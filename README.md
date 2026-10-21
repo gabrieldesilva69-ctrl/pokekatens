@@ -1,3 +1,18 @@
+# PokeKatens — versión no oficial
+
+PokeKatens es una copia **no oficial, gratis y sin ánimo de lucro** de PokéSurvivor, hecha por un grupo
+de amigos para jugar entre nosotros: web en GitHub Pages y programa para Windows, con cuentas, ranking,
+amigos y cooperativo.
+
+- Juego original: **PokéSurvivor**, de **Jonathan Piera Torregrosa (JPTER78)** — https://github.com/JPTER78/pokesurvivor
+- Licencia: la del original (PolyForm Noncommercial 1.0.0; MIT para versiones antiguas): `LICENSE` y `LICENSE-NONCOMMERCIAL.md`.
+- Required Notice: Copyright 2026 JPTER78 (https://github.com/JPTER78/pokesurvivor)
+- No usa los servidores del original: tiene su propio proyecto de Firebase.
+- No está afiliado a Nintendo, Creatures Inc., GAME FREAK ni The Pokémon Company.
+- Cómo publicar una versión: `docs/GUIA-PUBLICAR-POKEKATENS.md`.
+
+---
+
 # PokéSurvivor · Mundo Misterioso
 
 Bullet-heaven con Pokémon al estilo de Survivor.io y Megabonk, con sprites de
