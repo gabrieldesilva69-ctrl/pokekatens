@@ -253,6 +253,22 @@ service cloud.firestore {
       allow read: if signedIn();
     }
 
+    // ---------- regalos del admin (21-10-2026) ----------
+    // Buzón de cada jugador: el admin le deja monedas o tickets (sólo sumar,
+    // nunca quitar) y el juego los apunta en la libreta al entrar (js/core/db.js).
+    // Un regalo no se cambia ni se borra: así nunca se cobra dos veces ni se pierde.
+    match /gifts/{uid}/g/{gid} {
+      allow read: if signedIn() && (me() == uid || admin());
+      allow create: if admin()
+        && request.resource.data.keys().hasOnly(['c', 't1', 't10', 'at'])
+        && giftAmount(request.resource.data, 'c', 1000000)
+        && giftAmount(request.resource.data, 't1', 1000)
+        && giftAmount(request.resource.data, 't10', 1000)
+        && request.resource.data.get('c', 0) + request.resource.data.get('t1', 0) + request.resource.data.get('t10', 0) > 0
+        && request.resource.data.at == request.time;
+    }
+    function giftAmount(d, k, max) { return d.get(k, 0) is int && d.get(k, 0) >= 0 && d.get(k, 0) <= max; }
+
     match /{document=**} {
       allow read, write: if false;
     }

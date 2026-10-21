@@ -49,6 +49,17 @@ function entry(user, t) {
   };
 }
 
+// El admin de firestore.rules (js/core/fork-config.js, G.FORK.admins). El emulador acepta
+// tokens sin firmar: así se prueba como esa cuenta sin conocer su contraseña.
+const ADMIN = 'KNDXBqVVroOtaofexPunuc5aocw1';
+function adminToken() {
+  const b64 = o => Buffer.from(JSON.stringify(o)).toString('base64url');
+  const t = Math.floor(Date.now() / 1000);
+  return b64({ alg: 'none', typ: 'JWT' }) + '.' + b64({ iss: 'https://securetoken.google.com/demo-pokekatens',
+    aud: 'demo-pokekatens', iat: t, exp: t + 3600, auth_time: t, sub: ADMIN, user_id: ADMIN,
+    firebase: { sign_in_provider: 'password', identities: {} } }) + '.';
+}
+
 const commit = (user, body) => fetch(`${DOCS}:commit`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + user.token },
@@ -63,6 +74,29 @@ const commit = (user, body) => fetch(`${DOCS}:commit`, {
 
   const r = await fetch(`${DOCS}/reports/nada`, { headers: { Authorization: 'Bearer ' + tres.token } });
   expect('un jugador sin permisos no lee reportes', 403, r.status);
+
+  // ---- regalos del admin (gifts/{uid}/g) ----
+  const admin = { token: adminToken(), uid: ADMIN };
+  const gift = (who, to, id, fields, exists) => fetch(`${DOCS}:commit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + who.token },
+    body: JSON.stringify({ writes: [Object.assign({
+      update: { name: `projects/demo-pokekatens/databases/(default)/documents/gifts/${to}/g/${id}`, fields },
+      updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }]
+    }, exists === undefined ? {} : { currentDocument: { exists } })] })
+  });
+  const coins = n => ({ c: { integerValue: String(n) } });
+  expect('un jugador no se regala a sí mismo', 403, (await gift(tres, tres.uid, 'r0', coins(500))).status);
+  expect('el admin regala 500 monedas', 200, (await gift(admin, tres.uid, 'r1', coins(500), false)).status);
+  expect('el admin no puede quitar monedas', 403, (await gift(admin, tres.uid, 'r2', coins(-500), false)).status);
+  expect('un regalo no se cambia después', 403, (await gift(admin, tres.uid, 'r1', coins(900), true)).status);
+  const mine = await fetch(`${DOCS}/gifts/${tres.uid}/g`, { headers: { Authorization: 'Bearer ' + tres.token } });
+  expect('el jugador lee su buzón', 200, mine.status);
+  const docs = (await mine.json()).documents || [];
+  if (docs.length !== 1) fail('regalos en el buzón', 1, docs.length);
+  console.log('ok un regalo en el buzón');
+  const cuatro = await signUp('cuatro@jugadores.pokekatens.invalid');
+  expect('otro jugador no lee ese buzón', 403, (await fetch(`${DOCS}/gifts/${tres.uid}/g`, { headers: { Authorization: 'Bearer ' + cuatro.token } })).status);
 
   console.log('EMULATOR_RANKING_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

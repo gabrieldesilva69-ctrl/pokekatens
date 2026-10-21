@@ -8,6 +8,8 @@
  *                     subir marcas, y se borra su marca de todas las tablas de
  *                     ahora) o descartar el reporte.
  *   Baneados          las cuentas baneadas del ranking; se pueden desbanear.
+ *   Regalos           dar monedas o tickets a un jugador por su apodo (sólo
+ *                     sumar). Le llegan al buzón y los recibe al entrar.
  */
 G.ModUI = (() => {
   const $ = G.UI.$;
@@ -45,6 +47,7 @@ G.ModUI = (() => {
     list.innerHTML = '<p class="sub">Cargando…</p>';
     try {
       if (tab === 'rep') await renderReports(list);
+      else if (tab === 'gift') renderGift(list);
       else await renderMarked(list);
     } catch (e) {
       list.innerHTML = '<p class="sub">No se pudo cargar (' + esc(e.code || e.message) + ').</p>';
@@ -127,6 +130,39 @@ G.ModUI = (() => {
       row.appendChild(acts);
       list.appendChild(row);
     }
+  }
+
+  function renderGift(list) {
+    list.innerHTML = `<form id="gift-form" class="mod-gift" autocomplete="off">
+        <p class="sub">Monedas o tickets de regalo para un jugador. Sólo se puede sumar; le llegan la próxima vez que entre al juego.</p>
+        <label for="gift-nick">Apodo del jugador</label>
+        <input id="gift-nick" class="field" maxlength="16" spellcheck="false" required>
+        <label for="gift-c">Monedas</label>
+        <input id="gift-c" class="field" type="number" min="0" max="1000000" step="1" value="0">
+        <label for="gift-t1">Tickets</label>
+        <input id="gift-t1" class="field" type="number" min="0" max="1000" step="1" value="0">
+        <label for="gift-t10">Tickets ×10</label>
+        <input id="gift-t10" class="field" type="number" min="0" max="1000" step="1" value="0">
+        <p class="err" id="gift-err"></p>
+        <div class="row"><button class="btn gold grow" id="gift-send" type="submit">Regalar</button></div>
+      </form>`;
+    const amount = (id, max) => { const v = Math.floor(+$(id).value || 0); return v >= 0 && v <= max ? v : NaN; };
+    $('gift-form').onsubmit = async e => {
+      e.preventDefault();
+      const nick = $('gift-nick').value.trim();
+      const g = { c: amount('gift-c', 1000000), t1: amount('gift-t1', 1000), t10: amount('gift-t10', 1000) };
+      $('gift-err').textContent = '';
+      if (![g.c, g.t1, g.t10].every(Number.isFinite)) { $('gift-err').textContent = 'Máximo: 1.000.000 monedas y 1.000 tickets de cada tipo.'; return; }
+      if (!(g.c + g.t1 + g.t10)) { $('gift-err').textContent = 'Pon alguna cantidad.'; return; }
+      if (!confirm(`¿Regalar a ${nick}: ${g.c} monedas, ${g.t1} tickets y ${g.t10} tickets ×10? No se puede deshacer.`)) return;
+      $('gift-send').disabled = true;
+      try {
+        const uid = await G.Ranking.sendGift(nick, g);
+        if (!uid) $('gift-err').textContent = 'No hay ningún jugador con ese apodo.';
+        else { G.UI.toast('Regalo enviado a ' + nick, 4000); $('gift-form').reset(); }
+      } catch (err) { $('gift-err').textContent = 'No se pudo: ' + (err.code || err.message); }
+      $('gift-send').disabled = false;
+    };
   }
 
   return { init, open };

@@ -975,6 +975,7 @@ G.Flow = {
     G.Audio.music('village');
     G.MenuUI.open();
     G.LoginUI.updateNotices();
+    G.LoginUI.giftNotice();
   },
   /** Al cerrar el resumen: a la sala si sigues en una, si no al menú. */
   afterRun() {

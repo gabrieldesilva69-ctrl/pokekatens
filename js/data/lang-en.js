@@ -767,5 +767,9 @@ G.I18n.add({
   'Es el nombre que verán tus amigos y el que sale en el ranking. Tu nombre de usuario no se enseña a nadie.': 'It is the name your friends will see and the one shown on the leaderboard. Your username is never shown to anyone.',
   'Versión no oficial': 'Unofficial version',
   'PokeKatens es una versión no oficial de PokéSurvivor (de JPTER78) hecha por un grupo de amigos, gratuita y sin ánimo de lucro. No tiene anuncios, compras ni donaciones.': 'PokeKatens is an unofficial version of PokéSurvivor (by JPTER78) made by a group of friends, free and non-profit. It has no ads, purchases or donations.',
-  'PokeKatens se juega en horizontal.': 'PokeKatens is played in landscape.'
+  'PokeKatens se juega en horizontal.': 'PokeKatens is played in landscape.',
+  '¡Regalo del administrador!': 'A gift from the admin!',
+  '+{x} monedas': '+{x} coins',
+  '+{x} tickets': '+{x} tickets',
+  '+{x} tickets ×10': '+{x} ×10 tickets'
 });

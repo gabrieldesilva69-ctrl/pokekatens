@@ -591,6 +591,22 @@ G.Ranking = (() => {
       t1: (v.tickets || {}).t1 || 0, t10: (v.tickets || {}).t10 || 0, owned: Object.keys(v.owned || {}).length }; });
   }
 
+  /**
+   * Admin: regala monedas y/o tickets a un jugador, buscado por su apodo. Va a su
+   * buzón (gifts/{uid}/g, ver firestore.rules) y el juego lo suma al entrar.
+   *   g: { c, t1, t10 } → su uid, o null si no hay nadie con ese apodo
+   */
+  async function sendGift(nick, g) {
+    const f = fbx();
+    const n = await f.fs.collection('names').doc(String(nick).trim().toLowerCase()).get();
+    if (!n.exists) return null;
+    const uid = n.data().uid;
+    const doc = { at: now() };
+    for (const k of ['c', 't1', 't10']) if (g[k] > 0) doc[k] = Math.floor(g[k]);
+    await f.fs.collection('gifts').doc(uid).collection('g').add(doc);
+    return uid;
+  }
+
   return { PERIODS, periodIds, board, runStarted, submitSolo, submitGroup, top, myRank, removeMine,
-           report, reported, isAdmin, reports, entryInfo, removeEntry, purgeAbove, removeEverywhere, setMarked, dismiss, markedAccounts };
+           report, reported, isAdmin, reports, entryInfo, removeEntry, purgeAbove, removeEverywhere, setMarked, dismiss, markedAccounts, sendGift };
 })();

@@ -240,6 +240,31 @@ G.DB = (() => {
     return s;
   }
 
+  /*
+   * REGALOS del admin (buzón gifts/{uid}/g, ver firestore.rules). Cada regalo
+   * es un apunte más de la libreta, "g_<id>", como si fuera otro aparato: al
+   * fusionar se conserva y, si ya está, no se vuelve a sumar.
+   *   gifts: [[id, { c, t1, t10 }], ...]  → lo que es nuevo, sumado: { c, t1, t10 } o null
+   */
+  const GIFT_MAX = { c: 1000000, t1: 1000, t10: 1000 };
+  function addGifts(s, gifts) {
+    s.led = ledOf(s, DEV);
+    const got = { c: 0, t1: 0, t10: 0 };
+    let any = false;
+    for (const [id, g] of gifts) {
+      const k = 'g_' + id;
+      if (s.led[k] || !/^[A-Za-z0-9]{1,40}$/.test(id)) continue;
+      const e = {};
+      for (const c in CUR) {
+        const v = Math.min(num(g && g[c]), GIFT_MAX[c]);
+        if (v) { e[c] = [v, 0]; got[c] += v; any = true; }
+      }
+      if (Object.keys(e).length) s.led[k] = e;
+    }
+    for (const c in CUR) CUR[c][1](s, Math.max(0, ledSum(s.led, c)));
+    return any ? got : null;
+  }
+
   function merge(a, b) {
     if (!a) return b;
     if (!b) return a;
@@ -542,15 +567,40 @@ G.DB = (() => {
     }
     save = fold(migrate(s, s.name));
     key = uid; user = save.name; guest = false;
+    if (online) gift = await openGifts();
     write(K_CLOUD + uid, save);
     lastPull = Date.now();
-    // Si esta copia tiene algo que la nube no (cuenta nueva, progreso sin subir),
-    // se queda pendiente hasta que pulses Guardar (ya no se sube sola al entrar).
-    const same = remote && !opts.legacy && (!cached || (cached.updated || 0) <= (remote.updated || 0));
+    // Si esta copia tiene algo que la nube no (cuenta nueva, progreso sin subir,
+    // un regalo), se queda pendiente hasta que pulses Guardar (ya no se sube sola al entrar).
+    const same = remote && !opts.legacy && !gift && (!cached || (cached.updated || 0) <= (remote.updated || 0));
     lastPush = Date.now();
     if (!online) { pending = true; setSync('offline'); }
     else if (same) setSync('ok');
     else { pending = true; setSync('pending'); }
+  }
+
+  /*
+   * Mira el buzón de regalos al entrar. Sólo se leen los que han llegado desde
+   * el último que vio este navegador (K_GIFT); en otro aparato se leen todos,
+   * pero la libreta no deja sumar dos veces el mismo.
+   */
+  const K_GIFT = 'ps.gift.';
+  let gift = null;
+  async function openGifts() {
+    try {
+      let q = fs.collection('gifts').doc(uid).collection('g').orderBy('at').limit(50);
+      const last = +read(K_GIFT + uid) || 0;
+      if (last) q = q.startAfter(firebase.firestore.Timestamp.fromMillis(last));
+      const snap = await q.get();
+      if (snap.empty) return null;
+      const list = snap.docs.map(d => [d.id, d.data()]);
+      const lastAt = snap.docs[snap.docs.length - 1].data().at;
+      if (lastAt && lastAt.toMillis) write(K_GIFT + uid, lastAt.toMillis());
+      return addGifts(save, list);
+    } catch (e) {
+      console.warn('[DB] no se pudo mirar el buzón de regalos:', e.code || e.message);
+      return null;
+    }
   }
 
   /*
@@ -837,7 +887,9 @@ G.DB = (() => {
 
   return {
     ready, register, login, playAsGuest, logout, commit, deleteAccount, flush: pushNow, saveNow,
-    owns, grant, ownsShiny, grantShiny, merge, setName, upgradesOf, isFav, setFav,
+    owns, grant, ownsShiny, grantShiny, merge, addGifts, setName, upgradesOf, isFav, setFav,
+    /** Lo regalado por el admin al entrar ({ c, t1, t10 }), una sola vez; si no hay, null. */
+    takeGift() { const g = gift; gift = null; return g; },
     onSync(fn) { listeners.add(fn); },
     onLeave(fn) { leaveHooks.push(fn); },
     /** Acceso de bajo nivel para los módulos de red (sólo en modo nube). */

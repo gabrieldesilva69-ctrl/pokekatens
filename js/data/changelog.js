@@ -6,7 +6,10 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
-  { d: '2026-10-21', title: ['PokeKatens: versión no oficial', 'PokeKatens: unofficial version'], chg: [
+  { d: '2026-10-21', title: ['PokeKatens: versión no oficial', 'PokeKatens: unofficial version'], new: [
+    ['Regalos: el administrador ya puede regalar monedas y tickets a un jugador. Los recibes la próxima vez que entres al juego, con un aviso.',
+     'Gifts: the admin can now give coins and tickets to a player. You get them the next time you open the game, with a notice.']
+  ], chg: [
     ['El juego ahora se llama PokeKatens: es una versión no oficial, gratis y sin ánimo de lucro, basada en PokéSurvivor de JPTER78.',
      'The game is now called PokeKatens: an unofficial, free and non-profit version based on PokéSurvivor by JPTER78.'],
     ['Se entra sólo con nombre y contraseña (ya no hay botón de Google). Si olvidas la contraseña, pídele al administrador que te cree otra cuenta.',

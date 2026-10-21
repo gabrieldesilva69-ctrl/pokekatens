@@ -68,6 +68,18 @@ G.LoginUI = (() => {
     return true;
   }
 
+  /** Si el admin te ha regalado algo (lo recoge G.DB al entrar), lo dice una vez. */
+  function giftNotice() {
+    const g = G.DB.takeGift && G.DB.takeGift();
+    if (!g) return;
+    const parts = [];
+    if (g.c) parts.push(G.I18n.f('+{x} monedas', g.c.toLocaleString(G.I18n.locale)));
+    if (g.t1) parts.push(G.I18n.f('+{x} tickets', g.t1));
+    if (g.t10) parts.push(G.I18n.f('+{x} tickets ×10', g.t10));
+    G.UI.toast(G.T('¡Regalo del administrador!') + ' ' + parts.join(' · '), 6000);
+    if (G.UI.refreshCoins) G.UI.refreshCoins();
+  }
+
   /** Explica dónde se guarda la partida según el modo de la base de datos. */
   function modeNote() {
     if (G.DB.mode === 'cloud') return 'Tu partida se guarda en la nube: entra desde cualquier ordenador. Como invitado no se guarda.';
@@ -97,5 +109,5 @@ G.LoginUI = (() => {
     setTimeout(() => $('f-user').focus(), 50);
   }
 
-  return { init, open, updateNotices };
+  return { init, open, updateNotices, giftNotice };
 })();
