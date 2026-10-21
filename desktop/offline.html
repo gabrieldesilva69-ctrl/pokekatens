@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PokeKatens · Sin conexión</title>
+<!-- La abre desktop/main.js cuando la web del juego no carga (primer arranque sin internet). -->
+<style>
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box;
+    background: #0a1430; color: #ffffff; font: 16px/1.5 system-ui, sans-serif; text-align: center;
+  }
+  main { max-width: 440px; }
+  h1 { margin: 0 0 12px; font-size: 28px; color: #ffd84a; }
+  p { margin: 0 0 24px; }
+  button {
+    padding: 12px 24px; border: 0; border-radius: 10px; background: #ffd84a; color: #0a1430;
+    font: 700 16px system-ui, sans-serif; cursor: pointer;
+  }
+  button:focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sin conexión</h1>
+  <p>No se ha podido abrir PokeKatens. Comprueba tu conexión a internet y vuelve a intentarlo.</p>
+  <button id="reintentar" type="button">Reintentar</button>
+</main>
+<script>
+  var url = new URLSearchParams(location.search).get('url') || '';
+  document.getElementById('reintentar').addEventListener('click', function () {
+    if (/^https?:\/\//.test(url)) location.href = url;
+  });
+</script>
+</body>
+</html>

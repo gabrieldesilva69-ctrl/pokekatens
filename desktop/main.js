@@ -5,6 +5,7 @@
  *   PK_URL        web que se abre (si falta, pokekatens.url de package.json)
  *   PK_PROFILE    carpeta de perfil (pruebas: empieza sin caché ni service worker)
  *   --smoke       prueba sin ventana: escribe una marca y sale
+ *                 (PK_SMOKE_OK, PK_SMOKE_OFFLINE o, a los 30 s, PK_SMOKE_TIMEOUT)
  *   PK_SMOKE_OUT  archivo donde se escribe también la marca
  *
  * La ventana no da ningún acceso al PC a la página: sin preload, con
@@ -13,6 +14,7 @@
  */
 const { app, BrowserWindow, shell } = require('electron');
 const fs = require('fs');
+const path = require('path');
 
 const URL_JUEGO = process.env.PK_URL || require('./package.json').pokekatens.url;
 const SMOKE = process.argv.includes('--smoke');
@@ -57,9 +59,20 @@ app.whenReady().then(() => {
     }
   });
 
+  // Si la web no carga (sin internet y sin copia del service worker): pantalla
+  // Sin conexión, con un botón para reintentar.
+  let fallo = false;
+  wc.on('did-fail-load', (e, codigo, desc, url, esPrincipal) => {
+    if (!esPrincipal || codigo === -3) return;   // -3: carga cancelada
+    fallo = true;
+    win.loadFile(path.join(__dirname, 'offline.html'), { query: { url: URL_JUEGO } });
+  });
+
   if (SMOKE) {
     wc.on('did-finish-load', () => {
-      if (!wc.getURL().startsWith('file:')) fin(0, 'PK_SMOKE_OK');
+      if (wc.getURL().startsWith('file:')) fin(0, 'PK_SMOKE_OFFLINE');
+      else if (!fallo) fin(0, 'PK_SMOKE_OK');
+      // Si falló, la página de error no cuenta: llegará la de offline.html.
     });
     setTimeout(() => fin(3, 'PK_SMOKE_TIMEOUT'), SMOKE_TIMEOUT);
   }
