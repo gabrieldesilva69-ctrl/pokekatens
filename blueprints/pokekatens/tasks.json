@@ -285,7 +285,7 @@
       "js/net/ranking.js",
       "tests/emulator/ranking.cjs"
     ],
-    "status": "pending"
+    "status": "done"
   },
   {
     "id": "E2-T5",
