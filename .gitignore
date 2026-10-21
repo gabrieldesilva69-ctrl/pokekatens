@@ -21,3 +21,6 @@ docs/CONTACTOS_CREADORES.md
 
 # Caché local de wrangler (Cloudflare)
 .wrangler/
+
+# Instalador de escritorio (lo genera: npm --prefix desktop run dist)
+desktop/dist/

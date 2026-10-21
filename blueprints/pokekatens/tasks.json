@@ -1,0 +1,494 @@
+[
+  {
+    "id": "E1-T1",
+    "title": "Crear fork-config y apuntar Firebase al emulador",
+    "epic": "01-base-del-fork",
+    "dependencies": [],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `node --test \"tests/*.test.cjs\"` se ejecuta THE SYSTEM SHALL pasar `tests/fork.test.cjs`, que carga `js/core/fork-config.js` y `js/core/firebase-config.js` en un entorno aislado y comprueba `G.FORK.name === 'PokeKatens'`, `G.FORK.upstream === 'https://github.com/JPTER78/pokesurvivor'`, que `G.FORK.hosts` incluye `localhost` y `127.0.0.1` y que `G.FORK.admins` es una lista de textos.",
+      "WHEN `tests/fork.test.cjs` lee el bloque de scripts de `dev.html` THE SYSTEM SHALL encontrar `js/core/fork-config.js` antes que `js/core/firebase-config.js`, y éste antes que `js/core/db.js`.",
+      "WHEN `tests/fork.test.cjs` lee `js/core/db.js` THE SYSTEM SHALL encontrar `const HOSTS = G.FORK.hosts;` y ningún texto `'pokesurvivor.com'`.",
+      "WHEN `grep -rn \"pokesurvivor-free\" js/core` se ejecuta THE SYSTEM SHALL no encontrar nada (exit 1), y `js/core/firebase-config.js` SHALL contener `projectId: 'demo-pokekatens'` y `emulator: true`.",
+      "WHEN `node tools/build.js --sin-seo` y `node tools/export_data.js` se ejecutan THE SYSTEM SHALL terminar ambos con exit 0."
+    ],
+    "verify": [
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed",
+      "node tools/export_data.js   # expect: exit 0",
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)",
+      "status=0; grep -rn \"pokesurvivor-free\" js/core || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia · 2 = error de grep, y eso falla",
+      "grep -qF \"projectId: 'demo-pokekatens'\" js/core/firebase-config.js   # expect: exit 0",
+      "grep -qF \"emulator: true\" js/core/firebase-config.js   # expect: exit 0"
+    ],
+    "checkpoint": "step-01-config-fork",
+    "files": [
+      "js/core/fork-config.js",
+      "js/core/firebase-config.js",
+      "dev.html",
+      "js/core/db.js",
+      "tests/fork.test.cjs"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T2",
+    "title": "Crear el servidor local tools/serve.cjs",
+    "epic": "01-base-del-fork",
+    "dependencies": [
+      "E1-T1"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `node tools/serve.cjs --port 0` arranca THE SYSTEM SHALL escribir una línea `PK_SERVE http://127.0.0.1:<puerto>/` y escuchar sólo en `127.0.0.1`.",
+      "WHEN `tests/serve.test.cjs` pide `/dev.html`, `/js/core/util.js` y `/version.json` THE SYSTEM SHALL responder 200 con `Content-Type` que empieza por `text/html`, `text/javascript` y `application/json`, y con `Cache-Control: no-store`.",
+      "WHEN `tests/serve.test.cjs` pide `/no-existe.html` THE SYSTEM SHALL responder 404.",
+      "WHEN `tests/serve.test.cjs` pide la ruta sin normalizar `/%2e%2e/%2e%2e/secreto.txt` THE SYSTEM SHALL responder 403 y no servir nada de fuera de la carpeta del repositorio.",
+      "WHEN `tests/serve.test.cjs` manda `POST /` THE SYSTEM SHALL responder 405."
+    ],
+    "verify": [
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed — tests/serve.test.cjs arranca tools/serve.cjs de verdad",
+      "grep -qF \"8123\" tools/serve.cjs   # expect: exit 0 — el puerto por defecto"
+    ],
+    "checkpoint": "step-02-servidor-local",
+    "files": [
+      "tools/serve.cjs",
+      "tests/serve.test.cjs"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T3",
+    "title": "Quitar el inicio de sesión con Google",
+    "epic": "01-base-del-fork",
+    "dependencies": [
+      "E1-T2"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `node --test \"tests/*.test.cjs\"` se ejecuta THE SYSTEM SHALL pasar `tests/sin-google.test.cjs`, que no encuentra ninguno de `GoogleAuthProvider`, `signInWithPopup`, `linkWithPopup`, `reauthenticateWithPopup`, `loginWithGoogle`, `linkGoogle`, `hasGoogle`, `offerRecovery`, `btn-google`, `scr-recover`, `apis.google.com` ni `auth/popup-blocked` en `dev.html` ni en los `.js` de `js/` (salvo `js/app.min.js`, `js/lang/` y `js/data/`).",
+      "WHEN `tests/sin-google.test.cjs` lee `dev.html` THE SYSTEM SHALL encontrar exactamente la CSP `script-src 'self' file: https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app; object-src 'none'; base-uri 'self'`.",
+      "WHEN `tests/sin-google.test.cjs` lee `js/core/db.js` THE SYSTEM SHALL encontrar `const NAME_DOMAIN = 'jugadores.pokekatens.invalid';`, `createUserWithEmailAndPassword`, `signInWithEmailAndPassword` y `localReason = 'config'`.",
+      "WHEN `tests/sin-google.test.cjs` lee `dev.html` y `js/ui/login.js` THE SYSTEM SHALL encontrar `id=\"btn-guest\"`, `id=\"forgot-note\"` y el texto `pídele al administrador que te cree otra cuenta`, y ningún `pokesurvivor.com` en `js/ui/login.js`.",
+      "WHEN `node tools/build.js --sin-seo` se ejecuta THE SYSTEM SHALL terminar con exit 0.",
+      "WHEN `grep -niE \"entrar con google|si entras con google|correo de google|gmail\" dev.html` se ejecuta THE SYSTEM SHALL no encontrar nada (exit 1): los textos de privacidad y de apodo ya no hablan de Google."
+    ],
+    "verify": [
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed",
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)",
+      "node tools/export_data.js   # expect: exit 0",
+      "status=0; grep -niE \"entrar con google|si entras con google|correo de google|gmail\" dev.html || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia"
+    ],
+    "checkpoint": "step-03-sin-google",
+    "files": [
+      "js/core/db.js",
+      "js/ui/login.js",
+      "dev.html",
+      "js/game.js",
+      "tests/sin-google.test.cjs"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T4",
+    "title": "Quitar el TURN: cooperativo sólo con STUN",
+    "epic": "01-base-del-fork",
+    "dependencies": [
+      "E1-T3"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `node --test \"tests/*.test.cjs\"` se ejecuta THE SYSTEM SHALL pasar todas las pruebas de `tests/net.test.cjs`, incluida la nueva `STUN only: no request is made and every peer gets only the two Google STUN servers`, que comprueba que el `fetch` inyectado se llama 0 veces y que cada configuración de `RTCPeerConnection` es exactamente `{ iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] }`.",
+      "WHEN `grep -rnE \"ice\\.pokesurvivor\\.com|turn\\.pokesurvivor\\.com|TURN_API|viaTurn|turnServers\" js/net js/ui tests` se ejecuta THE SYSTEM SHALL no encontrar nada (exit 1).",
+      "WHEN `test ! -e infra/coturn` se ejecuta THE SYSTEM SHALL terminar con exit 0.",
+      "WHEN `node tools/build.js --sin-seo` se ejecuta THE SYSTEM SHALL terminar con exit 0."
+    ],
+    "verify": [
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed",
+      "status=0; grep -rnE \"ice\\.pokesurvivor\\.com|turn\\.pokesurvivor\\.com|TURN_API|viaTurn|turnServers\" js/net js/ui tests || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia",
+      "test ! -e infra/coturn   # expect: exit 0 — la carpeta ya no existe",
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)"
+    ],
+    "checkpoint": "step-04-sin-turn",
+    "files": [
+      "js/net/net.js",
+      "tests/net.test.cjs",
+      "js/ui/social-ui.js",
+      "infra/coturn/**"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E1-T5",
+    "title": "Poner el nombre PokeKatens y el crédito a JPTER78",
+    "epic": "01-base-del-fork",
+    "dependencies": [
+      "E1-T4"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN se busca en `dev.html` THE SYSTEM SHALL encontrar `<title>PokeKatens</title>`, `<div class=\"t1\">PokeKatens</div>` y la línea visible `Basado en PokéSurvivor de JPTER78 · versión no oficial y sin ánimo de lucro`, y SHALL no encontrar `<div class=\"t1\">PokéSurvivor` (tampoco en el logo del menú principal), `<h1>PokéSurvivor</h1>` (pantallas de carga y de «Pulsa para empezar»), `PokéSurvivor necesita JavaScript`, `apple-mobile-web-app-title\" content=\"PokéSurvivor` ni `PokéSurvivor se juega en horizontal`.",
+      "WHEN `grep -ni \"web oficial\" dev.html` se ejecuta THE SYSTEM SHALL no encontrar nada (exit 1).",
+      "WHEN se lee `manifest.webmanifest` como JSON THE SYSTEM SHALL tener `name` y `short_name` iguales a `PokeKatens` y la descripción `Versión no oficial, gratis y sin ánimo de lucro, basada en PokéSurvivor de JPTER78`.",
+      "WHEN se busca en `js/ui/settings-ui.js` y `js/ui/ui.js` THE SYSTEM SHALL encontrar `G.FORK.repo` en los dos, ningún `github.com/JPTER78`, ningún `pokesurvivor.com` y ningún enlace `href=\"contacto/\"`; y `js/noframe.js` SHALL no contener `pokesurvivor.com`.",
+      "WHEN `git diff --quiet HEAD -- LICENSE LICENSE-NONCOMMERCIAL.md` se ejecuta THE SYSTEM SHALL terminar con exit 0 (las licencias no se tocan).",
+      "WHEN `node --test \"tests/*.test.cjs\"` y `node tools/build.js --sin-seo` se ejecutan THE SYSTEM SHALL terminar ambos con exit 0."
+    ],
+    "verify": [
+      "grep -qF \"<title>PokeKatens</title>\" dev.html   # expect: exit 0",
+      "grep -qF '<div class=\"t1\">PokeKatens</div>' dev.html   # expect: exit 0",
+      "status=0; grep -nE '<div class=\"t1\">PokéSurvivor|<h1>PokéSurvivor</h1>|PokéSurvivor necesita JavaScript|apple-mobile-web-app-title\" content=\"PokéSurvivor|PokéSurvivor se juega en horizontal' dev.html || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ningún logo, título de carga, aviso <noscript>, título de app en iPhone ni aviso de girar el móvil con el nombre antiguo",
+      "grep -qF \"Basado en PokéSurvivor de JPTER78 · versión no oficial y sin ánimo de lucro\" dev.html   # expect: exit 0",
+      "status=0; grep -ni \"web oficial\" dev.html || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia",
+      "node -e \"const m=JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'));process.exit(m.name==='PokeKatens'&&m.short_name==='PokeKatens'?0:1)\"   # expect: exit 0 — JSON válido y nombre nuevo",
+      "grep -qF '\"description\": \"Versión no oficial, gratis y sin ánimo de lucro, basada en PokéSurvivor de JPTER78\"' manifest.webmanifest   # expect: exit 0",
+      "grep -qF \"G.FORK.repo\" js/ui/settings-ui.js   # expect: exit 0",
+      "grep -qF \"G.FORK.repo\" js/ui/ui.js   # expect: exit 0",
+      "status=0; grep -nE \"github\\.com/JPTER78|pokesurvivor\\.com|href=\\\"contacto/\\\"\" js/ui/settings-ui.js js/ui/ui.js js/noframe.js || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia",
+      "git diff --quiet HEAD -- LICENSE LICENSE-NONCOMMERCIAL.md   # expect: exit 0 — este paso no toca las licencias",
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed",
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)"
+    ],
+    "checkpoint": "step-05-identidad",
+    "files": [
+      "dev.html",
+      "manifest.webmanifest",
+      "js/ui/settings-ui.js",
+      "js/ui/ui.js",
+      "js/noframe.js"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T1",
+    "title": "Quitar las páginas SEO y el dominio pokesurvivor.com",
+    "epic": "02-limpieza-y-datos",
+    "dependencies": [
+      "E1-T5"
+    ],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN `ls -d CNAME sitemap.xml 404.html guia pokedex legendarios shinies tipos movimientos objetos logros novedades apoyar contacto en` se ejecuta THE SYSTEM SHALL no listar ninguno (ya no existen).",
+      "WHEN se lee `robots.txt` sin los retornos de carro THE SYSTEM SHALL contener exactamente las dos líneas `User-agent: *` y `Disallow:`.",
+      "WHEN `grep -nE \"seo:begin|seo:end|pokesurvivor\\.com|ps-pages\" dev.html` se ejecuta THE SYSTEM SHALL no encontrar nada (exit 1).",
+      "WHEN `node tools/build.js --sin-seo` se ejecuta THE SYSTEM SHALL terminar con exit 0 y el `index.html` generado SHALL no contener `pokesurvivor.com`.",
+      "WHEN `node --test \"tests/*.test.cjs\"` y `node tools/export_data.js` se ejecutan THE SYSTEM SHALL terminar ambos con exit 0."
+    ],
+    "verify": [
+      "test -z \"$(ls -d CNAME sitemap.xml 404.html guia pokedex legendarios shinies tipos movimientos objetos logros novedades apoyar contacto en 2>/dev/null)\"   # expect: exit 0 — no queda ninguno",
+      "test \"$(tr -d '\\r' < robots.txt)\" = \"$(printf 'User-agent: *\\nDisallow:')\"   # expect: exit 0",
+      "status=0; grep -nE \"seo:begin|seo:end|pokesurvivor\\.com|ps-pages\" dev.html || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia",
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)",
+      "status=0; grep -n \"pokesurvivor\\.com\" index.html || status=$?; test \"$status\" -eq 1   # expect: exit 0",
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed",
+      "node tools/export_data.js   # expect: exit 0"
+    ],
+    "checkpoint": "step-06-sin-seo",
+    "files": [
+      "dev.html",
+      "robots.txt",
+      "CNAME",
+      "sitemap.xml",
+      "{404.html,guia/**,pokedex/**,legendarios/**,shinies/**,tipos/**,movimientos/**,objetos/**,logros/**,novedades/**,apoyar/**,contacto/**,en/**}"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T2",
+    "title": "Quitar donaciones y presentar el fork en el README",
+    "epic": "02-limpieza-y-datos",
+    "dependencies": [
+      "E2-T1"
+    ],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN se carga `js/data/funding.js` THE SYSTEM SHALL dejar `G.Funding.kofi === ''`, `G.Funding.sponsors === ''`, `G.Funding.costs` vacío y `G.Funding.url === ''` (el botón de Ko-fi no sale nunca).",
+      "WHEN `test ! -e .github/FUNDING.yml` se ejecuta THE SYSTEM SHALL terminar con exit 0.",
+      "WHEN se leen las 20 primeras líneas de `README.md` THE SYSTEM SHALL encontrar `PokeKatens — versión no oficial`, y `README.md` SHALL seguir conteniendo `Jonathan Piera Torregrosa` y la línea `Required Notice: Copyright 2026 JPTER78 (https://github.com/JPTER78/pokesurvivor)`.",
+      "WHEN `git diff --quiet HEAD -- LICENSE LICENSE-NONCOMMERCIAL.md` se ejecuta THE SYSTEM SHALL terminar con exit 0.",
+      "WHEN `node tools/export_data.js`, `node tools/build.js --sin-seo` y `node --test \"tests/*.test.cjs\"` se ejecutan THE SYSTEM SHALL terminar los tres con exit 0."
+    ],
+    "verify": [
+      "node -e \"const G={};new Function('G',require('fs').readFileSync('js/data/funding.js','utf8'))(G);const f=G.Funding;process.exit(f.url===''&&f.kofi===''&&f.sponsors===''&&f.costs.length===0?0:1)\"   # expect: exit 0",
+      "test ! -e .github/FUNDING.yml   # expect: exit 0",
+      "head -n 20 README.md | grep -qF \"PokeKatens — versión no oficial\"   # expect: exit 0",
+      "grep -qF \"Jonathan Piera Torregrosa\" README.md   # expect: exit 0",
+      "grep -qF \"Required Notice: Copyright 2026 JPTER78 (https://github.com/JPTER78/pokesurvivor)\" README.md   # expect: exit 0",
+      "git diff --quiet HEAD -- LICENSE LICENSE-NONCOMMERCIAL.md   # expect: exit 0 — este paso no toca las licencias",
+      "node tools/export_data.js   # expect: exit 0",
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)",
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed"
+    ],
+    "checkpoint": "step-07-sin-donaciones",
+    "files": [
+      "js/data/funding.js",
+      ".github/FUNDING.yml",
+      "README.md"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T3",
+    "title": "Probar cuentas y partidas contra el emulador de Firebase",
+    "epic": "02-limpieza-y-datos",
+    "dependencies": [
+      "E2-T2"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `node tools/emu.cjs --check-java` se ejecuta THE SYSTEM SHALL terminar con exit 0 si encuentra Java 21 o más nuevo (en `JAVA_HOME`, en `C:\\Program Files\\Eclipse Adoptium\\jdk-2*` o en el `PATH`), y con exit 2 y el mensaje `Falta Java 21` si no.",
+      "WHEN `node tools/emu.cjs \"node tests/emulator/smoke.cjs\"` se ejecuta THE SYSTEM SHALL arrancar los emuladores `auth`, `firestore` y `database` del proyecto `demo-pokekatens` con `firebase-tools@15.34.0`, ejecutar el script, pararlos y terminar con el mismo código que el script.",
+      "WHEN `tests/emulator/smoke.cjs` escribe `saves/{uid1}` con el token del usuario 1 mediante `documents:commit` THE SYSTEM SHALL responder 200.",
+      "WHEN `tests/emulator/smoke.cjs` lee `saves/{uid1}` con el token del usuario 2 THE SYSTEM SHALL responder 403, y con el token del usuario 1 SHALL responder 200 con un documento cuyo `name` acaba en `/saves/{uid1}`.",
+      "WHEN el usuario 1 vuelve a escribir `saves/{uid1}` antes de 20 segundos THE SYSTEM SHALL responder 403 (el tope de 20 s de `firestore.rules`), y el script SHALL imprimir `EMULATOR_SMOKE_OK` y terminar con exit 0.",
+      "WHEN se lee `.firebaserc` THE SYSTEM SHALL contener `\"default\": \"demo-pokekatens\"`."
+    ],
+    "verify": [
+      "node tools/emu.cjs --check-java   # expect: exit 0 y una línea \"Java 21...\" · exit 2 = falta Java 21 (instálalo: §10 Requisitos)",
+      "grep -qF '\"default\": \"demo-pokekatens\"' .firebaserc   # expect: exit 0",
+      "node tools/emu.cjs \"node tests/emulator/smoke.cjs\" | grep -F EMULATOR_SMOKE_OK   # expect: exit 0 — la marca sólo sale si las 5 comprobaciones pasan",
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed"
+    ],
+    "checkpoint": "step-08-emulador",
+    "files": [
+      ".firebaserc",
+      "tools/emu.cjs",
+      "tests/emulator/smoke.cjs"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T4",
+    "title": "Quitar el administrador de JPTER78 de reglas y juego",
+    "epic": "02-limpieza-y-datos",
+    "dependencies": [
+      "E2-T3"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `grep -rn \"rshaa5gKD3fXw6lE4PPXITbowaG2\" js firestore.rules` se ejecuta después de `node tools/build.js --sin-seo` THE SYSTEM SHALL no encontrar nada (exit 1).",
+      "WHEN se busca en `js/net/ranking.js` y `firestore.rules` THE SYSTEM SHALL encontrar `const ADMINS = G.FORK.admins;` y `function admin() { return false; }`.",
+      "WHEN `tests/emulator/ranking.cjs` escribe `lb/s_test/e/{uid}` con `t: 2701` THE SYSTEM SHALL responder 403, y con `t: 600` (`uids`, `names`, `dex` y `shiny` de un elemento, `lv: 1`, `kills: 0`, `at` = hora del servidor) SHALL responder 200.",
+      "WHEN ese mismo usuario sin permisos de administrador lee `reports/nada` THE SYSTEM SHALL responder 403, y el script SHALL imprimir `EMULATOR_RANKING_OK` y terminar con exit 0.",
+      "WHEN `node tools/emu.cjs \"node tests/emulator/smoke.cjs && node tests/emulator/ranking.cjs\"` se ejecuta THE SYSTEM SHALL imprimir `EMULATOR_SMOKE_OK` y `EMULATOR_RANKING_OK`."
+    ],
+    "verify": [
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)",
+      "status=0; grep -rn \"rshaa5gKD3fXw6lE4PPXITbowaG2\" js firestore.rules || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia",
+      "grep -qF \"const ADMINS = G.FORK.admins;\" js/net/ranking.js   # expect: exit 0",
+      "grep -qF \"function admin() { return false; }\" firestore.rules   # expect: exit 0",
+      "out=$(node tools/emu.cjs \"node tests/emulator/smoke.cjs && node tests/emulator/ranking.cjs\"); echo \"$out\" | grep -qF EMULATOR_SMOKE_OK && echo \"$out\" | grep -qF EMULATOR_RANKING_OK   # expect: exit 0 — las dos marcas",
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed"
+    ],
+    "checkpoint": "step-09-reglas-admin",
+    "files": [
+      "firestore.rules",
+      "js/net/ranking.js",
+      "tests/emulator/ranking.cjs"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E2-T5",
+    "title": "Traducir los textos nuevos y contar el cambio en novedades",
+    "epic": "02-limpieza-y-datos",
+    "dependencies": [
+      "E2-T4"
+    ],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN la comprobación carga `js/data/changelog.js` THE SYSTEM SHALL encontrar en la primera entrada (una entrada nueva, con fecha `2026-10-20` o posterior y título `PokeKatens: versión no oficial`) líneas en español que contienen `PokeKatens` y `administrador`, cada una con su pareja en inglés.",
+      "WHEN `node --test \"tests/*.test.cjs\"` se ejecuta THE SYSTEM SHALL terminar con exit 0 — `tests/i18n.test.cjs` falla si alguna línea de novedades con fecha `2026-10-18` o posterior no tiene su traducción al francés, italiano, portugués y chino.",
+      "WHEN `node --test \"tests/*.test.cjs\"` ejecuta `tests/textos-nuevos.test.cjs` THE SYSTEM SHALL comprobar que cada uno de los 7 textos nuevos de los pasos 3 y 5 aparece en `dev.html` o `js/ui/login.js` y tiene inglés en `js/data/lang-en.js` y traducción en `fr`, `it`, `pt-BR`, `zh-Hans` y `zh-Hant`.",
+      "WHEN `node tools/build.js --sin-seo` se ejecuta THE SYSTEM SHALL terminar con exit 0."
+    ],
+    "verify": [
+      "node -e \"const G={};new Function('G',require('fs').readFileSync('js/data/changelog.js','utf8'))(G);const e=G.CHANGELOG[0],l=[...(e.new||[]),...(e.chg||[]),...(e.fix||[])];const t=l.map(p=>p[0]).join(' ');process.exit(e.d>='2026-10-20'&&e.title[0].startsWith('PokeKatens')&&t.includes('PokeKatens')&&t.includes('administrador')&&l.every(p=>p[1])?0:1)\"   # expect: exit 0",
+      "grep -qF \"PokeKatens\" js/data/lang-updates.js   # expect: exit 0 — las traducciones nuevas están",
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed",
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)"
+    ],
+    "checkpoint": "step-10-novedades",
+    "files": [
+      "js/data/changelog.js",
+      "js/data/lang-updates.js",
+      "js/data/lang-en.js",
+      "tests/textos-nuevos.test.cjs"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E3-T1",
+    "title": "Crear la app de escritorio y abrirla por primera vez",
+    "epic": "03-escritorio-y-publicacion",
+    "dependencies": [
+      "E2-T5"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `npm install --prefix desktop` se ejecuta THE SYSTEM SHALL terminar con exit 0, instalar `electron` 44.9.2 y `electron-builder` 26.15.3 y escribir `desktop/package-lock.json`.",
+      "WHEN se lee la versión instalada de `desktop/node_modules/electron/package.json` y de `desktop/node_modules/electron-builder/package.json` THE SYSTEM SHALL ser `44.9.2` y `26.15.3`.",
+      "WHEN `node tools/desktop-smoke.cjs` se ejecuta THE SYSTEM SHALL arrancar `tools/serve.cjs` en un puerto libre, abrir la app con `PK_URL` apuntando a `index.html` y `--smoke`, recibir `PK_SMOKE_OK`, imprimir `DESKTOP_SMOKE_OK online` y terminar con exit 0.",
+      "WHEN `node tools/desktop-smoke.cjs --hang` abre la app contra un servidor que acepta la conexión y nunca contesta THE SYSTEM SHALL ver la app salir con código 3 (`PK_SMOKE_TIMEOUT`) a los 30 segundos e imprimir `DESKTOP_SMOKE_OK hang`.",
+      "WHEN se busca en `desktop/main.js` THE SYSTEM SHALL encontrar `setWindowOpenHandler`, `contextIsolation: true`, `sandbox: true` y `nodeIntegration: false`.",
+      "WHEN `git check-ignore -q desktop/node_modules/electron/package.json` se ejecuta THE SYSTEM SHALL terminar con exit 0 (las dependencias no se suben al repositorio)."
+    ],
+    "verify": [
+      "npm install --prefix desktop   # expect: exit 0 (descarga Electron: hace falta internet)",
+      "test \"$(node -p \"require('./desktop/node_modules/electron/package.json').version\")\" = 44.9.2   # expect: exit 0",
+      "test \"$(node -p \"require('./desktop/node_modules/electron-builder/package.json').version\")\" = 26.15.3   # expect: exit 0",
+      "test -f desktop/package-lock.json   # expect: exit 0",
+      "node tools/desktop-smoke.cjs | grep -F \"DESKTOP_SMOKE_OK online\"   # expect: exit 0",
+      "node tools/desktop-smoke.cjs --hang | grep -F \"DESKTOP_SMOKE_OK hang\"   # expect: exit 0 (tarda unos 30 s)",
+      "grep -qF \"setWindowOpenHandler\" desktop/main.js   # expect: exit 0",
+      "grep -qF \"contextIsolation: true\" desktop/main.js   # expect: exit 0",
+      "grep -qF \"sandbox: true\" desktop/main.js   # expect: exit 0",
+      "grep -qF \"nodeIntegration: false\" desktop/main.js   # expect: exit 0",
+      "git check-ignore -q desktop/node_modules/electron/package.json   # expect: exit 0 — 0 = ignorado"
+    ],
+    "checkpoint": "step-11-escritorio-base",
+    "files": [
+      "desktop/package.json",
+      "desktop/package-lock.json",
+      "desktop/main.js",
+      "tools/desktop-smoke.cjs"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E3-T2",
+    "title": "Mostrar la pantalla Sin conexión cuando no carga",
+    "epic": "03-escritorio-y-publicacion",
+    "dependencies": [
+      "E3-T1"
+    ],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN `node tools/desktop-smoke.cjs --offline` se ejecuta THE SYSTEM SHALL abrir la app con `PK_URL=http://127.0.0.1:1/`, ver fallar la carga del marco principal, mostrar `offline.html`, recibir `PK_SMOKE_OFFLINE`, imprimir `DESKTOP_SMOKE_OK offline` y terminar con exit 0.",
+      "WHEN `node tools/desktop-smoke.cjs` se ejecuta THE SYSTEM SHALL seguir imprimiendo `DESKTOP_SMOKE_OK online` (la página del juego carga y `offline.html` no aparece).",
+      "WHEN se busca en `desktop/offline.html` THE SYSTEM SHALL encontrar `<html lang=\"es\">`, el texto `Sin conexión` y un botón `Reintentar`, y `desktop/main.js` SHALL contener `did-fail-load`."
+    ],
+    "verify": [
+      "node tools/desktop-smoke.cjs --offline | grep -F \"DESKTOP_SMOKE_OK offline\"   # expect: exit 0",
+      "node tools/desktop-smoke.cjs | grep -F \"DESKTOP_SMOKE_OK online\"   # expect: exit 0",
+      "grep -qF '<html lang=\"es\">' desktop/offline.html   # expect: exit 0",
+      "grep -qF \"Sin conexión\" desktop/offline.html   # expect: exit 0",
+      "grep -qF \"Reintentar\" desktop/offline.html   # expect: exit 0",
+      "grep -qF \"did-fail-load\" desktop/main.js   # expect: exit 0"
+    ],
+    "checkpoint": "step-12-sin-conexion",
+    "files": [
+      "desktop/offline.html",
+      "desktop/main.js"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E3-T3",
+    "title": "Generar el instalador PokeKatens-Setup-1.0.0.exe",
+    "epic": "03-escritorio-y-publicacion",
+    "dependencies": [
+      "E3-T2"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `cmp` compara `desktop/build/icon.png` con `assets/icons/icon-512.png` y los dos archivos de `desktop/legal/` con `LICENSE` y `LICENSE-NONCOMMERCIAL.md` THE SYSTEM SHALL decir que son idénticos (exit 0).",
+      "WHEN `npm --prefix desktop run dist` se ejecuta THE SYSTEM SHALL terminar con exit 0 y crear `desktop/dist/PokeKatens-Setup-1.0.0.exe` no vacío.",
+      "WHEN `node tools/desktop-smoke.cjs --exe desktop/dist/win-unpacked/PokeKatens.exe` se ejecuta THE SYSTEM SHALL imprimir `DESKTOP_SMOKE_OK online` — el programa empaquetado encuentra su `main.js` y carga el juego.",
+      "WHEN `test -f desktop/dist/win-unpacked/resources/legal/LICENSE-NONCOMMERCIAL.md` se ejecuta THE SYSTEM SHALL terminar con exit 0 (la licencia viaja con el programa).",
+      "WHEN `git check-ignore -q desktop/dist/PokeKatens-Setup-1.0.0.exe` se ejecuta THE SYSTEM SHALL terminar con exit 0 (el instalador nunca se sube al repositorio).",
+      "WHEN `node tools/desktop-smoke.cjs --exe desktop/dist/win-unpacked/PokeKatens.exe --default` se ejecuta THE SYSTEM SHALL arrancar `tools/serve.cjs` en el puerto 8123, abrir el programa empaquetado sin `PK_URL` (usa el `pokekatens.url` que lleva dentro, `http://127.0.0.1:8123/`) e imprimir `DESKTOP_SMOKE_OK default`."
+    ],
+    "verify": [
+      "cmp assets/icons/icon-512.png desktop/build/icon.png   # expect: exit 0",
+      "cmp LICENSE desktop/legal/LICENSE   # expect: exit 0",
+      "cmp LICENSE-NONCOMMERCIAL.md desktop/legal/LICENSE-NONCOMMERCIAL.md   # expect: exit 0",
+      "npm --prefix desktop run dist   # expect: exit 0 (la primera vez descarga NSIS: hace falta internet)",
+      "test -s desktop/dist/PokeKatens-Setup-1.0.0.exe   # expect: exit 0",
+      "test -f desktop/dist/win-unpacked/resources/legal/LICENSE-NONCOMMERCIAL.md   # expect: exit 0",
+      "node tools/desktop-smoke.cjs --exe desktop/dist/win-unpacked/PokeKatens.exe | grep -F \"DESKTOP_SMOKE_OK online\"   # expect: exit 0",
+      "git check-ignore -q desktop/dist/PokeKatens-Setup-1.0.0.exe   # expect: exit 0 — 0 = ignorado",
+      "node tools/desktop-smoke.cjs --exe desktop/dist/win-unpacked/PokeKatens.exe --default | grep -F \"DESKTOP_SMOKE_OK default\"   # expect: exit 0 — la URL de fábrica del programa (el puerto 8123 tiene que estar libre)"
+    ],
+    "checkpoint": "step-13-instalador",
+    "files": [
+      "desktop/build/icon.png",
+      "desktop/legal/LICENSE",
+      "desktop/legal/LICENSE-NONCOMMERCIAL.md"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E3-T4",
+    "title": "Poner las normas de PokeKatens y la guía para publicar",
+    "epic": "03-escritorio-y-publicacion",
+    "dependencies": [
+      "E3-T3"
+    ],
+    "priority": "p1",
+    "acceptance": [
+      "WHEN `diff -q CLAUDE.md blueprints/pokekatens/workspace/CLAUDE.md` y `diff -q AGENTS.md blueprints/pokekatens/workspace/AGENTS.md` se ejecutan THE SYSTEM SHALL terminar ambos con exit 0.",
+      "WHEN `wc -l < CLAUDE.md` se ejecuta THE SYSTEM SHALL dar un número menor que 200.",
+      "WHEN `grep -nE \"pokesurvivor-free|export_data.js && python\" CLAUDE.md` se ejecuta THE SYSTEM SHALL no encontrar nada (exit 1).",
+      "WHEN se busca en `docs/GUIA-PUBLICAR-POKEKATENS.md` THE SYSTEM SHALL encontrar cada uno de `git remote rename origin upstream`, `firebase-tools@15.34.0 deploy --only firestore:rules,firestore:indexes,database`, `Identity Platform`, `Ejecutar de todas formas`, `npm --prefix desktop run dist` y `node tools/build.js --sin-seo`.",
+      "WHEN se leen las 5 primeras líneas de `docs/PUBLICAR.md` THE SYSTEM SHALL encontrar `GUIA-PUBLICAR-POKEKATENS.md`."
+    ],
+    "verify": [
+      "diff -q CLAUDE.md blueprints/pokekatens/workspace/CLAUDE.md   # expect: exit 0",
+      "diff -q AGENTS.md blueprints/pokekatens/workspace/AGENTS.md   # expect: exit 0",
+      "test \"$(wc -l < CLAUDE.md)\" -lt 200   # expect: exit 0",
+      "status=0; grep -nE \"pokesurvivor-free|export_data.js && python\" CLAUDE.md || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia",
+      "grep -qF \"git remote rename origin upstream\" docs/GUIA-PUBLICAR-POKEKATENS.md   # expect: exit 0",
+      "grep -qF \"firebase-tools@15.34.0 deploy --only firestore:rules,firestore:indexes,database\" docs/GUIA-PUBLICAR-POKEKATENS.md   # expect: exit 0",
+      "grep -qF \"Identity Platform\" docs/GUIA-PUBLICAR-POKEKATENS.md   # expect: exit 0",
+      "grep -qF \"Ejecutar de todas formas\" docs/GUIA-PUBLICAR-POKEKATENS.md   # expect: exit 0",
+      "grep -qF \"npm --prefix desktop run dist\" docs/GUIA-PUBLICAR-POKEKATENS.md   # expect: exit 0",
+      "grep -qF \"node tools/build.js --sin-seo\" docs/GUIA-PUBLICAR-POKEKATENS.md   # expect: exit 0",
+      "head -n 5 docs/PUBLICAR.md | grep -qF \"GUIA-PUBLICAR-POKEKATENS.md\"   # expect: exit 0"
+    ],
+    "checkpoint": "step-14-normas-y-guia",
+    "files": [
+      "CLAUDE.md",
+      "docs/GUIA-PUBLICAR-POKEKATENS.md",
+      "docs/PUBLICAR.md"
+    ],
+    "status": "pending"
+  },
+  {
+    "id": "E3-T5",
+    "title": "Construir la versión final y pasar la comprobación global",
+    "epic": "03-escritorio-y-publicacion",
+    "dependencies": [
+      "E3-T4"
+    ],
+    "priority": "p0",
+    "acceptance": [
+      "WHEN `node tools/build.js --sin-seo` se ejecuta THE SYSTEM SHALL terminar con exit 0 y `version.json` SHALL tener un `v` de 10 caracteres hexadecimales y un `at` que es una fecha válida.",
+      "WHEN `grep -rlE \"GoogleAuthProvider|ice\\.pokesurvivor\\.com|apis\\.google\\.com|rshaa5gKD3fXw6lE4PPXITbowaG2|pokesurvivor-free\" dev.html index.html js/app.min.js js/core js/ui js/net` se ejecuta THE SYSTEM SHALL no encontrar nada (exit 1).",
+      "WHEN `node --test \"tests/*.test.cjs\"` y `node tools/export_data.js` se ejecutan THE SYSTEM SHALL terminar ambos con exit 0.",
+      "WHEN la prueba del emulador se ejecuta con los dos scripts THE SYSTEM SHALL imprimir `EMULATOR_SMOKE_OK` y `EMULATOR_RANKING_OK`.",
+      "WHEN `node tools/desktop-smoke.cjs` y `node tools/desktop-smoke.cjs --offline` se ejecutan THE SYSTEM SHALL imprimir `DESKTOP_SMOKE_OK online` y `DESKTOP_SMOKE_OK offline`, y `desktop/dist/PokeKatens-Setup-1.0.0.exe` SHALL existir y no estar vacío.",
+      "WHEN `git diff --quiet step-00-preparacion -- js/core/updater.js database.rules.json` se ejecuta THE SYSTEM SHALL terminar con exit 0 (el actualizador y las reglas del cooperativo no han cambiado) y `tools/build.js` SHALL seguir escribiendo `version.json`."
+    ],
+    "verify": [
+      "node tools/build.js --sin-seo   # expect: exit 0 (la primera vez descarga terser y javascript-obfuscator con npx: hace falta internet)",
+      "node -e \"const j=JSON.parse(require('fs').readFileSync('version.json','utf8'));process.exit(/^[0-9a-f]{10}$/.test(j.v)&&!isNaN(Date.parse(j.at))?0:1)\"   # expect: exit 0",
+      "status=0; grep -rlE \"GoogleAuthProvider|ice\\.pokesurvivor\\.com|apis\\.google\\.com|rshaa5gKD3fXw6lE4PPXITbowaG2|pokesurvivor-free\" dev.html index.html js/app.min.js js/core js/ui js/net || status=$?; test \"$status\" -eq 1   # expect: exit 0 — 1 = ninguna coincidencia",
+      "node --test \"tests/*.test.cjs\"   # expect: exit 0, 0 failed",
+      "node tools/export_data.js   # expect: exit 0",
+      "out=$(node tools/emu.cjs \"node tests/emulator/smoke.cjs && node tests/emulator/ranking.cjs\"); echo \"$out\" | grep -qF EMULATOR_SMOKE_OK && echo \"$out\" | grep -qF EMULATOR_RANKING_OK   # expect: exit 0 — las dos marcas",
+      "node tools/desktop-smoke.cjs | grep -F \"DESKTOP_SMOKE_OK online\"   # expect: exit 0",
+      "node tools/desktop-smoke.cjs --offline | grep -F \"DESKTOP_SMOKE_OK offline\"   # expect: exit 0",
+      "test -s desktop/dist/PokeKatens-Setup-1.0.0.exe   # expect: exit 0",
+      "git diff --quiet step-00-preparacion -- js/core/updater.js database.rules.json   # expect: exit 0 — sin cambios desde antes del paso 1",
+      "grep -qF \"version.json\" tools/build.js   # expect: exit 0"
+    ],
+    "checkpoint": "step-15-version-final",
+    "files": [
+      "index.html",
+      "js/app.min.js",
+      "version.json",
+      "tools/check-tags.cjs"
+    ],
+    "status": "pending"
+  }
+]
