@@ -13,7 +13,7 @@
     "dist": "electron-builder --win nsis --x64"
   },
   "pokekatens": {
-    "url": "http://127.0.0.1:8123/"
+    "url": "https://gabrieldesilva69-ctrl.github.io/pokekatens/"
   },
   "devDependencies": {
     "electron": "44.9.2",
