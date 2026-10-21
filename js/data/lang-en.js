@@ -758,5 +758,14 @@ G.I18n.add({
   'Tu mejor puesto: {x}': 'Your best rank: {x}',
   'Aún no estás en el top 50. Tu puesto está en Histórico.': 'You are not in the top 50 yet. Your rank is in All-time.',
   'Aún no tienes marca.': 'You do not have a record yet.',
-  'Folagor, Sekiam, PokeAlex: ¿un hueco?': 'Folagor, Sekiam, PokeAlex: room for one more?'
+  'Folagor, Sekiam, PokeAlex: ¿un hueco?': 'Folagor, Sekiam, PokeAlex: room for one more?',
+
+  // ---------------- PokeKatens (versión no oficial) ----------------
+  'Si olvidas la contraseña, pídele al administrador que te cree otra cuenta.': 'If you forget your password, ask the admin to create a new account for you.',
+  'Esta web no está en la lista de webs de esta copia del juego: la partida sólo se guarda en este navegador.': 'This website is not on the list of websites for this copy of the game: your game is only saved in this browser.',
+  'Si creas una cuenta, guardamos tu nombre de jugador y tu partida (colección, monedas, mejoras y estadísticas) en Google Firebase para que puedas seguir en cualquier ordenador. No usamos tus datos para nada más, ni los compartimos, ni hay publicidad ni seguimiento. Como invitado no se guarda nada fuera de tu navegador.': 'If you create an account, we store your player name and your game (collection, coins, upgrades and stats) in Google Firebase so you can carry on from any computer. We do not use your data for anything else, we do not share it, and there are no ads or tracking. As a guest, nothing is stored outside your browser.',
+  'Es el nombre que verán tus amigos y el que sale en el ranking. Tu nombre de usuario no se enseña a nadie.': 'It is the name your friends will see and the one shown on the leaderboard. Your username is never shown to anyone.',
+  'Versión no oficial': 'Unofficial version',
+  'PokeKatens es una versión no oficial de PokéSurvivor (de JPTER78) hecha por un grupo de amigos, gratuita y sin ánimo de lucro. No tiene anuncios, compras ni donaciones.': 'PokeKatens is an unofficial version of PokéSurvivor (by JPTER78) made by a group of friends, free and non-profit. It has no ads, purchases or donations.',
+  'PokeKatens se juega en horizontal.': 'PokeKatens is played in landscape.'
 });

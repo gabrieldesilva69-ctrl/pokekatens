@@ -6,6 +6,12 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-21', title: ['PokeKatens: versión no oficial', 'PokeKatens: unofficial version'], chg: [
+    ['El juego ahora se llama PokeKatens: es una versión no oficial, gratis y sin ánimo de lucro, basada en PokéSurvivor de JPTER78.',
+     'The game is now called PokeKatens: an unofficial, free and non-profit version based on PokéSurvivor by JPTER78.'],
+    ['Se entra sólo con nombre y contraseña (ya no hay botón de Google). Si olvidas la contraseña, pídele al administrador que te cree otra cuenta.',
+     'You sign in with name and password only (the Google button is gone). If you forget your password, ask the admin to create a new account for you.']
+  ] },
   { d: '2026-10-20', title: ['Cooperativo más seguro y arreglos de ataques', 'Safer co-op and move fixes'], fix: [
     ['Cooperativo: un jugador con el juego trucado ya no puede colgar la partida de los demás mandando números imposibles (una experiencia infinita dejaba congelado al anfitrión y un efecto gigante, a los invitados).',
      'Co-op: a player with a tampered game can no longer freeze the others by sending impossible numbers (infinite experience froze the host and a giant effect froze the guests).'],
