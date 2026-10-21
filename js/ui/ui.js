@@ -103,16 +103,22 @@ G.UI = (() => {
 
   // ---------------- aviso legal ----------------
 
-  const CONTACT = 'jpieratorregrosa@gmail.com';
-  const REPO = 'https://github.com/JPTER78/pokesurvivor';
   let legalBack = null;
 
   function openLegal() {
     legalBack = SCREENS.find(s => isOpen(s)) || null;
-    $('legal-mail').textContent = CONTACT;
-    $('legal-mail').href = 'mailto:' + CONTACT + '?subject=Pok%C3%A9Survivor';
-    $('legal-repo').textContent = REPO.replace('https://', '');
-    $('legal-repo').href = REPO;
+    // Contacto y código sólo si esta copia los tiene (js/core/fork-config.js).
+    const contact = G.FORK.contact, repo = G.FORK.repo;
+    $('legal-mail').parentElement.classList.toggle('hidden', !contact);
+    if (contact) {
+      $('legal-mail').textContent = contact;
+      $('legal-mail').href = 'mailto:' + contact + '?subject=' + encodeURIComponent(G.FORK.name);
+    }
+    $('legal-repo').parentElement.classList.toggle('hidden', !repo);
+    if (repo) {
+      $('legal-repo').textContent = repo.replace(/^https?:\/\//, '');
+      $('legal-repo').href = repo;
+    }
     const canDelete = G.DB.loggedIn && !G.DB.guest;
     $('legal-delete').disabled = !canDelete;
     $('legal-del-msg').textContent = canDelete ? '' : 'Inicia sesión para poder borrar tu cuenta.';
@@ -120,10 +126,9 @@ G.UI = (() => {
   }
 
   /**
-   * "¿Seguro que quieres borrar la cuenta?". Las cuentas de nombre y
-   * contraseña escriben su contraseña (Firebase pide confirmar quién eres);
-   * las de Google la confirman en la ventana de Google al seguir.
-   * Devuelve { pass } o null si se cancela.
+   * "¿Seguro que quieres borrar la cuenta?". En la nube se escribe la
+   * contraseña (Firebase pide confirmar quién eres); en este navegador basta
+   * con confirmar. Devuelve { pass } o null si se cancela.
    */
   function confirmDelete() {
     if (!G.DB.nameAccount) return Promise.resolve(confirm(G.T('Se borrarán tu cuenta y toda tu partida, para siempre. ¿Seguro?')) ? { pass: '' } : null);

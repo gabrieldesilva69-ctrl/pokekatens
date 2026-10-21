@@ -1,10 +1,8 @@
-/* ============ noframe.js — el juego sólo se juega en su web ============
- * Hay webs que meten pokesurvivor.com dentro de un marco (iframe) y ponen sus
- * anuncios alrededor (pokesurvival.com, 19-10-2026). Si esta página está dentro
- * de un marco de otra web, no arranca el juego (main.js mira PS_FRAMED) y
- * sale un aviso con un botón a la web oficial. Un marco de la misma web sí vale.
- * Va en un archivo aparte (y no dentro del HTML) por la CSP; lo usan el juego
- * (dev.html, index.html, en/) y las páginas de la guía (make_seo_pages.py).
+/* ============ noframe.js — el juego no se juega dentro de otras webs ============
+ * Hay webs que meten el juego dentro de un marco (iframe) y ponen sus anuncios
+ * alrededor. Si esta página está dentro de un marco de otra web, no arranca el
+ * juego (main.js mira PS_FRAMED) y sale un aviso, sin enlaces. Un marco de la
+ * misma web sí vale. Va en un archivo aparte (y no dentro del HTML) por la CSP.
  * Si algún día el juego se publica en un portal que lo mete en un marco
  * (itch.io, CrazyGames...), su dominio va en ALLOW.
  */
@@ -21,18 +19,17 @@
 
   var lang = (window.PS_LOCALES && window.PS_LOCALES.lang) || document.documentElement.lang || 'en';
   var texts = {
-    es: ['Esta no es la web oficial', 'PokéSurvivor sólo se juega en su web oficial, gratis y sin anuncios.', 'Jugar en pokesurvivor.com'],
-    en: ['This is not the official website', 'PokéSurvivor can only be played on its official website, free and without ads.', 'Play on pokesurvivor.com'],
-    fr: ['Ce n’est pas le site officiel', 'PokéSurvivor se joue uniquement sur son site officiel, gratuitement et sans publicité.', 'Jouer sur pokesurvivor.com'],
-    it: ['Questo non è il sito ufficiale', 'PokéSurvivor si gioca solo sul suo sito ufficiale, gratis e senza pubblicità.', 'Gioca su pokesurvivor.com'],
-    'pt-BR': ['Este não é o site oficial', 'PokéSurvivor só pode ser jogado no site oficial, de graça e sem anúncios.', 'Jogar em pokesurvivor.com'],
-    'zh-Hans': ['这不是官方网站', 'PokéSurvivor 只能在官方网站免费游玩，没有广告。', '前往 pokesurvivor.com 游玩'],
-    'zh-Hant': ['這不是官方網站', 'PokéSurvivor 只能在官方網站免費遊玩，沒有廣告。', '前往 pokesurvivor.com 遊玩']
+    es: ['Esta página no se puede abrir dentro de otra web', 'PokeKatens no se juega dentro de otras webs.'],
+    en: ['This page cannot be opened inside another website', 'PokeKatens cannot be played inside other websites.'],
+    fr: ['Cette page ne peut pas être ouverte dans un autre site', 'PokeKatens ne se joue pas dans d’autres sites.'],
+    it: ['Questa pagina non può essere aperta all’interno di un altro sito', 'PokeKatens non si gioca all’interno di altri siti.'],
+    'pt-BR': ['Esta página não pode ser aberta dentro de outro site', 'PokeKatens não pode ser jogado dentro de outros sites.'],
+    'zh-Hans': ['此页面无法在其他网站中打开', 'PokeKatens 不能在其他网站中游玩。'],
+    'zh-Hant': ['此頁面無法在其他網站中開啟', 'PokeKatens 不能在其他網站中遊玩。']
   };
   var copy = texts[lang] || texts.en;
 
   function show() {
-    var url = 'https://pokesurvivor.com' + location.pathname + location.search;
     var box = document.createElement('div');
     box.setAttribute('translate', 'no');
     box.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;' +
@@ -43,18 +40,9 @@
     h.style.cssText = 'margin:0 0 12px;font-size:24px;color:#ffd84a';
     h.textContent = copy[0];
     var p = document.createElement('p');
-    p.style.cssText = 'margin:0 0 20px';
+    p.style.cssText = 'margin:0';
     p.textContent = copy[1];
-    // _top saca al jugador del marco; si la web lo impide, se abre aparte.
-    var a = document.createElement('a');
-    a.href = url; a.target = '_top'; a.rel = 'noopener';
-    a.style.cssText = 'display:inline-block;padding:12px 20px;border-radius:10px;background:#ffd84a;color:#0a1430;' +
-      'font-weight:700;text-decoration:none';
-    a.textContent = copy[2];
-    a.addEventListener('click', function (e) {
-      try { window.top.location.href = url; e.preventDefault(); } catch (err) { a.target = '_blank'; }
-    });
-    inner.appendChild(h); inner.appendChild(p); inner.appendChild(a);
+    inner.appendChild(h); inner.appendChild(p);
     box.appendChild(inner);
     document.body.appendChild(box);
   }
