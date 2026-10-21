@@ -54,7 +54,7 @@
       "tools/serve.cjs",
       "tests/serve.test.cjs"
     ],
-    "status": "pending"
+    "status": "done"
   },
   {
     "id": "E1-T3",
