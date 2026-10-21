@@ -352,7 +352,7 @@
       "desktop/main.js",
       "tools/desktop-smoke.cjs"
     ],
-    "status": "pending"
+    "status": "done"
   },
   {
     "id": "E3-T2",
