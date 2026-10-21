@@ -8,7 +8,11 @@
 G.CHANGELOG = [
   { d: '2026-10-21', title: ['PokeKatens: versión no oficial', 'PokeKatens: unofficial version'], new: [
     ['Regalos: el administrador ya puede regalar monedas y tickets a un jugador. Los recibes la próxima vez que entres al juego, con un aviso.',
-     'Gifts: the admin can now give coins and tickets to a player. You get them the next time you open the game, with a notice.']
+     'Gifts: the admin can now give coins and tickets to a player. You get them the next time you open the game, with a notice.'],
+    ['Ajustes > Controles: ya puedes cambiar las teclas en PC (moverse, cambiar de ataque, los ataques 1-4 y la pausa), con dos teclas para cada acción. Vienen las de siempre y se pueden restablecer.',
+     'Settings > Controls: you can now change the keys on PC (move, switch moves, moves 1-4 and pause), with two keys per action. The usual ones come by default and can be reset.'],
+    ['Ping en las partidas en grupo: sale en la esquina de abajo, en verde por debajo de 100 ms, amarillo hasta 200 ms y rojo por encima. Se quita en Ajustes > Gráficos.',
+     'Ping in group games: it shows in the bottom corner, green below 100 ms, yellow up to 200 ms and red above. You can hide it in Settings > Graphics.']
   ], chg: [
     ['El juego ahora se llama PokeKatens: es una versión no oficial, gratis y sin ánimo de lucro, basada en PokéSurvivor de JPTER78.',
      'The game is now called PokeKatens: an unofficial, free and non-profit version based on PokéSurvivor by JPTER78.'],

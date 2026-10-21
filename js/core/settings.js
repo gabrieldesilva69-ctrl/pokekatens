@@ -6,6 +6,7 @@
  *   dmgNumbers  true/false                        números de daño
  *   calm        true/false                        menos sacudidas y destellos
  *   fps         true/false                        contador de FPS
+ *   ping        true/false                        ping en ms en las partidas en grupo
  *   stick       0.8 | 1 | 1.25                    tamaño del joystick táctil
  *   stickMode   'float' | 'fixed'                 joystick donde pones el dedo, o siempre en su sitio
  *   pad         { bar, pause, stick } | null      dónde van los botones en móvil (centro, en
@@ -13,13 +14,15 @@
  *   gamepad     true/false                        jugar con mando (gamepad.js)
  *   padRumble   true/false                        que el mando vibre al recibir daño
  *   aimManual   true/false                        apuntar a mano (ratón o stick derecho) en vez de solo
+ *   keys        { acción: [tecla, tecla] } | null  teclas cambiadas en PC (sólo las distintas de
+ *                                                 las de fábrica); lo pone input.js
  *
  *   G.Settings.get('quality')  ·  G.Settings.set('fps', true)  ·  G.Settings.on(fn)
  *   G.Settings.fx   nivel efectivo 0 (bajo) .. 2 (alto), ya resuelto el 'auto'
  */
 G.Settings = (() => {
   const KEY = 'ps.settings';
-  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false };
+  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, ping: true, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false, keys: null };
   let s = Object.assign({}, DEF);
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* nada */ }
   const fns = new Set();

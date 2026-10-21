@@ -803,6 +803,9 @@ body.touch kbd, body.touch .card .key, body.touch .kbd-hint { display: none !imp
 .set-chips { margin: 6px 0 10px; }
 .keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center; font-size: 14px; }
 .keys span { color: var(--muted); }
+/* Teclas de PC configurables (Ajustes → Controles): acción · principal · alternativa. */
+.keybinds { display: grid; grid-template-columns: 1fr minmax(92px, auto) minmax(92px, auto); gap: 6px 8px; align-items: center; font-size: 14px; }
+.keybinds .keybind { min-width: 92px; padding-left: 6px; padding-right: 6px; }
 .padkey { display: inline-block; padding: 0 7px; border: 2px solid rgba(244,248,255,.4); border-radius: 9px; font-size: 13px; color: var(--text, #f4f8ff) !important; text-shadow: none; }
 /* Lo seleccionado con el mando (gamepad.js). */
 .pad-focus { outline: 3px solid #ffd23f !important; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(255,210,63,.25) !important; }

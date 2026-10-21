@@ -8,9 +8,25 @@ G.SettingsUI = (() => {
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const VERSION = '1.2 · 2026-10-09';
   let tab = 'sound';
+  let capture = null;          // { a, slot } mientras se espera la tecla nueva (Controles → En PC)
+
+  // Teclas de PC: nombre de cada acción, en el orden en que salen.
+  const KEY_ROWS = [['up', 'Arriba'], ['down', 'Abajo'], ['left', 'Izquierda'], ['right', 'Derecha'],
+    ['prev', 'Ataque anterior'], ['next', 'Ataque siguiente'],
+    ['slot1', 'Ataque 1'], ['slot2', 'Ataque 2'], ['slot3', 'Ataque 3'], ['slot4', 'Ataque 4'], ['pause', 'Pausa']];
 
   function init() {
-    document.querySelectorAll('#set-tabs .gen-tab').forEach(b => { b.onclick = () => { tab = b.dataset.t; render(); }; });
+    document.querySelectorAll('#set-tabs .gen-tab').forEach(b => { b.onclick = () => { tab = b.dataset.t; capture = null; render(); }; });
+    // Cambiando una tecla: la siguiente pulsación es para eso y no llega al juego.
+    addEventListener('keydown', e => {
+      if (!capture || !isOpen()) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      const c = (e.code || e.key).toLowerCase();
+      if (c === 'backspace' || c === 'delete') G.Input.bind(capture.a, capture.slot, '');
+      else if (!G.Input.isReserved(c)) G.Input.bind(capture.a, capture.slot, c);
+      capture = null;
+      render();
+    }, true);
     // En el móvil no hay apuntado a mano (siempre apunta solo): fuera la pestaña, que sólo tenía eso.
     if (G.Settings.touch) document.querySelector('#set-tabs [data-t="a11y"]').classList.add('hidden');
     // Al conectar o quitar un mando con Controles abierto, se ve al momento.
@@ -32,7 +48,7 @@ G.SettingsUI = (() => {
     $('scr-settings').classList.remove('hidden');
     render();
   }
-  function close() { $('scr-settings').classList.add('hidden'); }
+  function close() { capture = null; $('scr-settings').classList.add('hidden'); }
   const isOpen = () => !$('scr-settings').classList.contains('hidden');
 
   // ---------------- pantalla completa ----------------
@@ -86,12 +102,13 @@ G.SettingsUI = (() => {
         + toggle('dmgNumbers', 'Números de daño', 'Los números que salen al golpear y al recibir daño.')
         + toggle('calm', 'Menos sacudidas y destellos', 'La cámara tiembla menos y los fogonazos son suaves.')
         + toggle('fps', 'Mostrar FPS', 'Fotogramas por segundo, en la esquina de abajo.')
+        + toggle('ping', 'Mostrar ping', 'En las partidas en grupo, en la esquina de abajo: verde por debajo de 100 ms, amarillo hasta 200 ms y rojo por encima.')
         + (canFull() ? `<div class="set-row"><div class="grow"><b>Pantalla completa</b><small>Sin barras del navegador.</small></div>
              <button class="btn small" id="set-full">${isFull() ? 'Salir' : 'Activar'}</button></div>`
            : iosTip() ? `<div class="set-row"><div class="grow"><b>Pantalla completa</b><small>${esc(IOS_TIP)}</small></div></div>` : '');
     } else if (tab === 'ctl') {
       const pn = G.Pad.name;
-      box.innerHTML = section('Con mando', pn
+      const padHtml = section('Con mando', pn
           ? 'Mando conectado: <b translate="no">' + esc(pn.replace(/\s*\(.*$/, '')) + '</b>'
           : 'Xbox, PlayStation, Switch y la mayoría de mandos USB o Bluetooth. Conéctalo y pulsa cualquier botón.')
         + toggle('gamepad', 'Usar mando', 'Moverte, cambiar de ataque y manejar los menús con el mando.')
@@ -104,21 +121,28 @@ G.SettingsUI = (() => {
              <div><span class="padkey">B</span></div><span>atrás / cerrar</span>
              <div><span class="padkey">Y</span></div><span>cambiar las cartas al subir de nivel</span>
              <div><span class="padkey">Stick der.</span></div><span>desplazar las listas · apuntar (si activas Apuntar a mano en Accesibilidad)</span>
-           </div>`
-        + section('En móvil o tablet')
+           </div>`;
+      const touchHtml = section('En móvil o tablet')
         + `<p class="sub">Pon el dedo en cualquier parte y arrastra para moverte: el joystick aparece donde tocas. Toca un ataque de abajo para cambiarlo y el botón de arriba a la derecha para pausar. Se juega en horizontal.</p>`
         + `<div class="set-row"><div class="grow"><b>Tamaño del joystick</b><small>Cuánto hay que arrastrar el dedo.</small></div></div>`
         + choice('stick', [[0.8, 'Pequeño'], [1, 'Normal'], [1.25, 'Grande']])
         + `<div class="set-row"><div class="grow"><b>Colocar los botones</b><small>Pon los ataques, la pausa y el joystick (fijo, si quieres) donde quieras de la pantalla.</small></div>
-             <button class="btn small" id="set-layout">Colocar</button></div>`
-        + section('En PC')
-        + `<div class="keys">
-             <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> o flechas</div><span>moverse</span>
-             <div><kbd>1</kbd>–<kbd>4</kbd> o clic en el icono</div><span>elegir ataque</span>
-             <div><kbd>Q</kbd> / <kbd>E</kbd></div><span>ataque anterior / siguiente</span>
-             <div><kbd>Esc</kbd> o <kbd>P</kbd></div><span>pausa</span>
-             <div><kbd>1</kbd>–<kbd>3</kbd></div><span>elegir carta al subir de nivel</span>
-           </div>`;
+             <button class="btn small" id="set-layout">Colocar</button></div>`;
+      const pcHtml = section('En PC', 'Pulsa una casilla y luego la tecla que quieras. Esc cancela y Retroceso la deja vacía. Si la tecla ya la usa otra acción, se intercambian.')
+        + `<div class="keybinds">${KEY_ROWS.map(([a, label]) => `<span>${esc(label)}</span>`
+             + G.Input.keys(a).map((k, i) => {
+                 const on = capture && capture.a === a && capture.slot === i;
+                 return `<button class="btn small keybind ${on ? 'gold' : ''}" data-bind="${a}" data-slot="${i}">${on ? esc('Pulsa una tecla…') : `<kbd>${esc(G.Input.keyName(k))}</kbd>`}</button>`;
+               }).join('')).join('')}</div>`
+        + `<div class="keys" style="margin-top:10px">
+             <div><kbd>Esc</kbd></div><span>pausa y cerrar (siempre)</span>
+             <div>clic en el icono</div><span>elegir ataque</span>
+             <div><kbd>1</kbd>–<kbd>3</kbd> · <kbd>R</kbd></div><span>elegir carta / cambiar las cartas al subir de nivel</span>
+           </div>`
+        + `<div class="row" style="justify-content:flex-end;margin-top:10px">
+             <button class="btn small" id="set-keys-reset" ${G.Input.defaultKeys ? 'disabled' : ''}>Restablecer teclas</button></div>`;
+      // En PC, lo primero son sus teclas; en el móvil, el táctil.
+      box.innerHTML = G.Settings.touch ? padHtml + touchHtml + pcHtml : pcHtml + padHtml + touchHtml;
     } else if (tab === 'a11y') {
       box.innerHTML = section('Apuntado')
         + toggle('aimManual', 'Apuntar a mano', 'Tus ataques van hacia el ratón (o hacia donde empujes el stick derecho del mando) en vez de al enemigo más cercano. Si sueltas el stick y no mueves el ratón, vuelve a apuntar solo. La cadena y los meteoros siguen buscando a los enemigos solos.');
@@ -173,6 +197,15 @@ G.SettingsUI = (() => {
     });
     const full = $('set-full'); if (full) full.onclick = toggleFull;
     const lay = $('set-layout'); if (lay) lay.onclick = () => G.LayoutUI.open();
+    box.querySelectorAll('[data-bind]').forEach(b => {
+      b.onclick = () => {
+        const want = { a: b.dataset.bind, slot: +b.dataset.slot };
+        capture = capture && capture.a === want.a && capture.slot === want.slot ? null : want;
+        b.blur();             // que Espacio o Intro no lo vuelvan a pulsar
+        const y = box.scrollTop; render(); box.scrollTop = y;
+      };
+    });
+    const kr = $('set-keys-reset'); if (kr) kr.onclick = () => { capture = null; G.Input.resetKeys(); const y = box.scrollTop; render(); box.scrollTop = y; };
     box.querySelectorAll('[data-lang]').forEach(b => { b.onclick = () => { if (b.dataset.lang !== G.I18n.lang) G.I18n.set(b.dataset.lang); }; });
     const lo = $('set-login'); if (lo) lo.onclick = () => { close(); leave(); };
     const out = $('set-logout'); if (out) out.onclick = () => { close(); leave(); };

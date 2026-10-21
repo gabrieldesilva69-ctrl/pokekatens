@@ -574,15 +574,16 @@ G.Game = (() => {
           && document.getElementById('pull-fx').classList.contains('hidden')) G.MenuUI.open();
       return;
     }
-    if (G.Input.tap('escape') || G.Input.tap('keyp')) { togglePause(); return; }
+    // Teclas de la partida: las de Ajustes → Controles (G.Input.act).
+    if (G.Input.act('pause')) { togglePause(); return; }
     if (state !== 'playing' || !pl) return;
     for (let i = 0; i < 4; i++) {
-      if (G.Input.tap('digit' + (i + 1)) || G.Input.tap('numpad' + (i + 1))) pl.setActive(i);
+      if (G.Input.act('slot' + (i + 1))) pl.setActive(i);
     }
-    // Caído en grupo: Q / E cambian a quién miras.
-    if (pl.dead) { if (G.Input.tap('keyq')) cycleWatch(-1); if (G.Input.tap('keye') || G.Input.tap('tab')) cycleWatch(1); return; }
-    if (G.Input.tap('keyq')) pl.cycle(-1);
-    if (G.Input.tap('keye') || G.Input.tap('tab')) pl.cycle(1);
+    // Caído en grupo: ataque anterior / siguiente (Q / E) cambian a quién miras.
+    if (pl.dead) { if (G.Input.act('prev')) cycleWatch(-1); if (G.Input.act('next')) cycleWatch(1); return; }
+    if (G.Input.act('prev')) pl.cycle(-1);
+    if (G.Input.act('next')) pl.cycle(1);
   }
 
   // ---------------- bucle ----------------
@@ -826,12 +827,24 @@ G.Game = (() => {
     G.Judgment.drawOverlay(ctx, w, h);
     G.Touch.draw(ctx);
     drawAimMark();
+    let cornerY = h - 8;
     if (G.Settings.get('fps')) {
       ctx.save();
       ctx.font = '700 11px Pixelify, monospace';
       ctx.textAlign = 'right';
       ctx.fillStyle = fpsShown >= 50 ? '#5fe08a' : fpsShown >= 30 ? '#ffd23f' : '#ff5f6d';
-      ctx.fillText(fpsShown + ' FPS', w - 10, h - 8);
+      ctx.fillText(fpsShown + ' FPS', w - 10, cornerY);
+      ctx.restore();
+      cornerY -= 14;
+    }
+    // Ping (sólo en grupo): verde por debajo de 100 ms, amarillo hasta 200, rojo por encima.
+    if (G.Settings.get('ping') && G.Coop.active) {
+      const ms = G.Net.ping();
+      ctx.save();
+      ctx.font = '700 11px Pixelify, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = ms == null ? '#9aa6bd' : ms < 100 ? '#5fe08a' : ms <= 200 ? '#ffd23f' : '#ff5f6d';
+      ctx.fillText(ms == null ? '— ms' : ms + ' ms', w - 10, cornerY);
       ctx.restore();
     }
     if (flashT > 0) {

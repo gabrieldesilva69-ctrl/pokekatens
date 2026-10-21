@@ -290,6 +290,9 @@ G.RunUI = (() => {
     $('pause-sum').innerHTML = pauseSummary();
     G.UI.soundControls($('pause-sound'));
     $('pause-coop').classList.toggle('hidden', !coop);
+    // Con teclas cambiadas en Ajustes, la chuleta de fábrica ya no vale.
+    $('pause-keys').classList.toggle('hidden', !G.Input.defaultKeys);
+    $('pause-keys-own').classList.toggle('hidden', G.Input.defaultKeys);
     $('btn-quit').textContent = coop ? 'Salir de la partida' : 'Abandonar run';
     G.UI.show('scr-pause');
   }

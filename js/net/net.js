@@ -16,6 +16,7 @@
  * API:  open(roomId, isHost, hostUid) · close() · send(to, msg) · toHost(msg)
  *       broadcast(msg) · on(fn(from, msg)) · onPeer(fn(uid, state))
  *       peers() · mode(uid) -> 'connecting' | 'direct' | 'relay' | 'closed'
+ *       rtt(uid) · ping() -> ms de ida y vuelta (el peor de la sala) o null
  */
 G.Net = (() => {
   const ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
@@ -25,10 +26,14 @@ G.Net = (() => {
   // junta ('failed') y el anfitrión lo reintenta cada RETRY_MS. Por la base de datos
   // sólo pasa la señalización (unos pocos mensajes pequeños para conectarse).
   const ALLOW_RELAY = false, RETRY_MS = 15000;
+  // Ping: lo mide el propio navegador en la conexión WebRTC (getStats), así que no
+  // manda ni un byte más por la red. Se lee como mucho cada PING_MS y sólo si alguien
+  // lo pide (el HUD, con "Mostrar ping" activado).
+  const PING_MS = 2000;
 
 
   let rtdb = null, uid = null, roomId = null, isHost = false, hostUid = null;
-  let qref = null;
+  let qref = null, pingAt = 0;
   const peers = new Map();         // uid -> { pc, dc, mode, timer }
   const handlers = new Set(), peerHandlers = new Set();
   const stats = { sent: 0, recv: 0, relaySent: 0,
@@ -190,6 +195,24 @@ G.Net = (() => {
     }
   }
 
+  /** Lee el tiempo de ida y vuelta del par de candidatos en uso de cada conexión directa. */
+  function measurePing() {
+    for (const p of peers.values()) {
+      if (p.mode !== 'direct' || !p.pc || !p.pc.getStats) { p.rtt = null; continue; }
+      p.pc.getStats().then(rep => {
+        let ms = null;
+        rep.forEach(r => {
+          if (r.type === 'candidate-pair' && r.state === 'succeeded' && (r.nominated || r.selected)
+              && typeof r.currentRoundTripTime === 'number') ms = r.currentRoundTripTime * 1000;
+        });
+        p.rtt = ms == null ? null : Math.round(ms);
+      }).catch(() => { p.rtt = null; });
+    }
+  }
+
+  /** Ping con un jugador en ms (null si no hay conexión directa o aún no se ha medido). */
+  function rtt(u) { const p = peers.get(u); return p && p.mode === 'direct' && p.rtt != null ? p.rtt : null; }
+
   function signal(to, sig) { relayPush(to, { f: uid, sig }); }
 
   function drop(u, silent) {
@@ -250,6 +273,15 @@ G.Net = (() => {
     /** ¿Va por el relé (o no hay conexión)? Entonces se manda menos a menudo. */
     slow(u) { const p = peers.get(u); return !p || p.mode !== 'direct'; },
     peers() { return [...peers.keys()]; },
+    rtt,
+    /** Ping de la sala: el del anfitrión para un invitado; el peor de los invitados para el anfitrión. */
+    ping() {
+      const now = Date.now();
+      if (now - pingAt >= PING_MS) { pingAt = now; measurePing(); }
+      let worst = null;
+      for (const u of peers.keys()) { const r = rtt(u); if (r != null && (worst == null || r > worst)) worst = r; }
+      return worst;
+    },
     get open_() { return !!roomId; },
     get isHost() { return isHost; },
     get uid() { return uid; },
