@@ -1,3 +1,5 @@
+> **PokeKatens:** esta guía es la del juego original (pokesurvivor.com). Para publicar PokeKatens usa [GUIA-PUBLICAR-POKEKATENS.md](GUIA-PUBLICAR-POKEKATENS.md).
+
 # Publicar el juego gratis en GitHub Pages
 
 El juego es una web estática: GitHub Pages la sirve gratis en
