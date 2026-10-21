@@ -115,7 +115,7 @@
       "js/ui/social-ui.js",
       "infra/coturn/**"
     ],
-    "status": "pending"
+    "status": "done"
   },
   {
     "id": "E1-T5",
