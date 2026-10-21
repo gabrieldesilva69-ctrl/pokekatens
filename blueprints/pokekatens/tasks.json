@@ -254,7 +254,7 @@
       "tools/emu.cjs",
       "tests/emulator/smoke.cjs"
     ],
-    "status": "pending"
+    "status": "done"
   },
   {
     "id": "E2-T4",
