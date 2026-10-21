@@ -489,6 +489,6 @@
       "version.json",
       "tools/check-tags.cjs"
     ],
-    "status": "pending"
+    "status": "done"
   }
 ]
