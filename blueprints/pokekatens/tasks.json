@@ -86,7 +86,7 @@
       "js/game.js",
       "tests/sin-google.test.cjs"
     ],
-    "status": "pending"
+    "status": "done"
   },
   {
     "id": "E1-T4",

@@ -10,7 +10,6 @@
  *     saves/{uid} y se puede seguir en cualquier ordenador.
  *       - Usuario + contraseña: Firebase pide un email, así que el nombre se
  *         convierte en uno interno (nunca se le envía nada).
- *       - Cuenta de Google.
  *     Además se guarda una copia local para poder jugar sin conexión; al
  *     sincronizar se FUSIONA (ver merge): las colecciones se unen y nunca se
  *     pierde un Pokémon ni un shiny.
@@ -30,7 +29,7 @@ G.DB = (() => {
   const VERSION = 3;
   const START_COINS = 500;
   const SDK = 'https://www.gstatic.com/firebasejs/13.0.0/';
-  const NAME_DOMAIN = 'jugadores.pokesurvivor.net';   // sólo para el email interno
+  const NAME_DOMAIN = 'jugadores.pokekatens.invalid';   // sólo para el email interno que pide Firebase (.invalid nunca existirá)
 
   let mode = 'local';       // 'cloud' | 'local'
   let localReason = '';     // por qué no hay nube: 'file' | 'config' | 'host' | 'error'
@@ -660,7 +659,6 @@ G.DB = (() => {
       'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
       'auth/too-many-requests': 'Demasiados intentos seguidos. Espera un poco.',
       'auth/network-request-failed': 'Sin conexión a internet.',
-      'auth/popup-blocked': 'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes.',
       'auth/unauthorized-domain': 'Este dominio no está autorizado en Firebase (Authentication > Configuración > Dominios autorizados).',
       'auth/operation-not-allowed': 'Ese método de inicio de sesión no está activado en Firebase.',
       // Registro de cuentas nuevas desactivado en Firebase (Authentication > Configuración).
@@ -669,7 +667,6 @@ G.DB = (() => {
       'permission-denied': 'La base de datos rechazó el acceso (revisa las reglas de Firestore).',
       'unavailable': 'Sin conexión con la base de datos.'
     };
-    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return '';
     return M[c] || ('Error: ' + (c || (e && e.message) || 'desconocido'));
   }
 
@@ -717,15 +714,6 @@ G.DB = (() => {
       const cred = await auth.signInWithEmailAndPassword(nameToEmail(name), pass || '');
       await openCloud(cred.user, { name, legacy });
       return { ok: true, isNew: !save.partner, imported: !!legacy };
-    } catch (e) { return { ok: false, error: authError(e) }; }
-  }
-
-  async function loginWithGoogle() {
-    if (mode !== 'cloud') return { ok: false, error: 'Entrar con Google necesita la versión publicada del juego.' };
-    try {
-      const cred = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      await openCloud(cred.user, { name: displayNameOf(cred.user) });
-      return { ok: true, isNew: !save.partner };
     } catch (e) { return { ok: false, error: authError(e) }; }
   }
 
@@ -779,31 +767,6 @@ G.DB = (() => {
 
   function nameAccount() { return !!(auth && auth.currentUser && (auth.currentUser.email || '').endsWith('@' + NAME_DOMAIN)); }
 
-  /*
-   * Recuperar la cuenta: las de nombre y contraseña no tienen correo de verdad
-   * (no se les puede mandar un enlace), así que se les ofrece VINCULAR su Gmail:
-   * si un día olvidan la contraseña, entran con Google y es la misma cuenta.
-   * Lo hace el sistema de cuentas de Firebase (gratis): ni una lectura ni una
-   * escritura de la base de datos.
-   */
-  function hasGoogle() {
-    const u = auth && auth.currentUser;
-    return !!(u && u.providerData.some(p => p.providerId === 'google.com'));
-  }
-  async function linkGoogle() {
-    if (!auth || !auth.currentUser) return { ok: false, error: 'Inicia sesión primero.' };
-    try {
-      await auth.currentUser.linkWithPopup(new firebase.auth.GoogleAuthProvider());
-      return { ok: true };
-    } catch (e) {
-      const c = (e && e.code) || '';
-      if (c === 'auth/provider-already-linked') return { ok: true };
-      if (c === 'auth/credential-already-in-use' || c === 'auth/email-already-in-use')
-        return { ok: false, error: 'Ese Gmail ya tiene su propia cuenta del juego. Usa otro Gmail.' };
-      return { ok: false, error: authError(e) };
-    }
-  }
-
   /**
    * Borra la cuenta y la partida (en la nube o en este navegador).
    * @param pass  contraseña (cuentas de nombre y contraseña)
@@ -824,12 +787,8 @@ G.DB = (() => {
       // ese último paso: la cuenta quedaba vacía pero existía y su nombre no
       // se podía volver a usar.
       const cu = auth.currentUser;
-      if (nameAccount()) {
-        if (!pass) return { ok: false, error: 'Escribe tu contraseña.' };
-        await cu.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(cu.email, pass));
-      } else {
-        await cu.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());
-      }
+      if (!pass) return { ok: false, error: 'Escribe tu contraseña.' };
+      await cu.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(cu.email, pass));
       clearTimeout(pushT); clearTimeout(retryT); pending = false;
       stopListening();
       for (const fn of leaveHooks) await fn('delete');
@@ -877,7 +836,7 @@ G.DB = (() => {
   }
 
   return {
-    ready, register, login, loginWithGoogle, playAsGuest, logout, commit, deleteAccount, flush: pushNow, saveNow,
+    ready, register, login, playAsGuest, logout, commit, deleteAccount, flush: pushNow, saveNow,
     owns, grant, ownsShiny, grantShiny, merge, setName, upgradesOf, isFav, setFav,
     onSync(fn) { listeners.add(fn); },
     onLeave(fn) { leaveHooks.push(fn); },
@@ -887,7 +846,6 @@ G.DB = (() => {
     get online() { return mode === 'cloud' && !guest && !!uid && !!save; },
     /** ¿La cuenta es de usuario y contraseña (no de Google)? */
     get nameAccount() { return nameAccount(); },
-    get hasGoogle() { return hasGoogle(); }, linkGoogle,
     get mode() { return mode; },
     get localReason() { return localReason; },
     get syncState() { return syncState; },
