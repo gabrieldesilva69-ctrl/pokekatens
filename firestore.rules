@@ -16,11 +16,9 @@ service cloud.firestore {
 
     function signedIn() { return request.auth != null; }
     function me() { return request.auth.uid; }
-    // Moderación (pantalla oculta js/ui/mod-ui.js). Nadie lo es hasta el lanzamiento.
-    // Para poner vuestra cuenta: cambia esta línea por
-    // `function admin() { return signedIn() && me() in ['VUESTRO_UID']; }`, pon el mismo
-    // UID en `G.FORK.admins` (js/core/fork-config.js) y despliega las reglas.
-    function admin() { return false; }
+    // Moderación (pantalla oculta js/ui/mod-ui.js): sólo estas cuentas. Deben ser los mismos
+    // UID que `G.FORK.admins` (js/core/fork-config.js); tras cambiarlos, despliega las reglas.
+    function admin() { return signedIn() && me() in ['KNDXBqVVroOtaofexPunuc5aocw1']; }
     // Tope de escrituras (20-10-2026): un documento no se puede volver a escribir
     // hasta pasados `secs` segundos desde `last` (su hora guardada). El juego
     // escribe mucho menos que eso; esto sólo frena un bucle (un juego trucado o

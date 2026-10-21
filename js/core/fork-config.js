@@ -14,5 +14,5 @@ G.FORK = {
   repo: 'https://github.com/gabrieldesilva69-ctrl/pokekatens',
   upstream: 'https://github.com/JPTER78/pokesurvivor',
   contact: '',
-  admins: []
+  admins: ['KNDXBqVVroOtaofexPunuc5aocw1']
 };
