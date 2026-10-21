@@ -9,9 +9,9 @@
  */
 G.FORK = {
   name: 'PokeKatens',
-  site: '',
-  hosts: ['localhost', '127.0.0.1'],
-  repo: '',
+  site: 'https://gabrieldesilva69-ctrl.github.io/pokekatens/',
+  hosts: ['localhost', '127.0.0.1', 'gabrieldesilva69-ctrl.github.io'],
+  repo: 'https://github.com/gabrieldesilva69-ctrl/pokekatens',
   upstream: 'https://github.com/JPTER78/pokesurvivor',
   contact: '',
   admins: []

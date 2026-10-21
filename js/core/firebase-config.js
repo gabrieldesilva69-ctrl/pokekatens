@@ -8,18 +8,17 @@
  *
  * Si se pone a null, el juego funciona en modo local (sólo en el navegador).
  */
-// Configuración del EMULADOR local de Firebase (proyecto demo-pokekatens): durante la
-// construcción ningún paso toca servidores reales. La lista de lanzamiento (§20.1 del
-// plan) la cambia por la del proyecto real de PokeKatens.
+// Proyecto pokekatens (21-10-2026): el de los dueños de PokeKatens, plan Spark gratuito,
+// SIN Identity Platform. ¡No pulsar nunca "Actualizar a Identity Platform" en su consola!
+// Para volver al emulador local, ver la configuración demo-pokekatens en la historia de git.
 G.FIREBASE_CONFIG = {
-  apiKey: 'demo-pokekatens-key',
-  authDomain: 'demo-pokekatens.firebaseapp.com',
-  projectId: 'demo-pokekatens',
-  storageBucket: 'demo-pokekatens.appspot.com',
-  messagingSenderId: '0',
-  appId: '1:0:web:0',
-  databaseURL: 'http://127.0.0.1:9000?ns=demo-pokekatens',
-  emulator: true
+  apiKey: 'AIzaSyBeTptBPYoENMserV1tjFlOcSjl_6NvJOM',
+  authDomain: 'pokekatens.firebaseapp.com',
+  projectId: 'pokekatens',
+  storageBucket: 'pokekatens.firebasestorage.app',
+  messagingSenderId: '967159838142',
+  appId: '1:967159838142:web:7696481f78de0b142135ef',
+  databaseURL: 'https://pokekatens-default-rtdb.firebaseio.com'
 };
 
 /* Ejemplo de cómo debe quedar:
