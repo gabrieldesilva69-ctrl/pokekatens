@@ -448,14 +448,13 @@ G.DB = (() => {
   }
 
   /*
-   * La nube (Firebase) sólo desde la web oficial: el
-   * código está en GitHub, y una copia publicada en otra web sin cambiar
-   * firebase-config.js guardaría sus cuentas y partidas en NUESTRO proyecto
-   * (y lo pagaríamos nosotros). Ahí el juego va en modo local. Lo que lo
-   * cierra de verdad es la clave de la API restringida a estos dominios en
-   * Google Cloud; esto frena las copias que ni lo miran (14-10-2026).
+   * La nube (Firebase) sólo en las webs de G.FORK.hosts (js/core/fork-config.js):
+   * una copia publicada en otra web sin cambiar firebase-config.js guardaría sus
+   * cuentas y partidas en nuestro proyecto. Ahí el juego va en modo local. Lo que
+   * lo cierra de verdad es la clave de la API restringida a esos dominios en
+   * Google Cloud; esto frena las copias que ni lo miran.
    */
-  const HOSTS = ['pokesurvivor.com', 'www.pokesurvivor.com', 'jpter78.github.io', 'localhost', '127.0.0.1'];
+  const HOSTS = G.FORK.hosts;
 
   async function initCloud() {
     const cfg = G.FIREBASE_CONFIG;

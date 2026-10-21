@@ -28,7 +28,7 @@
       "js/core/db.js",
       "tests/fork.test.cjs"
     ],
-    "status": "pending"
+    "status": "done"
   },
   {
     "id": "E1-T2",

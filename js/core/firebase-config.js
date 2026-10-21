@@ -8,17 +8,18 @@
  *
  * Si se pone a null, el juego funciona en modo local (sólo en el navegador).
  */
-// Proyecto pokesurvivor-free (desde el 12-10-2026): autenticación normal de Firebase,
-// SIN Identity Platform, así las cuentas son gratis sin límite. ¡No pulsar nunca
-// "Actualizar a Identity Platform" en su consola! (El viejo era pokesurvivor-jpter.)
+// Configuración del EMULADOR local de Firebase (proyecto demo-pokekatens): durante la
+// construcción ningún paso toca servidores reales. La lista de lanzamiento (§20.1 del
+// plan) la cambia por la del proyecto real de PokeKatens.
 G.FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyB1LpJcsnT7gj7c8cpRMGjhswLPr8-dnBw',
-  authDomain: 'pokesurvivor-free.firebaseapp.com',
-  projectId: 'pokesurvivor-free',
-  storageBucket: 'pokesurvivor-free.firebasestorage.app',
-  messagingSenderId: '798271504277',
-  appId: '1:798271504277:web:dcac4409f969239e87009c',
-  databaseURL: 'https://pokesurvivor-free-default-rtdb.europe-west1.firebasedatabase.app'
+  apiKey: 'demo-pokekatens-key',
+  authDomain: 'demo-pokekatens.firebaseapp.com',
+  projectId: 'demo-pokekatens',
+  storageBucket: 'demo-pokekatens.appspot.com',
+  messagingSenderId: '0',
+  appId: '1:0:web:0',
+  databaseURL: 'http://127.0.0.1:9000?ns=demo-pokekatens',
+  emulator: true
 };
 
 /* Ejemplo de cómo debe quedar:
