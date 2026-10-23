@@ -28,7 +28,8 @@ alto, largo + píxeles BGRA.
   ids: los de Reloaded, que NO son los nacionales a partir del 494 (mete formas
   y Pokémon inventados por medio). Archivo P<n>: hasta el 1000, N normal y
   1000+N shiny; del 1001 en adelante, N+1000 y N+2000 (file_id de
-  reloaded_ids.py). 100000+N mega y 101000+N mega shiny. Cada Pokémon se busca por su nombre con tools/reloaded_ids.py; en
+  reloaded_ids.py). Megas: 100000 + ese archivo (100006 y 101006 Charizard;
+  102050 y 103050 Zeraora). Cada Pokémon se busca por su nombre con tools/reloaded_ids.py; en
   el juego se guarda con el nacional (mega: 100000 + nacional).
 
 El origen del .gmspr es el centro del dibujo y es el mismo en todas las
@@ -64,22 +65,29 @@ RELOADED = os.path.join(ROOT, 'Proyecto Reloaded The Last Beta 1.9.2.2 Full', 'd
 ASSETS = os.path.join(ROOT, 'assets', 'pokemon')
 META = os.path.join(ROOT, 'js', 'data', 'sprites-meta.js')
 
-MEGA, MEGA_SHINY = 100000, 101000
+MEGA = 100000
 FOOT = 2            # píxeles de arte entre el pixel más bajo y el ancla
 SNAP = 0.08         # diferencia de tamaño por debajo de la cual no se escala
 
-# Megas oficiales (X/Y, Rubí Omega/Zafiro Alfa y Leyendas Z-A), por su Pokémon.
-# Fuera las inventadas de Reloaded y las que los dueños han decidido no usar
-# (docs/IDEAS-RELOADED.md): Raichu X/Y, Garchomp Z, Lucario Z, Absol Z,
-# Darkrai, Meganium.
+# Megas oficiales (X/Y, Rubí Omega/Zafiro Alfa, Leyendas Z-A y su expansión
+# Mega Dimension), por su Pokémon; lista comprobada con PokeAPI el 23-10-2026.
+# Fuera lo inventado de Reloaded (Scyclaw, Cryogelix, Pikablue, Mega Tyranitar
+# Negro, Mega Mewtwo Oscuro y sus "megas" de los Gigamax: Butterfree, Pikachu,
+# Meowth, Machamp, Kingler, Lapras, Eevee, Snorlax, Garbodor, Rillaboom...).
+# Mega Raichu X/Y (26) es oficial, pero Reloaded sólo trae su Mega Raichu
+# propia (de 2022-2023, anterior a Z-A), así que se queda fuera. Las segundas
+# megas Absol Z, Garchomp Z y Lucario Z no tienen sprite en Reloaded: de esas
+# especies se usa la mega de X/Y.
 OFFICIAL_MEGAS = sorted({
     # X/Y y Rubí Omega/Zafiro Alfa
     3, 6, 9, 15, 18, 65, 80, 94, 115, 127, 130, 142, 150, 181, 208, 212, 214,
     229, 248, 254, 257, 260, 282, 302, 303, 306, 308, 310, 319, 323, 334, 354,
     359, 362, 373, 376, 380, 381, 384, 428, 445, 448, 460, 475, 531, 719,
     # Leyendas Z-A
-    36, 71, 121, 149, 160, 227, 478, 500, 530, 545, 560, 604, 609, 652, 655,
-    658, 668, 670, 687, 689, 691, 701, 718, 780, 870,
+    36, 71, 121, 149, 154, 160, 227, 478, 500, 530, 545, 560, 604, 609, 652,
+    655, 658, 668, 670, 687, 689, 691, 701, 718, 780, 870,
+    # Mega Dimension (sin Raichu, ver arriba)
+    358, 398, 485, 491, 623, 678, 740, 768, 801, 807, 952, 970, 978, 998,
 })
 
 # Filas del juego (0 Down · 1 DownRight · 2 Right · 3 UpRight · 4 Up ·
@@ -325,20 +333,26 @@ def job_mega(dex, out, metas, k, have):
         print(f'  Mega {dex}: no esta en Reloaded')
         return None
     k = auto_scale(dex, metas) if k is None else k     # como su forma normal
-    res = convert(MEGA + rid, os.path.join(out, str(gid)), k)
+    res = convert(mega_file(rid), os.path.join(out, str(gid)), k)
     if not res:
-        print(f'  Mega {dex} (Reloaded {MEGA + rid}): sprites incompletos')
+        print(f'  Mega {dex} (Reloaded {mega_file(rid)}): sprites incompletos')
         return None
     anims, shadow = res
     meta = {'s': shadow, 'a': anims, 'rl': 1}
-    sres = convert(MEGA_SHINY + rid, os.path.join(out, str(gid), 's'), k)
+    sres = convert(mega_file(rid, True), os.path.join(out, str(gid), 's'), k)
     if sres:
         meta['sh'] = 1
         diff = {a: g for a, g in sres[0].items() if anims.get(a) != g}
         if diff:
             meta['sa'] = diff
-    print(f'  Mega {dex} (Reloaded {MEGA + rid}) -> {gid} (escala {k}{", con shiny" if sres else ", sin shiny"})')
+    print(f'  Mega {dex} (Reloaded {mega_file(rid)}) -> {gid} (escala {k}{", con shiny" if sres else ", sin shiny"})')
     return meta
+
+
+def mega_file(rid, shiny=False):
+    """Archivo de la mega de ese número de Reloaded: 100000 + su archivo normal
+    (100006, 102050...) y 100000 + el shiny (101006, 103050...)."""
+    return MEGA + file_id(rid, shiny)
 
 
 def reloaded_megas():
@@ -346,8 +360,11 @@ def reloaded_megas():
     ids = set()
     for fn in os.listdir(RELOADED):
         m = re.match(r'P(\d+)_', fn)
-        if m and MEGA < int(m.group(1)) < MEGA_SHINY:
-            ids.add(int(m.group(1)) - MEGA)
+        f = int(m.group(1)) - MEGA if m else -1
+        if 0 < f <= 1000:
+            ids.add(f)
+        elif 2000 < f < 3000:
+            ids.add(f - 1000)
     return ids
 
 

@@ -15,9 +15,11 @@ Completar la Pokédex está **aplazado** (al final del documento).
   decidido usarlo (excepción escrita en `CLAUDE.md`): crédito visible "Pokémon Edición Reloaded, de F3R" con enlace a https://pokemon-reloaded.blogspot.com en
   `CREDITS.md` y en Ajustes → Acerca de, junto a los créditos que ya hay. Los dueños son fans de ese
   juego y quieren que la gente lo conozca.
-- **Sólo contenido oficial de Pokémon.** Nada de los Pokémon inventados de Reloaded (ids `1026+`) ni de
-  sus megas inventadas (Mega Raichu X/Y, Garchomp Z, Lucario Z, Absol Z, Mega Darkrai, Meganium…): sólo
-  las megas que existen en los juegos oficiales.
+- **Sólo contenido oficial de Pokémon.** Nada de los Pokémon inventados de Reloaded (Pikablue, Scyclaw,
+  Cryogelix, Mewthree…, mezclados entre sus números) ni de sus megas inventadas (su Mega Raichu propia,
+  Mega Tyranitar Negro, Mega Mewtwo Oscuro, las "megas" de los Gigamax…): sólo las megas que existen en
+  los juegos oficiales, también las de Leyendas Z-A y su expansión Mega Dimension (Meganium, Darkrai,
+  Heatran, Raichu X/Y, Garchomp Z… son oficiales).
 - Todo lo que se copie de Reloaded pasa por **una herramienta en `tools/`** que se puede volver a
   ejecutar (no se convierten archivos a mano), y debe ser **ligero**: el juego es una web que cada
   jugador descarga; se carga sólo lo que se usa, cuando se usa.
@@ -37,7 +39,7 @@ Completar la Pokédex está **aplazado** (al final del documento).
 | sufijo `_H` | Recibir golpe / girar (5 fotogramas) | |
 | sufijo `_S` | Tumbado / dormido (2 fotogramas) → sirve de "debilitado" | |
 | sufijo `_ALT` | Forma alternativa (p. ej. Mega X / Mega Y) | |
-| ids | `1..1025` normales · `100000+N` mega · `101000+N` mega shiny · `1026+` Pokémon inventados de Reloaded | **Ojo (comprobado en la idea 2):** el número de Reloaded no es el nacional a partir de los 400 y pico; en todos sus archivos (retratos, gritos, huevos, sprites de mapa) hay que buscar el Pokémon por su nombre con `tools/reloaded_ids.py`. Archivo de `pkmnbattle/` y `pkmn/`: hasta el 1000, `N` normal y `1000+N` shiny; del 1001 en adelante, `N+1000` y `N+2000` (`file_id`). Los sprites de mapa también traen shiny |
+| ids | Los de Reloaded (no los nacionales a partir del 494, con sus inventados por medio) · mega: `100000 +` el número de archivo (normal o shiny) | **Ojo (comprobado en la idea 2):** el número de Reloaded no es el nacional a partir de los 400 y pico; en todos sus archivos (retratos, gritos, huevos, sprites de mapa) hay que buscar el Pokémon por su nombre con `tools/reloaded_ids.py`. Archivo de `pkmnbattle/` y `pkmn/`: hasta el 1000, `N` normal y `1000+N` shiny; del 1001 en adelante, `N+1000` y `N+2000` (`file_id`). Los sprites de mapa también traen shiny |
 | `pkmn/N.gif`, `pkmn_shiny/(1000+N).gif` | Retratos de frente 96×96 (estilo Negro/Blanco), normal y shiny. Megas en `100000+N` / `101000+N` | Del 1001 en adelante cambia: normal `pkmn/(N+1000).gif`, shiny `pkmn_shiny/(N+2000).gif` |
 | `audio/grito/NNN.wav` | 1216 gritos (WAV 44,1 kHz estéreo, ~1,3 s, 66 MB en total). Megas en `100000+N` | Faltan algunos (p. ej. 6, 25, 133, 448): sin grito, no suena nada |
 | `huevo/N.gif`, `huevo_shiny/(1000+N).gif` | Un huevo de color para cada familia (80×80, por el Pokémon base) | |
@@ -146,12 +148,14 @@ antes (los gritos sólo se bajan al sonar) y los ~800 archivos ocupan menos de 1
 
 **Objetivo:** que tu compañero pueda megaevolucionar durante la run un rato, con su sprite de mega.
 
-**Material:** Reloaded tiene sprites de mapa de unas 90 megas (`pkmnbattle/P100000+N_*`) y su shiny
-(`P101000+N_*`); las que tienen dos (Charizard, Mewtwo) usan `_ALT` para la segunda.
-**Decidido: sólo las megas oficiales** (las de X/Y, Rubí Omega/Zafiro Alfa y Leyendas Z-A). La
-herramienta lleva una lista de las oficiales y descarta las inventadas de Reloaded (Mega Raichu X/Y,
-Garchomp Z, Lucario Z, Absol Z, Darkrai, Meganium, Scyclaw, Cryogelix…). Si alguna oficial no tiene
-sprite en Reloaded, se queda sin mega.
+**Material:** Reloaded tiene sprites de mapa de unas 120 megas (`pkmnbattle/P<100000 + archivo>_*`,
+normal y shiny; ver `mega_file` en `tools/import_reloaded.py`); las que tienen dos (Charizard, Mewtwo)
+usan `_ALT` para la segunda.
+**Decidido: sólo las megas oficiales** (las de X/Y, Rubí Omega/Zafiro Alfa, Leyendas Z-A y su expansión
+Mega Dimension, comprobadas con PokeAPI). La herramienta lleva la lista y descarta las inventadas de
+Reloaded. `--megas` convierte 83: de las oficiales faltan Golisopod, Magearna y Tatsugiri (no están en
+Reloaded), Mega Raichu X/Y (Reloaded sólo trae su Mega Raichu propia, de 2022-2023) y las segundas
+megas Absol Z, Garchomp Z y Lucario Z (sin sprite; esas especies tienen la de X/Y). Sin sprite, sin mega.
 
 **Diseño propuesto (los dueños confirman cada punto):**
 - **Megapiedra de cada especie**: se compra en la Tienda Kecleon (cara, p. ej. 8000 monedas) o sale muy
