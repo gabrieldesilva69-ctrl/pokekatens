@@ -76,7 +76,7 @@ Se edita `dev.html` (pantallas y orden de carga); `index.html` y `js/app.min.js`
 | `js/net/` | social (apodo, amigos, salas), net (WebRTC sólo con STUN, sin relé), coop, ranking, codec |
 | `js/ui/` | pantallas: menu, login, test (personalidad), hud, run-ui, gacha-ui, shop-ui, goals-ui, settings-ui, social-ui, ranking-ui, news-ui, mod-ui (moderación) … |
 | `js/game.js`, `js/main.js` | Flujo y bucle principal; `main.js` tiene `MAINTENANCE` |
-| `tools/` | Scripts; los `.py` regeneran lo marcado con \* (Python 3 + Pillow + internet, una sola vez): `fetch_sprites.py` (~20 min, reanudable con `tools/cache/`), `fetch_pokedex.py`, `fetch_credits.py` → `CREDITS.md` |
+| `tools/` | Scripts; los `.py` regeneran lo marcado con \* (Python 3 + Pillow + internet, una sola vez): `fetch_sprites.py` (~20 min, reanudable con `tools/cache/`), `fetch_pokedex.py`, `fetch_credits.py` → `CREDITS.md`. `import_reloaded.py` convierte sprites de mapa de Pokémon Reloaded (`--mega N`, `--megas`, `--dex N`, `--faltan`, `--out` para probar) y marca sus entradas con `rl` |
 
 Donaciones: `js/data/funding.js` y `js/ui/support-ui.js` existen pero están vacíos a propósito (el botón
 de Ko-fi no sale nunca). PokeKatens no acepta dinero.
