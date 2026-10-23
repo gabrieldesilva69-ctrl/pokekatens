@@ -82,8 +82,11 @@ G.Sprites = (() => {
   function sheet(dex, anim, shiny = false) {
     const m = meta(dex);
     shiny = shiny && !!(m && m.sh);
-    const name = animName(dex, anim, shiny);
+    let name = animName(dex, anim, shiny);
     if (!name) return null;
+    // Algunas animaciones usan la hoja de otra ("f", en las de Reloaded: Shoot y Charge = Attack).
+    const g = animMeta(dex, name, shiny);
+    if (g && g.f) name = g.f;
     const k = dex + '/' + name + (shiny ? '/s' : '');
     let s = sheets.get(k);
     const now = Date.now();

@@ -58,6 +58,10 @@ G.HUD = (() => {
     ctx.textAlign = 'center';
     ctx.fillText(Math.ceil(pl.hp) + ' / ' + Math.round(pl.maxHp), px + 48 + 84, py + 26);
 
+    // barra de megaevolución (sólo si tu compañero tiene su Megapiedra: systems/mega.js)
+    const mb = G.Mega.bar(pl);
+    if (mb) drawMega(ctx, w, h, pl, mb, px, py, touch);
+
     // buffs activos
     const COL = { atk: '#ff6b4d', patk: '#ff6b4d', satk: '#c47bff', spd: '#7fe0ff', def: '#b0b8c8', regen: '#5fe08a' };
     const LBL = { atk: 'ATK', patk: 'ATK', satk: 'AT.E', spd: 'VEL', def: 'DEF', regen: 'REG' };
@@ -69,10 +73,11 @@ G.HUD = (() => {
       ctx.font = F(800, 9);
       const txt = LBL[k] + ' ×' + b.n;
       const tw = ctx.measureText(txt).width + 12;
-      roundRect(ctx, bx, py + 34, tw, 15, 7);
+      const by = py + (mb ? 42 : 34);
+      roundRect(ctx, bx, by, tw, 15, 7);
       ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fill();
       ctx.fillStyle = COL[k];
-      ctx.fillText(txt, bx + 6, py + 45);
+      ctx.fillText(txt, bx + 6, by + 11);
       bx += tw + 5;
     }
 
@@ -389,6 +394,47 @@ G.HUD = (() => {
     }
 
     ctx.restore();
+  }
+
+  // ---------------- megaevolución ----------------
+
+  /**
+   * Debajo de la vida: el símbolo y la barra (rosa mientras se llena, dorada
+   * y bajando mientras dura la mega). Llena: parpadea y dice qué tecla pulsar;
+   * en el móvil sale el botón redondo (se coloca con "Colocar los botones").
+   */
+  function drawMega(ctx, w, h, pl, mb, px, py, touch) {
+    const t = performance.now() / 1000, pulse = 0.5 + 0.5 * Math.sin(t * 6);
+    G.Icons.draw(ctx, 'mega', px + 28, py + 28, 14);
+    const g = ctx.createLinearGradient(px + 48, 0, px + 216, 0);
+    if (mb.on) { g.addColorStop(0, '#ffd23f'); g.addColorStop(1, '#fff4d6'); }
+    else { g.addColorStop(0, '#c47bff'); g.addColorStop(1, '#ff8ad8'); }
+    if (mb.ready) { ctx.save(); ctx.shadowColor = '#ff8ad8'; ctx.shadowBlur = 6 + 8 * pulse; }
+    bar(ctx, px + 48, py + 31, 168, 7, mb.k, g);
+    if (mb.ready) ctx.restore();
+    ctx.font = F(800, 9);
+    ctx.textAlign = 'left';
+    if (mb.on) {
+      ctx.fillStyle = '#ffd23f';
+      ctx.fillText(G.T('MEGA') + ' ' + Math.ceil(pl.mega.t) + 's', px + 222, py + 38);
+    } else if (mb.ready && !touch) {
+      const k = G.Input.keys('mega').find(Boolean);
+      ctx.fillStyle = `rgba(255,138,216,${0.6 + 0.4 * pulse})`;
+      ctx.fillText(k ? G.I18n.f('¡{x}: megaevolucionar!', G.Input.keyName(k)) : G.T('¡Megaevolucionar!'), px + 222, py + 38);
+    }
+    if (touch && mb.ready) {
+      const S = 52, sa = G.Touch.safeArea(), sp = G.Touch.spot('mega');
+      const cx = sp ? sp[0] * w : w - 44 - Math.min(44, sa.right), cy = sp ? sp[1] * h : h * 0.52;
+      const bx = G.U.clamp(cx - S / 2, 4, w - S - 4), by = G.U.clamp(cy - S / 2, 24, h - S - 4);
+      ctx.save();
+      ctx.shadowColor = '#ff8ad8'; ctx.shadowBlur = 8 + 10 * pulse;
+      ctx.beginPath(); ctx.arc(bx + S / 2, by + S / 2, S / 2, 0, 6.2832);
+      ctx.fillStyle = 'rgba(10,16,28,.75)'; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#ff8ad8'; ctx.stroke();
+      ctx.restore();
+      G.Icons.draw(ctx, 'mega', bx + 10, by + 10, 32);
+      G.Touch.addButton(bx, by, S, S, () => G.Mega.press(pl), 8);
+    }
   }
 
   // ---------------- cooperativo ----------------

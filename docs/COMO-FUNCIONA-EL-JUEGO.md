@@ -26,6 +26,12 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Tabla de tipos:** p. ej. un Rayo Burbuja le quita más a un Charmander.
 - **Climas** de vez en cuando (sol, lluvia, arena, nieve, niebla): potencian unos tipos y debilitan otros.
 - **Objetos** que salen en las runs (Restos, Cinta Elección…).
+- **Megaevolución** (`js/systems/mega.js`): con la Megapiedra de tu compañero (Tienda Kecleon, 8000 monedas,
+  sólo la de tu compañero actual; o un 3 % al ganar una grieta), una barra se llena con 150 enemigos (un jefe
+  cuenta 25) y con F (X en el mando, botón en el móvil) megaevoluciona 45 s: sprite, tipos, estadísticas y
+  habilidad de mega (lo que la habilidad hace "al empezar" no se aplica); no cambian la vida, el choque ni
+  los ataques. 81 megas, una por especie (`js/data/megas.js`; Charizard la X, Mewtwo la Y). En grupo se ve
+  (evento `mg`). Misión semanal "Megaevoluciona 3 veces" sólo si tienes alguna Megapiedra.
 
 ## Enemigos
 

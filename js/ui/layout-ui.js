@@ -1,6 +1,6 @@
 /* ============ layout-ui.js — colocar los botones (móvil) ============
  * Ajustes > Controles > Colocar los botones: se ven los ataques (con el
- * objeto), la pausa y, si es fijo, el joystick, y se arrastran a donde se
+ * objeto), la pausa, el de megaevolucionar y, si es fijo, el joystick, y se arrastran a donde se
  * quiera. Se guarda el centro de cada cosa en proporción a la pantalla
  * (G.Settings 'pad'); lo que no se mueve se queda en su sitio de siempre.
  * El HUD (hud.js) y el joystick (touch.js) leen esas posiciones.
@@ -9,6 +9,9 @@
 G.LayoutUI = (() => {
   const S = 54, GAP = 9, ITEM_GAP = 18, N = 4;          // como en hud.js
   const BAR_W = S + ITEM_GAP + N * S + (N - 1) * GAP;
+  const MEGA_S = 52;                                     // botón de megaevolucionar (hud.js)
+  /** Dónde va el de megaevolucionar si no se ha movido: a la derecha, encima de la mitad. */
+  function megaDef(w, h, sa) { return [w - 44 - Math.min(44, sa.right), h * 0.52]; }
   let el = null, pos = null, moved = null, mode = 'float';
 
   /** Dónde está cada cosa ahora mismo (centro en px), con lo guardado o lo de siempre. */
@@ -23,6 +26,7 @@ G.LayoutUI = (() => {
       return [left + BAR_W / 2, h - S - 18 - Math.min(28, sa.bottom) + S / 2];
     }
     if (p) return [p[0] * w, p[1] * h];
+    if (k === 'mega') return megaDef(w, h, sa);
     return [w - 52 - Math.min(44, sa.right) + 20, 12 + Math.min(20, sa.top) + 20];
   }
 
@@ -30,6 +34,7 @@ G.LayoutUI = (() => {
   function fit(k, x, y, w, h) {
     if (k === 'bar') return [G.U.clamp(x, 6 + BAR_W / 2, Math.max(6 + BAR_W / 2, w - BAR_W / 2 - 6)), G.U.clamp(y, 24 + S / 2, h - S / 2 - 6)];
     if (k === 'pause') return [G.U.clamp(x, 24, w - 24), G.U.clamp(y, 30, h - 24)];
+    if (k === 'mega') return [G.U.clamp(x, MEGA_S / 2 + 4, w - MEGA_S / 2 - 4), G.U.clamp(y, MEGA_S / 2 + 24, h - MEGA_S / 2 - 4)];
     const r = G.Touch.R();
     return [G.U.clamp(x, r + 4, w - r - 4), G.U.clamp(y, r + 4, h - r - 4)];
   }
@@ -42,6 +47,7 @@ G.LayoutUI = (() => {
     el.innerHTML = `
       <div class="lay-thing lay-bar" data-k="bar"><div class="lay-slot item"></div>${slots}<span class="lay-tag">Ataques</span></div>
       <div class="lay-thing lay-pause" data-k="pause"><b></b><b></b></div>
+      <div class="lay-thing lay-mega" data-k="mega"><span class="lay-tag">Mega</span></div>
       <div class="lay-thing lay-stick" data-k="stick"><div class="knob"></div><span class="lay-tag">Joystick</span></div>
       <div class="box lay-panel">
         <h3>Arrastra los botones a donde quieras</h3>
@@ -66,7 +72,7 @@ G.LayoutUI = (() => {
       const totalW = N * S + (N - 1) * GAP;
       pos = { bar: [(w - totalW) / 2 - S - ITEM_GAP + BAR_W / 2, h - S - 18 - Math.min(28, sa.bottom) + S / 2],
               pause: [w - 52 - Math.min(44, sa.right) + 20, 12 + Math.min(20, sa.top) + 20],
-              stick: [G.Touch.STICK_DEF[0] * w, G.Touch.STICK_DEF[1] * h] };
+              stick: [G.Touch.STICK_DEF[0] * w, G.Touch.STICK_DEF[1] * h], mega: megaDef(w, h, sa) };
       for (const k in pos) pos[k] = fit(k, pos[k][0], pos[k][1], w, h);
       paint();
     };
@@ -97,7 +103,7 @@ G.LayoutUI = (() => {
   function load() {
     const w = innerWidth, h = innerHeight;
     pos = {}; moved = {};
-    for (const k of ['bar', 'pause', 'stick']) {
+    for (const k of ['bar', 'pause', 'stick', 'mega']) {
       const c = current(k, w, h);
       pos[k] = fit(k, c[0], c[1], w, h);
       moved[k] = !!G.Touch.spot(k);
@@ -114,6 +120,7 @@ G.LayoutUI = (() => {
     };
     place('bar', BAR_W, S);
     place('pause', 40, 40);
+    place('mega', MEGA_S, MEGA_S).style.backgroundImage = `url("${G.Icons.url('mega')}")`;
     place('stick', r * 2, r * 2).classList.toggle('hidden', mode !== 'fixed');
     el.querySelectorAll('#lay-mode .chip').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
     el.querySelector('.lay-turn').classList.toggle('hidden', innerWidth >= innerHeight);

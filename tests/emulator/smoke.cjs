@@ -27,7 +27,7 @@ async function signUp(email) {
   return { token: j.idToken, uid: j.localId };
 }
 
-function saveBody(uid, exists) {
+function saveBody(uid, exists, extra = {}) {
   return {
     writes: [{
       update: {
@@ -39,7 +39,8 @@ function saveBody(uid, exists) {
             tickets: { mapValue: { fields: {
               t1: { integerValue: '1' },
               t10: { integerValue: '0' }
-            } } }
+            } } },
+            ...extra
           } } }
         }
       },
@@ -49,10 +50,10 @@ function saveBody(uid, exists) {
   };
 }
 
-const commit = (user, exists) => fetch(`${DOCS}:commit`, {
+const commit = (user, exists, extra) => fetch(`${DOCS}:commit`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + user.token },
-  body: JSON.stringify(saveBody(user.uid, exists))
+  body: JSON.stringify(saveBody(user.uid, exists, extra))
 });
 const read = (user, uid) => fetch(`${DOCS}/saves/${uid}`, { headers: { Authorization: 'Bearer ' + user.token } });
 
@@ -70,6 +71,17 @@ const read = (user, uid) => fetch(`${DOCS}/saves/${uid}`, { headers: { Authoriza
   console.log('ok nombre del documento');
 
   expect('guardar otra vez antes de 20 s', 403, (await commit(uno, true)).status);
+
+  // Megapiedra en la Mochila (save.bag.ms6, data/shop.js) y su apunte en la libreta.
+  const mochila = await signUp('mochila@jugadores.pokekatens.invalid');
+  const bag = { bag: { mapValue: { fields: { ms6: { integerValue: '1' } } } } };
+  expect('guardar una partida con una Megapiedra', 200, (await commit(mochila, false, bag)).status);
+  const r3 = await read(mochila, mochila.uid);
+  expect('leerla', 200, r3.status);
+  const got = (((((await r3.json()).fields || {}).save || {}).mapValue || {}).fields || {}).bag;
+  const n = got && got.mapValue && got.mapValue.fields && got.mapValue.fields.ms6;
+  if (!n || n.integerValue !== '1') fail('la Megapiedra sigue en la Mochila', 'ms6 = 1', JSON.stringify(got));
+  console.log('ok la Megapiedra sigue en la Mochila');
 
   console.log('EMULATOR_SMOKE_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

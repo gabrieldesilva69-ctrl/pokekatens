@@ -131,6 +131,7 @@ G.Game = (() => {
 
     pl = new G.Player(mon, perks, !!save.partnerShiny && G.DB.ownsShiny(mon.dex));
     pl.setAbility(G.Mons.abilityOf(mon.dex).id);
+    G.Mega.setup(pl);
     banked = { t1: 0, t10: 0 };
     caught = [];
     // Atajos: movimientos con hueco fijo (save.pbind[dex] = [id del 1, id del 2, ...]),
@@ -585,6 +586,7 @@ G.Game = (() => {
     if (pl.dead) { if (G.Input.act('prev')) cycleWatch(-1); if (G.Input.act('next')) cycleWatch(1); return; }
     if (G.Input.act('prev')) pl.cycle(-1);
     if (G.Input.act('next')) pl.cycle(1);
+    if (G.Input.act('mega')) G.Mega.press(pl);
   }
 
   // ---------------- bucle ----------------
@@ -693,6 +695,7 @@ G.Game = (() => {
 
     pl.frozen = coop && (G.UI.isOpen('scr-pause') || G.UI.isOpen('scr-item'));
     pl.update(dt);
+    G.Mega.update(pl, dt);
     if (coop) {
       for (const p of G.Coop.puppets()) { p.netUpdate(dt); G.Combat.ghostOrbit(p, dt, time); }
       if (pl.dead) reviveTick(dt);

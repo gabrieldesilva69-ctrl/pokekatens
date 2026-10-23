@@ -252,6 +252,7 @@ G.Pad = (() => {
       if (Math.hypot(ax, ay) > 0.35) { aimVec = [ax, ay]; aimAt = performance.now(); } else aimVec = [0, 0];
       if (hit(BT.LB) || hit(BT.LT)) G.Input.virtualAct('prev');
       if (hit(BT.RB) || hit(BT.RT)) G.Input.virtualAct('next');
+      if (hit(BT.X)) G.Input.virtualAct('mega');
       if (hit(BT.START) || hit(BT.BACK)) G.Input.virtual('escape');
       if (hit(BT.A)) G.Input.virtual('space');
     }

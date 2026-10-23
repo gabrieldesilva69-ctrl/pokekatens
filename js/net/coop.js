@@ -342,6 +342,10 @@ G.Coop = (() => {
         case 'hs': holdOn(from); break;
         case 'he': holdOff(from); break;
         case 're': G.Rift.enterRequest(); break;
+        case 'mg':
+          G.Mega.apply(m.pl, !!ev[1]);
+          emit(['mg', from, ev[1] ? 1 : 0], from);
+          break;
         case 'bye': mateGone(from); break;
       }
     }
@@ -438,6 +442,7 @@ G.Coop = (() => {
       case 'hp': lastHo = (ev[1] || []).join('|'); api.hold && api.hold(ev[1]); break;
       case 'ha': hostAway = !!ev[1]; updateAway(); break;
       case 'sh': api.shiny(ev[1]); break;
+      case 'mg': { const m = mates.get(ev[1]); if (m) G.Mega.apply(m.pl, !!ev[2]); break; }
       case 'ov': { const cb = api.over; const d = ev[1]; end(); cb(d); break; }
       case 'rift': case 'riftx': case 'arena': case 'aw': case 'al': G.Rift.onEvent(ev); break;
       case 'jd': case 'jk': G.Judgment.onEvent(ev); break;
@@ -457,6 +462,13 @@ G.Coop = (() => {
     if (!active || pl !== local) return;
     if (host) emit(['c', me, m.id, m.lvl, r2(pl.aim), m.evolved ? 1 : 0]);
     else outEv.push(['c', m.id, m.lvl, r2(pl.aim), m.evolved ? 1 : 0]);
+  }
+
+  /** Tu megaevolución (systems/mega.js): los demás cambian tu sprite y tus tipos. */
+  function mega(pl, on) {
+    if (!active || pl !== local) return;
+    if (host) emit(['mg', me, on ? 1 : 0]);
+    else outEv.push(['mg', on ? 1 : 0]);
   }
 
   // invitado
@@ -560,7 +572,7 @@ G.Coop = (() => {
 
   return {
     ANIMS, COLORS, begin, end, leave, keeps, tick, players, puppets, xpFactor, scaleRate, scaleHp,
-    cast, hit, status, hurtShown, enemyAdded, enemyGone, enemyShot, pickupAdded, pickupGone, say,
+    cast, mega, hit, status, hurtShown, enemyAdded, enemyGone, enemyShot, pickupAdded, pickupGone, say,
     propBroken, collected, shinyCaught, levelStart, localPicked, over, holdStart, holdEnd,
     /** Anfitrión: evento para todos. Invitado: evento para el anfitrión. */
     broadcast(ev) { emit(ev); },

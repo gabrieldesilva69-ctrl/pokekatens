@@ -13,7 +13,8 @@ G.Input = (() => {
     up: ['keyw', 'arrowup'], down: ['keys', 'arrowdown'],
     left: ['keya', 'arrowleft'], right: ['keyd', 'arrowright'],
     prev: ['keyq', ''], next: ['keye', 'tab'], pause: ['keyp', ''],
-    slot1: ['digit1', 'numpad1'], slot2: ['digit2', 'numpad2'], slot3: ['digit3', 'numpad3'], slot4: ['digit4', 'numpad4']
+    slot1: ['digit1', 'numpad1'], slot2: ['digit2', 'numpad2'], slot3: ['digit3', 'numpad3'], slot4: ['digit4', 'numpad4'],
+    mega: ['keyf', '']
   };
   const ACTIONS = Object.keys(DEF_KEYS);
   const RESERVED = new Set(['escape']);

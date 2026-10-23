@@ -24,6 +24,7 @@ G.Rift = (() => {
   // Desde 2 min antes de la Sentencia de Arceus (minuto 30) ya no se abren.
   const CHECK = 30, CHANCE = 0.2, TTL = 45;
   const ARENA_R = 11, ARENA_TIME = 120, FROM = 75;
+  const STONE_CHANCE = 0.03;          // Megapiedra de tu compañero al ganar (systems/mega.js)
   let rift = null;          // { x, y, ttl, t }
   let arena = null;         // { tx, ty, r, dex, shiny, x, y, back, biome, t, phase, endT, bossId }
   let zone = null;          // dónde estaba la última arena { x, y, r } (ver leftBehind)
@@ -212,6 +213,11 @@ G.Rift = (() => {
       pl.bonds++;
       G.FX.dmgText(pl.x, pl.y - pl.bodyH - 10, '¡Vínculo!', '#ff8ad8', true);
       G.FX.ring(pl.x, pl.y, 8, 90, '#ff8ad8', 0.7, 5);
+      // Muy de vez en cuando, la Megapiedra de tu compañero (cada jugador la suya).
+      if (Math.random() < STONE_CHANCE && G.Mega.exists(pl.dex) && G.Shop.giveStone(pl.dex)) {
+        G.Spawner.say(G.I18n.f('¡El legendario ha dejado una {x}!', G.Mega.stoneName(pl.dex)), 3.6, true);
+        G.Audio.sfx('shinyGet');
+      }
     }
   }
 

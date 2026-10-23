@@ -282,6 +282,7 @@ def main():
         ' * Por animación:  w,h fotograma · n fotogramas · r filas',
         ' *                 d duración de cada fotograma (1/60 s)',
         ' *                 ax,ay ancla al suelo dentro del fotograma',
+        ' *                 f hoja de otra animación que se usa (las de Reloaded: Shoot/Charge = Attack)',
         ' * Filas: 0 Down · 1 DownRight · 2 Right · 3 UpRight',
         ' *        4 Up   · 5 UpLeft    · 6 Left  · 7 DownLeft',
         ' */',

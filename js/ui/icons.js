@@ -7,6 +7,7 @@
  *   G.Icons.url('star')          data URL (para CSS)
  *   'move:<id>'                  emblema del tipo + insignia de la familia
  *   'type:<tipo>'                sólo el emblema
+ *   'stone:<tipo>'               Megapiedra del color de ese tipo
  */
 G.Icons = (() => {
   const K = '#1b1528';          // contorno
@@ -29,6 +30,14 @@ G.Icons = (() => {
     capsuleh: { pal: { r: '#ffd23f', w: '#c47bff' }, rows: [
       '............', '.......kkk..', '......krrrk.', '.....krwrrk.', '....krrrrrk.', '...kkrrrrk..',
       '..kwwkkrk...', '.kwwwwkk....', '.kwwwwk.....', '.kwwwk......', '..kkk.......', '............'] },
+    // Megapiedra: esfera con la hélice de la mega; 'stone:<tipo>' la pinta del color de ese tipo.
+    megastone: { pal: { c: '#c47bff', d: '#6a3aa8', w: '#f4f8ff', y: '#ffd23f' }, rows: [
+      '....kkkk....', '..kkccwwkk..', '.kccccwwcck.', '.kcyccccyck.', 'kccyycyycdck', 'kcccyyyccddk',
+      'kccyycyyccdk', 'kccycccycddk', '.kcccccccdk.', '.kdcccccddk.', '..kkddddkk..', '....kkkk....'] },
+    // Símbolo de la megaevolución (HUD, botón del móvil).
+    mega: { pal: { p: '#ff8ad8', y: '#ffd23f', w: '#fff4d6' }, rows: [
+      '....kkkk....', '..kkppppkk..', '.kppyyyyppk.', '.kpyk..kypk.', 'kpyk.ww.kypk', 'kpy.wyyw.ypk',
+      'kpy.wyyw.ypk', 'kpyk.ww.kypk', '.kpyk..kypk.', '.kppyyyyppk.', '..kkppppkk..', '....kkkk....'] },
     bag: { pal: { b: '#e0743d', d: '#9a4418', w: '#ffc59f', y: '#ffd23f' }, rows: [
       '....kkkk....', '...k....k...', '..kkkkkkkk..', '.kbbbbbbbbk.', '.kbwbbbbbbk.', '.kkkkkkkkkk.',
       '.kbbbyybbbk.', '.kbbbyybbbk.', '.kbbbbbbbbk.', '.kbbbbbbbdk.', '.kddddddddk.', '..kkkkkkkk..'] },
@@ -319,6 +328,14 @@ G.Icons = (() => {
     return cv;
   }
 
+  /** La Megapiedra con el color de un tipo (el primero de su mega). */
+  function stoneDef(type) {
+    const c = G.U.TYPE_COLOR[type];
+    if (!c) return UI.megastone;
+    const d = '#' + [1, 3, 5].map(i => Math.round(parseInt(c.slice(i, i + 2), 16) * 0.55).toString(16).padStart(2, '0')).join('');
+    return { rows: UI.megastone.rows, pal: Object.assign({}, UI.megastone.pal, { c, d }) };
+  }
+
   function canvas(name) {
     let cv = cache.get(name);
     if (cv) return cv;
@@ -327,6 +344,8 @@ G.Icons = (() => {
       cv = emblem(m ? m.type : 'normal', m ? m.kind : null);
     } else if (name.startsWith('type:')) {
       cv = emblem(name.slice(5));
+    } else if (name.startsWith('stone:')) {
+      cv = fromRows(stoneDef(name.slice(6)));
     } else {
       cv = fromRows(UI[name] || UI.star);
     }
@@ -339,7 +358,8 @@ G.Icons = (() => {
     if (!u) {
       // Los de interfaz, directamente de su dibujo; los emblemas (tipos, movimientos), del canvas.
       const plain = !name.startsWith('move:') && !name.startsWith('type:');
-      u = plain ? svgOfRows(UI[name] || UI.star) : svgOf(canvas(name));
+      u = name.startsWith('stone:') ? svgOfRows(stoneDef(name.slice(6)))
+        : plain ? svgOfRows(UI[name] || UI.star) : svgOf(canvas(name));
       urls.set(name, u);
     }
     return u;

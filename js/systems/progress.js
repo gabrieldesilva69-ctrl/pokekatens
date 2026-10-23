@@ -10,9 +10,11 @@
  *   judge     llegas a la Sentencia de Arceus (minuto 30)
  *   judgeEnd  { time, bosses }  aguantado ante Arceus (al acabar la partida)
  *   missionDone { daily }   (lo lanza claim)
+ *   mega      megaevolucionas en la partida (systems/mega.js)
  *
  * y esto actualiza en la partida guardada:
  *   stats.bossesTotal · riftWins · evolutions · missionsDone · groupRuns
+ *   stats.megas (veces que has megaevolucionado)
  *   stats.judged · judgeTime (mejor tiempo ante Arceus) · judgeBosses (mejor nº de jefes)
  *   legends{dex} · arenas{tipo} · itemsFound{id} · evoMoves{id} · ach{id}
  *   missions { day, daily[], rerolled, week, weekly[] }
@@ -40,7 +42,7 @@ G.Progress = (() => {
   }
 
   function pickSet(defs, n, r, avoid = []) {
-    const pool = defs.filter(d => !avoid.includes(d.id));
+    const pool = defs.filter(d => !avoid.includes(d.id) && (!d.need || d.need()));
     const out = [];
     while (out.length < n && pool.length) out.push(make(pool.splice(Math.floor(r() * pool.length), 1)[0], r));
     return out;
@@ -153,6 +155,9 @@ G.Progress = (() => {
       case 'runEnd':
         if (d.group) S.groupRuns = (S.groupRuns || 0) + 1;
         break;
+      case 'mega':
+        S.megas = (S.megas || 0) + 1;
+        break;
       case 'judge':
         S.judged = (S.judged || 0) + 1;
         break;
@@ -174,6 +179,7 @@ G.Progress = (() => {
     // misiones ni para logros de jefes): tienen su propio contador.
     if (G.Judgment.active && e.boss) { G.Judgment.bossDown(); event('kill', { types: e.types || [], boss: false, legend: 0 }); return; }
     const legend = e.legend || (G.Rift.inArena && e.boss) ? e.dex : 0;
+    G.Mega.onKill(e);
     event('kill', { types: e.types || [], boss: !!e.boss, legend });
   }
 

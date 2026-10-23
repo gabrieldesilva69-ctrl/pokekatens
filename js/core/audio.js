@@ -476,8 +476,8 @@ G.Audio = (() => {
    * silencio. Como mucho uno a la vez (si llega otro mientras suena, se
    * descarta) y nunca en bucle. Se quitan en Ajustes → Sonido (G.Settings 'cries').
    * Con file:// no va fetch(): se usa un <audio>, con el volumen de efectos.
-   * opts.shiny: el mismo grito. opts.mega: el de su forma normal hasta que
-   * haya gritos de mega (idea 4 de docs/IDEAS-RELOADED.md).
+   * opts.shiny: el mismo grito. opts.mega: el de su mega (100000 + dex) o, si
+   * no lo tiene, el de su forma normal.
    */
   const CRY_VOL = 0.22;                          // los efectos sintetizados suenan a ~0,05
   const cries = new Map();                        // dex -> AudioBuffer | <audio> | 'loading' | 'fail'
@@ -485,6 +485,7 @@ G.Audio = (() => {
 
   function cry(dex, opts = {}) {
     dex = +dex;
+    if (opts.mega && !(G.CRY_MISSING && G.CRY_MISSING.has(100000 + dex))) dex += 100000;
     if (!dex || (G.CRY_MISSING && G.CRY_MISSING.has(dex))) return;
     if (G.Settings && G.Settings.get('cries') === false) return;
     if (!ctx || settings.muted || settings.sfx <= 0 || ctx.state !== 'running') return;

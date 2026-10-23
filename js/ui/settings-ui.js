@@ -13,7 +13,7 @@ G.SettingsUI = (() => {
   // Teclas de PC: nombre de cada acción, en el orden en que salen.
   const KEY_ROWS = [['up', 'Arriba'], ['down', 'Abajo'], ['left', 'Izquierda'], ['right', 'Derecha'],
     ['prev', 'Ataque anterior'], ['next', 'Ataque siguiente'],
-    ['slot1', 'Ataque 1'], ['slot2', 'Ataque 2'], ['slot3', 'Ataque 3'], ['slot4', 'Ataque 4'], ['pause', 'Pausa']];
+    ['slot1', 'Ataque 1'], ['slot2', 'Ataque 2'], ['slot3', 'Ataque 3'], ['slot4', 'Ataque 4'], ['mega', 'Megaevolucionar'], ['pause', 'Pausa']];
 
   function init() {
     document.querySelectorAll('#set-tabs .gen-tab').forEach(b => { b.onclick = () => { tab = b.dataset.t; capture = null; render(); }; });
@@ -155,7 +155,7 @@ G.SettingsUI = (() => {
         + section('Créditos')
         + `<ul class="credits">
              <li><b>Sprites:</b> PMD SpriteCollab y sus artistas (CC BY-NC 4.0).</li>
-             <li><b>Pokémon Edición Reloaded, de F3R:</b> colores de algunos shiny y gritos de los Pokémon. <a href="https://pokemon-reloaded.blogspot.com" target="_blank" rel="noopener" translate="no">pokemon-reloaded.blogspot.com</a></li>
+             <li><b>Pokémon Edición Reloaded, de F3R:</b> colores de algunos shiny, gritos de los Pokémon y sprites de sus megaevoluciones. <a href="https://pokemon-reloaded.blogspot.com" target="_blank" rel="noopener" translate="no">pokemon-reloaded.blogspot.com</a></li>
              <li><b>Datos de los Pokémon:</b> PokéAPI.</li>
              <li><b>Música y sonidos:</b> originales, generados por el propio juego.</li>
              <li><b>Fuente:</b> Pixelify Sans (OFL).</li>

@@ -18,7 +18,9 @@ Comprobado el 23-10-2026 comparando con los gritos oficiales de PokeAPI
 (700, 820, 1000, 1007...): con el número nacional sale otro Pokémon.
 Si la forma base no tiene grito se prueba con sus formas; si ninguna, se queda
 sin grito (en el juego no suena nada) y va a la lista de cries.js.
-Las megas (100000+N) se añadirán con la idea 4.
+Megas (js/data/megas.js): su grito va en assets/cries/<100000 + dex>.mp3, del
+archivo de mega de Reloaded (100000 + su archivo, como sus sprites: mega_file).
+Sin grito de mega, en el juego suena el de su forma normal.
 """
 import io
 import os
@@ -28,12 +30,14 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from reloaded_ids import DATA, file_id, reloaded_ids   # noqa: E402
+from import_reloaded import MEGA, mega_file            # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CRIES = os.path.join(DATA, 'audio', 'grito')
 OUT = os.path.join(ROOT, 'assets', 'cries')
 META = os.path.join(ROOT, 'js', 'data', 'sprites-meta.js')
 LIST = os.path.join(ROOT, 'js', 'data', 'cries.js')
+MEGAS = os.path.join(ROOT, 'js', 'data', 'megas.js')
 
 # Silencio: por debajo de -45 dB. Al final se deja una cola corta para que no corte en seco.
 FILTER = ('silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.01,'
@@ -46,10 +50,20 @@ def game_dexes():
     return sorted(d for d in map(int, re.findall(r'^  (\d+): \{', text, re.M)) if d <= 1025)
 
 
-def source_of(dex):
-    """WAV de Reloaded de ese Pokémon nacional, o None."""
-    for rid in reloaded_ids(dex):
-        path = os.path.join(CRIES, f'{file_id(rid):03d}.wav')
+def mega_ids():
+    """Las megas del juego, con su número en el juego (100000 + dex)."""
+    if not os.path.exists(MEGAS):
+        return []
+    text = io.open(MEGAS, encoding='utf-8').read()
+    return sorted(MEGA + int(d) for d in re.findall(r'^  (\d+): \{', text, re.M))
+
+
+def source_of(gid):
+    """WAV de Reloaded de ese Pokémon nacional (o mega, 100000 + dex), o None."""
+    mega = gid > MEGA
+    for rid in reloaded_ids(gid - MEGA if mega else gid):
+        num = mega_file(rid) if mega else file_id(rid)
+        path = os.path.join(CRIES, f'{num:03d}.wav')
         if os.path.exists(path):
             return path
     return None
@@ -80,7 +94,7 @@ def main():
     if not os.path.isdir(CRIES):
         sys.exit(f'No encuentro los gritos de Reloaded: {CRIES}')
     only = [int(a) for a in sys.argv[1:]]
-    dexes = only or game_dexes()
+    dexes = only or game_dexes() + mega_ids()
     os.makedirs(OUT, exist_ok=True)
     missing, done = [], 0
     for dex in dexes:

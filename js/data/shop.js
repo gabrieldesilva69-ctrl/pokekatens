@@ -3,6 +3,8 @@
  *
  * Se compra con Pokémonedas y lo comprado va a la Mochila:
  *   save.bag[id]     Menta, Cápsula Habilidad y Cápsula Habilidad Oculta
+ *   save.bag['ms'+dex] Megapiedra de esa especie (G.MEGAS): no se gasta; con ella,
+ *                    ese Pokémon puede megaevolucionar en la partida (systems/mega.js)
  *   save.tms[move]   MT sin usar (cada una se gasta al enseñarla: G.Mons.teach)
  * Las dos van en la libreta de las monedas (core/db.js): lo gastado en un
  * aparato no reaparece al fusionar con otro.
@@ -21,6 +23,7 @@ G.Shop = (() => {
   };
   const ORDER = ['mint', 'cap', 'caph'];
   const DAILY = 8;
+  const STONE_PRICE = 8000;
 
   const save = () => G.DB.save;
 
@@ -33,6 +36,27 @@ G.Shop = (() => {
     if (--s.bag[id] <= 0) delete s.bag[id];
     return true;
   }
+  // ---------------- Megapiedras ----------------
+  const stoneId = dex => 'ms' + dex;
+  /** ¿Es la Megapiedra de una mega que existe? ('ms6') */
+  const isStone = id => /^ms\d{1,4}$/.test(id) && !!(G.MEGAS && G.MEGAS[id.slice(2)]);
+  const isItem = id => !!ITEMS[id] || isStone(id);
+  const hasStone = dex => count(stoneId(dex)) > 0;
+  /** La que vende la tienda: la de tu compañero, si tiene mega y aún no la tienes. */
+  function stoneForSale() {
+    const s = save(), dex = s && s.partner;
+    return dex && G.MEGAS && G.MEGAS[dex] && !hasStone(dex) ? dex : null;
+  }
+  /** Te da la Megapiedra de esa especie (premio de un legendario). → ¿era nueva? */
+  function giveStone(dex) {
+    const s = save();
+    if (!s || !G.MEGAS || !G.MEGAS[dex] || hasStone(dex)) return false;
+    s.bag = s.bag || {};
+    s.bag[stoneId(dex)] = 1;
+    G.DB.commit();
+    return true;
+  }
+
   const tmCount = id => { const s = save(); return (s && s.tms && s.tms[id]) || 0; };
   function takeTm(id) {
     const s = save();
@@ -76,8 +100,10 @@ G.Shop = (() => {
     if (!s) return { ok: false };
     const tm = key.startsWith('tm:') ? key.slice(3) : null;
     if (tm && !dailyTms().includes(tm)) return { ok: false, error: 'Esa MT ya no está a la venta.' };
-    if (!tm && !ITEMS[key]) return { ok: false };
-    const price = tm ? tmPrice(tm) : ITEMS[key].price;
+    const stone = isStone(key) ? +key.slice(2) : null;
+    if (stone && stone !== stoneForSale()) return { ok: false, error: 'Esa Megapiedra ya no está a la venta.' };
+    if (!tm && !stone && !ITEMS[key]) return { ok: false };
+    const price = tm ? tmPrice(tm) : stone ? STONE_PRICE : ITEMS[key].price;
     if (s.coins < price) return { ok: false, error: 'No tienes Pokémonedas suficientes.' };
     s.coins -= price;
     if (tm) { s.tms = s.tms || {}; s.tms[tm] = Math.min(999, (s.tms[tm] || 0) + 1); }
@@ -86,5 +112,6 @@ G.Shop = (() => {
     return { ok: true };
   }
 
-  return { ITEMS, ORDER, count, take, tmCount, takeTm, dailyTms, tmPrice, buy, today };
+  return { ITEMS, ORDER, STONE_PRICE, count, take, tmCount, takeTm, dailyTms, tmPrice, buy, today,
+           stoneId, isStone, isItem, hasStone, stoneForSale, giveStone };
 })();

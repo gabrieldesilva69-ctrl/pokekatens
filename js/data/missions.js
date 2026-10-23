@@ -8,6 +8,7 @@
  *   value   datos -> cuánto vale; con mode 'max' se queda el mayor, con
  *           'add' (por defecto) se suma (1 si no hay value)
  *   param   'type': sortea un tipo Pokémon para la misión
+ *   need    () -> ¿puede salir? (se mira al sortear las de la semana)
  */
 G.MissionDefs = (() => {
   const T = t => G.U.TYPE_NAME[t];
@@ -47,6 +48,10 @@ G.MissionDefs = (() => {
       text: n => `Aguanta ${n} minutos en una run` },
     { id: 'wevolve', ev: 'evolve', goals: [3, 5], reward: { t10: 1, coins: 900 },
       text: n => `Evoluciona ${n} movimientos` },
+    // Sólo si tienes alguna Megapiedra (data/shop.js): sin ella sería imposible.
+    { id: 'wmega', ev: 'mega', goals: [3], reward: { t10: 1, coins: 900 },
+      need: () => !!G.DB.save && Object.keys(G.DB.save.bag || {}).some(G.Shop.isStone),
+      text: n => `Megaevoluciona ${n} veces` },
     { id: 'wdaily', ev: 'missionDone', match: d => d.daily, goals: [8, 12], reward: { t10: 1, coins: 800 },
       text: n => `Completa ${n} misiones diarias` }
   ];

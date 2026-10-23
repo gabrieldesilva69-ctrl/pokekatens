@@ -96,6 +96,8 @@ OFFICIAL_MEGAS = sorted({
 ROWS = [('2', None), ('3', None), ('6', None), ('9', None),
         ('8', None), ('7', '9'), ('4', '6'), ('1', '3')]
 LEFT_ROWS = {5, 6, 7}
+# Animaciones que usan la hoja de otra (campo "f" en sprites-meta.js): no se repite el PNG.
+SAME_SHEET = {'Shoot': 'Attack', 'Charge': 'Attack'}
 
 # Duraciones (1/60 s): como la mediana de las de SpriteCollab.
 DUR = {
@@ -195,9 +197,10 @@ def build_sheet(rows, name, foot, path):
         for i in range(n):
             f = c.frames[i % len(c.frames)]   # filas más cortas: se repiten
             sheet.alpha_composite(f, (i * w + L - c.ox, r * h + T - c.oy))
-    buf = io.BytesIO()
-    sheet.save(buf, 'PNG')
-    save_optimized(buf.getvalue(), path)
+    if path:
+        buf = io.BytesIO()
+        sheet.save(buf, 'PNG')
+        save_optimized(buf.getvalue(), path)
     return {'w': w, 'h': h, 'n': n, 'r': 8, 'd': DUR[name](n), 'ax': float(L), 'ay': float(T + foot)}
 
 
@@ -222,7 +225,14 @@ def convert(rid, out_dir, k):
     anims = {}
     for name, rows in (('Idle', idle), ('Walk', walk), ('Attack', attack), ('Shoot', attack),
                        ('Charge', attack), ('Hurt', hurt or idle), ('Faint', faint or idle)):
-        anims[name] = build_sheet(rows, name, foot, os.path.join(out_dir, name + '.png'))
+        path = os.path.join(out_dir, name + '.png')
+        if name in SAME_SHEET:
+            # La misma hoja que Attack (sólo cambian las duraciones): "f" dice cuál se carga.
+            anims[name] = dict(build_sheet(rows, name, foot, None), f=SAME_SHEET[name])
+            if os.path.exists(path):
+                os.remove(path)
+        else:
+            anims[name] = build_sheet(rows, name, foot, path)
 
     bb = opaque_box(idle[0].frames[0])
     width = bb[2] - bb[0]

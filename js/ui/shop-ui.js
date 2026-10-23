@@ -554,6 +554,13 @@ G.ShopUI = (() => {
       const it = G.Shop.ITEMS[id];
       h += row(G.Icons.html(it.icon, 32), G.T(it.name) + mine(G.Shop.count(id)), G.T(it.desc), buyBtn(id, it.price));
     }
+    // La Megapiedra de tu compañero (si tiene mega y aún no la tienes): systems/mega.js.
+    const st = G.Shop.stoneForSale();
+    if (st) {
+      h += row(G.Icons.html(G.Mega.stoneIcon(st), 32), G.Mega.stoneName(st),
+        G.I18n.f('Con ella, {x} puede megaevolucionar en la partida. No se gasta.', G.DEX_BY[st].name),
+        buyBtn(G.Shop.stoneId(st), G.Shop.STONE_PRICE));
+    }
     h += `</div><h3 style="margin:14px 0 6px">${G.T('MT de hoy')}</h3>
       <p class="sub" style="margin:0 0 8px">${G.T('Cada día hay otras 8. Una MT enseña su ataque a un Pokémon que lo aprenda en los juegos, para siempre (se gasta al usarla).')}</p><div class="upg">`;
     for (const id of G.Shop.dailyTms()) {
@@ -571,8 +578,9 @@ G.ShopUI = (() => {
   function bagHtml() {
     const s = G.DB.save;
     const items = G.Shop.ORDER.filter(id => G.Shop.count(id) > 0);
+    const stones = Object.keys(s.bag || {}).filter(G.Shop.isStone).map(id => +id.slice(2)).sort((a, b) => a - b);
     const tms = Object.keys(s.tms || {}).filter(id => G.Moves.BY_ID[id] && s.tms[id] > 0).sort((a, b) => moveName(a).localeCompare(moveName(b)));
-    if (!items.length && !tms.length) {
+    if (!items.length && !tms.length && !stones.length) {
       return `<p class="sub center" style="margin:24px 0">${G.T('Tu Mochila está vacía.')}<br><br>
             <button class="btn gold" data-go-shop>${G.Icons.html('shop', 16)} ${G.T('Ir a la Tienda Kecleon')}</button></p>`;
     }
@@ -581,6 +589,10 @@ G.ShopUI = (() => {
     for (const id of items) {
       const it = G.Shop.ITEMS[id];
       h += row(G.Icons.html(it.icon, 32), G.T(it.name), G.T(it.desc), `<b class="gold">×${G.Shop.count(id)}</b>`);
+    }
+    for (const dex of stones) {
+      h += row(G.Icons.html(G.Mega.stoneIcon(dex), 32), G.Mega.stoneName(dex),
+        G.I18n.f('Se usa sola: con {x} de compañero, llena la barra de mega en la partida.', G.DEX_BY[dex].name), '');
     }
     for (const id of tms) {
       // Cuántos de tus Pokémon la pueden aprender.

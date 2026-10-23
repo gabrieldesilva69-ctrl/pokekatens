@@ -159,7 +159,7 @@ G.DB = (() => {
       }
     }
     // Mochila y MT: cuántas de cada cosa que exista (tope 999).
-    for (const [k, ok] of [['bag', id => !G.Shop || G.Shop.ITEMS[id]], ['tms', id => !G.Moves || G.Moves.BY_ID[id]]]) {
+    for (const [k, ok] of [['bag', id => !G.Shop || G.Shop.isItem(id)], ['tms', id => !G.Moves || G.Moves.BY_ID[id]]]) {
       if (!isObj(s[k])) s[k] = {};
       for (const id of Object.keys(s[k])) {
         s[k][id] = Math.min(999, n(s[k][id]));
