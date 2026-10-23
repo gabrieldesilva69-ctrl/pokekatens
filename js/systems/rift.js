@@ -213,6 +213,9 @@ G.Rift = (() => {
       pl.bonds++;
       G.FX.dmgText(pl.x, pl.y - pl.bodyH - 10, '¡Vínculo!', '#ff8ad8', true);
       G.FX.ring(pl.x, pl.y, 8, 90, '#ff8ad8', 0.7, 5);
+      // A veces, un huevo de la región de este legendario (systems/eggs.js).
+      const egg = G.Eggs.onRiftWin(arena.dex);
+      if (egg && !egg.overflow) G.Spawner.say(G.T('¡El legendario ha dejado un huevo!'), 3.4, true);
       // Muy de vez en cuando, la Megapiedra de tu compañero (cada jugador la suya).
       if (Math.random() < STONE_CHANCE && G.Mega.exists(pl.dex) && G.Shop.giveStone(pl.dex)) {
         G.Spawner.say(G.I18n.f('¡El legendario ha dejado una {x}!', G.Mega.stoneName(pl.dex)), 3.6, true);

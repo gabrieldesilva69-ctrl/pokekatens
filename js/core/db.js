@@ -97,6 +97,10 @@ G.DB = (() => {
       itemsFound: {},         // id -> fecha: objetos equipables encontrados
       evoMoves: {},           // id -> fecha: movimientos evolucionados alguna vez
       ach: {},                // id -> fecha: logros conseguidos
+      // Huevos (23-10-2026, systems/eggs.js): los 3 primeros incuban, el resto espera.
+      eggs: [],               // [{ id, dex, shiny, need, done, from }]
+      eggsHatched: {},        // id -> fecha: los ya abiertos (que no vuelvan al juntar aparatos)
+      eggGacha: {},           // generación del banner -> tiradas ×10 hacia el próximo huevo
       missions: {},           // misiones del día / semana (systems/progress.js)
       profile: { favs: [], title: '' },   // perfil público: 3 favoritos y título
       stats: { runs: 0, bestTime: 0, bestLevel: 0, totalKills: 0, pulls: 0, coinsEarned: 0, shinies: 0,
@@ -165,6 +169,14 @@ G.DB = (() => {
         s[k][id] = Math.min(999, n(s[k][id]));
         if (!s[k][id] || !ok(id)) delete s[k][id];
       }
+    }
+    // Huevos: los que tienen sentido (un Pokémon que existe, números válidos).
+    s.eggs = (Array.isArray(s.eggs) ? s.eggs : []).filter(e => isObj(e) && typeof e.id === 'string' && e.id.length <= 24
+      && (!G.DEX_BY || G.DEX_BY[e.dex])).slice(0, 12)
+      .map(e => ({ id: e.id, dex: +e.dex, shiny: !!e.shiny, need: Math.max(1, n(e.need)), done: n(e.done), from: String(e.from || '').slice(0, 10) }));
+    for (const k of ['eggsHatched', 'eggGacha']) {
+      if (!isObj(s[k])) s[k] = {};
+      for (const id of Object.keys(s[k])) if (!Number.isFinite(+s[k][id])) delete s[k][id];
     }
     // MT aprendidas: movimientos que existen, sin repetir.
     if (!isObj(s.ptm)) s.ptm = {};
@@ -388,6 +400,19 @@ G.DB = (() => {
       });
     }
     for (const k in older.stats || {}) r.stats[k] = Math.max(r.stats[k] || 0, older.stats[k] || 0);
+    // Huevos: los de los dos, cada uno con su mayor progreso, sin los que se abrieron en
+    // cualquiera de ellos; primero los que ya estaban en la copia que queda (systems/eggs.js).
+    const hatched = Object.assign({}, older.eggsHatched || {}, r.eggsHatched || {}), eggs = new Map();
+    for (const e of (r.eggs || []).concat(older.eggs || [])) {
+      if (!isObj(e) || !e.id || hatched[e.id]) continue;
+      const o = eggs.get(e.id);
+      if (!o) eggs.set(e.id, Object.assign({}, e));
+      else o.done = Math.max(num(o.done), num(e.done));
+    }
+    r.eggs = [...eggs.values()];
+    r.eggsHatched = hatched;
+    r.eggGacha = r.eggGacha || {};
+    for (const g in older.eggGacha || {}) r.eggGacha[g] = Math.max(num(r.eggGacha[g]), num(older.eggGacha[g]));
     if (r.starter == null) r.starter = older.starter;
     if (r.personality == null) r.personality = older.personality;
     if (r.partner == null || !r.owned[r.partner]) { r.partner = older.partner; r.partnerShiny = older.partnerShiny; }

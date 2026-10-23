@@ -118,6 +118,12 @@ G.Progress = (() => {
     if (r.coins) s.coins += r.coins;
     if (r.t1) s.tickets.t1 += r.t1;
     if (r.t10) s.tickets.t10 += r.t10;
+    // Huevo de una región al azar (systems/eggs.js).
+    for (let i = 0; i < (r.egg || 0); i++) {
+      const got = G.Eggs.give(1 + Math.floor(Math.random() * G.Gacha.BANNERS.length), 'mission');
+      // (Un poco después: si no, lo tapa el «¡Premio recogido!» de la pantalla de Misiones.)
+      if (G.UI && G.UI.toast) setTimeout(() => G.UI.toast(got && got.overflow ? G.I18n.f('La Incubadora está llena: +{x} monedas', got.overflow) : G.T('¡Tienes un huevo nuevo! Míralo en la Mochila')), 1400);
+    }
     if (G.UI && G.UI.refreshCoins && !document.getElementById('topbar').classList.contains('hidden')) G.UI.refreshCoins();
   }
 
@@ -126,6 +132,7 @@ G.Progress = (() => {
     if (r.t10) p.push(G.Icons.html('ticket10', 12) + ' ' + r.t10 + ' ×10');
     if (r.t1) p.push(G.Icons.html('ticket', 12) + ' ' + r.t1);
     if (r.coins) p.push('<span class="coin"></span> ' + r.coins);
+    if (r.egg) p.push(G.Icons.html('egg', 12) + ' ' + G.T('Huevo'));
     return p.join(' &nbsp;');
   }
 
@@ -180,6 +187,7 @@ G.Progress = (() => {
     if (G.Judgment.active && e.boss) { G.Judgment.bossDown(); event('kill', { types: e.types || [], boss: false, legend: 0 }); return; }
     const legend = e.legend || (G.Rift.inArena && e.boss) ? e.dex : 0;
     G.Mega.onKill(e);
+    G.Eggs.onKill();
     event('kill', { types: e.types || [], boss: !!e.boss, legend });
   }
 

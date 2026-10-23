@@ -83,5 +83,18 @@ const read = (user, uid) => fetch(`${DOCS}/saves/${uid}`, { headers: { Authoriza
   if (!n || n.integerValue !== '1') fail('la Megapiedra sigue en la Mochila', 'ms6 = 1', JSON.stringify(got));
   console.log('ok la Megapiedra sigue en la Mochila');
 
+  // Huevos en la Incubadora (save.eggs, systems/eggs.js): una lista de mapas.
+  const incu = await signUp('huevos@jugadores.pokekatens.invalid');
+  const egg = { mapValue: { fields: { id: { stringValue: 'mh3k2a9z' }, dex: { integerValue: '25' }, shiny: { booleanValue: false },
+    need: { integerValue: '1000' }, done: { integerValue: '340' }, from: { stringValue: 'mission' } } } };
+  const withEgg = { eggs: { arrayValue: { values: [egg] } }, eggsHatched: { mapValue: { fields: { old1: { integerValue: '1' } } } } };
+  expect('guardar una partida con un huevo', 200, (await commit(incu, false, withEgg)).status);
+  const r4 = await read(incu, incu.uid);
+  expect('leerla', 200, r4.status);
+  const f4 = (((await r4.json()).fields || {}).save || {}).mapValue.fields;
+  const e4 = f4.eggs && f4.eggs.arrayValue.values[0].mapValue.fields;
+  if (!e4 || e4.id.stringValue !== 'mh3k2a9z' || e4.done.integerValue !== '340') fail('el huevo sigue igual', 'mh3k2a9z 340/1000', JSON.stringify(e4));
+  console.log('ok el huevo sigue igual');
+
   console.log('EMULATOR_SMOKE_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

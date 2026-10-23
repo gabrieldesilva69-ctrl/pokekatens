@@ -41,6 +41,7 @@ no se sube).
 - **Megaevoluciones** (`assets/pokemon/1000xx/`): los sprites de mapa de 81 megas
   oficiales (normal y shiny), convertidos con `tools/import_reloaded.py --mega N`, y sus
   gritos. Sus datos (tipos, estadísticas, habilidad) son de PokeAPI (`tools/fetch_megas.py`).
+- **Huevos** (`assets/eggs/`): uno por familia, normal y shiny, recortados con `tools/import_eggs.py`.
 '''
 
 

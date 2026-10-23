@@ -227,6 +227,10 @@ G.Icons = (() => {
     rareincense: { pal: { p: '#c47bff', d: '#6a3aa8', s: '#9ae6ff', w: '#f4f8ff' }, rows: [
       '...s....s...', '....s..s....', '...s..ws....', '..kkkkkkkk..', '.kppppppppk.', '.kpwppppppk.',
       '..kppppdpk..', '...kppddk...', '....kddk....', '...kppppk...', '..kkkkkkkk..', '............'] },
+    // Huevo (Incubadora, recompensas): el genérico; los de cada familia son imágenes (assets/eggs/).
+    egg: { pal: { w: '#fffaf0', s: '#e0d6c8', g: '#5fe08a', d: '#2f9a52' }, rows: [
+      '....kkkk....', '...kwwwwk...', '..kwwggwwk..', '..kwwggwwsk.', '.kwwwwwwwsk.', '.kgwwwwwgsk.',
+      '.kggwwwggsk.', '.kwwwwwwwsk.', '.kwwwggwssk.', '..kswggssk..', '...kkssskk..', '....kkkk....'] },
     // ---------- de un solo uso (data/items.js: TREATS) ----------
     expcandy: { pal: { c: '#4fd1ff', d: '#2a6fb0', w: '#e8fbff', y: '#ffd23f' }, rows: [
       '............', '............', 'kk..kkkk..kk', 'kykkccwckkyk', 'kyyccwcccyyk', 'kyyccccccyyk',

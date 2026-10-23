@@ -96,7 +96,11 @@ G.MenuUI = (() => {
   function bagLine() {
     const s = G.DB.save, sum = o => Object.values(o || {}).reduce((a, b) => a + (+b || 0), 0);
     const items = sum(s.bag), tms = sum(s.tms);
-    $('menu-bag-sub').textContent = items || tms ? G.I18n.f('Objetos: {x} · MT: {x}', items, tms) : G.T('Vacía');
+    const eggs = (s.eggs || []).length, ready = G.Eggs.anyReady();
+    const txt = items || tms ? G.I18n.f('Objetos: {x} · MT: {x}', items, tms) : eggs ? '' : G.T('Vacía');
+    $('menu-bag-sub').textContent = ready ? G.T('¡Un huevo está listo para abrirse!')
+      : [txt, eggs ? G.I18n.f('Huevos: {x}', eggs) : ''].filter(Boolean).join(' · ');
+    $('menu-bag-sub').classList.toggle('gold', ready);
   }
 
   /** Texto bajo "Amigos" y "Jugar": quién está en línea, solicitudes, sala. */

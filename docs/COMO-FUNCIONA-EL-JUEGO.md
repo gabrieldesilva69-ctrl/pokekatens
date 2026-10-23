@@ -60,6 +60,12 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Colección:** eliges tu compañero en versión normal o shiny.
 - **Misiones** diarias y semanales: dan tickets y monedas.
 - **Logros:** dan medallas y títulos.
+- **Huevos** (`js/systems/eggs.js`, Incubadora en la Mochila: `js/ui/egg-ui.js`): salen de las semanales «Gana una
+  pelea en una grieta» y «Aguanta X minutos» (región al azar), del gacha (cada 10 tiradas ×10 en un banner) y
+  un 5 % al ganar una grieta. El Pokémon se sortea al conseguirlo (como el gacha, sin legendarios; shiny 1/32).
+  3 incuban a la vez (avanzan con cada enemigo derrotado, también los del grupo) y 3 esperan; el séptimo da
+  200 monedas. Necesitan 500/1000/2000/4000/8000 según la rareza. Huevos de Reloaded, uno por familia
+  (`tools/import_eggs.py`). Al juntar aparatos se unen por id sin repetir los abiertos (`G.DB.merge`).
 - **Perfil:** enseña tus 3 Pokémon favoritos, tus marcas y tus medallas.
 
 ## Guardado

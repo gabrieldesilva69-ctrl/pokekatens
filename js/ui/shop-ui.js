@@ -467,7 +467,8 @@ G.ShopUI = (() => {
   function openBag() {
     G.UI.show('scr-bag', true);
     const box = $('bag-body');
-    box.innerHTML = bagHtml();
+    box.innerHTML = G.EggUI.incubatorHtml() + bagHtml();
+    G.EggUI.wire(box, openBag);
     const go = box.querySelector('[data-go-dex]');
     if (go) go.onclick = () => G.MenuUI.openDex();
     const shop = box.querySelector('[data-go-shop]');

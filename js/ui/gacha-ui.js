@@ -69,7 +69,8 @@ G.GachaUI = (() => {
     $('cost-1').innerHTML = `${G.Icons.html('ticket', 18)} 1`;
     $('cost-10').innerHTML = `${G.Icons.html('ticket', 18)} 10`;
     $('cost-10b').innerHTML = `${G.Icons.html('ticket10', 18)} 1`;
-    $('gacha-tickets').innerHTML = `Tienes ${G.Icons.html('ticket', 18)} <b>${t.t1}</b> tickets y ${G.Icons.html('ticket10', 18)} <b>${t.t10}</b> tickets ×10`;
+    $('gacha-tickets').innerHTML = `Tienes ${G.Icons.html('ticket', 18)} <b>${t.t1}</b> tickets y ${G.Icons.html('ticket10', 18)} <b>${t.t10}</b> tickets ×10`
+      + `<br><small>${G.Icons.html('egg', 14)} ${G.I18n.f('Huevo de esta región: {x} de 10 tiradas ×10', (s.eggGacha && s.eggGacha[gen]) || 0)}</small>`;
     $('pull-1').disabled = !G.Gacha.costOf(s, 1);
     $('pull-10').disabled = !G.Gacha.costOf(s, 10, 't1');
     $('pull-10b').disabled = !G.Gacha.costOf(s, 10, 't10');
@@ -83,6 +84,8 @@ G.GachaUI = (() => {
     const res = G.Gacha.pull(G.DB.save, n, gen, use);
     if (!res) { G.Audio.sfx('error'); G.UI.toast('No tienes tickets suficientes: consíguelos jugando'); return; }
     G.Progress.checkAch();
+    // Cada 10 tiradas ×10 en este banner, un huevo de su región (systems/eggs.js).
+    const egg = n === 10 ? G.Eggs.onGacha10(gen) : null;
     G.DB.commit(true);
     busy = true;
 
@@ -117,6 +120,7 @@ G.GachaUI = (() => {
       await wait(n === 10 ? 150 : 0);
     }
     $('pull-close').classList.remove('hidden');
+    if (egg) G.UI.toast(egg.overflow ? G.I18n.f('La Incubadora está llena: +{x} monedas', egg.overflow) : G.T('¡Tienes un huevo nuevo! Míralo en la Mochila'));
     busy = false;
   }
 

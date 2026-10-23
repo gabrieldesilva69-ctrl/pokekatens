@@ -346,6 +346,8 @@ G.Game = (() => {
     // A la nube al acabar la partida (como mucho cada hora); si la marca entra
     // en un top (hoy, semana o mes), enseguida (abajo, tras subirla al ranking).
     G.DB.commit('run');
+    // Huevos (systems/eggs.js): avisa si alguno ya se puede abrir.
+    if (G.Eggs.anyReady()) setTimeout(() => G.UI.toast(G.T('¡Un huevo está a punto de eclosionar! Ábrelo en la Mochila'), 4000), 600);
     if (G.Social.me) G.Social.publishProfile();
 
     // Ranking: en solitario cada uno lo suyo; en grupo lo sube el anfitrión.

@@ -783,6 +783,24 @@ body.touch kbd, body.touch .card .key, body.touch .kbd-hint { display: none !imp
 .lay-pause { border-radius: 10px; background: rgba(10,16,28,.7); border: 2px solid rgba(244,248,255,.8); box-sizing: border-box; }
 .lay-pause b { position: absolute; top: 9px; width: 5px; height: 18px; background: #f4f8ff; }
 .lay-pause b:first-child { left: 11px; } .lay-pause b:last-child { left: 20px; }
+.egg-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.egg-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border-radius: 12px; background: rgba(10,16,28,.55); border: 1px solid rgba(140,170,210,.18); min-height: 120px; justify-content: center; }
+.egg-slot img { width: 60px; height: auto; image-rendering: pixelated; }
+.egg-slot.ready { border-color: var(--gold); box-shadow: 0 0 12px rgba(255,210,63,.45); }
+.egg-slot.ready img { animation: egg-wiggle 1.2s ease-in-out infinite; }
+.egg-slot.empty span { color: var(--muted); font-size: 12px; }
+.egg-slot .bar { width: 80%; height: 6px; border-radius: 3px; background: rgba(0,0,0,.5); overflow: hidden; }
+.egg-slot .bar i { display: block; height: 100%; background: linear-gradient(90deg, #5fe08a, #ffd23f); }
+.egg-mini { width: 22px; height: auto; vertical-align: middle; image-rendering: pixelated; }
+@keyframes egg-wiggle { 0%, 70%, 100% { transform: rotate(0); } 78% { transform: rotate(-8deg); } 86% { transform: rotate(8deg); } 94% { transform: rotate(-4deg); } }
+.hatch-box { width: min(360px, 92vw); text-align: center; }
+.hatch-stage { position: relative; height: 170px; display: flex; align-items: center; justify-content: center; }
+.hatch-egg, .hatch-cracks { position: absolute; width: 96px; height: auto; image-rendering: pixelated; transition: opacity .15s; }
+.hatch-cracks { width: 96px; height: 96px; }
+.hatch-flash { position: absolute; inset: -20px; background: #fff; opacity: 0; pointer-events: none; border-radius: 50%; }
+.hatch-flash.go { animation: hatch-flash .6s ease-out; }
+@keyframes hatch-flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+.hatch-mon canvas { image-rendering: pixelated; }
 .lay-mega { border-radius: 50%; background: rgba(10,16,28,.7) center / 60% no-repeat; border: 2px solid #ff8ad8; box-sizing: border-box; image-rendering: pixelated; }
 .lay-stick { border-radius: 50%; background: rgba(10,20,48,.3); border: 3px solid rgba(244,248,255,.6); box-sizing: border-box; }
 .lay-stick .knob { position: absolute; left: 50%; top: 50%; width: 42%; height: 42%; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(255,210,63,.85); border: 3px solid #a55f00; box-sizing: border-box; }
