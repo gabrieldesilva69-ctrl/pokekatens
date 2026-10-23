@@ -215,6 +215,27 @@ test('ICE candidates that arrive right behind the answer or offer are not lost (
   assert.deepEqual(g.pcs[0].added.map(c => c.candidate), ['srflx-h']);
 });
 
+test('network diagnosis: open, normal, strict (a different port per STUN server) and blocked', () => {
+  const N = stunNetwork().N;
+  const h = (address, port) => ({ type: 'host', protocol: 'udp', address, port });
+  const s = (address, port) => ({ type: 'srflx', protocol: 'udp', address, port });
+  assert.equal(N.natKind([h('8.8.4.4', 5000), s('8.8.4.4', 5000)]), 'open');
+  assert.equal(N.natKind([h('a.local', 5000), s('81.1.1.1', 61000), s('81.1.1.1', 61000)]), 'nat');
+  assert.equal(N.natKind([h('a.local', 5000), h('b.local', 5001), s('81.1.1.1', 61000), s('81.1.1.1', 62000)]), 'nat');
+  assert.equal(N.natKind([h('a.local', 5000), s('100.70.1.1', 1024), s('100.70.1.1', 1090), s('100.70.1.1', 2000)]), 'sym');
+  assert.equal(N.natKind([h('a.local', 5000)]), 'block');
+  assert.equal(N.natKind([h('a.local', 5000), { type: 'srflx', protocol: 'tcp', address: '81.1.1.1', port: 1 }]), 'block');
+});
+
+test('network diagnosis travels by signalling: only known kinds are kept, and it never touches peer state', async () => {
+  const g = signalNetwork('a', false), seen = [];
+  g.N.onPeer((u, m) => seen.push(m)); let nats = 0; g.N.onNat(() => nats++);
+  g.deliver('host', { nat: 'sym' }); g.deliver('host', { nat: 'evil' });
+  await settle();
+  assert.equal(g.N.nat('host'), 'sym'); assert.equal(nats, 1); assert.deepEqual(seen, []);
+  assert.equal(g.N.mode('host'), 'connecting');
+});
+
 function coopWithCuts(host) {
   let peerFn = null, msgFn = null;
   const timers = new Map(), lost = [], said = [], dropped = [];

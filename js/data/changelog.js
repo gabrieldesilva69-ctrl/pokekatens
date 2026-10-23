@@ -6,7 +6,9 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
-  { d: '2026-10-23', title: ['PokeKatens: shiny para todos', 'PokeKatens: shiny for everyone'], new: [
+  { d: '2026-10-23', title: ['PokeKatens: shiny para todos y red en la sala', 'PokeKatens: shiny for everyone and network in the room'], new: [
+    ['Cooperativo: en la sala, cada jugador ve el tipo de red de cada uno (abierta, normal, estricta o bloqueada) y, si no conecta, el motivo más probable.',
+     'Co-op: in the room, every player sees each one\'s network type (open, normal, strict or blocked) and, if it doesn\'t connect, the most likely reason.'],
     ['Los 8 Pokémon que no tenían shiny (Karrablast, Greedent, Barraskewda, Milcery, Glastrier, Oinkologne, Naclstack y Koraidon) ya lo tienen, con los colores de Pokémon Edición Reloaded, de F3R. Antes, si salían shiny, se veían con los colores normales.',
      'The 8 Pokémon that had no shiny (Karrablast, Greedent, Barraskewda, Milcery, Glastrier, Oinkologne, Naclstack and Koraidon) now have one, with the colours of Pokémon Reloaded Edition, by F3R. Before, if they came out shiny, they looked like the normal ones.']
   ] },

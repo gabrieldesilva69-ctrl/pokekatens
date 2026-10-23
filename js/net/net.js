@@ -32,10 +32,23 @@ G.Net = (() => {
   const PING_MS = 2000;
 
 
+  // Diagnóstico de la red (para la sala): con una conexión de prueba contra varios STUN
+  // de Google se mira qué puerto ve cada uno. Si cada servidor ve uno distinto, la red
+  // es «estricta» (NAT simétrica: datos móviles, CGNAT, empresas) y sin un servidor de
+  // puente no se puede conectar con nadie que esté fuera. No manda nada a los demás
+  // jugadores salvo el resultado, por la señalización.
+  //   open  el aparato tiene IP pública · nat  router normal · sym  estricta
+  //   block no llega a los STUN (cortafuegos o red que corta UDP)
+  const NAT_ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }];
+  const NAT_MS = 5000, NAT_KINDS = ['open', 'nat', 'sym', 'block'];
+
+
   let rtdb = null, uid = null, roomId = null, isHost = false, hostUid = null;
   let qref = null, pingAt = 0;
+  let natMine = null, natAsk = null;
+  const natOf = new Map();         // uid -> tipo de red que nos ha contado
   const peers = new Map();         // uid -> { pc, dc, mode, timer }
-  const handlers = new Set(), peerHandlers = new Set();
+  const handlers = new Set(), peerHandlers = new Set(), natHandlers = new Set();
   const stats = { sent: 0, recv: 0, relaySent: 0,
     // Sólo los datos de la partida que se han mandado bien (sin ICE/SCTP/DTLS).
     sentBytes: 0, jsonBytes: 0, recvBytes: 0, binarySent: 0, binaryRecv: 0, invalidBinary: 0 };
@@ -44,6 +57,65 @@ G.Net = (() => {
     const p = peers.get(u);
     peerHandlers.forEach(fn => { try { fn(u, p ? p.mode : 'closed'); } catch (e) { console.warn(e); } });
   }
+
+  // ---------------- diagnóstico de la red ----------------
+
+  /** Tipo de red a partir de los candidatos ({type, address, port, protocol}). */
+  function natKind(cands) {
+    const udp = cands.filter(c => c && c.protocol === 'udp');
+    const hosts = udp.filter(c => c.type === 'host'), srflx = udp.filter(c => c.type === 'srflx');
+    if (!srflx.length) return 'block';
+    if (srflx.some(s => hosts.some(h => h.address === s.address))) return 'open';
+    // Un puerto por interfaz es lo normal; más puertos que interfaces para la misma IP
+    // pública es que cada servidor ha visto uno distinto.
+    const ports = new Map();
+    for (const s of srflx) { if (!ports.has(s.address)) ports.set(s.address, new Set()); ports.get(s.address).add(s.port); }
+    const ifaces = Math.max(1, hosts.length);
+    return [...ports.values()].some(set => set.size > ifaces) ? 'sym' : 'nat';
+  }
+
+  /**
+   * Mide la red propia una vez por sesión; al acabar se la cuenta a la sala.
+   * «Bloqueada» puede ser sólo un STUN que ha tardado: se repite una vez al momento
+   * y no se da por buena para siempre (se vuelve a medir al abrir otra vez la sala).
+   */
+  function probeNat() {
+    if (natMine && natMine !== 'block') return Promise.resolve(natMine);
+    if (natAsk) return natAsk;
+    natAsk = probeOnce().then(kind => kind === 'block' ? probeOnce() : kind).then(kind => {
+      natAsk = null;
+      if (kind) { natMine = kind; for (const u of peers.keys()) tellNat(u); emitNat(); }
+      return kind;
+    });
+    return natAsk;
+  }
+
+  function probeOnce() {
+    return new Promise(done => {
+      let pc;
+      try { pc = new RTCPeerConnection({ iceServers: NAT_ICE }); } catch (e) { done(null); return; }
+      const cands = [];
+      let over = false;
+      const finish = () => {
+        if (over) return;
+        over = true; clearTimeout(stop);
+        try { pc.close(); } catch (e) { /* nada */ }
+        done(natKind(cands));
+      };
+      const stop = setTimeout(finish, NAT_MS);
+      pc.onicecandidate = e => {
+        if (!e.candidate) { finish(); return; }
+        const c = e.candidate;
+        if (c.type) cands.push({ type: c.type, address: c.address, port: c.port, protocol: c.protocol });
+      };
+      pc.createDataChannel('nat');
+      pc.createOffer().then(o => pc.setLocalDescription(o)).catch(finish);
+    });
+  }
+
+  function tellNat(u) { if (natMine && roomId && u !== uid) signal(u, { nat: natMine }); }
+  // Aparte de onPeer: el cooperativo no tiene que enterarse de esto.
+  function emitNat() { natHandlers.forEach(fn => { try { fn(); } catch (e) { console.warn(e); } }); }
 
   // ---------------- apertura ----------------
 
@@ -76,6 +148,7 @@ G.Net = (() => {
     for (const u of [...peers.keys()]) drop(u);
     if (qref) { qref.off(); qref = null; }
     roomId = null; isHost = false; hostUid = null;
+    natOf.clear();
   }
 
   /** El anfitrión llama a esto cuando cambian los miembros de la sala. */
@@ -163,6 +236,7 @@ G.Net = (() => {
       const offer = await p.pc.createOffer();
       await p.pc.setLocalDescription(offer);
       signal(u, { sdp: p.pc.localDescription.toJSON() });
+      tellNat(u);
     } catch (e) { useRelay(u); }
   }
 
@@ -181,6 +255,10 @@ G.Net = (() => {
   }
 
   async function onSignal(from, sig) {
+    if (sig.nat) {                  // su tipo de red (las versiones viejas no lo mandan)
+      if (NAT_KINDS.includes(sig.nat) && natOf.get(from) !== sig.nat) { natOf.set(from, sig.nat); emitNat(); }
+      return;
+    }
     let p = peers.get(from);
     try {
       if (sig.sdp && sig.sdp.type === 'offer') {
@@ -193,6 +271,7 @@ G.Net = (() => {
         const ans = await p.pc.createAnswer();
         await p.pc.setLocalDescription(ans);
         signal(from, { sdp: p.pc.localDescription.toJSON() });
+        tellNat(from);
         await flushIce(from, p);
       } else if (sig.sdp && sig.sdp.type === 'answer') {
         if (p && p.pc) { await p.pc.setRemoteDescription(sig.sdp); await flushIce(from, p); }
@@ -281,6 +360,9 @@ G.Net = (() => {
     open, close, syncMembers, send, toHost, broadcast,
     on(fn) { handlers.add(fn); }, off(fn) { handlers.delete(fn); },
     onPeer(fn) { peerHandlers.add(fn); },
+    /** Diagnóstico: probeNat() mide la red propia; nat(uid) -> 'open'|'nat'|'sym'|'block'|null. */
+    probeNat, natKind, onNat(fn) { natHandlers.add(fn); },
+    nat(u) { return u === uid ? natMine : natOf.get(u) || null; },
     mode(u) { const p = peers.get(u); return p ? p.mode : 'closed'; },
     /** ¿Va por el relé (o no hay conexión)? Entonces se manda menos a menudo. */
     slow(u) { const p = peers.get(u); return !p || p.mode !== 'direct'; },

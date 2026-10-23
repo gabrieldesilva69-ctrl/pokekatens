@@ -165,13 +165,19 @@
         if (G.UI.isOpen('scr-lobby')) render();
       });
       G.Net.onPeer(() => { if (G.UI.isOpen('scr-lobby')) render(); });
+      G.Net.onNat(() => { if (G.UI.isOpen('scr-lobby')) render(); });
     }
+
+    // Tipo de red de cada uno (G.Net.probeNat), para saber por qué no conecta.
+    const NET_TEXT = { open: 'Red abierta', nat: 'Red normal', sym: 'Red estricta', block: 'Red bloqueada' };
+    const badNet = k => k === 'sym' || k === 'block';
 
     function open() {
       if (!G.Social.room) { G.MenuUI.open(); return; }
       G.Social.refreshMember();
       G.Social.ensureFriends().then(() => { if (G.UI.isOpen('scr-lobby')) { membersKey = ''; render(); } });
       G.UI.show('scr-lobby', true);
+      G.Net.probeNat();
       membersKey = '';
       render();
     }
@@ -206,7 +212,7 @@
           if (m) {
             c.style.setProperty('--pc', G.Coop.COLORS[i]);
             c.appendChild(G.UI.spriteCanvas(m.dex, 120, 96, { scale: 2, lively: true, shiny: !!m.shiny }));
-            c.insertAdjacentHTML('beforeend', `<b translate="no">${esc(m.name)}</b><small>${esc((G.DEX_BY[m.dex] || {}).name || '')}</small><span class="conn" data-u="${m.uid}"></span>`);
+            c.insertAdjacentHTML('beforeend', `<b translate="no">${esc(m.name)}</b><small>${esc((G.DEX_BY[m.dex] || {}).name || '')}</small><span class="conn" data-u="${m.uid}"></span><span class="net" data-u="${m.uid}"></span>`);
           } else c.innerHTML = '<span>Libre</span>';
           box.appendChild(c);
         }
@@ -218,6 +224,12 @@
         el.textContent = t;
         el.className = 'conn' + (t === 'Conectando…' ? ' wait' : '');
       });
+      box.querySelectorAll('.net').forEach(el => {
+        const k = G.Net.nat(el.dataset.u);
+        el.textContent = NET_TEXT[k] || (el.dataset.u === G.Social.uid ? 'Comprobando la red…' : '');
+        el.className = 'net' + (badNet(k) ? ' bad' : '');
+      });
+      const nets = ms.map(m => G.Net.nat(m.uid));
 
       // Invitar (sólo el anfitrión y si queda sitio).
       const canInvite = room.isHost && ms.length < G.Social.MAX_PLAYERS;
@@ -248,6 +260,8 @@
       btn.textContent = 'Empezar partida (' + ms.length + '/' + G.Social.MAX_PLAYERS + ')';
       $('lobby-note').textContent = !room.isHost ? 'Cuando el anfitrión empiece, entraréis todos a la vez.'
         : ms.length < 2 ? 'Necesitas al menos un amigo en la sala.'
+        : failed && nets.some(badNet) ? 'No se puede conectar: una red «estricta» o «bloqueada» (datos móviles, CGNAT, redes de empresa o un cortafuegos) no deja jugar en grupo con alguien de fuera. Probad con otra wifi; se reintenta solo.'
+        : failed && nets.every(k => k) ? 'No se puede conectar aunque las redes parecen normales: puede ser un cortafuegos o un antivirus. Probad a permitir el juego en él o con otra wifi; se reintenta solo.'
         : failed ? 'No se puede conectar con algún amigo: su red (o la tuya) no deja jugar en grupo. Probad con otra wifi o datos móviles; se reintenta solo.'
         : connecting ? 'Conectando con tus amigos…' : 'La partida empieza para todos a la vez.';
     }

@@ -716,6 +716,12 @@ G.I18n.add({
   'Hay una versión nueva del juego: actualizando en {x} s…': 'A new version of the game is out: updating in {x} s…',
   'Actualización obligatoria: tu partida se guarda y el juego se recarga en {x} s…': 'Required update: your run is saved and the game reloads in {x} s…',
   'No se pudo conectar (reintentando…)': 'Could not connect (retrying…)',
+  'Red abierta': 'Open network', 'Red normal': 'Normal network', 'Red estricta': 'Strict network',
+  'Red bloqueada': 'Blocked network', 'Comprobando la red…': 'Checking network…',
+  'No se puede conectar: una red «estricta» o «bloqueada» (datos móviles, CGNAT, redes de empresa o un cortafuegos) no deja jugar en grupo con alguien de fuera. Probad con otra wifi; se reintenta solo.':
+    "Can't connect: a \"strict\" or \"blocked\" network (mobile data, CGNAT, work networks or a firewall) doesn't allow group play with someone outside it. Try another Wi-Fi; it retries automatically.",
+  'No se puede conectar aunque las redes parecen normales: puede ser un cortafuegos o un antivirus. Probad a permitir el juego en él o con otra wifi; se reintenta solo.':
+    "Can't connect even though the networks look normal: it may be a firewall or antivirus. Try allowing the game in it or another Wi-Fi; it retries automatically.",
   'No se puede conectar con algún amigo: su red (o la tuya) no deja jugar en grupo. Probad con otra wifi o datos móviles; se reintenta solo.':
     "Can't connect to one of your friends: their network (or yours) doesn't allow group play. Try another Wi-Fi or mobile data; it retries automatically.",
   'Ahora mismo no se pueden crear cuentas nuevas. Si ya tienes cuenta, entra normal; si no, puedes jugar como invitado.':
