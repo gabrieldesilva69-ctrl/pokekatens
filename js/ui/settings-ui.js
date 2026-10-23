@@ -89,7 +89,8 @@ G.SettingsUI = (() => {
     const box = $('set-body');
     box.scrollTop = 0;
     if (tab === 'sound') {
-      box.innerHTML = section('Sonido') + '<div id="set-sound" class="sound-inline"></div>';
+      box.innerHTML = section('Sonido') + '<div id="set-sound" class="sound-inline"></div>'
+        + toggle('cries', 'Gritos de los Pokémon', 'Tu compañero y los Pokémon especiales suenan con su grito en algunos momentos (gacha, jefes, legendarios, shiny…).');
       G.UI.soundControls($('set-sound'));
     } else if (tab === 'gfx') {
       const auto = ['baja', 'media', 'alta'][G.Settings.autoLevel];
@@ -154,7 +155,7 @@ G.SettingsUI = (() => {
         + section('Créditos')
         + `<ul class="credits">
              <li><b>Sprites:</b> PMD SpriteCollab y sus artistas (CC BY-NC 4.0).</li>
-             <li><b>Pokémon Edición Reloaded, de F3R:</b> colores de algunos shiny. <a href="https://pokemon-reloaded.blogspot.com" target="_blank" rel="noopener" translate="no">pokemon-reloaded.blogspot.com</a></li>
+             <li><b>Pokémon Edición Reloaded, de F3R:</b> colores de algunos shiny y gritos de los Pokémon. <a href="https://pokemon-reloaded.blogspot.com" target="_blank" rel="noopener" translate="no">pokemon-reloaded.blogspot.com</a></li>
              <li><b>Datos de los Pokémon:</b> PokéAPI.</li>
              <li><b>Música y sonidos:</b> originales, generados por el propio juego.</li>
              <li><b>Fuente:</b> Pixelify Sans (OFL).</li>

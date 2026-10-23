@@ -171,6 +171,7 @@ G.Rift = (() => {
     G.Spawner.say('¡' + e.name + (e.shiny ? ' shiny' : '') + ' te esperaba en la grieta!', 3.2);
     G.Camera.kick(1.1);
     G.Audio.sfx('boss');
+    G.Audio.cry(e.dex, { shiny: e.shiny });
   }
 
   /** Nadie sale del círculo de la arena (por si algo empuja demasiado). */

@@ -106,6 +106,11 @@ de Ko-fi no sale nunca). PokeKatens no acepta dinero.
 - **Audio:** sintetizador Web Audio con planificador anticipado (~150 ms por delante) y reverb por
   convolución con un impulso generado. Partituras en `js/data/music.js` (formato de texto propio). Los
   efectos tienen separación mínima entre repeticiones y tope de voces, para no saturar con 400 golpes a la vez.
+- **Gritos:** lo único grabado. Los de Pokémon Reloaded en `assets/cries/<dex>.mp3` (`tools/import_cries.py`,
+  ~7 KB cada uno; sin grito: Charizard, Pikachu, Eevee, Riolu y Lucario, lista en `js/data/cries.js`).
+  `G.Audio.cry(dex)` lo baja la primera vez que suena; uno a la vez. Suenan en el gacha (en la ×10 sólo 4-5★ y
+  shiny), al elegir compañero o tocarlo en su ficha, al empezar la partida y al aparecer un jefe, un legendario
+  de grieta o un shiny salvaje (en cooperativo, sólo en el aparato que lo crea). Se quitan en Ajustes → Sonido.
 - **Iconos:** mapas de caracteres convertidos a canvas y data URLs, siempre a múltiplos enteros de su tamaño
   para que el píxel quede limpio.
 

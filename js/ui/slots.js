@@ -78,6 +78,8 @@ G.Slots = (() => {
       G.Audio.sfx('reveal', { rarity: r.rarity });
       if (r.rarity === 5) G.Audio.sfx('legend');
       if (r.shiny) G.Audio.sfx('shiny');
+      // Su grito (en la ×10, sólo los de 4-5★ y los shiny).
+      if (!ten || big) G.Audio.cry(r.dex, { shiny: r.shiny });
       if (big) burst(colOf(r), r.rarity === 5 || r.shiny ? 60 : 30);
       st.tray.push({ sym: symOf(r), y: 104, vy: 0, done: false });
       await wait(ten ? (big ? 0.7 : 0.28) : 1.0);

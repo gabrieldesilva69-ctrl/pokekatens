@@ -112,6 +112,7 @@ G.Spawner = (() => {
     if (shiny) {
       say('¡Un ' + e.name + ' shiny anda cerca!', 3.4);
       G.Audio.sfx('shiny');
+      G.Audio.cry(e.dex, { shiny: true });
     }
     return e;
   }
@@ -124,6 +125,7 @@ G.Spawner = (() => {
     say('¡' + e.name + (e.shiny ? ' shiny' : '') + ' salvaje apareció!', 3.2);
     G.Camera.kick(1.1);
     G.Audio.sfx('boss');
+    G.Audio.cry(e.dex, { shiny: e.shiny });
     return e;
   }
 

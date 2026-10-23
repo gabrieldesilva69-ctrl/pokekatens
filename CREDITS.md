@@ -136,6 +136,8 @@ no se sube).
   896 Glastrier, 916 Oinkologne, 933 Naclstack y 1007 Koraidon: los sprites son los
   de SpriteCollab (artistas de arriba) recoloreados con los colores de Pokémon
   Edición Reloaded (`tools/shiny_from_reloaded.py`).
+- **Gritos de los Pokémon** (`assets/cries/`): los de Pokémon Edición Reloaded,
+  pasados a MP3 ligero con `tools/import_cries.py`.
 
 ## Datos
 

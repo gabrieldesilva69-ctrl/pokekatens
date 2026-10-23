@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-23', title: ['PokeKatens: shiny para todos y red en la sala', 'PokeKatens: shiny for everyone and network in the room'], new: [
+    ['Los Pokémon ya tienen su grito, de Pokémon Edición Reloaded, de F3R: suena al salir en el gacha (en la tirada ×10, los de 4 y 5 estrellas y los shiny), al elegir compañero o tocarlo en su ficha de la colección, al empezar la partida y cuando aparece un jefe, un legendario de grieta o un shiny salvaje. Se quitan en Ajustes > Sonido.',
+     'Pokémon now have their cry, from Pokémon Reloaded Edition, by F3R: it plays when they come out of the gacha (in the ×10 pull, the 4 and 5 star ones and shinies), when you choose your partner or tap it on its collection page, when the run starts and when a boss, a rift legendary or a wild shiny appears. You can turn them off in Settings > Sound.'],
     ['Cooperativo: en la sala, cada jugador ve el tipo de red de cada uno (abierta, normal, estricta o bloqueada) y, si no conecta, el motivo más probable.',
      'Co-op: in the room, every player sees each one\'s network type (open, normal, strict or blocked) and, if it doesn\'t connect, the most likely reason.'],
     ['Los 8 Pokémon que no tenían shiny (Karrablast, Greedent, Barraskewda, Milcery, Glastrier, Oinkologne, Naclstack y Koraidon) ya lo tienen, con los colores de Pokémon Edición Reloaded, de F3R. Antes, si salían shiny, se veían con los colores normales.',

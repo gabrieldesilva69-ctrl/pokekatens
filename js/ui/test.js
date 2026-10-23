@@ -87,6 +87,7 @@ G.TestUI = (() => {
     save.personality = result ? { trait: result.trait, scores } : null;
     G.DB.grant(dex, 'starter');
     G.DB.commit();
+    G.Audio.cry(dex);
     G.UI.toast('¡' + G.DEX_BY[dex].name + ' se une a ti!');
     G.Flow.goMenu();
   }

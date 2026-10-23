@@ -1,7 +1,7 @@
 /* ============ sw.js — para poder instalar el juego como app ============
  * - Código del juego (html, js, css): primero la red, así cada actualización
  *   llega al momento; si no hay conexión, la última copia guardada.
- * - Sprites, iconos y fuente: no cambian nunca, se sirven de la caché
+ * - Sprites, iconos, fuente y gritos: no cambian nunca, se sirven de la caché
  *   (se van guardando según se usan: no se descarga todo de golpe).
  * - Firebase y demás servicios de fuera no se tocan.
  */
@@ -22,7 +22,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
-  const art = /\/assets\/(pokemon|icons|fonts)\//.test(url.pathname);
+  const art = /\/assets\/(pokemon|icons|fonts|cries)\//.test(url.pathname);
   if (art) {
     e.respondWith(caches.open(ART).then(async c => {
       const hit = await c.match(req);

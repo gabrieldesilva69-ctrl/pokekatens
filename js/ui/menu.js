@@ -336,6 +336,9 @@ G.MenuUI = (() => {
     $('dex-big').style.setProperty('--stage-c', !own ? '#5b83d6' : viewShiny ? '#9ae6ff' : G.U.TYPE_COLOR[p.types[0]]);
     $('dex-big').classList.toggle('shiny', own && viewShiny);
     G.UI.sprite($('dex-big'), dex, { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny });
+    // Tocar el sprite: su grito (sólo si ya lo tienes).
+    $('dex-big').onclick = own ? () => G.Audio.cry(dex, { shiny: viewShiny }) : null;
+    $('dex-big').style.cursor = own ? 'pointer' : '';
     box.querySelectorAll('.seg button').forEach(b => {
       b.onclick = () => { viewShiny = b.dataset.v === '1'; showDetail(dex); };
     });
@@ -346,6 +349,7 @@ G.MenuUI = (() => {
       s.partner = dex;
       s.partnerShiny = hasSh && viewShiny;
       G.DB.commit();
+      G.Audio.cry(dex, { shiny: s.partnerShiny });
       G.UI.toast(p.name + (s.partnerShiny ? ' shiny' : '') + ' es ahora tu compañero');
       renderGrid(true); showDetail(dex);
     };

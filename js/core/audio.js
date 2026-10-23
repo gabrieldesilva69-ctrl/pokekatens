@@ -1,9 +1,11 @@
 /* ============ audio.js — sintetizador, secuenciador y efectos de sonido ============
- * Todo el sonido se genera en el momento con Web Audio: no hay ficheros.
+ * Todo el sonido se genera en el momento con Web Audio; los únicos ficheros
+ * son los gritos de los Pokémon (cry).
  *
  *   G.Audio.music('village')   cambia de tema con fundido (ver data/music.js)
  *   G.Audio.sfx('coin')        efecto de sonido (con límite de repetición)
  *   G.Audio.setVolume('music' | 'sfx', 0..1) · toggleMute()
+ *   G.Audio.cry(dex)           grito del Pokémon (lo único grabado, ver abajo)
  *
  * Los navegadores no dejan sonar nada hasta el primer clic o tecla, así que
  * el contexto se crea entonces y arranca la música que estuviera pedida.
@@ -466,6 +468,67 @@ G.Audio = (() => {
     try { fn(opts); } catch (e) { /* un efecto nunca debe romper el juego */ }
   }
 
+  // ---------------- gritos ----------------
+  /*
+   * Gritos de Pokémon Edición Reloaded (de F3R) en assets/cries/<dex>.mp3
+   * (tools/import_cries.py). Sólo se bajan la primera vez que suenan y se
+   * quedan en memoria. Van por el bus de efectos: respetan su volumen y el
+   * silencio. Como mucho uno a la vez (si llega otro mientras suena, se
+   * descarta) y nunca en bucle. Se quitan en Ajustes → Sonido (G.Settings 'cries').
+   * Con file:// no va fetch(): se usa un <audio>, con el volumen de efectos.
+   * opts.shiny: el mismo grito. opts.mega: el de su forma normal hasta que
+   * haya gritos de mega (idea 4 de docs/IDEAS-RELOADED.md).
+   */
+  const CRY_VOL = 0.22;                          // los efectos sintetizados suenan a ~0,05
+  const cries = new Map();                        // dex -> AudioBuffer | <audio> | 'loading' | 'fail'
+  let cryUntil = 0;                               // hasta cuándo suena el grito de ahora (performance.now)
+
+  function cry(dex, opts = {}) {
+    dex = +dex;
+    if (!dex || (G.CRY_MISSING && G.CRY_MISSING.has(dex))) return;
+    if (G.Settings && G.Settings.get('cries') === false) return;
+    if (!ctx || settings.muted || settings.sfx <= 0 || ctx.state !== 'running') return;
+    if (performance.now() < cryUntil) return;
+    const asked = performance.now();
+    const have = cries.get(dex);
+    if (have === 'fail' || have === 'loading') return;
+    if (have) return playCry(have);
+    const src = `assets/cries/${dex}.mp3`;
+    if (location.protocol === 'file:') {
+      const el = new Audio(src);
+      el.preload = 'auto';
+      cries.set(dex, el);
+      return playCry(el);
+    }
+    cries.set(dex, 'loading');
+    fetch(src)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then(b => new Promise((res, rej) => ctx.decodeAudioData(b, res, rej)))
+      .then(buf => {
+        cries.set(dex, buf);
+        // Si tardó en bajar, el momento ya pasó: se queda para la próxima vez.
+        if (performance.now() - asked < 1500 && performance.now() >= cryUntil) playCry(buf);
+      })
+      .catch(() => cries.set(dex, 'fail'));
+  }
+
+  function playCry(c) {
+    try {
+      if (c instanceof AudioBuffer) {
+        const s = ctx.createBufferSource(), g = ctx.createGain();
+        s.buffer = c; g.gain.value = CRY_VOL;
+        s.connect(g).connect(sfxBus);
+        s.start();
+        cryUntil = performance.now() + c.duration * 1000;
+      } else {
+        c.volume = G.U.clamp(settings.sfx * CRY_VOL * 2.4, 0, 1);
+        c.currentTime = 0;
+        c.play().catch(() => {});
+        cryUntil = performance.now() + (c.duration > 0 ? c.duration * 1000 : 1500);
+      }
+    } catch (e) { /* un grito nunca debe romper el juego */ }
+  }
+
   /** Para pruebas: mide pico y RMS de la salida durante `ms` milisegundos. */
   function debugMeter(ms = 2000) {
     if (!ctx) return Promise.resolve(null);
@@ -501,7 +564,7 @@ G.Audio = (() => {
   }
 
   return {
-    music, sfx, setVolume, toggleMute, unlock, debugMeter, debugStream,
+    music, sfx, cry, setVolume, toggleMute, unlock, debugMeter, debugStream,
     /** ¿Ya puede sonar? (el navegador sólo deja tras tocar algo, salvo excepciones) */
     canPlay() { return !!ctx && ctx.state === 'running'; },
     get settings() { return settings; },
