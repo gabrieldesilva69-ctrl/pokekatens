@@ -6,6 +6,16 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-22', title: ['PokeKatens: cooperativo más estable', 'PokeKatens: more stable co-op'], fix: [
+    ['Cooperativo: con un amigo en otra casa o con otra conexión, la sala se quedaba en «No se pudo conectar (reintentando…)» para siempre, aunque en la misma red funcionaba. Una parte de los datos para encontrarse por internet se perdía por el camino; ahora llega entera.',
+     'Co-op: with a friend in another home or on another connection, the room got stuck on "Could not connect (retrying…)" forever, even though it worked on the same network. Part of the data used to find each other over the internet got lost on the way; now it all arrives.'],
+    ['Cooperativo: a los invitados ya no les sale «La sala se ha cerrado» a mitad de partida (a veces a los pocos minutos o al entrar en una grieta) mientras los demás seguían jugando. Pasaba cuando su conexión con el servidor de las salas se cortaba un momento; ahora la partida sigue y la sala se recupera sola.',
+     'Co-op: guests no longer get "The room has been closed" in the middle of a run (sometimes after a few minutes or when entering a rift) while the others kept playing. It happened when their connection to the rooms server dropped for a moment; now the run goes on and the room recovers on its own.'],
+    ['Cooperativo: si se corta un momento la conexión con el anfitrión (un bache de la wifi o de los datos), el invitado ya no pierde la partida: se queda en pausa hasta 45 segundos mientras se vuelve a conectar y sigue jugando.',
+     'Co-op: if the connection with the host drops for a moment (a Wi-Fi or mobile data hiccup), the guest no longer loses the run: it pauses for up to 45 seconds while reconnecting and then keeps playing.'],
+    ['Cooperativo: si te quedas fuera de una partida mientras los demás siguen, ya no te sale «La sala se ha cerrado»: esperas en la sala y, cuando acaben, seguís juntos.',
+     'Co-op: if you drop out of a run while the others keep playing, you no longer get "The room has been closed": you wait in the room and, when they finish, you play together again.']
+  ] },
   { d: '2026-10-21', title: ['PokeKatens: versión no oficial', 'PokeKatens: unofficial version'], new: [
     ['Regalos: el administrador ya puede regalar monedas y tickets a un jugador. Los recibes la próxima vez que entres al juego, con un aviso.',
      'Gifts: the admin can now give coins and tickets to a player. You get them the next time you open the game, with a notice.'],

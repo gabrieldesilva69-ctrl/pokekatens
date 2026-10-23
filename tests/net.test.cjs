@@ -176,3 +176,101 @@ test('STUN only: no request is made and every peer gets only the two Google STUN
   assert.equal(configs.length, 2);
   for (const cfg of configs) assert.deepEqual(cfg, { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] });
 });
+
+function signalNetwork(me, isHost) {
+  const pcs = [], G = { NetCodec: codec(), DB: { fb: { uid: me, rtdb: {
+    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve() })
+  } } } };
+  // Como el navegador: remoteDescription sólo se rellena al acabar setRemoteDescription.
+  class PC {
+    constructor() { pcs.push(this); this.added = []; this.remoteDescription = null; }
+    createDataChannel() { return this.dc = { readyState: 'connecting', send() {}, close() {} }; }
+    createOffer() { return Promise.resolve({ type: 'offer' }); }
+    createAnswer() { return Promise.resolve({ type: 'answer' }); }
+    setLocalDescription(d) { this.localDescription = { toJSON: () => d }; return Promise.resolve(); }
+    setRemoteDescription(d) { return new Promise(r => setImmediate(() => { this.remoteDescription = d; r(); })); }
+    addIceCandidate(c) { if (!this.remoteDescription) return Promise.reject(Error('no remote')); this.added.push(c); return Promise.resolve(); }
+    close() {}
+  }
+  new Function('G', 'RTCPeerConnection', 'setTimeout', 'clearTimeout', source('js/net/net.js'))(G, PC, () => 1, () => {});
+  let onChild = null;
+  G.DB.fb.rtdb.ref = () => ({ on: (ev, fn) => { onChild = fn; }, off() {}, push: () => Promise.resolve() });
+  G.Net.open('room', isHost, 'host');
+  const deliver = (f, sig) => onChild({ val: () => JSON.stringify({ f, sig }), ref: { remove: () => Promise.resolve() } });
+  return { N: G.Net, pcs, deliver };
+}
+
+test('ICE candidates that arrive right behind the answer or offer are not lost (different networks)', async () => {
+  const h = signalNetwork('host', true);
+  h.N.syncMembers(['host', 'a']); await settle();
+  h.deliver('a', { sdp: { type: 'answer' } });
+  h.deliver('a', { c: { candidate: 'srflx-1' } });
+  h.deliver('a', { c: { candidate: 'srflx-2' } });
+  await settle(); await settle();
+  assert.deepEqual(h.pcs[0].added.map(c => c.candidate), ['srflx-1', 'srflx-2']);
+  const g = signalNetwork('a', false);
+  g.deliver('host', { sdp: { type: 'offer' } });
+  g.deliver('host', { c: { candidate: 'srflx-h' } });
+  await settle(); await settle();
+  assert.deepEqual(g.pcs[0].added.map(c => c.candidate), ['srflx-h']);
+});
+
+function coopWithCuts(host) {
+  let peerFn = null, msgFn = null;
+  const timers = new Map(), lost = [], said = [], dropped = [];
+  let mode = 'direct', nextT = 0;
+  const G = {};
+  G.Net = { uid: host ? 'host' : 'guest', on(fn) { msgFn = fn; }, onPeer(fn) { peerFn = fn; }, slow: () => false,
+    send() {}, toHost() {}, mode: () => mode };
+  G.Player = class { constructor() { this.maxHp = 300; } };
+  G.DEX_BY = { 25: { dex: 25 } }; G.baseStartOf = () => 'thundershock';
+  G.Sprites = { preload() {} }; G.U = { dist2: () => 0 };
+  G.Projectiles = { clearOrbs() {} }; G.Spawner = { say: s => said.push(s) };
+  G.Social = { me: { name: 'yo' }, dropMember: u => dropped.push(u) };
+  const setT = fn => { timers.set(++nextT, fn); return nextT; };
+  new Function('G', 'document', 'setTimeout', 'clearTimeout', source('js/net/coop.js'))(G, { addEventListener() {} }, setT, id => timers.delete(id));
+  G.Coop.begin({ host: 'host', members: [{ uid: 'host', name: 'Ana', dex: 25 }, { uid: 'guest', name: 'Bea', dex: 25 }] }, { x: 0, y: 0 },
+    { lost: m => lost.push(m), mateLeft() {}, waiting() {} });
+  const other = host ? 'guest' : 'host';
+  return {
+    G, lost, said, dropped, timers,
+    cut() { mode = 'failed'; peerFn(other, 'failed'); },
+    back() { mode = 'direct'; peerFn(other, 'direct'); },
+    expire() { for (const [id, fn] of [...timers]) { timers.delete(id); fn(); } },
+    bye() { msgFn(other, { k: 'f', ev: [['bye']] }); }
+  };
+}
+
+test('co-op cut mid-run: the guest waits for the host to reconnect instead of losing the run', () => {
+  const c = coopWithCuts(false);
+  c.cut();
+  assert.equal(c.lost.length, 0);
+  assert.ok(c.G.Coop.active);
+  c.back();
+  assert.equal(c.timers.size, 0);
+  c.expire();
+  assert.equal(c.lost.length, 0);
+  // a second cut that never comes back does end it, after the wait
+  c.cut(); c.cut();
+  assert.equal(c.timers.size, 1);
+  c.expire();
+  assert.equal(c.lost.length, 1);
+  assert.ok(!c.G.Coop.active);
+});
+
+test('co-op cut mid-run: the host keeps the guest while it reconnects and removes it only if it never does', () => {
+  const c = coopWithCuts(true);
+  c.cut();
+  assert.equal(c.G.Coop.puppets().length, 1);
+  assert.ok(c.G.Coop.keeps('guest'));
+  c.back();
+  assert.ok(c.said.some(s => s.includes('ha vuelto')));
+  c.cut(); c.expire();
+  assert.equal(c.G.Coop.puppets().length, 0);
+  assert.deepEqual(c.dropped, ['guest']);
+  // leaving on purpose during the wait never removes them from the room
+  const d = coopWithCuts(true);
+  d.cut(); d.bye(); d.expire();
+  assert.deepEqual(d.dropped, []);
+  assert.equal(d.G.Coop.puppets().length, 0);
+});

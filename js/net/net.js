@@ -166,7 +166,19 @@ G.Net = (() => {
     } catch (e) { useRelay(u); }
   }
 
-  const pendingIce = new Map();     // candidatos que llegan antes que la oferta
+  // Candidatos que llegan antes de que esté puesta la descripción del otro. Ojo:
+  // remoteDescription sigue vacía mientras setRemoteDescription no ha acabado, y los
+  // candidatos llegan justo detrás de la oferta o la respuesta, así que pasa casi
+  // siempre. Antes, los del invitado que llegaban así al anfitrión se perdían: en la
+  // misma red se conectaba igual, pero desde casas distintas (cada uno tras su
+  // router) el anfitrión no llegaba a probar el camino y no conectaba nunca.
+  const pendingIce = new Map();
+
+  async function flushIce(from, p) {
+    const list = pendingIce.get(from) || [];
+    pendingIce.delete(from);
+    for (const c of list) await p.pc.addIceCandidate(c).catch(() => {});
+  }
 
   async function onSignal(from, sig) {
     let p = peers.get(from);
@@ -181,10 +193,9 @@ G.Net = (() => {
         const ans = await p.pc.createAnswer();
         await p.pc.setLocalDescription(ans);
         signal(from, { sdp: p.pc.localDescription.toJSON() });
-        for (const c of pendingIce.get(from) || []) await p.pc.addIceCandidate(c).catch(() => {});
-        pendingIce.delete(from);
+        await flushIce(from, p);
       } else if (sig.sdp && sig.sdp.type === 'answer') {
-        if (p && p.pc) await p.pc.setRemoteDescription(sig.sdp);
+        if (p && p.pc) { await p.pc.setRemoteDescription(sig.sdp); await flushIce(from, p); }
       } else if (sig.c) {
         if (p && p.pc && p.pc.remoteDescription) await p.pc.addIceCandidate(sig.c).catch(() => {});
         else { if (!pendingIce.has(from)) pendingIce.set(from, []); pendingIce.get(from).push(sig.c); }
@@ -219,6 +230,7 @@ G.Net = (() => {
     const p = peers.get(u);
     if (!p) return;
     clearTimeout(p.timer);
+    pendingIce.delete(u);           // eran de este intento; el siguiente trae los suyos
     p.mode = 'closed';
     try { if (p.dc) p.dc.close(); } catch (e) { /* nada */ }
     try { if (p.pc) p.pc.close(); } catch (e) { /* nada */ }
