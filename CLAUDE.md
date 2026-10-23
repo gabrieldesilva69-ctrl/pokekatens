@@ -66,6 +66,12 @@ de las entradas antiguas de JPTER78. Cada texto español nuevo lleva su fila
 en `js/data/lang-updates.js` (francés, italiano, portugués, chino simplificado y tradicional): si falta,
 `tests/i18n.test.cjs` falla. Los cambios de servidores, base de datos o costes **no** van ahí.
 
+## Cómo funciona el juego
+
+Antes de proponer o diseñar algo de juego, lee `docs/COMO-FUNCIONA-EL-JUEGO.md` (controles, combate,
+mapa, enemigos, gacha, progresión e ideas pendientes de los dueños). Lo que cuenten los dueños sobre
+el juego se apunta ahí, no aquí.
+
 ## Arquitectura
 
 - **Juego**: HTML + CSS + JavaScript sin frameworks, Canvas 2D. Cada módulo es un script clásico
@@ -112,6 +118,14 @@ PokeKatens es un derivado de PokéSurvivor bajo PolyForm Noncommercial 1.0.0:
 - El crédito visible se queda en la pantalla de entrada, en Ajustes y en el aviso legal:
   `Basado en PokéSurvivor de JPTER78 · versión no oficial y sin ánimo de lucro`.
 
+**Material de Pokémon Reloaded (excepción decidida por los dueños):** se pueden usar sprites, gritos,
+huevos, fondos y demás de Pokémon Reloaded (creado por F3R, https://pokemon-reloaded.blogspot.com; carpeta `Proyecto Reloaded*/`, en
+`.gitignore`), aunque no traigan licencia. Condiciones: se convierte con una herramienta de `tools/`
+(nunca se sube la carpeta), sólo lo que se use y ligero; crédito a "Pokémon Edición Reloaded, de F3R" (con enlace a su blog) en
+`CREDITS.md` y en Ajustes → Acerca de; **sólo contenido oficial de Pokémon** (nada de sus Pokémon ni
+megas inventados). Ideas y formatos: `docs/IDEAS-RELOADED.md`. Para cualquier otra fuente sigue
+haciendo falta licencia compatible y crédito.
+
 ## Reglas de código
 
 1. Comentarios y textos de la interfaz en español. Cada texto visible nuevo lleva su inglés en
@@ -135,7 +149,10 @@ PokeKatens es un derivado de PokéSurvivor bajo PolyForm Noncommercial 1.0.0:
 | `.claude/rules/escritorio.md` | `desktop/**`, `tools/desktop-smoke.cjs`, `tools/serve.cjs` |
 | `.claude/rules/traducciones.md` | `js/data/lang-*.js`, `js/data/changelog.js` |
 
-Recetas (skills): `anadir-pokemon`, `anadir-movimiento`, `anadir-funcion`, `publicar-version`.
+Recetas (skills): `anadir-pokemon`, `anadir-movimiento`, `anadir-funcion`, `publicar-version`, `gate`.
+Subagente: `revisor-reglas` (revisa la seguridad de las reglas y de lo que se guarda; sólo lee).
+Hooks (`.claude/hooks/`): `proteger-archivos.cjs` bloquea editar los archivos generados, `updater.js` y
+las licencias; `probar-idiomas.cjs` pasa las pruebas de idiomas al editar `js/data/lang-*.js` o `changelog.js`.
 
 ## No negociable
 

@@ -24,3 +24,6 @@ docs/CONTACTOS_CREADORES.md
 
 # Instalador de escritorio (lo genera: npm --prefix desktop run dist)
 desktop/dist/
+
+# Otro juego (Pokémon Reloaded) guardado aquí sólo para mirarlo: sin licencia, nunca se sube
+/Proyecto Reloaded*/
