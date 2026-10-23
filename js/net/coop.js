@@ -425,6 +425,7 @@ G.Coop = (() => {
         break;
       case 'c': { const m = mates.get(ev[1]); if (m) G.Combat.ghostCast(m.pl, ev[2], ev[3], ev[4], ev[5]); break; }
       case 'item': api.item(ev[1]); break;
+      case 'treat': if (api.treat) api.treat(ev[1]); break;
       case 'pk': G.Pickups.addRemote(ev[1], ev[2], ev[3], ev[4], ev[5]); break;
       case 'pc': G.Pickups.removeId(ev[1]); break;
       case 'mag': G.Pickups.pullAll(); G.FX.ring(local.x, local.y, 10, 420, '#ff9ed8', 0.6, 4); break;
@@ -496,9 +497,10 @@ G.Coop = (() => {
     emit(['pc', p.id]);
     if (p.kind === 'magnet') emit(['mag']);
     if (p.kind === 'bomb') emit(['bomb', r1(who.x), r1(who.y)]);
-    if ((p.kind === 'heal' || p.kind === 'item') && who !== local) {
+    const treat = p.kind === 'treat' && G.Items.TREAT[p.value] && !G.Items.TREAT[p.value].team;
+    if ((p.kind === 'heal' || p.kind === 'item' || treat) && who !== local) {
       const m = mates.get(who.uid);
-      if (m) m.q.push(p.kind === 'heal' ? ['heal', 0.3] : ['item', p.value]);
+      if (m) m.q.push(p.kind === 'heal' ? ['heal', 0.3] : [p.kind, p.value]);
     }
   }
 

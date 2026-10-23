@@ -25,7 +25,11 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - Los movimientos **evolucionan** al llegar a su nivel máximo.
 - **Tabla de tipos:** p. ej. un Rayo Burbuja le quita más a un Charmander.
 - **Climas** de vez en cuando (sol, lluvia, arena, nieve, niebla): potencian unos tipos y debilitan otros.
-- **Objetos** que salen en las runs (Restos, Cinta Elección…).
+- **Objetos** que salen en las runs (Restos, Cinta Elección…): 23 equipables, uno por run (`js/data/items.js`;
+  los que reaccionan a algo se miran con `pl.hasItem(id)` / `pl.item`). Y 8 de un solo uso que salen de cofres
+  (20 %; el de candado, siempre) y jefes (50 %) sin ocupar el hueco: Caramelo Exp. (un nivel al equipo), Bayas
+  Zidra, Atania y Meloc (se guardan, una de cada, y se usan solas; repetida, al momento) y cuatro Mochis (+5 %).
+  En grupo, Capa Furtiva e Incienso Raro sólo valen si los lleva el anfitrión (es quien mueve a los enemigos).
 - **Megaevolución** (`js/systems/mega.js`): con la Megapiedra de tu compañero (Tienda Kecleon, 8000 monedas,
   sólo la de tu compañero actual; o un 3 % al ganar una grieta), una barra se llena con 150 enemigos (un jefe
   cuenta 25) y con F (X en el mando, botón en el móvil) megaevoluciona 45 s: sprite, tipos, estadísticas y

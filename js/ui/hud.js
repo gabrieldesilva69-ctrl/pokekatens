@@ -366,6 +366,21 @@ G.HUD = (() => {
         ctx.textAlign = 'center';
         ctx.fillStyle = '#ffd23f';
         ctx.fillText(G.Items.BY[pl.item].name, ix + S / 2, iy - 6);
+        // Lo que va sumando: Metrónomo (+6 % cada 3 s) y Espray Bucal (8 s).
+        const extra = pl.item === 'metronome' && pl.metroT >= 3 ? '+' + 6 * Math.min(8, Math.floor(pl.metroT / 3)) + '%'
+          : pl.item === 'throatspray' && pl.sprayT > 0 ? Math.ceil(pl.sprayT) + 's' : '';
+        if (extra) {
+          ctx.font = F(800, 10);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(extra, ix + S / 2, iy + S - 4);
+        }
+      }
+      // Bayas guardadas (de un solo uso, data/items.js): en columna a su izquierda.
+      let by = iy;
+      for (const id of ['sitrus', 'atania', 'meloc']) {
+        if (!pl.berries[id]) continue;
+        G.Icons.draw(ctx, id, ix - 20, by, 16);
+        by += 18;
       }
     }
 

@@ -74,6 +74,12 @@ G.Player = class Player {
     this.dead = false;
     this.power = null;         // poder de altar activo: { def, t, dur }
     this.slowT = 0;            // pegado por una trampa
+    // Objetos (data/items.js): Metrónomo, Espray Bucal y las bayas de un solo uso.
+    this.metroT = 0;           // segundos seguidos con el mismo ataque
+    this.sprayT = 0; this.sprayCd = 0;
+    this.berries = {};         // id -> true (sitrus, atania, meloc)
+    this.berryAtkT = 0;        // Baya Atania en marcha
+    this.melocT = 0;           // Baya Meloc: inmune a frenazos
     this.item = null;          // objeto equipado (data/items.js), uno por run
     this.sashT = -999;         // última vez que salvó la Banda Focus
     this.bellHeal = 0;         // curación pendiente del Cascabel Concha
@@ -108,17 +114,29 @@ G.Player = class Player {
    */
   atkFor(m) {
     const cat = m && m.cat, b = cat === 'physical' ? this.buffs.patk : cat === 'special' ? this.buffs.satk : null;
-    return this.atk * G.Stats.fit(this.mon, cat) * (b ? 1 + b.n * b.amount : 1) * (m && this.monoType(m.type) ? Player.MONO_K : 1);
+    return this.atk * G.Stats.fit(this.mon, cat) * (b ? 1 + b.n * b.amount : 1) * (m && this.monoType(m.type) ? Player.MONO_K : 1) * this.itemK(m);
   }
+  /** Lo que suben el daño los objetos que miran el ataque (data/items.js). */
+  itemK(m) {
+    let k = this.berryAtkT > 0 ? 1.3 : 1;                                    // Baya Atania
+    if (!m || !this.item) return k;
+    if (this.item === 'metronome') k *= 1 + 0.06 * Math.min(8, Math.floor(this.metroT / 3));
+    else if (this.item === 'punchingglove' && m.cat === 'physical' && Player.CONTACT.includes(m.kind)) k *= 1.3;
+    else if (this.item === 'throatspray' && this.sprayT > 0 && m.cat === 'special') k *= 1.25;
+    return k;
+  }
+  /** Guante de Boxeo: los ataques de contacto (golpe, giro, carga y empujón). */
+  static get CONTACT() { return ['melee', 'spin', 'dash', 'shove']; }
   /** Monotipo (19-10-2026): los de un solo tipo pegan un +20 % con los ataques de su tipo (tienen menos variedad). */
   static get MONO_K() { return 1.2; }
   monoType(type) { return this.mon.types.length === 1 && type === this.mon.types[0]; }
   get spd() {
     // (Habilidades: "steady" no se frena; speed() multiplica, ver data/ability-fx.js.)
-    const ab = this.abil || {}, stuck = this.slowT > 0 && !ab.steady;
+    // (Objetos: Botas Gruesas, el agua no frena; Gafa Protectora, el clima tampoco; Baya Meloc, nada.)
+    const ab = this.abil || {}, free = this.melocT > 0, stuck = this.slowT > 0 && !ab.steady && !free;
     const s = this.baseSpd * this.spdMul * (1 + this.buffs.spd.n * this.buffs.spd.amount) * (stuck ? 0.5 : 1) * (ab.speed ? ab.speed(this) : 1);
-    const w = G.Weather.speedFor(this.mon.types);
-    const slow = this.inLiquid && !ab.steady ? G.World.liquidEffect(this.mon.types).slow || 1 : 1;
+    const w = this.hasItem('safetygoggles') ? 1 : G.Weather.speedFor(this.mon.types);
+    const slow = this.inLiquid && !ab.steady && !free && !this.hasItem('heavydutyboots') ? G.World.liquidEffect(this.mon.types).slow || 1 : 1;
     return G.Judgment && G.Judgment.active ? G.Judgment.capSpd(s * slow * w) : s * slow * w;
   }
   get reduction() { return Math.min(0.8, this.dmgReduce + this.buffs.def.n * this.buffs.def.amount); }
@@ -173,6 +191,11 @@ G.Player = class Player {
       return;
     }
     this.active = i;
+    this.metroT = 0;                                       // Metrónomo: vuelve a empezar
+    if (this.hasItem('throatspray') && this.sprayCd <= 0) {
+      this.sprayT = 8; this.sprayCd = 12;
+      G.FX.dmgText(this.x, this.y - this.bodyH - 8, G.T('Espray Bucal'), '#4fb4ff');
+    }
     G.Projectiles.clearOrbs(this);
     G.Audio.sfx('select');
     for (const m of this.slots[i]) m.t = Math.min(m.t, m.cd * 0.35);
@@ -307,6 +330,8 @@ G.Player = class Player {
       G.FX.ring(this.x, this.y, 6, 70, '#c9b48a', 0.5, 4);
     }
     if (ab && ab.hurt && this.hp > 0) ab.hurt(this, type, cls);
+    // Bayas Zidra y Atania: al bajar del 25 % de vida.
+    if (this.hp > 0 && this.hp < this.maxHp * 0.25) { this.useBerry('sitrus'); this.useBerry('atania'); }
     if (this.hp <= 0) {
       this.hp = 0; this.dead = true;
       this.anim.play('Faint', { hold: true });
@@ -342,6 +367,33 @@ G.Player = class Player {
 
   // ---------------- objeto equipado ----------------
   hasItem(id) { return this.item === id; }
+
+  // ---------------- de un solo uso (data/items.js: TREATS) ----------------
+  /** Lo has cogido del suelo. Las bayas se guardan (una de cada); si ya la tenías, se usa ya. */
+  takeTreat(id) {
+    const t = G.Items.TREAT[id];
+    if (!t) return;
+    G.FX.dmgText(this.x, this.y - this.bodyH - 10, G.T(t.name), '#ffd23f', true);
+    if (t.berry) {
+      if (this.berries[id]) { this.berries[id] = false; this.berryEffect(id); }
+      else this.berries[id] = true;
+      return;
+    }
+    if (t.use) t.use(this);
+  }
+  /** Gasta esa baya si la llevas. */
+  useBerry(id) {
+    if (!this.berries[id]) return;
+    this.berries[id] = false;
+    this.berryEffect(id);
+  }
+  berryEffect(id) {
+    if (id === 'sitrus') this.heal(this.maxHp * 0.3);
+    else if (id === 'atania') this.berryAtkT = 10;
+    else if (id === 'meloc') { this.slowT = 0; this.melocT = 5; }
+    G.FX.ring(this.x, this.y, 6, 60, { sitrus: '#ffd23f', atania: '#ff7b3d', meloc: '#ff8ad8' }[id], 0.4, 3);
+    G.Audio.sfx('heal');
+  }
 
   /** Se pone un objeto (y se quita el que llevara). */
   equip(id) {
@@ -383,6 +435,14 @@ G.Player = class Player {
       if (b.n > 0) { b.t -= dt; if (b.t <= 0) b.n = 0; }
     }
     if (this.slowT > 0) this.slowT -= dt;
+    if (!this.frozen) this.metroT += dt;
+    if (this.sprayT > 0) this.sprayT -= dt;
+    if (this.sprayCd > 0) this.sprayCd -= dt;
+    if (this.berryAtkT > 0) this.berryAtkT -= dt;
+    if (this.melocT > 0) this.melocT -= dt;
+    // Baya Meloc: en cuanto algo te frena (trampa pegajosa, agua o clima), te limpia.
+    if (this.berries.meloc && (this.slowT > 0 || (this.inLiquid && (G.World.liquidEffect(this.mon.types).slow || 1) < 1)
+        || G.Weather.speedFor(this.mon.types) < 1)) this.useBerry('meloc');
     if (this.bellHeal > 0) { const h = Math.min(this.bellHeal, 4 * dt); this.hp = Math.min(this.maxHp, this.hp + h); this.bellHeal -= h; }
     if (this.power && (this.power.t -= dt) <= 0) { this.power.def.off(this); this.power = null; }
     if (this.regen > 0) this.hp = Math.min(this.maxHp, this.hp + this.regen * dt);
@@ -413,7 +473,7 @@ G.Player = class Player {
     this.inLiquid = !(this.abil && this.abil.levitate) && G.World.isLiquid(this.x, this.y);
     if (this.inLiquid) {
       const le = G.World.liquidEffect(this.mon.types);
-      if (le.dmg && !(this.abil && this.abil.lavaProof)) {
+      if (le.dmg && !(this.abil && this.abil.lavaProof) && !this.hasItem('heavydutyboots')) {
         this.lavaTick -= dt;
         if (this.lavaTick <= 0) {
           this.lavaTick = le.every; this.invuln = 0;

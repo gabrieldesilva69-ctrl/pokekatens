@@ -48,7 +48,9 @@ G.Hazards = (() => {
         // (Humedad: la explosión de un kamikaze no le daña, ver data/ability-fx.js.)
         if (pl && !pl.dead && inside(h, pl.x, pl.y, pl.r) && !(h.boom && pl.abil && pl.abil.damp)) {
           pl.invuln = 0;
-          pl.hurt(h.pct ? Math.max(h.dmg, pl.maxHp * h.pct) : h.dmg, h.type, !!h.pure, h.cat);
+          // (Supertapones, data/items.js: un 30 % menos.)
+          const pads = pl.hasItem('superpads') ? 0.7 : 1;
+          pl.hurt((h.pct ? Math.max(h.dmg, pl.maxHp * h.pct) : h.dmg) * pads, h.type, !!h.pure, h.cat);
         }
       }
       if (h.hit && h.t >= h.delay + h.end) list.splice(i, 1);

@@ -42,6 +42,13 @@
   const PCT_REF = 60000;
   const pctHp = e => (e.maxHp <= PCT_REF ? e.maxHp : PCT_REF * Math.sqrt(e.maxHp / PCT_REF));
 
+  /** Capa Furtiva (data/items.js): ¿está este enemigo cerca de quien la lleva? (curas y escudos no le llegan) */
+  const CLOAK_R = 260;
+  function cloaked() {
+    const ps = G.Game.everyone().filter(p => p.item === 'covertcloak' && !p.dead);
+    return ps.length ? e => ps.some(p => G.U.dist2(p.x, p.y, e.x, e.y) < CLOAK_R * CLOAK_R) : () => false;
+  }
+
   class Enemy {
     constructor(def, x, y, sc, boss = false) {
       this.id = nextId++;
@@ -205,6 +212,8 @@
         for (let i = 0; i < 10; i++) G.Pickups.drop('coin', this.x + G.U.rand(-40, 40), this.y + G.U.rand(-30, 30), 5);
         // Los jefes siempre sueltan un objeto equipable.
         G.Pickups.drop('item', this.x - 26, this.y - 10, G.Items.roll());
+        // Y la mitad de las veces, uno de un solo uso (data/items.js).
+        if (Math.random() < 0.5) G.Pickups.drop('treat', this.x + 26, this.y - 10, G.Items.rollTreat());
       }
       G.Pickups.dropXp(this.x, this.y, this.xp, this.boss, !!this.legend, !!this.judge);
       if (this.golden && Math.random() < 0.35) G.Pickups.drop('coin', this.x + 6, this.y - 4, 3);
@@ -633,8 +642,9 @@
       const pow = Math.max(1, ...G.Game.everyone().map(p => (p.atk > 0 && p.baseAtk > 0 ? p.atk / p.baseAtk : 1)));
       const k = 0.07 * Math.min(2.5, Math.pow(pow, 0.35));
       let n = 0;
+      const cloak = cloaked();
       for (const e of G.EnemyMgr.queryCircle(this.x, this.y, 150)) {
-        if (e.dead || e.hp >= e.maxHp) continue;
+        if (e.dead || e.hp >= e.maxHp || cloak(e)) continue;
         // A un jefe, como mucho lo que le quitas en 0,4 s: así nunca se vuelve inmatable.
         const heal = e.maxHp * k;
         e.hp = Math.min(e.maxHp, e.hp + (e.boss ? Math.min(heal, bossDps(e) * BOSS_HEAL_S) : heal));
@@ -648,7 +658,8 @@
     }
 
     castShields() {
-      const near = G.EnemyMgr.queryCircle(this.x, this.y, 160).filter(e => !e.dead)
+      const cloak = cloaked();
+      const near = G.EnemyMgr.queryCircle(this.x, this.y, 160).filter(e => !e.dead && !cloak(e))
         .sort((a, b) => G.U.dist2(a.x, a.y, this.x, this.y) - G.U.dist2(b.x, b.y, this.x, this.y)).slice(0, 6);
       // A un jefe, el escudo es lo que le quitas en 1,2 s (no un 35 % de su vida
       // enorme), y uno cada 6 s aunque haya varios escuderos (shieldT empieza en 8).

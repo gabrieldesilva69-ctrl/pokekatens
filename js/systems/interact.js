@@ -73,11 +73,12 @@ G.Interact = (() => {
   function usePower(pl, p) {
     p.used = true;
     const pw = POWERS[p.kind];
-    pl.addPower(pw, POWER_TIME);
+    const dur = POWER_TIME * (pl.hasItem('mirrorherb') ? 2 : 1);       // Hierba Copia
+    pl.addPower(pw, dur);
     G.FX.ring(p.x, p.y - 20, 8, 90, pw.color, 0.6, 5);
     G.FX.burst(pl.x, pl.y - pl.bodyH * 0.5, pw.color, 24, 200);
     G.Audio.sfx('legend');
-    G.Spawner.say('¡Poder ' + pw.name + '! ' + pw.desc + ' durante ' + POWER_TIME + ' s', 3, true);
+    G.Spawner.say('¡Poder ' + pw.name + '! ' + pw.desc + ' durante ' + dur + ' s', 3, true);
   }
 
   /**
@@ -111,7 +112,9 @@ G.Interact = (() => {
     // (Levitación y Muro Mágico: las trampas no les hacen nada; Flexibilidad y
     // parecidas, la pegajosa no les frena. Ver data/ability-fx.js.)
     const ab = (pl && pl.abil) || {};
-    if (pl && !pl.dead && G.U.dist2(x, y, pl.x, pl.y) < (TRAP_R * 0.7) ** 2 && !ab.levitate && !ab.trapProof && !(k === 1 && ab.steady)) {
+    // (Botas Gruesas, data/items.js: tampoco.)
+    if (pl && !pl.dead && G.U.dist2(x, y, pl.x, pl.y) < (TRAP_R * 0.7) ** 2 && !ab.levitate && !ab.trapProof && !(k === 1 && ab.steady)
+        && !pl.hasItem('heavydutyboots')) {
       pl.invuln = 0;
       if (k === 0) pl.hurt(pl.maxHp * 0.1);
       else if (k === 1) { pl.slowT = 3.5; G.FX.dmgText(pl.x, pl.y - pl.bodyH - 6, '¡Pegajoso!', '#8bd94a'); }

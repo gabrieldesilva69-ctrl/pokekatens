@@ -252,6 +252,7 @@ G.Game = (() => {
     },
     lost(msg) { G.UI.toast(msg, 3600); endRun(false); },
     item(id) { offerItem(id); },
+    treat(id) { if (pl) pl.takeTreat(id); },
     mateLeft() {},
     /** Grupo: quién está eligiendo fusión. Mientras haya alguien, todo parado. */
     hold(names) {
@@ -439,7 +440,7 @@ G.Game = (() => {
 
   // ---------------- recogida ----------------
 
-  const PICK_SFX = { xp: 'xp', xpBig: 'xp', coin: 'coin', heal: 'heal', bomb: 'break', magnet: 'confirm', ticket: 'shiny', ticket10: 'legend', item: 'legend' };
+  const PICK_SFX = { xp: 'xp', xpBig: 'xp', coin: 'coin', heal: 'heal', bomb: 'break', magnet: 'confirm', ticket: 'shiny', ticket10: 'legend', item: 'legend', treat: 'confirm' };
 
   /*
    * Cooperativo: la elección de objeto y las cartas de nivel no pueden taparse.
@@ -512,6 +513,17 @@ G.Game = (() => {
     }
     if (p.kind === 'item') {
       if (mine) offerItem(p.value);
+      return;
+    }
+    // De un solo uso (data/items.js). El Caramelo sube un nivel al equipo (la experiencia es común);
+    // lo demás es de quien lo coge (a un compañero se lo manda G.Coop.collected).
+    if (p.kind === 'treat') {
+      const t = G.Items.TREAT[p.value];
+      if (!t) return;
+      if (t.team) {
+        pendingLevels += pl.gainXp(Math.max(1, pl.xpNext - pl.xp) / (pl.xpMul || 1) + 0.01);
+        G.FX.dmgText(who.x, who.y - who.bodyH - 10, G.T(t.name), '#4fd1ff', true);
+      } else if (mine) pl.takeTreat(p.value);
       return;
     }
     if (p.kind === 'ticket' || p.kind === 'ticket10') {

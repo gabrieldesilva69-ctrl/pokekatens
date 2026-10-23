@@ -42,7 +42,7 @@ G.Combat = (() => {
     // enemigo, como Ascuas tras Ataque Rápido, casi no se ve).
     m.castAt = performance.now();
 
-    run(pl, m);
+    runMove(pl, m);
   }
 
   function run(pl, m) {
@@ -97,8 +97,19 @@ G.Combat = (() => {
              bounce: m.bounce | 0, drain: m.drain || 0 };
   }
 
-  /** Tabla de tipos × clima para un ataque de tipo `type` contra `e`. */
-  function typeK(type, e) { return G.Types.mult(type, e.types) * G.Weather.mult(type); }
+  /** Tabla de tipos × clima para un ataque de tipo `type` contra `e`.
+   *  (Gafa Protectora, data/items.js: el clima sólo suma, nunca resta.) */
+  function typeK(type, e, pl) {
+    const w = G.Weather.mult(type);
+    return G.Types.mult(type, e.types) * (pl && pl.item === 'safetygoggles' ? Math.max(1, w) : w);
+  }
+
+  /** Lanza un ataque; con el Dado Trucado, los de varios proyectiles o golpes, uno más. */
+  function runMove(pl, m) {
+    const dice = pl.item === 'loadeddice' && (m.count | 0) >= 2;
+    if (dice) m.count++;
+    try { run(pl, m); } finally { if (dice) m.count--; }
+  }
 
   function fireProjectiles(pl, m) {
     const col = G.U.TYPE_COLOR[m.type];
@@ -718,7 +729,7 @@ G.Combat = (() => {
     ghost = true;
     try {
       pl.cast(m);
-      run(pl, m);
+      runMove(pl, m);
     } finally { ghost = false; }
   }
 
@@ -747,7 +758,7 @@ G.Combat = (() => {
   }
 
   function hit(pl, e, dmg, col, dx, dy, knock, m) {
-    const k = typeK(m.type, e) * G.Stats.taken(e.mon, m.cat) * abilOut(pl, m, e);
+    const k = typeK(m.type, e, pl) * G.Stats.taken(e.mon, m.cat) * abilOut(pl, m, e);
     const crit = isCrit(pl), sk = statusK(pl);
     dmg *= k * (crit ? critMul(pl) : 1);
     e.hurt(dmg, col, dx, dy, sk ? knock : 0, crit ? 'crit' : G.Types.label(G.Types.mult(m.type, e.types)));
@@ -859,7 +870,7 @@ G.Combat = (() => {
         }
 
         const crit = isCrit(pl), sk = statusK(pl);
-        const k = (p.mtype ? typeK(p.mtype, e) : 1) * G.Stats.taken(e.mon, p.mcat) * (crit ? critMul(pl) : 1) * abilOut(pl, p.src, e);
+        const k = (p.mtype ? typeK(p.mtype, e, pl) : 1) * G.Stats.taken(e.mon, p.mcat) * (crit ? critMul(pl) : 1) * abilOut(pl, p.src, e);
         e.hurt(p.dmg * k, p.color, p.vx || (e.x - pl.x), p.vy || (e.y - pl.y), sk ? p.knock : 0,
                crit ? 'crit' : p.mtype ? G.Types.label(G.Types.mult(p.mtype, e.types)) : null);
         if (Math.random() < 0.5) G.FX.sp('impact', p.vis ? p.vis.pal : 'normal', e.x, e.y - e.bodyH * 0.5, { life: 0.12, scale: 1 });

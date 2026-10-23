@@ -73,7 +73,9 @@ G.Spawner = (() => {
   function rollShiny(dex) {
     if (!G.Sprites.hasShiny(dex)) return false;
     if (forceShiny > 0) { forceShiny--; return true; }
-    return Math.random() < SHINY_RATE;
+    // Incienso Raro (data/items.js): el doble. Lo mira quien crea los enemigos (en grupo, el anfitrión).
+    const pl = G.Game.player;
+    return Math.random() < SHINY_RATE * (pl && pl.item === 'rareincense' ? 2 : 1);
   }
 
   // Como mucho 3 curanderos, 3 escuderos y 3 invocadores vivos a la vez

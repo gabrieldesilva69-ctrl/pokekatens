@@ -21,7 +21,8 @@ G.Pickups = (() => {
     coin:  { color: '#ffd23f', glow: '#b8860b', r: 5.5 },
     ticket:   { color: '#ffd23f', glow: '#c08a10', r: 7 },
     ticket10: { color: '#c47bff', glow: '#8a3fd0', r: 8 },
-    item:     { color: '#ffd23f', glow: '#c08a10', r: 9 }       // value = id del objeto
+    item:     { color: '#ffd23f', glow: '#c08a10', r: 9 },      // value = id del objeto
+    treat:    { color: '#ffffff', glow: '#9ab0d0', r: 7.5 }     // de un solo uso: value = id (data/items.js: TREATS)
   };
   /** Probabilidad de que un Pokémon normal suelte un ticket del gacha. */
   const BOSS_T10 = 1 / 3;               // ticket ×10 de un jefe normal
@@ -183,7 +184,14 @@ G.Pickups = (() => {
       } else {
         // Baya, imán y bomba: su icono pixel art.
         const ICON = { heal: 'berry', magnet: 'magnet', bomb: 'bomb', ticket: 'ticket', ticket10: 'ticket10' };
-        const sz = p.kind === 'ticket10' || p.kind === 'item' ? 24 : 18;
+        const sz = p.kind === 'ticket10' || p.kind === 'item' ? 24 : p.kind === 'treat' ? 20 : 18;
+        if (p.kind === 'treat') {
+          // De un solo uso: brillo blanco suave.
+          ctx.globalAlpha = 0.25 + Math.sin(p.t * 2) * 0.1;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(p.x, y, 14, 0, 6.2832); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
         if (p.kind === 'item') {
           // Objeto: brillo dorado latiendo, para que se vea desde lejos.
           ctx.globalAlpha = 0.35 + Math.sin(p.t * 1.5) * 0.15;
@@ -191,7 +199,7 @@ G.Pickups = (() => {
           ctx.beginPath(); ctx.arc(p.x, y, 18, 0, 6.2832); ctx.fill();
           ctx.globalAlpha = 1;
         }
-        G.Icons.draw(ctx, p.kind === 'item' ? p.value : ICON[p.kind], p.x - sz / 2, y - sz / 2 - 1, sz);
+        G.Icons.draw(ctx, p.kind === 'item' || p.kind === 'treat' ? p.value : ICON[p.kind], p.x - sz / 2, y - sz / 2 - 1, sz);
         continue;
       }
       ctx.fillStyle = 'rgba(255,255,255,.8)';

@@ -190,6 +190,68 @@ G.Icons = (() => {
     assaultvest: { pal: { g: '#4f8a3a', d: '#2f5a22', y: '#ffd23f' }, rows: [
       '............', '.kkk....kkk.', 'kggk....kggk', 'kgggkkkkgggk', 'kgggyggygggk', 'kgggggggggdk',
       'kggyggggygdk', 'kgggggggggdk', 'kgggggggggdk', 'kddddddddddk', 'kkkkkkkkkkkk', '............'] },
+    // ---------- objetos de la lista de Reloaded (23-10-2026, data/items.js) ----------
+    heavydutyboots: { pal: { b: '#8a5a2b', d: '#5a3818', y: '#ffd23f' }, rows: [
+      '............', '..kkkk......', '..kbbk......', '..kbbk......', '..kbbk......', '..kbbkkkk...',
+      '..kbbbbbbk..', '.kbbbbbbbbk.', '.kbybbbbybk.', '.kddddddddk.', '.kkkkkkkkkk.', '............'] },
+    metronome: { pal: { b: '#b07a4a', d: '#7a4f2a', w: '#f4f8ff', y: '#ffd23f' }, rows: [
+      '.....kk.....', '.....kyk....', '....kbwk....', '....kbwbk...', '...kbbwbk...', '...kbbwbbk..',
+      '..kbbbwbbk..', '..kbbbybbbk.', '.kbbbbbbbbk.', '.kdddddddddk', '.kkkkkkkkkkk', '............'] },
+    mirrorherb: { pal: { g: '#5fe08a', d: '#2f9a52', w: '#d6ffe2', s: '#c9d6ff' }, rows: [
+      '............', '..kk....kk..', '.kgwk..kgwk.', '.kggk..kggk.', '..kgdkkdgk..', '...kgddgk...',
+      '....kddk....', '....kddk....', '...kssssk...', '..kswwwssk..', '..kssssssk..', '...kkkkkk...'] },
+    covertcloak: { pal: { p: '#6a4ab0', d: '#3a2470', w: '#c9b0ff' }, rows: [
+      '....kkkk....', '...kppppk...', '..kpwpppdk..', '..kpppppdk..', '.kppppppddk.', '.kpppppppdk.',
+      'kppppppppddk', 'kpppppppppdk', 'kppppppppddk', 'kpdpdpdpdpdk', 'kdkdkdkdkdkk', '............'] },
+    punchingglove: { pal: { r: '#ff5f6d', d: '#b8283a', w: '#ffd8d8', y: '#ffd23f' }, rows: [
+      '............', '...kkkkk....', '..krrrrrk...', '.krwrrrrrkk.', '.krwrrrrrrrk', '.krrrrrrrrrk',
+      '.krrrrrrrrdk', '.kdrrrrrrddk', '..kddddddk..', '...kyyyyk...', '...kkkkkk...', '............'] },
+    superpads: { pal: { o: '#ff9a3d', d: '#b05a10', w: '#ffe0c0' }, rows: [
+      '............', '..kkk..kkk..', '.kowok.kowok', '.koook.koook', '.koook.koook', '.kodok.kodok',
+      '.kodok.kodok', '.kddk..kddk.', '..kk....kk..', '............', '............', '............'] },
+    throatspray: { pal: { b: '#4fb4ff', d: '#2a6fb0', w: '#cfe8ff', s: '#b0b8c8' }, rows: [
+      '....kkk.....', '...ksssk.ww.', '...kkskk.w..', '....kssk....', '...kkkkkk...', '..kbbbbbbk..',
+      '..kbwbbbbk..', '..kbwbbbdk..', '..kbbbbbdk..', '..kbbbbbdk..', '..kddddddk..', '...kkkkkk...'] },
+    loadeddice: { pal: { w: '#f4f8ff', s: '#b0b8c8', r: '#ff3048' }, rows: [
+      '............', '...kkkkkkk..', '..kwwwwwwsk.', '.kwwwwwwssk.', '.kkkkkkkssk.', '.kwrwwrwksk.',
+      '.kwwwwwwksk.', '.kwwrrwwksk.', '.kwwwwwwkk..', '.kwrwwrwk...', '.kkkkkkkk...', '............'] },
+    safetygoggles: { pal: { b: '#3a3a4a', c: '#7fe0ff', w: '#e8fbff' }, rows: [
+      '............', '............', '.kkkkkkkkkk.', 'kbkkbbbbkkbk', 'kkccckkccckk', 'kcwcckkcwcck',
+      'kcccckkcccck', 'kkcckbbkcckk', '.kkkk..kkkk.', '............', '............', '............'] },
+    expcharm: { pal: { y: '#ffd23f', o: '#c08a10', c: '#4fd1ff', w: '#fff4d6' }, rows: [
+      '....k..k....', '....kkkk....', '.....kk.....', '...kkyykk...', '..kywyyyok..', '.kywcccyyok.',
+      '.kyycwcyyok.', '.kyyccccyok.', '..kyyyyyok..', '...kooook...', '....kkkk....', '............'] },
+    luckincense: { pal: { y: '#ffd23f', o: '#c08a10', s: '#c9d6ff', w: '#f4f8ff' }, rows: [
+      '....s..s....', '...s..s.....', '....s..s....', '..kkkkkkkk..', '.kyyyyyyyyk.', '.kywyyyyyok.',
+      '..kyyyyyok..', '...kyyyok...', '....kook....', '...kyyyyk...', '..kkkkkkkk..', '............'] },
+    rareincense: { pal: { p: '#c47bff', d: '#6a3aa8', s: '#9ae6ff', w: '#f4f8ff' }, rows: [
+      '...s....s...', '....s..s....', '...s..ws....', '..kkkkkkkk..', '.kppppppppk.', '.kpwppppppk.',
+      '..kppppdpk..', '...kppddk...', '....kddk....', '...kppppk...', '..kkkkkkkk..', '............'] },
+    // ---------- de un solo uso (data/items.js: TREATS) ----------
+    expcandy: { pal: { c: '#4fd1ff', d: '#2a6fb0', w: '#e8fbff', y: '#ffd23f' }, rows: [
+      '............', '............', 'kk..kkkk..kk', 'kykkccwckkyk', 'kyyccwcccyyk', 'kyyccccccyyk',
+      'kykkcccdkkyk', 'kk..kkkk..kk', '............', '............', '............', '............'] },
+    sitrus: { pal: { y: '#ffd23f', o: '#e0a010', w: '#fff4d6', g: '#5fe08a' }, rows: [
+      '.....kgk....', '....kggk....', '...kkkkkk...', '..kywyyyok..', '.kywyyyyyok.', '.kyyyyyyyok.',
+      '.kyyyyyyyok.', '.kyyyyyyook.', '..kyyyyook..', '...kooook...', '....kkkk....', '............'] },
+    atania: { pal: { r: '#ff7b3d', d: '#b05a10', w: '#ffe0c0', g: '#5fe08a' }, rows: [
+      '....kgk.....', '...kggk.....', '...kkkkk....', '..krwrrrk...', '.krwrrrrrk..', '.krrrrrrrdk.',
+      '.krrrrrrrdk.', '..krrrrrddk.', '...krrrddk..', '....kdddk...', '.....kkk....', '............'] },
+    meloc: { pal: { p: '#ff8ad8', d: '#c04a98', w: '#ffe0f4', g: '#5fe08a' }, rows: [
+      '......kgk...', '.....kggk...', '..kkkkkkkk..', '.kppwppppdk.', 'kppwpppppppk', 'kpppppppppdk',
+      'kpppppppppdk', '.kpppppppdk.', '..kpppppdk..', '...kkdddk...', '.....kkk....', '............'] },
+    mochihp: { pal: { m: '#ff9ab0', d: '#c85a78', w: '#fff0f4' }, rows: [
+      '............', '............', '....kkkk....', '..kkmmwwkk..', '.kmmmmwwmmk.', 'kmmmmmmmmmmk',
+      'kmmmmmmmmmdk', 'kdmmmmmmmddk', '.kddddddddk.', '..kkkkkkkk..', '............', '............'] },
+    mochiatk: { pal: { m: '#ff7b3d', d: '#b05a10', w: '#ffe0c0' }, rows: [
+      '............', '............', '....kkkk....', '..kkmmwwkk..', '.kmmmmwwmmk.', 'kmmmmmmmmmmk',
+      'kmmmmmmmmmdk', 'kdmmmmmmmddk', '.kddddddddk.', '..kkkkkkkk..', '............', '............'] },
+    mochispd: { pal: { m: '#5fd4ff', d: '#2a6fb0', w: '#e8fbff' }, rows: [
+      '............', '............', '....kkkk....', '..kkmmwwkk..', '.kmmmmwwmmk.', 'kmmmmmmmmmmk',
+      'kmmmmmmmmmdk', 'kdmmmmmmmddk', '.kddddddddk.', '..kkkkkkkk..', '............', '............'] },
+    mochidef: { pal: { m: '#b0b8c8', d: '#6a7288', w: '#f4f8ff' }, rows: [
+      '............', '............', '....kkkk....', '..kkmmwwkk..', '.kmmmmwwmmk.', 'kmmmmmmmmmmk',
+      'kmmmmmmmmmdk', 'kdmmmmmmmddk', '.kddddddddk.', '..kkkkkkkk..', '............', '............'] },
     // ---------- medallas de logros (bronce, plata, oro) ----------
     medal1: { pal: { r: '#ff5f6d', q: '#b8283a', m: '#d08a4a', n: '#8a5226', w: '#ffd0a0', s: '#ffe8c8' }, rows: MEDAL },
     medal2: { pal: { r: '#4fb4ff', q: '#2a6fb0', m: '#c9d2de', n: '#7d8899', w: '#ffffff', s: '#ffffff' }, rows: MEDAL },
