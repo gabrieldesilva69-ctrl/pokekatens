@@ -254,14 +254,19 @@ def main():
         if d not in metas and os.path.isdir(os.path.join(OUT_ASSETS, str(d))):
             metas[d] = json.load(open(os.path.join(CACHE, fn), encoding='utf-8'))
 
-    # Respeta los de Pokémon Reloaded ("rl":1, tools/import_reloaded.py).
+    # Respeta los de Pokémon Reloaded ("rl":1, tools/import_reloaded.py) y los
+    # shiny hechos con sus colores ("rs":1, tools/shiny_from_reloaded.py).
     if os.path.exists(OUT_META):
         for line in io.open(OUT_META, encoding='utf-8'):
             m = re.match(r'^  (\d+): (\{.*\}),$', line.rstrip('\n'))
-            if m and int(m.group(1)) not in metas:
-                meta = json.loads(m.group(2))
+            if not m:
+                continue
+            dex, meta = int(m.group(1)), json.loads(m.group(2))
+            if dex not in metas:
                 if meta.get('rl'):
-                    metas[int(m.group(1))] = meta
+                    metas[dex] = meta
+            elif meta.get('rs') and not metas[dex].get('sh'):
+                metas[dex] = dict(metas[dex], sh=1, rs=1)
 
     lines = [
         '/* ============ sprites-meta.js — GENERADO, no editar a mano ============',
@@ -273,6 +278,7 @@ def main():
         ' *                 sa geometría shiny que difiera de la normal (raro)',
         ' *                 sm animaciones que le faltan al shiny',
         ' *                 rl=1 si viene de Pokémon Edición Reloaded (tools/import_reloaded.py)',
+        ' *                 rs=1 shiny con colores de Reloaded (tools/shiny_from_reloaded.py)',
         ' * Por animación:  w,h fotograma · n fotogramas · r filas',
         ' *                 d duración de cada fotograma (1/60 s)',
         ' *                 ax,ay ancla al suelo dentro del fotograma',

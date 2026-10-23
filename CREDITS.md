@@ -124,6 +124,19 @@ uso **no comercial** y con atribución a sus artistas.
 | YoukaiMinori | <@91001329228464128> | 252, 253 |
 | ◥θ┴θ◤ | DC:<@215638650434617345> | 157, 445, 501, 504, 505, 566, 577, 595, 627, 650, 651, 658, 661, 676, 684, 707, 724, 726, 728, 729, 730, 761, 763, 790, 823, 872, 907, 991 |
 
+## Pokémon Edición Reloaded
+
+Material de **Pokémon Edición Reloaded, de F3R**
+(<https://pokemon-reloaded.blogspot.com>), usado con crédito porque los dueños
+son fans de ese juego y quieren que la gente lo conozca. Sólo contenido oficial
+de Pokémon; se convierte con las herramientas de `tools/` (la carpeta del juego
+no se sube).
+
+- **Colores shiny** de 588 Karrablast, 820 Greedent, 847 Barraskewda, 868 Milcery,
+  896 Glastrier, 916 Oinkologne, 933 Naclstack y 1007 Koraidon: los sprites son los
+  de SpriteCollab (artistas de arriba) recoloreados con los colores de Pokémon
+  Edición Reloaded (`tools/shiny_from_reloaded.py`).
+
 ## Datos
 
 Stats base y nombres en español: [PokeAPI](https://pokeapi.co/),

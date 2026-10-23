@@ -76,7 +76,7 @@ Se edita `dev.html` (pantallas y orden de carga); `index.html` y `js/app.min.js`
 | `js/net/` | social (apodo, amigos, salas), net (WebRTC sólo con STUN, sin relé), coop, ranking, codec |
 | `js/ui/` | pantallas: menu, login, test (personalidad), hud, run-ui, gacha-ui, shop-ui, goals-ui, settings-ui, social-ui, ranking-ui, news-ui, mod-ui (moderación) … |
 | `js/game.js`, `js/main.js` | Flujo y bucle principal; `main.js` tiene `MAINTENANCE` |
-| `tools/` | Scripts; los `.py` regeneran lo marcado con \* (Python 3 + Pillow + internet, una sola vez): `fetch_sprites.py` (~20 min, reanudable con `tools/cache/`), `fetch_pokedex.py`, `fetch_credits.py` → `CREDITS.md`. `import_reloaded.py` convierte sprites de mapa de Pokémon Reloaded (`--mega N`, `--megas`, `--dex N`, `--faltan`, `--out` para probar) y marca sus entradas con `rl` |
+| `tools/` | Scripts; los `.py` regeneran lo marcado con \* (Python 3 + Pillow + internet, una sola vez): `fetch_sprites.py` (~20 min, reanudable con `tools/cache/`), `fetch_pokedex.py`, `fetch_credits.py` → `CREDITS.md`. `import_reloaded.py` convierte sprites de mapa de Pokémon Reloaded (`--mega N`, `--megas`, `--dex N`, `--faltan`, `--out` para probar) y marca sus entradas con `rl`. `shiny_from_reloaded.py` hace el shiny de los que SpriteCollab no dibujó, con los colores de los retratos de Reloaded (`rs` en los metadatos; sin `--aplicar` sólo deja la hoja de revisión en `tools/cache/`). `reloaded_ids.py` dice qué número tiene cada Pokémon en Reloaded |
 
 Donaciones: `js/data/funding.js` y `js/ui/support-ui.js` existen pero están vacíos a propósito (el botón
 de Ko-fi no sale nunca). PokeKatens no acepta dinero.
@@ -96,6 +96,12 @@ de Ko-fi no sale nunca). PokeKatens no acepta dinero.
 - **Metadatos en `.js`, no `.json`:** el juego nació para abrirse con `file://`, donde `fetch()` está bloqueado.
 - **Shiny:** en SpriteCollab son el mismo dibujo con otra paleta; están en `s/` y sólo 30 tienen geometría
   distinta (campo `sa` en los metadatos). Las hojas son PNG con paleta exacta (la mitad de peso).
+  Los 8 que SpriteCollab no dibujó en shiny (588, 820, 847, 868, 896, 916, 933, 1007) lo tienen recoloreado
+  con los colores de Pokémon Reloaded (campo `rs`): todos los Pokémon del juego tienen shiny.
+- **Números de Reloaded:** no son los de la Pokédex nacional a partir de los 400 y pico (mete formas y
+  Pokémon inventados por medio: Karrablast es su 596, Koraidon su 1385). Sus archivos van por su número;
+  `tools/reloaded_ids.py` lo saca de su lista de nombres. Pendiente: `--dex`/`--faltan` de
+  `import_reloaded.py` aún usan el número nacional.
 - **Audio:** sintetizador Web Audio con planificador anticipado (~150 ms por delante) y reverb por
   convolución con un impulso generado. Partituras en `js/data/music.js` (formato de texto propio). Los
   efectos tienen separación mínima entre repeticiones y tope de voces, para no saturar con 400 golpes a la vez.

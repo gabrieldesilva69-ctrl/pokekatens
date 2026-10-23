@@ -6,6 +6,10 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-23', title: ['PokeKatens: shiny para todos', 'PokeKatens: shiny for everyone'], new: [
+    ['Los 8 Pokémon que no tenían shiny (Karrablast, Greedent, Barraskewda, Milcery, Glastrier, Oinkologne, Naclstack y Koraidon) ya lo tienen, con los colores de Pokémon Edición Reloaded, de F3R. Antes, si salían shiny, se veían con los colores normales.',
+     'The 8 Pokémon that had no shiny (Karrablast, Greedent, Barraskewda, Milcery, Glastrier, Oinkologne, Naclstack and Koraidon) now have one, with the colours of Pokémon Reloaded Edition, by F3R. Before, if they came out shiny, they looked like the normal ones.']
+  ] },
   { d: '2026-10-22', title: ['PokeKatens: cooperativo más estable', 'PokeKatens: more stable co-op'], fix: [
     ['Cooperativo: con un amigo en otra casa o con otra conexión, la sala se quedaba en «No se pudo conectar (reintentando…)» para siempre, aunque en la misma red funcionaba. Una parte de los datos para encontrarse por internet se perdía por el camino; ahora llega entera.',
      'Co-op: with a friend in another home or on another connection, the room got stuck on "Could not connect (retrying…)" forever, even though it worked on the same network. Part of the data used to find each other over the internet got lost on the way; now it all arrives.'],

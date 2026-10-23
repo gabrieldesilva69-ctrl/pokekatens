@@ -21,6 +21,24 @@ ASSETS = os.path.join(ROOT, 'assets', 'pokemon')
 OUT = os.path.join(ROOT, 'CREDITS.md')
 
 
+# Material de Pokémon Edición Reloaded (excepción de los dueños, ver CLAUDE.md).
+# Se amplía con cada cosa nueva que se use de Reloaded.
+RELOADED_MD = '''
+## Pokémon Edición Reloaded
+
+Material de **Pokémon Edición Reloaded, de F3R**
+(<https://pokemon-reloaded.blogspot.com>), usado con crédito porque los dueños
+son fans de ese juego y quieren que la gente lo conozca. Sólo contenido oficial
+de Pokémon; se convierte con las herramientas de `tools/` (la carpeta del juego
+no se sube).
+
+- **Colores shiny** de 588 Karrablast, 820 Greedent, 847 Barraskewda, 868 Milcery,
+  896 Glastrier, 916 Oinkologne, 933 Naclstack y 1007 Koraidon: los sprites son los
+  de SpriteCollab (artistas de arriba) recoloreados con los colores de Pokémon
+  Edición Reloaded (`tools/shiny_from_reloaded.py`).
+'''
+
+
 def fetch(url):
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'pokesurvivor/1.0'})
@@ -74,6 +92,7 @@ def main():
         for (display, contact), dx in sorted(per_artist.items(), key=lambda kv: kv[0][0].lower()):
             nums = ', '.join(str(d) for d in sorted(dx))
             f.write(f'| {display} | {contact} | {nums} |\n')
+        f.write(RELOADED_MD)
         f.write('\n## Datos\n\n')
         f.write('Stats base y nombres en español: [PokeAPI](https://pokeapi.co/),\n')
         f.write('descargados una vez y guardados en `js/data/pokedex.js`.\n\n')
