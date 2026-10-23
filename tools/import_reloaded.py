@@ -8,7 +8,7 @@ marcada con "rl":1 (para los créditos y para que fetch_sprites.py la respete).
 
     python tools/import_reloaded.py --mega 6          # una mega (normal y shiny) -> 100006
     python tools/import_reloaded.py --megas           # todas las megas oficiales que tenga Reloaded
-    python tools/import_reloaded.py --dex 25          # un Pokémon (sólo normal: Reloaded no trae su shiny de mapa)
+    python tools/import_reloaded.py --dex 25          # un Pokémon (sólo normal; su shiny de mapa, file_id(N, True), aún no se convierte)
     python tools/import_reloaded.py --faltan          # los de 1-1025 que aún no tenemos
 
     --out DIR   carpeta de prueba: escribe DIR/<id>/ y DIR/sprites-meta-prueba.js
@@ -25,16 +25,21 @@ alto, largo + píxeles BGRA.
   P<id>_<d>   direcciones como el teclado numérico (2 abajo, 8 arriba, 4 izq.,
               6 der., diagonales), 3-8 fotogramas; si falta la izquierda, en espejo
   P<id>_A     atacar (una sola dirección) · _H recibir golpe · _S tumbado
-  ids 1..1025 normales · 100000+N mega · 101000+N mega shiny
+  ids: los de Reloaded, que NO son los nacionales a partir del 494 (mete formas
+  y Pokémon inventados por medio). Archivo P<n>: hasta el 1000, N normal y
+  1000+N shiny; del 1001 en adelante, N+1000 y N+2000 (file_id de
+  reloaded_ids.py). 100000+N mega y 101000+N mega shiny. Cada Pokémon se busca por su nombre con tools/reloaded_ids.py; en
+  el juego se guarda con el nacional (mega: 100000 + nacional).
 
 El origen del .gmspr es el centro del dibujo y es el mismo en todas las
 animaciones de un Pokémon: con él se alinean (x del ancla = x del origen). Los
 pies quedan debajo: el y del ancla es el pixel opaco más bajo de andar hacia
 abajo menos FOOT (como el centro de la sombra en SpriteCollab).
 
-Tamaño: medido el 23-10-2026 con 121 especies que están en las dos fuentes, el
-alto en Reloaded es el mismo que en SpriteCollab (mediana 1,0) pero varía por
-especie (Pikachu 21 px frente a 25; Charizard 34 frente a 26). Si tenemos la
+Tamaño: medido el 23-10-2026 con las 966 especies que están en las dos fuentes
+(emparejadas por nombre), el alto en Reloaded es el mismo que en SpriteCollab
+(mediana 1,0; el 80 % entre 0,89 y 1,12) pero varía por especie (Pikachu 21 px
+frente a 25; Charizard 34 frente a 26). Si tenemos la
 especie (o, para una mega, su forma normal) de SpriteCollab, se escala para
 que mida lo mismo que la nuestra; si no, se deja tal cual. Siempre con vecino
 más próximo, y si la diferencia es menor del 8 % no se escala.
@@ -52,6 +57,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fetch_sprites import save_optimized   # noqa: E402  (mismo PNG con paleta)
+from reloaded_ids import reloaded_ids, national_of, file_id   # noqa: E402  (su numeración no es la nacional)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RELOADED = os.path.join(ROOT, 'Proyecto Reloaded The Last Beta 1.9.2.2 Full', 'data', 'pkmnbattle')
@@ -236,9 +242,16 @@ def reloaded_height(rid):
     return bb[3] - bb[1] if bb else None
 
 
+def base_rid(dex):
+    """Número de Reloaded de la forma base de ese Pokémon nacional (None si no está)."""
+    ids = reloaded_ids(dex)
+    return ids[0] if ids else None
+
+
 def auto_scale(base_dex, metas):
     """Escala para que mida como nuestra versión de SpriteCollab (1 si no la hay)."""
-    ours, theirs = our_height(base_dex, metas), reloaded_height(base_dex)
+    rid = base_rid(base_dex)
+    ours, theirs = our_height(base_dex, metas), (reloaded_height(file_id(rid)) if rid else None)
     if not ours or not theirs:
         return 1.0
     k = ours / theirs
@@ -285,36 +298,51 @@ def job_dex(dex, gid, out, metas, k):
     if out == ASSETS and dex in metas and not metas[dex].get('rl'):
         print(f'  {dex}: ya lo tenemos de SpriteCollab, no se sustituye')
         return None
+    rid = base_rid(dex)
+    if rid is None:
+        print(f'  {dex}: no está en Reloaded')
+        return None
     k = auto_scale(dex, metas) if k is None else k
-    res = convert(dex, os.path.join(out, str(gid)), k)
+    res = convert(file_id(rid), os.path.join(out, str(gid)), k)
     if not res:
-        print(f'  {dex}: Reloaded no tiene sus sprites de mapa completos')
+        print(f'  {dex} (Reloaded {rid}): no tiene sus sprites de mapa completos')
         return None
     anims, shadow = res
-    print(f'  {dex} -> {gid} (escala {k})')
+    print(f'  {dex} (Reloaded {rid}) -> {gid} (escala {k})')
     return {'s': shadow, 'a': anims, 'rl': 1}
 
 
-def job_mega(dex, out, metas, k):
-    gid = MEGA + dex
-    k = auto_scale(dex, metas) if k is None else k     # como su forma normal
-    res = convert(MEGA + dex, os.path.join(out, str(gid)), k)
-    if not res:
+def mega_rid(dex, have):
+    """Número de Reloaded que lleva la mega de ese Pokémon: el de la forma base o,
+    si no, el de una de sus formas (Floette Flor Eterna, Zygarde...)."""
+    return next((rid for rid in reloaded_ids(dex) if rid in have), None)
+
+
+def job_mega(dex, out, metas, k, have):
+    gid = MEGA + dex                                    # en el juego, por su número nacional
+    rid = mega_rid(dex, have)
+    if rid is None:
         print(f'  Mega {dex}: no esta en Reloaded')
+        return None
+    k = auto_scale(dex, metas) if k is None else k     # como su forma normal
+    res = convert(MEGA + rid, os.path.join(out, str(gid)), k)
+    if not res:
+        print(f'  Mega {dex} (Reloaded {MEGA + rid}): sprites incompletos')
         return None
     anims, shadow = res
     meta = {'s': shadow, 'a': anims, 'rl': 1}
-    sres = convert(MEGA_SHINY + dex, os.path.join(out, str(gid), 's'), k)
+    sres = convert(MEGA_SHINY + rid, os.path.join(out, str(gid), 's'), k)
     if sres:
         meta['sh'] = 1
         diff = {a: g for a, g in sres[0].items() if anims.get(a) != g}
         if diff:
             meta['sa'] = diff
-    print(f'  Mega {dex} -> {gid} (escala {k}{", con shiny" if sres else ", sin shiny"})')
+    print(f'  Mega {dex} (Reloaded {MEGA + rid}) -> {gid} (escala {k}{", con shiny" if sres else ", sin shiny"})')
     return meta
 
 
 def reloaded_megas():
+    """Números de Reloaded (los suyos, no los nacionales) que tienen mega."""
     ids = set()
     for fn in os.listdir(RELOADED):
         m = re.match(r'P(\d+)_', fn)
@@ -348,12 +376,15 @@ def main():
             if dex not in OFFICIAL_MEGAS:
                 print(f'  Mega {dex}: no es una mega oficial, se descarta')
                 continue
-            meta = job_mega(dex, out, metas, args.escala)
+            meta = job_mega(dex, out, metas, args.escala, have)
             if meta:
                 done[MEGA + dex] = meta
         if args.megas:
-            print(f'Oficiales sin sprite en Reloaded: {sorted(set(OFFICIAL_MEGAS) - have)}')
-            print(f'De Reloaded descartadas (no oficiales): {sorted(have - set(OFFICIAL_MEGAS))}')
+            print(f'Oficiales sin sprite en Reloaded: {[d for d in OFFICIAL_MEGAS if mega_rid(d, have) is None]}')
+            used = {mega_rid(d, have) for d in OFFICIAL_MEGAS}
+            extra = sorted(have - used)
+            print('De Reloaded descartadas (no oficiales): '
+                  + ', '.join(f'{r} (nacional {national_of(r) or "-"})' for r in extra))
             print('Ojo: Reloaded solo trae Mega Charizard X (su _ALT es otra Mega X, mas pequena)'
                   ' y una sola Mega Mewtwo; las _ALT no se usan.')
     else:

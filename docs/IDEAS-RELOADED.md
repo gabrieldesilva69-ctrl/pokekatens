@@ -37,7 +37,7 @@ Completar la Pokédex está **aplazado** (al final del documento).
 | sufijo `_H` | Recibir golpe / girar (5 fotogramas) | |
 | sufijo `_S` | Tumbado / dormido (2 fotogramas) → sirve de "debilitado" | |
 | sufijo `_ALT` | Forma alternativa (p. ej. Mega X / Mega Y) | |
-| ids | `1..1025` normales · `100000+N` mega · `101000+N` mega shiny · `1026+` Pokémon inventados de Reloaded | **Ojo (comprobado en la idea 2):** el número de Reloaded no es el nacional a partir de los 400 y pico; en todos sus archivos (retratos, gritos, huevos, sprites de mapa) hay que buscar el Pokémon por su nombre con `tools/reloaded_ids.py` |
+| ids | `1..1025` normales · `100000+N` mega · `101000+N` mega shiny · `1026+` Pokémon inventados de Reloaded | **Ojo (comprobado en la idea 2):** el número de Reloaded no es el nacional a partir de los 400 y pico; en todos sus archivos (retratos, gritos, huevos, sprites de mapa) hay que buscar el Pokémon por su nombre con `tools/reloaded_ids.py`. Archivo de `pkmnbattle/` y `pkmn/`: hasta el 1000, `N` normal y `1000+N` shiny; del 1001 en adelante, `N+1000` y `N+2000` (`file_id`). Los sprites de mapa también traen shiny |
 | `pkmn/N.gif`, `pkmn_shiny/(1000+N).gif` | Retratos de frente 96×96 (estilo Negro/Blanco), normal y shiny. Megas en `100000+N` / `101000+N` | Del 1001 en adelante cambia: normal `pkmn/(N+1000).gif`, shiny `pkmn_shiny/(N+2000).gif` |
 | `audio/grito/NNN.wav` | 1216 gritos (WAV 44,1 kHz estéreo, ~1,3 s, 66 MB en total). Megas en `100000+N` | Faltan algunos (p. ej. 6, 25, 133, 448): sin grito, no suena nada |
 | `huevo/N.gif`, `huevo_shiny/(1000+N).gif` | Un huevo de color para cada familia (80×80, por el Pokémon base) | |

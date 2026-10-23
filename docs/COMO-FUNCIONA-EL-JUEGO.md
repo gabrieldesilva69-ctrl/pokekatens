@@ -98,10 +98,11 @@ de Ko-fi no sale nunca). PokeKatens no acepta dinero.
   distinta (campo `sa` en los metadatos). Las hojas son PNG con paleta exacta (la mitad de peso).
   Los 8 que SpriteCollab no dibujó en shiny (588, 820, 847, 868, 896, 916, 933, 1007) lo tienen recoloreado
   con los colores de Pokémon Reloaded (campo `rs`): todos los Pokémon del juego tienen shiny.
-- **Números de Reloaded:** no son los de la Pokédex nacional a partir de los 400 y pico (mete formas y
-  Pokémon inventados por medio: Karrablast es su 596, Koraidon su 1385). Sus archivos van por su número;
-  `tools/reloaded_ids.py` lo saca de su lista de nombres. Pendiente: `--dex`/`--faltan` de
-  `import_reloaded.py` aún usan el número nacional.
+- **Números de Reloaded:** no son los de la Pokédex nacional a partir del 494 (mete formas y Pokémon
+  inventados por medio: Karrablast es su 596, Koraidon su 1385). Sus archivos van por su número;
+  `tools/reloaded_ids.py` lo saca de su lista de nombres (encuentra los 1025) y `file_id` da el archivo:
+  hasta el 1000, N normal y 1000+N shiny; del 1001 en adelante, N+1000 y N+2000 (retratos y sprites de
+  mapa, que también traen shiny). Las megas: 100000+N y 101000+N. `import_reloaded.py` ya busca así.
 - **Audio:** sintetizador Web Audio con planificador anticipado (~150 ms por delante) y reverb por
   convolución con un impulso generado. Partituras en `js/data/music.js` (formato de texto propio). Los
   efectos tienen separación mínima entre repeticiones y tope de voces, para no saturar con 400 golpes a la vez.
