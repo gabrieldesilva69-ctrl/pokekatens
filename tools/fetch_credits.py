@@ -46,12 +46,10 @@ no se sube).
   oficiales (normal y shiny), convertidos con `tools/import_reloaded.py --mega N`, y sus
   gritos. Sus datos (tipos, estadísticas, habilidad) son de PokeAPI (`tools/fetch_megas.py`).
 - **Huevos** (`assets/eggs/`): uno por familia, normal y shiny, recortados con `tools/import_eggs.py`.
-- **Retratos** (`assets/portraits/`): los retratos de frente de 96x96 de cada Pokémon, normal y
-  shiny, para la ficha de la colección y las cartas del gacha (`tools/import_visual.py --retratos`).
-- **Iconos Físico / Especial / Estado** (`assets/ui/cat-*.png`) y **fondos de caja del PC**
-  (`assets/ui/box/`, uno por región en la colección): `tools/import_visual.py --iconos --cajas`.
-- **Suelos de las arenas** (`assets/arenas/`): un campo de combate visto desde arriba por tipo, y
-  el de la Sentencia de Arceus, bajo la arena de las grietas (`tools/import_visual.py --arenas`).
+- **Fondos de caja del PC** (`assets/ui/box/`, uno por región en la colección):
+  `tools/import_visual.py --cajas`.
+- **Suelos de las arenas** (`assets/arenas/`): campos de combate vistos desde arriba, en pixel art
+  (y una playa para el agua), bajo la arena de las grietas de muchos tipos (`tools/import_visual.py --arenas`).
 - **Avatares de entrenador** (`assets/trainers/`): 60 entrenadores oficiales animados, revisados por los
   dueños, para el perfil, la lista de amigos y la sala (`tools/import_visual.py --entrenadores`).
 '''

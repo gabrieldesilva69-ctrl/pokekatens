@@ -348,7 +348,7 @@ G.MenuUI = (() => {
     const fxOn = !(G.Settings.get('fxOff') || []).includes(dex);
     const box = $('dex-detail');
     box.innerHTML = `
-      <div class="dex-stage"><canvas id="dex-big" class="stage" width="220" height="190"></canvas>${own ? G.UI.portrait(dex, viewShiny, 'portrait dex-portrait') : ''}</div>
+      <canvas id="dex-big" class="stage" width="220" height="190"></canvas>
       ${hasSh ? `<div class="seg">
           <button class="${viewShiny ? '' : 'on'}" data-v="0">Normal</button>
           <button class="${viewShiny ? 'on' : ''}" data-v="1">${G.Icons.html('shiny', 12)} Shiny</button></div>` : ''}

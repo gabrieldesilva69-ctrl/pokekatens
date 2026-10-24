@@ -58,15 +58,6 @@ G.UI = (() => {
   }
 
   /**
-   * Retrato 96x96 (de frente) de Pokémon Edición Reloaded, de F3R (tools/import_visual.py
-   * --retratos): assets/portraits/<dex>.png y s/ el shiny. Si no hay, no se ve nada.
-   */
-  function portrait(dex, shiny = false, cls = 'portrait') {
-    return `<img class="${cls}" src="assets/portraits/${shiny ? 's/' : ''}${dex | 0}.png" alt="" width="96" height="96"
-      loading="lazy" onerror="this.remove()">`;
-  }
-
-  /**
    * Avatar de entrenador n (1..G.AVATARS) de Pokémon Edición Reloaded, de F3R: assets/trainers/<n>.gif
    * (tools/import_visual.py --entrenadores), animado. Con otro número (o 0), nada.
    */
@@ -379,6 +370,6 @@ G.UI = (() => {
     return cv;
   }
 
-  return { $, show, hide, hideAll, isOpen, chrome, refreshCoins, toast, typeChips, stars, portrait, avatar, confirmDelete,
+  return { $, show, hide, hideAll, isOpen, chrome, refreshCoins, toast, typeChips, stars, avatar, confirmDelete,
            sprite, spriteCanvas, tick, initChrome, soundControls, hueSwap };
 })();

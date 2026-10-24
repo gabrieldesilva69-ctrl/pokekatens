@@ -62,7 +62,7 @@ G.RunUI = (() => {
       const el = document.createElement('div');
       el.className = 'card';
       const tag = c.type === 'new'
-        ? `<span class="tag-chip" style="background:${c.color}">Nuevo · ${c.tag}</span>${G.Stats.catIcon(c.cat)}`
+        ? `<span class="tag-chip" style="background:${c.color}">Nuevo · ${c.tag}</span>${c.cat ? `<span class="tag-chip cat">${c.cat}</span>` : ''}`
         : c.type === 'up' || c.type === 'evo'
           ? `<span class="tag-chip" style="background:${c.color}">${c.tag}</span>`
           : `<span class="tag-chip" style="background:${c.color === '#ffd23f' ? '#ffd23f' : '#9fb1c9'}">${c.tag}</span>`;
@@ -257,8 +257,8 @@ G.RunUI = (() => {
     const k2 = v => '×' + v.toFixed(2).replace('.', ',');
     const pct = v => Math.round(v * 100) + ' %';
     const moves = pl.moves.map(m => {
-      const secs = Math.max(5, t - (m.since || 0));
-      const cat = G.Stats.catIcon(m.cat || G.Stats.catOf(m.def)) || '<span class="sub">Mejora</span>';
+      const secs = Math.max(5, t - (m.since || 0)), col = G.U.TYPE_COLOR[m.type];
+      const cat = m.cat ? `<span class="tag-chip" style="background:${col}">${G.Stats.NAME[m.cat]}</span>` : '<span class="sub">Mejora</span>';
       return `<tr><td>${G.Icons.html('move:' + m.id, 18)} ${G.T(m.name, 'move')} <small>Nv.${m.lvl}</small></td><td>${cat}</td>
         <td class="num">${m.cat ? n(m.dealt || 0) : '—'}</td><td class="num">${m.cat ? n((m.dealt || 0) / secs) + '/s' : '—'}</td></tr>`;
     }).join('');

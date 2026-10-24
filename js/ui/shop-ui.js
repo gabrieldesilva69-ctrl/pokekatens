@@ -568,7 +568,8 @@ G.ShopUI = (() => {
     for (const id of G.Shop.dailyTms()) {
       const m = G.Moves.BY_ID[id];
       const fits = partner && G.Mons.canLearn(partner, id);
-      const tag = `<span class="tag-chip" style="background:${G.U.TYPE_COLOR[m.type]}">${G.U.TYPE_NAME[m.type]}</span>${G.Stats.catIcon(G.Stats.catOf(m))}`;
+      const cat = G.Stats.NAME[m.cat || (m.stat === 'patk' ? 'physical' : m.stat === 'satk' ? 'special' : '')];
+      const tag = `<span class="tag-chip" style="background:${G.U.TYPE_COLOR[m.type]}">${G.U.TYPE_NAME[m.type]}</span>${cat ? `<span class="tag-chip cat">${cat}</span>` : ''}`;
       const note = fits ? `<span class="gold">${G.I18n.f('{x} la puede aprender', G.DEX_BY[partner].name)}</span>`
         : partner && G.Mons.taught(partner).includes(id) ? G.I18n.f('{x} ya la sabe', G.DEX_BY[partner].name) : G.T(m.desc);
       h += row(G.Icons.html('move:' + id, 32), `${G.T('MT')} ${moveName(id)} ${tag}${mine(G.Shop.tmCount(id))}`, note, buyBtn('tm:' + id, G.Shop.tmPrice(id)));

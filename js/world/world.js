@@ -439,18 +439,20 @@ G.World = (() => {
   }
 
   /*
-   * Suelo de la arena de la grieta (y de la Sentencia): un campo de combate visto desde arriba
-   * de Pokémon Edición Reloaded, de F3R (assets/arenas/<tipo>.jpg, tools/import_visual.py
-   * --arenas). Se pinta sólo en las baldosas de suelo de dentro del círculo: paredes, columnas,
-   * charcos y decorado se quedan como estaban. Su alto cubre el diámetro de la arena (y una baldosa
-   * más por cada lado) y el centro de la imagen cae en el centro de la arena.
+   * Suelo de la arena de la grieta: un campo de combate visto desde arriba de Pokémon Edición
+   * Reloaded, de F3R, en los tipos que lo tienen (data/arenas.js, tools/import_visual.py --arenas;
+   * los demás, el suelo de siempre). Se pinta sólo en las baldosas de suelo de dentro del círculo:
+   * paredes, columnas, charcos y decorado se quedan como estaban. El centro de la imagen cae en el
+   * centro de la arena. El pixel art (px) va a su tamaño, un píxel suyo por píxel del juego y sin
+   * suavizar; el pintado cubre el diámetro de la arena.
    */
-  const ARENA_ART = 'assets/arenas/';
   function loadArenaArt(a) {
+    const d = (G.ARENA_ART || {})[a.type];
+    if (!d) return;
     const img = new Image();
     img.onload = () => { if (arena === a) forgetArena(a, false); };     // se vuelve a pintar ya con él
-    img.src = ARENA_ART + a.type + '.jpg';
-    a.art = img;
+    img.src = 'assets/arenas/' + d.f;
+    a.art = img; a.artPx = !!d.px;
   }
   function paintArenaArt(cv, cx, cy) {
     const a = arena, img = a.art, T = G.Tiles.T;
@@ -467,9 +469,9 @@ G.World = (() => {
       c.rect(i * T, j * T, T, T); any = true;
     }
     if (any) {
-      const H = (2 * a.r + 3) * T, W = img.naturalWidth * H / img.naturalHeight;
+      const H = a.artPx ? img.naturalHeight : (2 * a.r + 3) * T, W = img.naturalWidth * H / img.naturalHeight;
       c.clip();
-      c.imageSmoothingEnabled = true;
+      c.imageSmoothingEnabled = !a.artPx;
       c.drawImage(img, (a.tx + 0.5 - tx0) * T - W / 2, (a.ty + 0.5 - ty0) * T - H / 2, W, H);
     }
     c.restore();
@@ -649,7 +651,7 @@ G.World = (() => {
       a.th = G.Tiles.ARENA_THEMES[a.type] || G.Tiles.ARENA_THEMES.normal;
       // Olvida los chunks de esa zona (si se hubieran generado antes) y carga su suelo.
       forgetArena(a, true);
-      if (G.Tiles.ARENA_THEMES[a.type]) loadArenaArt(a);
+      loadArenaArt(a);
     },
     get arena() { return arena; }, drawGround, drawLiquid, visibleProps, drawProp, drawVignette,
     get biome() { return biome; }

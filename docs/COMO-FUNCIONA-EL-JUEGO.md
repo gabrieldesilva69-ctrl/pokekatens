@@ -62,13 +62,12 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Formas primigenias** (24-10-2026): Kyogre y Groudon, como una mega (`primal:1` en `js/data/megas.js`), con su
   Orbe Azul / Rojo en vez de Megapiedra y lluvia / sol mientras duran. Sprites de SpriteCollab con
   `tools/fetch_forms.py` (`fm:1` en `sprites-meta.js`). No salen en el gacha.
-- **Material visual de Reloaded** (`tools/import_visual.py`): retrato de frente de cada Pokémon (`G.UI.portrait`,
-  `assets/portraits/`) en la ficha de la colección y en las cartas nuevas, de 4 y 5 estrellas y shiny del gacha (no en la
-  tabla de la ×100); icono Físico / Especial / Estado de los juegos (`G.Stats.catOf` y `catIcon`) en las cartas de nivel,
-  la pausa y la Tienda; y de fondo de la colección una caja del PC por región (`assets/ui/box/<gen>.png`, la 0 con
-  "Todas" o al buscar). En las grietas y en la Sentencia, el suelo de la arena es un campo de combate de Reloaded
-  según el tipo (`assets/arenas/<tipo>.jpg`, `paintArenaArt` en `js/world/world.js`): sólo en las baldosas de suelo,
-  con las paredes, columnas y charcos de siempre encima. **Avatar de entrenador**: en Misiones → Perfil se elige uno
+- **Material visual de Reloaded** (`tools/import_visual.py`): de fondo de la colección, una caja del PC por región
+  (`assets/ui/box/<gen>.png`, la 0 con "Todas" o al buscar). En las grietas, el suelo de la arena es un campo de
+  combate de Reloaded en los tipos de `js/data/arenas.js` (pixel art a su tamaño y sin suavizar; el agua, una playa
+  pintada); los demás tipos y la Sentencia, el suelo de siempre (`paintArenaArt` en `js/world/world.js`): sólo en las
+  baldosas de suelo, con las paredes, columnas y charcos de siempre encima. Los retratos y los iconos Físico / Especial /
+  Estado se probaron y los dueños prefirieron quitarlos (24-10-2026). **Avatar de entrenador**: en Misiones → Perfil se elige uno
   de 60 (`G.UI.avatar`, `assets/trainers/<n>.gif`); se guarda sólo su número (`save.profile.avatar`, 0 = ninguno) y
   sale en el perfil público (`profiles/{uid}.avatar`, 0-60 en `firestore.rules`), en la lista de amigos y en la sala
   (`rooms/<id>/m/<uid>.avatar`). Todo se descarga sólo al verlo.

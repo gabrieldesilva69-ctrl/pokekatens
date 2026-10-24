@@ -438,12 +438,6 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
   text-shadow: 2px 2px 0 var(--shadow);
 }
 .pcard .stars { color: var(--rc); font-size: 14px; }
-/* Retratos 96x96 de Pokémon Edición Reloaded (G.UI.portrait): pixel art, sin suavizar. */
-.portrait { image-rendering: pixelated; pointer-events: none; }
-.pcard { position: relative; }
-.pcard-portrait { position: absolute; top: 4px; right: -6px; width: 64px; height: 64px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.6)); }
-.dex-stage { position: relative; }
-.dex-portrait { position: absolute; left: 4px; top: 4px; width: 72px; height: 72px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.6)); }
 .pcard b { display: block; font-size: 16px; }
 .pcard .tag { font-size: 12px; margin-top: 2px; }
 .pcard .new { color: var(--gold); font-weight: 700; }
@@ -517,8 +511,7 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 .card .key { font-size: 13px; color: var(--muted); border: 2px solid rgba(244,248,255,.3); border-radius: 6px; padding: 2px 8px; }
 .tag-chip { font-size: 11px; padding: 2px 7px; border-radius: 5px; color: #10131a; text-shadow: none; font-weight: 700; }
 /* Físico / Especial en las cartas de nivel: aparte del tipo, oscura y con borde. */
-/* Físico / Especial / Estado: el icono de los juegos (de Pokémon Edición Reloaded), en grande y sin suavizar. */
-.cat-ico { width: 33px; height: 22px; image-rendering: pixelated; vertical-align: middle; margin-left: 4px; }
+.tag-chip.cat { background: rgba(10,20,48,.55); color: #f4f8ff; border: 1.5px solid rgba(170,195,255,.5); padding: 1px 7px; }
 
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 18px; }
 .stats > div { background: rgba(0,0,0,.22); border-radius: 9px; padding: 8px 10px; }
@@ -1035,7 +1028,6 @@ a.btn { text-decoration: none; display: inline-block; color: var(--ink); }
   #scr-dex .cell b { font-size: 11px; }
   #dex-detail { min-height: 0; overflow-y: auto; padding: 6px 8px; display: flex; flex-direction: column; }
   #dex-detail .stage { width: 132px; height: 114px; margin: 2px auto 4px; }
-  #dex-detail .dex-portrait { width: 48px; height: 48px; left: 2px; top: 2px; }
   #dex-detail h3 { margin: 0; }
   #dex-detail .stat { grid-template-columns: 62px 1fr 34px; gap: 4px; font-size: 12px; margin: 2px 0; }
   #dex-detail p { margin: 4px 0 !important; font-size: 12px !important; }
