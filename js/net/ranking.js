@@ -201,6 +201,10 @@ G.Ranking = (() => {
   const rowT = e => shinyOf(e, { t: e.t, uids: e.uids, names: e.names, dex: e.dex, lv: e.lv, kills: e.kills });
   const rowD = e => shinyOf(e, { d: e.dmg, uids: e.uids, names: e.names, dex: e.dex });
   /** El resumen tal cual se vuelve a escribir (sin perder la otra mitad). */
+  // Lo que aceptan las reglas (firestore.rules, validEntry): daño sólo tras el minuto 30 y
+  // como mucho 3000 por segundo desde entonces; el tiempo, hasta 3 h.
+  const DMG_FROM = 1800, DMG_PS = 3000, T_MAX = 10800;
+  const dmgOk = (t, d) => Math.max(0, Math.min(Math.floor(d || 0), (Math.min(t, T_MAX) - DMG_FROM) * DMG_PS));
   const sumOut = (top, dtop, me, ev, dev) => (dtop && Object.keys(dtop).length ? { top, dtop, me, ev, dev: dev || '' } : { top, me, ev });
   const now = () => firebase.firestore.FieldValue.serverTimestamp();
 
@@ -356,9 +360,10 @@ G.Ranking = (() => {
   async function submitSoloNow(r) {
     const fb = fbx();
     if (!fb || !G.Social.me || r.t < MIN_T) return [];
-    flushDeferred();
+    // (Las marcas aplazadas se suben al empezar la partida, runStarted: aquí no, que las
+    // reglas sólo dejan una marca cada 30 s por tabla y chocaría con la de esta partida.)
     const ids = boardIds();
-    const entry = { t: r.t, uids: [fb.uid], names: [G.Social.me.name], dex: [r.dex], shiny: [!!r.shiny], lv: r.lv, kills: r.kills, dmg: Math.max(0, Math.floor(r.dmg || 0)) };
+    const entry = { t: Math.min(r.t, T_MAX), uids: [fb.uid], names: [G.Social.me.name], dex: [r.dex], shiny: [!!r.shiny], lv: r.lv, kills: r.kills, dmg: dmgOk(r.t, r.dmg) };
     const boards = NORMAL.map(([p]) => ['s_' + ids[p], p]);
     if (r.t >= MIN_T_MON) boards.push(['s_' + ALL + '_p' + r.dex, 'p']);
     const better = await store(boards, fb.uid, entry);
@@ -371,7 +376,7 @@ G.Ranking = (() => {
   async function submitChallengeNow(r) {
     const fb = fbx();
     if (!fb || !G.Social.me || r.t < MIN_T) return [];
-    const entry = { t: r.t, uids: [fb.uid], names: [G.Social.me.name], dex: [r.dex], shiny: [false], lv: r.lv, kills: r.kills };
+    const entry = { t: Math.min(r.t, T_MAX), uids: [fb.uid], names: [G.Social.me.name], dex: [r.dex], shiny: [false], lv: r.lv, kills: r.kills };
     const better = await store([['s_' + boardIds().c, 'c']], fb.uid, entry);
     announce(better);
     return better;
@@ -384,8 +389,8 @@ G.Ranking = (() => {
     if (!fb || r.t < MIN_T || !r.members || r.members.length < 2) return [];
     const ms = r.members.slice().sort((a, b) => (a.uid < b.uid ? -1 : 1));
     const id = ms.map(m => m.uid).join('_');
-    const entry = { t: r.t, uids: ms.map(m => m.uid), names: ms.map(m => m.name), dex: ms.map(m => m.dex),
-                    shiny: ms.map(m => !!m.shiny), lv: r.lv, kills: r.kills, dmg: Math.max(0, Math.floor(r.dmg || 0)) };
+    const entry = { t: Math.min(r.t, T_MAX), uids: ms.map(m => m.uid), names: ms.map(m => m.name), dex: ms.map(m => m.dex),
+                    shiny: ms.map(m => !!m.shiny), lv: r.lv, kills: r.kills, dmg: dmgOk(r.t, r.dmg) };
     const ids = boardIds();
     const boards = NORMAL.map(([p]) => ['g_' + ids[p], p]);
     if (r.t >= MIN_T_MON) for (const d of new Set(entry.dex)) boards.push(['g_' + ALL + '_p' + d, 'p']);

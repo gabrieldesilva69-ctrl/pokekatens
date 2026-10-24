@@ -154,17 +154,30 @@ service cloud.firestore {
     // Una entrada sólo se puede mejorar, nunca empeorar: el tiempo (t) o el
     // daño a Arceus (dmg, desde el 23-10-2026), sin bajar el otro. Anti-trampas:
     //   - (el tope de 45 min se quitó el 23-10-2026: en el minuto 35 Arceus
-    //     rompe los objetos; sólo queda el de un día, por si acaso)
+    //     rompe los objetos y cada legendario es más fuerte; queda uno de 3 h)
+    //   - daño a Arceus sólo después del minuto 30 (cuando sale) y como mucho
+    //     DPS_MAX por segundo de partida desde entonces (24-10-2026; ya viene
+    //     reducido por la Sentencia, ver judgment.js dmgK: 3000/s es más de
+    //     60 000/s de golpes de verdad, de sobra para un grupo de 4)
+    //   - nombres de hasta 24 letras, dex números y shiny sí/no (24-10-2026:
+    //     sin esto un nombre enorme llenaba el resumen del ranking)
+    //   - como mucho una marca cada 30 s por tabla (las partidas duran más)
     //   - nivel y derrotados con margen de sobra (un grupo de 4 muy bueno)
     //   - la cuenta no puede estar baneada por el admin (saves/{uid}.ban; si aún
     //     no ha guardado nunca en la nube, no tiene documento y no está baneada)
+    // El jugador i de una marca (si lo hay): nombre corto, Pokémon y si es shiny.
+    function who(d, i) {
+      return d.uids.size() <= i
+        || (d.uids[i] is string && d.uids[i].size() <= 128 && d.names[i] is string && d.names[i].size() <= 24
+            && d.dex[i] is int && d.shiny[i] is bool);
+    }
     function validEntry(board, id) {
       let d = request.resource.data;
       let sv = /databases/$(database)/documents/saves/$(me());
       let dmg = d.get('dmg', 0);
       return d.keys().hasOnly(['t', 'uids', 'names', 'dex', 'shiny', 'lv', 'kills', 'dmg', 'at'])
-        && d.t is int && d.t > 0 && d.t <= 86400
-        && dmg is int && dmg >= 0
+        && d.t is int && d.t > 0 && d.t <= 10800
+        && dmg is int && dmg >= 0 && (dmg == 0 || (d.t > 1800 && dmg <= (d.t - 1800) * 3000))
         && d.lv is int && d.lv >= 1 && d.lv <= 10 + d.t / 4
         && d.kills is int && d.kills >= 0 && d.kills <= 100 + d.t * 12
         && (!exists(sv) || get(sv).data.get('ban', false) == false)
@@ -172,7 +185,9 @@ service cloud.firestore {
         && d.names is list && d.names.size() == d.uids.size()
         && d.dex is list && d.dex.size() == d.uids.size()
         && d.shiny is list && d.shiny.size() == d.uids.size()
+        && d.uids.size() <= 4 && who(d, 0) && who(d, 1) && who(d, 2) && who(d, 3)
         && d.at == request.time
+        && (resource == null || every(resource.data.at, 30))
         && (board.matches('s_.*')
               ? (d.uids.size() == 1 && id == me())
               : (d.uids.size() >= 2 && d.uids.size() <= 4 && id == d.uids.join('_')))
@@ -190,8 +205,10 @@ service cloud.firestore {
     //   top:  { id: { t, uids, names, dex, shiny, lv, kills } }   tiempo aguantado
     //   dtop: { id: { d, uids, names, dex, shiny } }              daño a Arceus (desde el 23-10-2026)
     //   me:   la fila que añades o mejoras (debe coincidir con tu marca validada,
-    //         escrita en la misma transacción)
-    //   ev / dev: la fila que sale del top / del dtop (sólo si es peor que la tuya)
+    //         escrita en la misma transacción: su at es la hora de esta escritura)
+    //   ev / dev: la fila que sale del top / del dtop: sólo si entras nueva, el top
+    //         ya tiene 50 y es peor que la tuya (24-10-2026: antes se podía echar a
+    //         otros sin mejorar nada)
     // Al borrar la cuenta: me = '' y ev (o dev) = una fila tuya que se quita.
     function validTop(board) {
       let d = request.resource.data;
@@ -217,13 +234,15 @@ service cloud.firestore {
     function addMine(board, d, old, changed, dold, dnew, dev) {
       let e = getAfter(/databases/$(database)/documents/lb/$(board)/e/$(d.me)).data;
       let dchanged = dnew.diff(dold).affectedKeys();
-      return me() in e.uids
+      return me() in e.uids && e.at == request.time
         && changed.hasOnly([d.me, d.ev])
         && dchanged.hasOnly([d.me, dev])
         && (!(d.me in changed) || (d.me in d.top && rowOk(d.top[d.me], e)))
         && (!(d.me in dchanged) || (d.me in dnew && drowOk(dnew[d.me], e)))
-        && (d.ev == '' || (d.me in d.top && !(d.ev in d.top) && d.ev in old && old[d.ev].t <= e.t))
-        && (dev == '' || (d.me in dnew && !(dev in dnew) && dev in dold && dold[dev].d <= e.get('dmg', 0)));
+        && (d.ev == '' || (d.me in d.top && !(d.me in old) && old.size() >= 50
+              && !(d.ev in d.top) && d.ev in old && old[d.ev].t <= e.t))
+        && (dev == '' || (d.me in dnew && !(d.me in dold) && dold.size() >= 50
+              && !(dev in dnew) && dev in dold && dold[dev].d <= e.get('dmg', 0)));
     }
     // La fila del resumen es una COPIA exacta de la marca ya validada (validEntry):
     // también nivel, derrotados y shiny (18-10-2026: sin esto se podía meter

@@ -29,41 +29,44 @@ async function signUp(email) {
 }
 
 /** Marca de una persona en la tabla de prueba s_test, con `t` segundos aguantados y `dmg` a Arceus. */
-function entry(user, t, dmg, board = 's_test') {
-  return { writes: [entryWrite(user, t, dmg, board)] };
+function entry(user, t, dmg, board = 's_test', name = 'Tres') {
+  return { writes: [entryWrite(user, t, dmg, board, name)] };
 }
-function entryWrite(user, t, dmg, board = 's_test') {
+function entryWrite(user, t, dmg, board = 's_test', name = 'Tres') {
   return {
-      update: {
-        name: `projects/demo-pokekatens/databases/(default)/documents/lb/${board}/e/${user.uid}`,
-        fields: {
-          t: { integerValue: String(t) },
-          uids: { arrayValue: { values: [{ stringValue: user.uid }] } },
-          names: { arrayValue: { values: [{ stringValue: 'Tres' }] } },
-          dex: { arrayValue: { values: [{ integerValue: '25' }] } },
-          shiny: { arrayValue: { values: [{ booleanValue: false }] } },
-          lv: { integerValue: '1' },
-          kills: { integerValue: '0' },
-          ...(dmg === undefined ? {} : { dmg: typeof dmg === 'number' ? { integerValue: String(dmg) } : { stringValue: String(dmg) } })
-        }
-      },
-      updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }]
+    update: {
+      name: `projects/demo-pokekatens/databases/(default)/documents/lb/${board}/e/${user.uid}`,
+      fields: {
+        t: { integerValue: String(t) },
+        uids: { arrayValue: { values: [{ stringValue: user.uid }] } },
+        names: { arrayValue: { values: [{ stringValue: name }] } },
+        dex: { arrayValue: { values: [{ integerValue: '25' }] } },
+        shiny: { arrayValue: { values: [{ booleanValue: false }] } },
+        lv: { integerValue: '1' },
+        kills: { integerValue: '0' },
+        ...(dmg === undefined ? {} : { dmg: typeof dmg === 'number' ? { integerValue: String(dmg) } : { stringValue: String(dmg) } })
+      }
+    },
+    updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }]
   };
 }
 const arr = (k, v) => ({ arrayValue: { values: [{ [k]: v }] } });
-/** El resumen lbs/s_test con tu fila en top (tiempo) y en dtop (daño), en la misma transacción que la marca. */
-function withSummary(user, t, dmg, rowDmg) {
-  const who = { uids: arr('stringValue', user.uid), names: arr('stringValue', 'Tres'), dex: arr('integerValue', '25') };
-  const row = { t: { integerValue: String(t) }, ...who, shiny: arr('booleanValue', false), lv: { integerValue: '1' }, kills: { integerValue: '0' } };
-  const drow = { d: { integerValue: String(rowDmg) }, ...who, shiny: arr('booleanValue', false) };
-  return { writes: [entryWrite(user, t, dmg), { update: {
-    name: 'projects/demo-pokekatens/databases/(default)/documents/lbs/s_test',
-    fields: {
-      top: { mapValue: { fields: { [user.uid]: { mapValue: { fields: row } } } } },
-      dtop: { mapValue: { fields: { [user.uid]: { mapValue: { fields: drow } } } } },
-      me: { stringValue: user.uid }, ev: { stringValue: '' }, dev: { stringValue: '' }
-    } } }] };
+/** Las filas de alguien en el resumen: en top (tiempo) y en dtop (daño), copiadas de su marca. */
+function rows(user, t, d) {
+  const who = { uids: arr('stringValue', user.uid), names: arr('stringValue', 'Tres'), dex: arr('integerValue', '25'), shiny: arr('booleanValue', false) };
+  return {
+    row: { mapValue: { fields: { t: { integerValue: String(t) }, ...who, lv: { integerValue: '1' }, kills: { integerValue: '0' } } } },
+    drow: { mapValue: { fields: { d: { integerValue: String(d) }, ...who } } }
+  };
 }
+/** Escritura del resumen lbs/s_test: top y dtop (mapas uid -> fila), me, ev y dev. */
+function summaryWrite(top, dtop, me, ev = '', dev = '') {
+  return { update: {
+    name: 'projects/demo-pokekatens/databases/(default)/documents/lbs/s_test',
+    fields: { top: { mapValue: { fields: top } }, dtop: { mapValue: { fields: dtop } },
+              me: { stringValue: me }, ev: { stringValue: ev }, dev: { stringValue: dev } } } };
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
 
 // El admin de firestore.rules (js/core/fork-config.js, G.FORK.admins). El emulador acepta
 // tokens sin firmar: así se prueba como esa cuenta sin conocer su contraseña.
@@ -85,17 +88,48 @@ const commit = (user, body) => fetch(`${DOCS}:commit`, {
 (async () => {
   const tres = await signUp('tres@jugadores.pokekatens.invalid');
 
-  expect('marca imposible (t = 86401, más de un día)', 403, (await commit(tres, entry(tres, 86401))).status);
+  expect('marca imposible (t = 10801, más de 3 h)', 403, (await commit(tres, entry(tres, 10801))).status);
   expect('marca válida (t = 600)', 200, (await commit(tres, entry(tres, 600))).status);
+  expect('otra marca antes de 30 s', 403, (await commit(tres, entry(tres, 700))).status);
+  expect('nombre de 25 letras', 403, (await commit(tres, entry(tres, 700, undefined, 's_test2', 'x'.repeat(25)))).status);
+  expect('nombre de 24 letras', 200, (await commit(tres, entry(tres, 700, undefined, 's_test2', 'x'.repeat(24)))).status);
 
-  // ---- daño a Arceus (dmg, desde el 23-10-2026): se mejora el tiempo o el daño, sin bajar el otro ----
-  expect('daño negativo', 403, (await commit(tres, entry(tres, 700, -5))).status);
-  expect('daño que no es un número', 403, (await commit(tres, entry(tres, 700, 'mucho'))).status);
-  expect('mismo tiempo y más daño (600 s, 5000)', 200, (await commit(tres, entry(tres, 600, 5000))).status);
-  expect('más tiempo pero menos daño', 403, (await commit(tres, entry(tres, 900, 10))).status);
-  expect('lo mismo otra vez (no mejora nada)', 403, (await commit(tres, entry(tres, 600, 5000))).status);
-  expect('resumen con su fila de daño copiada', 200, (await commit(tres, withSummary(tres, 650, 6000, 6000))).status);
-  expect('resumen con un daño inventado en dtop', 403, (await commit(tres, withSummary(tres, 700, 7000, 99999))).status);
+  // ---- daño a Arceus (dmg): sólo tras el minuto 30 y como mucho 3000 por segundo desde entonces ----
+  const ana = await signUp('ana@jugadores.pokekatens.invalid');
+  expect('daño antes del minuto 30', 403, (await commit(ana, entry(ana, 1700, 50))).status);
+  expect('daño enorme para su tiempo', 403, (await commit(ana, entry(ana, 1900, 300001))).status);
+  expect('daño negativo', 403, (await commit(ana, entry(ana, 1900, -5))).status);
+  expect('daño que no es un número', 403, (await commit(ana, entry(ana, 1900, 'mucho'))).status);
+  expect('daño posible (1900 s, 200000)', 200, (await commit(ana, entry(ana, 1900, 200000))).status);
+  console.log('(31 s de espera: una marca cada 30 s)');
+  await wait(31000);
+  expect('más tiempo pero menos daño', 403, (await commit(ana, entry(ana, 2000, 10))).status);
+  expect('lo mismo otra vez (no mejora nada)', 403, (await commit(ana, entry(ana, 1900, 200000))).status);
+  expect('mismo tiempo y más daño (al tope: 100 s × 3000)', 200, (await commit(ana, entry(ana, 1900, 300000))).status);
+
+  // ---- resumen lbs/s_test: copias exactas, sólo con una marca nueva y sin echar a nadie sin motivo ----
+  const [bea, ces, dan] = [await signUp('bea@jugadores.pokekatens.invalid'), await signUp('ces@jugadores.pokekatens.invalid'),
+    await signUp('dan@jugadores.pokekatens.invalid')];
+  const B = rows(bea, 2000, 5000), C = rows(ces, 2100, 6000);
+  expect('bea entra con sus filas copiadas', 200, (await commit(bea, { writes: [entryWrite(bea, 2000, 5000),
+    summaryWrite({ [bea.uid]: B.row }, { [bea.uid]: B.drow }, bea.uid)] })).status);
+  expect('ces con un daño inventado en dtop', 403, (await commit(ces, { writes: [entryWrite(ces, 2100, 6000),
+    summaryWrite({ [bea.uid]: B.row, [ces.uid]: C.row }, { [bea.uid]: B.drow, [ces.uid]: rows(ces, 2100, 99999).drow }, ces.uid)] })).status);
+  expect('ces echa a bea con el top a medio llenar', 403, (await commit(ces, { writes: [entryWrite(ces, 2100, 6000),
+    summaryWrite({ [ces.uid]: C.row }, { [ces.uid]: C.drow }, ces.uid, bea.uid, bea.uid)] })).status);
+  expect('ces entra sin echar a nadie', 200, (await commit(ces, { writes: [entryWrite(ces, 2100, 6000),
+    summaryWrite({ [bea.uid]: B.row, [ces.uid]: C.row }, { [bea.uid]: B.drow, [ces.uid]: C.drow }, ces.uid)] })).status);
+  expect('bea reescribe el resumen sin marca nueva', 403, (await commit(bea, { writes: [
+    summaryWrite({ [bea.uid]: B.row, [ces.uid]: C.row }, { [bea.uid]: B.drow, [ces.uid]: C.drow }, bea.uid)] })).status);
+  expect('bea, con su fila sin cambiar, quita la de ces', 403, (await commit(bea, { writes: [
+    summaryWrite({ [bea.uid]: B.row }, { [bea.uid]: B.drow }, bea.uid, ces.uid, ces.uid)] })).status);
+  const D = rows(dan, 2200, 7000);
+  expect('dan, con marca nueva, echa a bea con el top a medio llenar', 403, (await commit(dan, { writes: [entryWrite(dan, 2200, 7000),
+    summaryWrite({ [ces.uid]: C.row, [dan.uid]: D.row }, { [ces.uid]: C.drow, [dan.uid]: D.drow }, dan.uid, bea.uid, bea.uid)] })).status);
+  expect('dan quita su fila de dtop (borrar la cuenta)', 403, (await commit(dan, { writes: [
+    summaryWrite({ [bea.uid]: B.row, [ces.uid]: C.row }, { [bea.uid]: B.drow }, '', '', ces.uid)] })).status);
+  expect('ces quita su fila de dtop (borrar la cuenta)', 200, (await commit(ces, { writes: [
+    summaryWrite({ [bea.uid]: B.row, [ces.uid]: C.row }, { [bea.uid]: B.drow }, '', '', ces.uid)] })).status);
 
   const r = await fetch(`${DOCS}/reports/nada`, { headers: { Authorization: 'Bearer ' + tres.token } });
   expect('un jugador sin permisos no lee reportes', 403, r.status);
