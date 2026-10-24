@@ -19,7 +19,7 @@ G.Combat = (() => {
   // ---------------- ejecutar el movimiento activo ----------------
 
   function tick(dt, pl, now) {
-    if (pl.dead) return;
+    if (pl.dead || pl.restT > 0) return;                 // dormido con Descanso: no ataca
     // Vínculos: todos los movimientos del hueco activo, cada uno con su recarga.
     for (const m of pl.activeGroup()) tickMove(dt, pl, m, now);
   }
@@ -78,12 +78,17 @@ G.Combat = (() => {
       case 'scissor':    scissor(pl, m); break;
       case 'blitz':      blitz(pl, m); break;
       case 'leap':       leap(pl, m); break;
+      case 'guard':      guard(pl, m); break;
+      case 'rest':       rest(pl, m); break;
+      case 'screen':     screen(pl, m); break;
+      case 'decoy':      decoy(pl, m); break;
+      case 'boom':       boom(pl, m); break;
     }
   }
 
   const TARGETED = ['melee', 'beam', 'projectile', 'boomerang', 'chain', 'meteor', 'dash', 'cone',
                     'homing', 'bounce', 'charge', 'spin', 'quake', 'vortex', 'shove', 'stun',
-                    'tremor', 'wave', 'cross', 'storm', 'punch', 'scissor', 'blitz', 'leap'];
+                    'tremor', 'wave', 'cross', 'storm', 'punch', 'scissor', 'blitz', 'leap', 'boom'];
   // Con "Apuntar a mano" éstos se lanzan hacia donde apuntas aunque no haya
   // nadie (los decide el jugador); la cadena y los meteoros siguen esperando blanco.
   const FREE_AIM = ['melee', 'beam', 'projectile', 'boomerang', 'dash', 'cone', 'homing', 'bounce', 'charge', 'spin', 'quake', 'shove',
@@ -106,6 +111,7 @@ G.Combat = (() => {
     if (m.kind === 'punch' || m.kind === 'scissor') return m.radius + 30;
     if (m.kind === 'blitz') return m.radius;
     if (m.kind === 'leap') return m.range || 220;
+    if (m.kind === 'boom') return m.radius * 0.8;          // no explota si no hay nadie cerca
     return 520;
   }
 
@@ -561,6 +567,67 @@ G.Combat = (() => {
     if (!ghost) pl.invuln = Math.max(pl.invuln || 0, 0.45);
   }
 
+  // ---------------- tanda D de MT (23-10-2026): apoyo ----------------
+  // (Lo de tu Pokémon sólo en tu pantalla: el fantasma de un compañero sólo se ve.)
+
+  /** Protección: no recibes daño durante `dur` s. */
+  function guard(pl, m) {
+    G.FX.ring(pl.x, pl.y - G.LIFT * 0.5, pl.r * 3, pl.r * 1.2, '#9ae6ff', 0.3, 3);
+    if (ghost) return;
+    pl.guardT = m.dur;
+    G.FX.dmgText(pl.x, pl.y - pl.bodyH - 8, G.T('Protección'), '#9ae6ff');
+  }
+
+  /** Descanso: cura `amount` y duermes `dur` s (ni te mueves ni atacas). */
+  function rest(pl, m) {
+    if (ghost) return;
+    if (pl.hp >= pl.maxHp * 0.98) { m.t = 1; return; }        // con la vida llena no se duerme
+    pl.heal(pl.maxHp * m.amount);
+    pl.restT = m.dur;
+    G.FX.ring(pl.x, pl.y, 6, 60, '#c9a6ff', 0.5, 3);
+  }
+
+  /** Reflejo / Pantalla Luz: −`amount` de daño de su categoría durante `dur` s. */
+  function screen(pl, m) {
+    const col = m.shield === 'physical' ? '#ffcb3d' : '#c47bff';
+    G.FX.ring(pl.x, pl.y - G.LIFT * 0.5, pl.r, pl.r * 3.5, col, 0.4, 3);
+    if (ghost) return;
+    pl.screens = pl.screens || {};
+    pl.screens[m.shield] = { t: m.dur, k: m.amount };
+    G.FX.dmgText(pl.x, pl.y - pl.bodyH - 8, G.T(m.name, 'move'), col);
+  }
+
+  /** Doble Equipo: copias tuyas que atraen a los enemigos cercanos (las mueve quien mueve a los enemigos). */
+  function decoy(pl, m) {
+    const n = Math.max(1, m.count | 0);
+    for (let i = 0; i < n; i++) {
+      const a = pl.aim + Math.PI + (i - (n - 1) / 2) * 0.9;
+      const x = pl.x + Math.cos(a) * 50, y = pl.y + Math.sin(a) * 40;
+      fields.push({ kind: 'decoy', owner: pl, ghost, m, col: '#ffffff', vis: null, x, y, t: 0, life: m.dur, r: pl.r,
+                    pull: m.radius, _vx: 0, _vy: 0, dead: false });
+      G.FX.burst(x, y - 10, '#e8fbff', 8, 90);
+    }
+  }
+  /** Los señuelos que hay ahora (enemy.js: los enemigos cercanos van a por ellos). */
+  function decoys() {
+    if (G.Coop.active && !G.Coop.isHost) return [];
+    return fields.filter(f => f.kind === 'decoy' && !f.gone && f.t < f.life);
+  }
+
+  /** Explosión: daña todo a `radius` y te cuesta `cost` de la vida que te queda (nunca te deja KO). */
+  function boom(pl, m) {
+    const col = G.U.TYPE_COLOR.fire;
+    G.FX.ring(pl.x, pl.y, 8, m.radius, '#ffffff', 0.35, 6);
+    G.FX.ring(pl.x, pl.y, 8, m.radius * 0.8, col, 0.45, 5);
+    G.FX.burst(pl.x, pl.y - 10, col, 30, 260);
+    G.Audio.sfx('boss');
+    if (ghost) return;
+    G.Camera.kick(1);
+    pl.hp = Math.max(1, pl.hp - Math.max(1, pl.hp * m.cost));
+    for (const e of G.EnemyMgr.queryCircle(pl.x, pl.y, m.radius)) hit(pl, e, m.dmg * pl.atkFor(m), col, e.x - pl.x, e.y - pl.y, m.knock || 200, m);
+    for (const p of G.World.propsInCircle(pl.x, pl.y, m.radius)) G.World.damageProp(p, m.dmg * pl.atkFor(m), col);
+  }
+
   /** Rebote: el proyectil sale hacia el enemigo más cercano que aún no ha tocado. → true si rebota. */
   function rebound(p, from) {
     if (!(p.bounce > 0)) return false;
@@ -881,6 +948,13 @@ G.Combat = (() => {
         ctx.globalAlpha = 0.85;
         ctx.fillStyle = '#e8fbff';
         for (let o = -f.w / 2; o < f.w / 2; o += 12) ctx.fillRect(Math.sin(now * 10 + o) * 3 - 4, o, 6, 9);
+      } else if (f.kind === 'decoy') {
+        // Doble Equipo: una copia medio transparente de tu Pokémon que parpadea al acabarse.
+        const left = f.life - f.t;
+        if (f.owner && f.owner.anim && (left > 1 || Math.floor(now * 10) % 2)) {
+          G.Sprites.drawShadow(ctx, f.owner.dex, f.x, f.y, f.owner.scale);
+          f.owner.anim.draw(ctx, f.x, f.y, { alpha: 0.55 });
+        }
       } else if (f.kind === 'leap') {
         // Acróbata: tu sombra va hacia donde caerás.
         const k = G.U.clamp(f.t / f.fly, 0, 1), x = f.sx + (f.x - f.sx) * k, y = f.sy + (f.y - f.sy) * k;
@@ -1218,6 +1292,6 @@ G.Combat = (() => {
     }
   }
 
-  return { tick, resolve, ghostCast, ghostOrbit, updateFields, drawGroundFields, drawAirFields, clearFields,
+  return { tick, resolve, ghostCast, ghostOrbit, updateFields, drawGroundFields, drawAirFields, clearFields, decoys,
            get fieldCount() { return fields.length; } };
 })();

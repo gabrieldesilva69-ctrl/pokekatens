@@ -80,6 +80,8 @@ G.Player = class Player {
     this.berries = {};         // id -> true (sitrus, atania, meloc)
     this.berryAtkT = 0;        // Baya Atania en marcha
     this.melocT = 0;           // Baya Meloc: inmune a frenazos
+    // Ataques de apoyo (tanda D de MT): Protección, Descanso, Reflejo y Pantalla Luz.
+    this.guardT = 0; this.restT = 0; this.screens = {};
     this.item = null;          // objeto equipado (data/items.js), uno por run
     this.sashT = -999;         // última vez que salvó la Banda Focus
     this.bellHeal = 0;         // curación pendiente del Cascabel Concha
@@ -260,11 +262,13 @@ G.Player = class Player {
                    aura: 'Charge', buff: 'Charge', orbit: 'Charge', boomerang: 'Shoot', chain: 'Shoot',
                    mine: 'Charge', meteor: 'Charge', turret: 'Charge', dash: 'Attack', trail: 'Walk', cone: 'Shoot',
                    tremor: 'Attack', wave: 'Shoot', cross: 'Shoot', storm: 'Charge', weather: 'Charge',
-                   punch: 'Attack', scissor: 'Attack', blitz: 'Attack', leap: 'Attack' }[m.kind] || 'Attack';
+                   punch: 'Attack', scissor: 'Attack', blitz: 'Attack', leap: 'Attack',
+                   guard: 'Charge', rest: 'Charge', screen: 'Charge', decoy: 'Charge', boom: 'Attack' }[m.kind] || 'Attack';
     // Las familias nuevas suenan como la parecida de las de siempre.
     const SND = { boomerang: 'projectile', chain: 'beam', mine: 'nova', meteor: 'nova', turret: 'buff', dash: 'melee', trail: 'aura', cone: 'projectile',
                   tremor: 'nova', wave: 'beam', cross: 'nova', storm: 'beam', weather: 'buff',
-                  punch: 'melee', scissor: 'melee', blitz: 'melee', leap: 'melee' };
+                  punch: 'melee', scissor: 'melee', blitz: 'melee', leap: 'melee',
+                  guard: 'buff', rest: 'buff', screen: 'buff', decoy: 'buff', boom: 'nova' };
     // El rastro no suena a cada charco (sería un zumbido constante).
     if (m.kind !== 'trail') G.Audio.sfx('shot', { kind: SND[m.kind] || m.kind, type: m.type });
     if (m.kind === 'trail') return;
@@ -285,6 +289,15 @@ G.Player = class Player {
   /** @param cat  'physical' | 'special': con qué defensa tuya se para (la del enemigo que pega). */
   hurt(amount, type = null, pure = false, cat = null) {
     if (this.invuln > 0 || this.dead) return;
+    // Protección: nada te hace daño.
+    if (this.guardT > 0) {
+      this.invuln = 0.2;
+      if (Math.random() < 0.3) G.FX.ring(this.x, this.y - this.bodyH * 0.5, this.r, this.r * 2.2, '#9ae6ff', 0.2, 2);
+      return;
+    }
+    // Reflejo / Pantalla Luz: menos daño de su categoría.
+    const scr = cat && this.screens[cat];
+    if (scr && scr.t > 0) amount *= 1 - scr.k;
     // Habilidad (data/ability-fx.js): absorber un tipo, esquivar o recibir menos.
     const ab = this.abil, cls = cat === 'physical' ? 'p' : cat === 'special' ? 's' : '';
     if (ab && !pure) {
@@ -444,6 +457,12 @@ G.Player = class Player {
     if (this.sprayCd > 0) this.sprayCd -= dt;
     if (this.berryAtkT > 0) this.berryAtkT -= dt;
     if (this.melocT > 0) this.melocT -= dt;
+    if (this.guardT > 0) this.guardT -= dt;
+    for (const k in this.screens) if ((this.screens[k].t -= dt) <= 0) delete this.screens[k];
+    if (this.restT > 0) {
+      this.restT -= dt;
+      if ((this.zzzT = (this.zzzT || 0) - dt) <= 0) { this.zzzT = 0.6; G.FX.dmgText(this.x + 8, this.y - this.bodyH - 6, 'Z', '#c9a6ff'); }
+    }
     // Baya Meloc: en cuanto algo te frena (trampa pegajosa, agua o clima), te limpia.
     if (this.berries.meloc && (this.slowT > 0 || (this.inLiquid && (G.World.liquidEffect(this.mon.types).slow || 1) < 1)
         || G.Weather.speedFor(this.mon.types) < 1)) this.useBerry('meloc');
@@ -460,7 +479,7 @@ G.Player = class Player {
 
     // --- movimiento con colisiones ---
     // (En cooperativo la pausa no para el juego: sólo te quedas quieto.)
-    const [ax, ay] = this.frozen ? [0, 0] : G.Input.axis();
+    const [ax, ay] = this.frozen || this.restT > 0 ? [0, 0] : G.Input.axis();     // (dormido con Descanso: quieto)
     this.walking = ax !== 0 || ay !== 0;
     const s = this.spd;
     // Hielo: resbalas (la velocidad cambia despacio).
@@ -626,6 +645,20 @@ G.Player = class Player {
 
     const alpha = this.invuln > 0 && !this.dead ? (Math.floor(this.invuln * 18) % 2 ? 0.45 : 1) : 1;
     this.anim.draw(ctx, this.x, this.y, { flash: this.flash > 0, softFlash: true, alpha, color: '#ffcb3d' });
+
+    // Protección: burbuja; Reflejo / Pantalla Luz: aro amarillo / morado.
+    if (!this.dead && (this.guardT > 0 || this.screens.physical || this.screens.special)) {
+      ctx.save();
+      if (this.guardT > 0) {
+        ctx.globalAlpha = 0.35 + Math.sin(performance.now() / 80) * 0.1;
+        ctx.strokeStyle = '#9ae6ff'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.ellipse(this.x, this.y - this.bodyH * 0.5, this.r * 1.8, this.bodyH * 0.75 + 6, 0, 0, 6.2832); ctx.stroke();
+      }
+      ctx.globalAlpha = 0.5; ctx.lineWidth = 2;
+      if (this.screens.physical) { ctx.strokeStyle = '#ffcb3d'; ctx.beginPath(); ctx.ellipse(this.x, this.y, this.r * 2.4, this.r * 1, 0, 0, 6.2832); ctx.stroke(); }
+      if (this.screens.special) { ctx.strokeStyle = '#c47bff'; ctx.beginPath(); ctx.ellipse(this.x, this.y, this.r * 2.7, this.r * 1.15, 0, 0, 6.2832); ctx.stroke(); }
+      ctx.restore();
+    }
 
     // Arcos de buff alrededor de los pies.
     const COL = { atk: '#ff6b4d', patk: '#ff6b4d', satk: '#c47bff', spd: '#7fe0ff', def: '#b0b8c8', regen: '#5fe08a' };

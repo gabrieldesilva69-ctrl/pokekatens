@@ -36,6 +36,10 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   Tanda C (proyectiles): Pulso Dragón (atraviesa todo), Bomba Lodo y Ola-Lava (`puddle`: charco al impactar),
   Escaldar, Fuerza Lunar (`splash`), Vendaval (empuja), Viento Plata (`boost`: a veces sube Ataque y Velocidad),
   Psicocarga, Hidropulso (`stun`) y Roca Afilada (`critUp`: +30 % de críticos).
+  Tanda D (apoyo; no hacen daño salvo Explosión): Protección (`guard`: intocable 1,5 s), Descanso (`rest`: cura el
+  60 % y duermes 2 s sin moverte ni atacar), Reflejo / Pantalla Luz (`screen`: −35 % de daño físico / especial 8 s),
+  Doble Equipo (`decoy`: una copia que atrae a los enemigos a 260 px, menos a los jefes; la mueve el anfitrión) y
+  Explosión (`boom`: te cuesta un 25 % de la vida que te queda, nunca KO).
 - **Tabla de tipos:** p. ej. un Rayo Burbuja le quita más a un Charmander.
 - **Climas** de vez en cuando (sol, lluvia, arena, nieve, niebla): potencian unos tipos y debilitan otros.
 - **Objetos** que salen en las runs (Restos, Cinta Elección…): 23 equipables, uno por run (`js/data/items.js`;

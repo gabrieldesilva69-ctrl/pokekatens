@@ -962,9 +962,14 @@
         p._px = p.x; p._py = p.y;
       }
       rebuildGrid();
+      // Doble Equipo (systems/combat.js): los que están cerca de un señuelo van a por él.
+      const dec = G.Combat.decoys();
       for (const e of list) {
         if (e.remote) e.netUpdate(dt);
-        else e.update(dt, nearestPlayer(players, e.x, e.y) || pl);
+        else {
+          const d = dec.length && !e.boss ? dec.find(o => G.U.dist2(o.x, o.y, e.x, e.y) < o.pull * o.pull) : null;
+          e.update(dt, d || nearestPlayer(players, e.x, e.y) || pl);
+        }
       }
       if (!G.Coop.active || G.Coop.isHost) separate(dt);
       for (let i = list.length - 1; i >= 0; i--) {

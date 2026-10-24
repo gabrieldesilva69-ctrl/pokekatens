@@ -44,6 +44,12 @@
  *   stun        al impactar, aturde esos segundos
  *   critUp      probabilidad extra de crítico
  *   boost       al lanzarlo, esa probabilidad de subirte Ataque y Velocidad un rato
+ *   ---- tanda D (apoyo, 23-10-2026); los cuatro primeros no hacen daño, como los potenciadores ----
+ *   guard       Protección: no recibes daño durante `dur` s
+ *   rest        Descanso: te cura `amount` de la vida, pero duermes `dur` s (ni te mueves ni atacas)
+ *   screen      Reflejo / Pantalla Luz: −`amount` de daño `cat` (físico o especial) durante `dur` s
+ *   decoy       Doble Equipo: `count` copias tuyas atraen a los enemigos a `radius` durante `dur` s
+ *   boom        Explosión: daña todo a `radius`, pero te cuesta `cost` de la vida que te queda (nunca KO)
  *
  * Sólo el movimiento ACTIVO se ejecuta. Se cambia con 1-4 / Q / E.
  *
@@ -235,6 +241,36 @@
       { t: 'Onda un 30% más grande',        m: { radius: 1.30 } },
       { t: '-25% recarga',                  m: { cd: 0.75 } },
       { t: '+50% daño y salta más lejos',   m: { dmg: 1.50, range: 1.30 } }
+    ],
+    guard: [
+      { t: '+25% duración',                 m: { dur: 1.25 } },
+      { t: '-15% recarga',                  m: { cd: 0.85 } },
+      { t: '+25% duración',                 m: { dur: 1.25 } },
+      { t: '-20% recarga y +20% duración',  m: { cd: 0.80, dur: 1.20 } }
+    ],
+    rest: [
+      { t: 'Cura un 15% más',               m: { amount: 1.15 } },
+      { t: 'Duermes un 15% menos',          m: { dur: 0.85 } },
+      { t: '-15% recarga',                  m: { cd: 0.85 } },
+      { t: 'Cura un 20% más y duermes menos', m: { amount: 1.20, dur: 0.85 } }
+    ],
+    screen: [
+      { t: '+30% duración',                 m: { dur: 1.30 } },
+      { t: 'Protege un 15% más',            m: { amount: 1.15 } },
+      { t: '-15% recarga',                  m: { cd: 0.85 } },
+      { t: '+30% duración',                 m: { dur: 1.30 } }
+    ],
+    decoy: [
+      { t: '+30% duración',                 m: { dur: 1.30 } },
+      { t: '+1 copia',                      m: { count: 1 } },
+      { t: '-15% recarga',                  m: { cd: 0.85 } },
+      { t: 'Atrae desde un 30% más lejos',  m: { radius: 1.30 } }
+    ],
+    boom: [
+      { t: '+40% daño',                     m: { dmg: 1.40 } },
+      { t: '+25% radio',                    m: { radius: 1.25 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+50% daño',                     m: { dmg: 1.50 } }
     ],
     weather: [
       { t: '+35% duración',                 m: { dur: 1.35 } },
@@ -756,7 +792,27 @@
       cd: 0.7, dmg: 15, speed: 360, count: 1, life: 1.4, size: 10, stun: 0.45 },
     { id: 'stone-edge', name: 'Roca Afilada', type: 'rock', kind: 'projectile',
       desc: 'Una roca afiladísima que atraviesa a uno y hace críticos muy a menudo.',
-      cd: 0.85, dmg: 22, speed: 420, count: 1, life: 1.2, size: 8, pierce: 1, critUp: 0.3 }
+      cd: 0.85, dmg: 22, speed: 420, count: 1, life: 1.2, size: 8, pierce: 1, critUp: 0.3 },
+
+    // ---------------- MT de Pokémon Edición Reloaded, tanda D: apoyo (23-10-2026) ----------------
+    { id: 'protect', name: 'Protección', type: 'normal', kind: 'guard',
+      desc: 'No hace daño: un escudo te hace intocable un momento cada pocos segundos.',
+      cd: 7, dur: 1.5 },
+    { id: 'rest', name: 'Descanso', type: 'psychic', kind: 'rest',
+      desc: 'No hace daño: te cura mucho, pero te quedas dormido un rato sin moverte ni atacar.',
+      cd: 18, amount: 0.6, dur: 2.0 },
+    { id: 'reflect', name: 'Reflejo', type: 'psychic', kind: 'screen',
+      desc: 'No hace daño: una pared de luz te quita un 35 % del daño físico un rato.',
+      cd: 10, dur: 8, amount: 0.35, shield: 'physical' },
+    { id: 'light-screen', name: 'Pantalla Luz', type: 'psychic', kind: 'screen',
+      desc: 'No hace daño: una pared de luz te quita un 35 % del daño especial un rato.',
+      cd: 10, dur: 8, amount: 0.35, shield: 'special' },
+    { id: 'double-team', name: 'Doble Equipo', type: 'normal', kind: 'decoy',
+      desc: 'No hace daño: dejas una copia tuya que atrae a los enemigos cercanos.',
+      cd: 8, dur: 4, count: 1, radius: 260 },
+    { id: 'explosion', name: 'Explosión', type: 'normal', kind: 'boom',
+      desc: 'Una explosión enorme a tu alrededor; te cuesta un cuarto de la vida que te queda (nunca te deja KO).',
+      cd: 2.5, dmg: 70, radius: 150, cost: 0.25, knock: 220 }
   ];
 
   // Cuerpo a cuerpo (12-10-2026): +20 % de daño y +25 % de alcance y de arco
@@ -792,7 +848,9 @@
     'fire-punch', 'ice-punch', 'thunder-punch', 'drain-punch', 'x-scissor', 'crunch', 'waterfall', 'megahorn',
     'extreme-speed', 'acrobatics',
     // tanda C de MT (23-10-2026): proyectiles
-    'stone-edge']);
+    'stone-edge',
+    // tanda D (23-10-2026)
+    'explosion']);
 
   // Los que disparan bolas necesitan count y spread de base: las mejoras los
   // multiplican y, sin ellos, "+1 proyectil" no sumaba ninguno y el abanico se
@@ -803,9 +861,12 @@
     if (m.spread == null) m.spread = 0.12;
   }
 
+  // Los que no hacen daño (potenciadores, clima y los de apoyo de la tanda D).
+  const STATUS_KINDS = ['buff', 'weather', 'guard', 'rest', 'screen', 'decoy'];
+
   const BY_ID = {};
   for (const m of RAW) {
-    m.cat = m.kind === 'buff' || m.kind === 'weather' ? null : PHYSICAL.has(m.id) ? 'physical' : 'special';
+    m.cat = STATUS_KINDS.includes(m.kind) ? null : PHYSICAL.has(m.id) ? 'physical' : 'special';
     m.ups = LADDERS[m.kind];
     m.maxLvl = m.ups.length + 1;
     BY_ID[m.id] = m;
@@ -947,7 +1008,9 @@
     'scald': ['Vapor Volcánico', 'atk'],     'moonblast': ['Geocontrol', 'cd'],
     'hurricane': ['Ala Mortífera', 'spd'],   'lava-plume': ['Llama Embrujada', 'rgn'],
     'silver-wind': ['Danza Aleteo', 'def'],  'psyshock': ['Psicoataque', 'atk'],
-    'water-pulse': ['Hidrovapor', 'cd'],     'stone-edge': ['Roca Veloz', 'spd']
+    'water-pulse': ['Hidrovapor', 'cd'],     'stone-edge': ['Roca Veloz', 'spd'],
+    // tanda D (23-10-2026): sólo Explosión hace daño (los de apoyo no evolucionan)
+    'explosion': ['Autodestrucción', 'hp']
   };
   // Lo que gana al evolucionar, según cómo funcione.
   const EVO_MODS = {
@@ -980,7 +1043,8 @@
     punch:      { t: '×1,8 daño y +2 directos', m: { dmg: 1.8, count: 2 } },
     scissor:    { t: '×1,8 daño y tajos más largos', m: { dmg: 1.8, radius: 1.25 } },
     blitz:      { t: '×1,7 daño y +3 saltos', m: { dmg: 1.7, count: 3 } },
-    leap:       { t: '×1,8 daño y onda más grande', m: { dmg: 1.8, radius: 1.3 } }
+    leap:       { t: '×1,8 daño y onda más grande', m: { dmg: 1.8, radius: 1.3 } },
+    boom:       { t: '×1,8 daño y un 30% más de radio', m: { dmg: 1.8, radius: 1.3 } }
   };
 
   /** ¿Puede evolucionar ya? → { name, needs, needName, text, ready } o null */
@@ -1004,7 +1068,7 @@
   }
 
   /** ¿Es de los que no hacen daño (potenciadores y de clima)? */
-  const isStatus = m => !!m && (m.kind === 'buff' || m.kind === 'weather');
+  const isStatus = m => !!m && STATUS_KINDS.includes(m.kind);
 
   G.Moves = { ALL: RAW, BY_ID, POOL, poolFor, instance, levelUp, nextUpText, startFor,
               EVO, NEED_NAME, evoInfo, evolve, isStatus };
