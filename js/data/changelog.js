@@ -34,7 +34,9 @@ G.CHANGELOG = [
      'The evolutions of Fire Spin, Surf, Earthquake, Dragon Pulse, Ominous Wind, Sludge Bomb, Moonblast, Scald and Ancient Power have a new name, because the old one belongs to a signature move. They work the same.',
      ['Calcinación', 'Envite Acuático', 'Pataleta', 'Cola Dragón', 'Impresionar', 'Veneno X', 'Bruma Explosiva', 'Agua Lodosa', 'Pedrada']],
     ["En el mando, X megaevoluciona a tu compañero si ya puedes y, si no, usa la esfera elegida (Y cambia de esfera). Las teclas de las esferas (5-8) se pueden cambiar en Ajustes > Controles.",
-     "On the controller, X Mega Evolves your partner when you can and otherwise uses the selected orb (Y switches orbs). The orb keys (5-8) can be changed in Settings > Controls."]
+     "On the controller, X Mega Evolves your partner when you can and otherwise uses the selected orb (Y switches orbs). The orb keys (5-8) can be changed in Settings > Controls."],
+    ["Todas las megas se ven nítidas y al menos un 40 % más grandes que su forma normal (antes sólo las de los Pokémon grandes; las demás, un 20 %).",
+     "Every Mega Evolution now looks sharp and at least 40% bigger than its normal form (before, only the big Pokémon's did; the rest were 20% bigger)."]
   ], fix: [
     ['Las megas ya se ven más grandes que su forma normal: al menos un 20 %, y las de Pokémon grandes, como Mega Charizard, Mega Metagross o Mega Mewtwo, un 40 %. Antes algunas salían casi iguales o más pequeñas.',
      'Megas now look bigger than their normal form: at least 20%, and the big Pokémon ones, like Mega Charizard, Mega Metagross or Mega Mewtwo, 40%. Before, some looked almost the same or smaller.']

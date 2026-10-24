@@ -91,14 +91,13 @@ G.Mega = (() => {
 
   /*
    * Tamaño de la mega (24-10-2026: Mega Charizard X o Mega Metagross se veían casi como su forma
-   * normal): en pantalla, como mínimo GROW veces el alto de su forma normal (BIG_GROW las que en los
-   * juegos son mucho más grandes) y nunca más pequeña que con sus propios sprites; como mucho
+   * normal): en pantalla, como mínimo GROW veces el alto de su forma normal (todas: hasta el 24-10-2026
+   * sólo las de Pokémon grandes, el resto un 20 %) y nunca más pequeña que con sus propios sprites; como mucho
    * MAX_GROW de lo que darían sus sprites. El alto es el del dibujo (del pixel más alto a los pies)
    * en el primer fotograma de Idle; si no se puede medir, el ancla de los pies (ay).
    * No cambia con qué choca (pl.r).
    */
-  const GROW = 1.2, BIG_GROW = 1.4, MAX_GROW = 1.6;
-  const BIG = new Set([3, 6, 9, 115, 130, 142, 150, 208, 248, 254, 257, 260, 306, 373, 376, 384, 445, 460]);
+  const GROW = 1.4, MAX_GROW = 1.6;
   const tall = new Map();
   function height(dex) {
     const m = G.Sprites.animMeta(dex, 'Idle');
@@ -129,7 +128,7 @@ G.Mega = (() => {
     const s = G.Sprites.playerScale(gid);
     const a = height(pl.dex), b = height(gid);
     if (!a || !b) return s;
-    const want = (BIG.has(pl.dex) ? BIG_GROW : GROW) * a * pl.scale;
+    const want = GROW * a * pl.scale;
     return s * G.U.clamp(want / (b * s), 1, MAX_GROW);
   }
 

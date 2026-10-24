@@ -62,9 +62,11 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Formas primigenias** (24-10-2026): Kyogre y Groudon, como una mega (`primal:1` en `js/data/megas.js`), con su
   Orbe Azul / Rojo en vez de Megapiedra y lluvia / sol mientras duran. Sprites de SpriteCollab con
   `tools/fetch_forms.py` (`fm:1` en `sprites-meta.js`). No salen en el gacha.
-- **Tamaño de las megas** (`G.Mega.megaScale`): en pantalla, al menos un 20 % más altas que su forma normal (un 40 %
-  las de Pokémon grandes). `tools/import_reloaded.py` ya no las encoge: al volver a convertirlas con `--megas` (en el
-  ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.
+- **Tamaño de las megas** (`G.Mega.megaScale`): en pantalla, todas al menos un 40 % más altas que su forma normal
+  (como mucho 1,6 veces lo que dan sus sprites). `tools/import_reloaded.py` ya no las encoge: al volver a convertirlas
+  con `--megas` (en el ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.
+  Faltan Mega Golisopod, Mega Magearna y Mega Tatsugiri: Reloaded no trae sus sprites de mapa (de Magearna sólo un
+  dibujo de combate, `data/pkmn/100992.gif`, sin animaciones), así que no tienen Megapiedra.
 - **Megaevolución** (`js/systems/mega.js`): con la Megapiedra de tu compañero (Tienda Kecleon, 8000 monedas,
   sólo la de tu compañero actual; o un 3 % al ganar una grieta), una barra se llena con 150 enemigos (un jefe
   cuenta 25) y con F (X en el mando, botón en el móvil) megaevoluciona 45 s: sprite, tipos, estadísticas y
