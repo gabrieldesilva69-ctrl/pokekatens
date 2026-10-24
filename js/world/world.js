@@ -432,9 +432,55 @@ G.World = (() => {
     const S = 6 * G.Tiles.T;
     const dirtField = (gx, gy) => fbm(gx / S, gy / S, seed + 303);
     img = G.Tiles.paintChunk(cx, cy, N, at, dirtField, bi, seed);
+    if (arena && bi === biome) paintArenaArt(img, cx, cy);
     if (cache.size > MAX_IMAGES) cache.delete(cache.keys().next().value);
     cache.set(k, img);
     return img;
+  }
+
+  /*
+   * Suelo de la arena de la grieta (y de la Sentencia): un campo de combate visto desde arriba
+   * de Pokémon Edición Reloaded, de F3R (assets/arenas/<tipo>.jpg, tools/import_visual.py
+   * --arenas). Se pinta sólo en las baldosas de suelo de dentro del círculo: paredes, columnas,
+   * charcos y decorado se quedan como estaban. Su alto cubre el diámetro de la arena (y una baldosa
+   * más por cada lado) y el centro de la imagen cae en el centro de la arena.
+   */
+  const ARENA_ART = 'assets/arenas/';
+  function loadArenaArt(a) {
+    const img = new Image();
+    img.onload = () => { if (arena === a) forgetArena(a, false); };     // se vuelve a pintar ya con él
+    img.src = ARENA_ART + a.type + '.jpg';
+    a.art = img;
+  }
+  function paintArenaArt(cv, cx, cy) {
+    const a = arena, img = a.art, T = G.Tiles.T;
+    if (!img || !img.complete || !img.naturalWidth) return;
+    const tx0 = cx * N, ty0 = cy * N;
+    if (Math.abs(tx0 + N / 2 - a.tx) > a.r + N || Math.abs(ty0 + N / 2 - a.ty) > a.r + N) return;
+    const c = cv.getContext('2d');
+    c.save();
+    c.beginPath();
+    let any = false;
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const tx = tx0 + i, ty = ty0 + j;
+      if (arenaDist(tx, ty) >= a.r || terrainAt(tx, ty) !== FLOOR) continue;
+      c.rect(i * T, j * T, T, T); any = true;
+    }
+    if (any) {
+      const H = (2 * a.r + 3) * T, W = img.naturalWidth * H / img.naturalHeight;
+      c.clip();
+      c.imageSmoothingEnabled = true;
+      c.drawImage(img, (a.tx + 0.5 - tx0) * T - W / 2, (a.ty + 0.5 - ty0) * T - H / 2, W, H);
+    }
+    c.restore();
+  }
+  /** Olvida los chunks de la zona de la arena (los datos también si withData). */
+  function forgetArena(a, withData) {
+    const R = a.r + 9;
+    for (const k of [...data.keys(), ...images.keys()]) {
+      const [cx, cy] = k.split(',').map(Number);
+      if (Math.abs(cx * N + N / 2 - a.tx) < R + N && Math.abs(cy * N + N / 2 - a.ty) < R + N) { if (withData) data.delete(k); images.delete(k); }
+    }
   }
 
   /** 0..1 del fundido de bioma (suavizado), o null si no hay. */
@@ -601,12 +647,9 @@ G.World = (() => {
       arena = a;
       if (!a) return;
       a.th = G.Tiles.ARENA_THEMES[a.type] || G.Tiles.ARENA_THEMES.normal;
-      // Olvida los chunks de esa zona (si se hubieran generado antes).
-      const R = a.r + 9;
-      for (const k of [...data.keys(), ...images.keys()]) {
-        const [cx, cy] = k.split(',').map(Number);
-        if (Math.abs(cx * N + N / 2 - a.tx) < R + N && Math.abs(cy * N + N / 2 - a.ty) < R + N) { data.delete(k); images.delete(k); }
-      }
+      // Olvida los chunks de esa zona (si se hubieran generado antes) y carga su suelo.
+      forgetArena(a, true);
+      if (G.Tiles.ARENA_THEMES[a.type]) loadArenaArt(a);
     },
     get arena() { return arena; }, drawGround, drawLiquid, visibleProps, drawProp, drawVignette,
     get biome() { return biome; }

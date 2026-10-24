@@ -66,7 +66,9 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   `assets/portraits/`) en la ficha de la colección y en las cartas nuevas, de 4 y 5 estrellas y shiny del gacha (no en la
   tabla de la ×100); icono Físico / Especial / Estado de los juegos (`G.Stats.catOf` y `catIcon`) en las cartas de nivel,
   la pausa y la Tienda; y de fondo de la colección una caja del PC por región (`assets/ui/box/<gen>.png`, la 0 con
-  "Todas" o al buscar). Todo se descarga sólo al verlo.
+  "Todas" o al buscar). En las grietas y en la Sentencia, el suelo de la arena es un campo de combate de Reloaded
+  según el tipo (`assets/arenas/<tipo>.jpg`, `paintArenaArt` en `js/world/world.js`): sólo en las baldosas de suelo,
+  con las paredes, columnas y charcos de siempre encima. Todo se descarga sólo al verlo.
 - **Tamaño de las megas** (`G.Mega.megaScale`): en pantalla, todas al menos un 40 % más altas que su forma normal
   (como mucho 1,6 veces lo que dan sus sprites). `tools/import_reloaded.py` ya no las encoge: al volver a convertirlas
   con `--megas` (en el ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.

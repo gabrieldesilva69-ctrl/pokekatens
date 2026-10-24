@@ -52,3 +52,14 @@ test('la categoría de un ataque: la suya, la del lado que sube o Estado', () =>
 test('sw.js guarda los retratos y las imágenes de la interfaz para la copia sin internet', () => {
   assert.ok(/portraits/.test(read('sw.js')) && /\|ui\|/.test(read('sw.js')));
 });
+
+test('cada arena (los 18 tipos y la Sentencia) tiene su suelo, ligero', () => {
+  const types = [...read('js/world/tiles.js').match(/const ARENA_THEMES = \{([\s\S]*?)\n  \};/)[1].matchAll(/^    ([a-z]+):/gm)].map(m => m[1]);
+  assert.strictEqual(types.length, 19);
+  for (const t of types) {
+    const f = `assets/arenas/${t}.jpg`;
+    assert.ok(has(f), f);
+    assert.ok(fs.statSync(path.join(ROOT, f)).size < 100 * 1024, f + ' pesa demasiado');
+  }
+  assert.ok(/arenas/.test(read('sw.js')));
+});

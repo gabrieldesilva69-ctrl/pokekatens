@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: desafío semanal, evoluciones y noche', 'PokeKatens: weekly challenge, evolutions and night'], new: [
+    ["Las arenas de las grietas y la de la Sentencia de Arceus tienen suelo nuevo, uno por tipo (lava y roca para los de fuego, una isla de arena para los de agua, nieve para los de hielo...), de los campos de combate de Pokémon Edición Reloaded, de F3R.",
+     "The rift arenas and Arceus's Judgment arena have a new floor, one per type (lava and rock for Fire, a sand island for Water, snow for Ice...), from the battlefields of Pokémon Reloaded Edition, by F3R."],
     ["Retratos de Pokémon Edición Reloaded, de F3R: cada Pokémon tiene su retrato de frente (y el shiny) en su ficha de la colección y en las cartas nuevas, de 4 y 5 estrellas y shiny del gacha. Los ataques llevan el icono Físico, Especial o Estado de los juegos, y la colección tiene de fondo una caja del PC distinta en cada región.",
      "Portraits from Pokémon Reloaded Edition, by F3R: every Pokémon has its front portrait (and its shiny one) on its collection page and on the new, 4 and 5 star and shiny gacha cards. Moves show the Physical, Special or Status icon from the games, and the collection has a different PC box wallpaper for each region."],
     ["Lo nuevo de PokéSurvivor (de JPTER78): la Sentencia de Arceus con Tablas y ranking de daño a Arceus (todas las tablas del ranking empiezan de cero), Esferas de Mundo Misterioso, Amuletos Iris, tirada ×100 con botón Saltar (la tirada ×1 ya no está) y movimientos evolucionados que se llaman igual con un «+». Lo tienes todo en sus novedades del 22 y el 23-10.",

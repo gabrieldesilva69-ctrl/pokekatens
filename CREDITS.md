@@ -147,6 +147,8 @@ no se sube).
   shiny, para la ficha de la colección y las cartas del gacha (`tools/import_visual.py --retratos`).
 - **Iconos Físico / Especial / Estado** (`assets/ui/cat-*.png`) y **fondos de caja del PC**
   (`assets/ui/box/`, uno por región en la colección): `tools/import_visual.py --iconos --cajas`.
+- **Suelos de las arenas** (`assets/arenas/`): un campo de combate visto desde arriba por tipo, y
+  el de la Sentencia de Arceus, bajo la arena de las grietas (`tools/import_visual.py --arenas`).
 
 ## Datos
 

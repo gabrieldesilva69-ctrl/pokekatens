@@ -893,7 +893,7 @@ G.I18n.add({
   "¡Un huevo está listo para abrirse!": "An egg is ready to hatch!",
   "Huevos: {x}": "Eggs: {x}",
   "¡Un huevo está a punto de eclosionar! Ábrelo en la Mochila": "An egg is about to hatch! Open it in your Bag",
-  "colores de algunos shiny, gritos de los Pokémon, sprites de sus megaevoluciones, huevos, retratos, iconos Físico / Especial / Estado y fondos de caja.": "colours of some shinies, the Pokémon cries, the sprites of their Mega Evolutions, the eggs, the portraits, the Physical / Special / Status icons and the box wallpapers.",
+  "colores de algunos shiny, gritos de los Pokémon, sprites de sus megaevoluciones, huevos, retratos, iconos Físico / Especial / Estado, fondos de caja y suelos de las arenas.": "colours of some shinies, the Pokémon cries, the sprites of their Mega Evolutions, the eggs, the portraits, the Physical / Special / Status icons, the box wallpapers and the arena floors.",
   "Botas Gruesas": "Heavy-Duty Boots",
   "Las trampas no te afectan, la lava no te quema y el agua no te frena.": "Traps don't affect you, lava doesn't burn you and water doesn't slow you down.",
   "Metrónomo": "Metronome",
