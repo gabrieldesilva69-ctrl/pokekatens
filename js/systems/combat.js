@@ -123,6 +123,10 @@ G.Combat = (() => {
 
   /** Lanza un ataque; con el Dado Trucado, los de varios proyectiles o golpes, uno más. */
   function runMove(pl, m) {
+    if (m.boost && !ghost && Math.random() < m.boost) {          // Viento Plata
+      pl.addBuff('atk', 0.08, 6, 3); pl.addBuff('spd', 0.08, 6, 3);
+      G.FX.dmgText(pl.x, pl.y - pl.bodyH - 8, G.T('¡Ataque y Velocidad suben!'), '#c9d6ff');
+    }
     const dice = pl.item === 'loadeddice' && (m.count | 0) >= 2;
     if (dice) m.count++;
     try { run(pl, m); } finally { if (dice) m.count--; }
@@ -1039,6 +1043,25 @@ G.Combat = (() => {
     if (a.touchPoison && m && ['melee', 'dash', 'punch', 'scissor', 'blitz', 'leap'].includes(m.kind)) e.applyPoison(1);
   }
 
+  /** Extras de un proyectil al impactar (tanda C de MT): aturdir, explosión y charco. */
+  function projectileExtras(pl, p, e, d) {
+    const m = p.src, sk = statusK(pl);
+    if (m.stun && sk && !e.dead) e.applyStun(m.stun * (e.boss || e.judge ? 0.35 : 1));
+    if (m.splash) {
+      G.FX.ring(e.x, e.y, 4, m.splash, p.color, 0.25, 3);
+      for (const o of G.EnemyMgr.queryCircle(e.x, e.y, m.splash)) {
+        if (o !== e && !o.dead) o.hurt(d * 0.6, p.color, o.x - e.x, o.y - e.y, 0, null);
+      }
+    }
+    if (m.puddle) {
+      const vis = G.VFX.forMove(m);
+      fields.push({ kind: 'patch', owner: pl, ghost: false, m, col: p.color, vis, x: e.x, y: e.y, t: 0, life: m.puddle,
+                    r: m.pr || 30, tick: 0, dmg: d * 0.3 });
+      const mine = fields.filter(o => o.kind === 'patch' && o.owner === pl && o.m === m && !o.gone);
+      for (const o of mine.slice(0, Math.max(0, mine.length - 12))) o.gone = true;
+    }
+  }
+
   function hit(pl, e, dmg, col, dx, dy, knock, m) {
     const k = typeK(m.type, e, pl) * G.Stats.taken(e.mon, m.cat) * abilOut(pl, m, e);
     const crit = isCrit(pl), sk = statusK(pl);
@@ -1153,7 +1176,7 @@ G.Combat = (() => {
           break;
         }
 
-        const crit = isCrit(pl), sk = statusK(pl);
+        const crit = isCrit(pl) || !!(p.src && p.src.critUp && Math.random() < p.src.critUp), sk = statusK(pl);
         const k = (p.mtype ? typeK(p.mtype, e, pl) : 1) * G.Stats.taken(e.mon, p.mcat) * (crit ? critMul(pl) : 1) * abilOut(pl, p.src, e);
         e.hurt(p.dmg * k, p.color, p.vx || (e.x - pl.x), p.vy || (e.y - pl.y), sk ? p.knock : 0,
                crit ? 'crit' : p.mtype ? G.Types.label(G.Types.mult(p.mtype, e.types)) : null);
@@ -1165,6 +1188,7 @@ G.Combat = (() => {
         if (p.poison && sk) e.applyPoison(p.poison * sk);
         if (p.slow && sk) e.applySlow(Math.min(0.8, p.slow * sk));
         if (p.drain) pl.heal(p.drain);                    // Beso Drenaje
+        if (p.src) projectileExtras(pl, p, e, p.dmg * k);
         afterHit(pl, e, p.src);
 
         if (!p.orb && rebound(p, e)) break;

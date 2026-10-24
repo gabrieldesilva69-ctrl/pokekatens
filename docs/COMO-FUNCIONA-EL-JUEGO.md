@@ -33,6 +33,9 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   (`scissor`), Triturar (`shred`: tus golpes +25 % 4 s), Cascada, Megacuerno, Velocidad Extrema (`blitz`) y
   Acróbata (`leap`, ×1,5 sin objeto). Cuentan como cuerpo a cuerpo (−25 % de daño recibido, Guante de Boxeo).
   Velocidad Extrema no es MT en los juegos: la aprenden los que la tienen por nivel o tutor.
+  Tanda C (proyectiles): Pulso Dragón (atraviesa todo), Bomba Lodo y Ola-Lava (`puddle`: charco al impactar),
+  Escaldar, Fuerza Lunar (`splash`), Vendaval (empuja), Viento Plata (`boost`: a veces sube Ataque y Velocidad),
+  Psicocarga, Hidropulso (`stun`) y Roca Afilada (`critUp`: +30 % de críticos).
 - **Tabla de tipos:** p. ej. un Rayo Burbuja le quita más a un Charmander.
 - **Climas** de vez en cuando (sol, lluvia, arena, nieve, niebla): potencian unos tipos y debilitan otros.
 - **Objetos** que salen en las runs (Restos, Cinta Elección…): 23 equipables, uno por run (`js/data/items.js`;

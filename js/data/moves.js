@@ -38,6 +38,12 @@
  *   blitz       saltas de enemigo en enemigo golpeando a `count`
  *   leap        un salto sobre el enemigo y una onda al caer (`noItem`: × daño sin objeto)
  *   (y en melee, `shred`: el enemigo recibe +25 % de tus golpes durante `shred` s)
+ *   ---- tanda C (proyectiles, 23-10-2026): extras de los proyectiles ----
+ *   puddle      al impactar deja un charco de `pr` de radio durante `puddle` s (con su veneno o quemadura)
+ *   splash      al impactar, explosión de ese radio (60 % del daño a los de alrededor)
+ *   stun        al impactar, aturde esos segundos
+ *   critUp      probabilidad extra de crítico
+ *   boost       al lanzarlo, esa probabilidad de subirte Ataque y Velocidad un rato
  *
  * Sólo el movimiento ACTIVO se ejecuta. Se cambia con 1-4 / Q / E.
  *
@@ -718,7 +724,39 @@
       cd: 1.3, dmg: 18, count: 3, radius: 220 },
     { id: 'acrobatics', name: 'Acróbata', type: 'flying', kind: 'leap',
       desc: 'Un salto acrobático sobre el enemigo con onda al caer; sin objeto equipado, pega ×1,5.',
-      cd: 1.3, dmg: 24, radius: 70, range: 220, noItem: 1.5 }
+      cd: 1.3, dmg: 24, radius: 70, range: 220, noItem: 1.5 },
+
+    // ---------------- MT de Pokémon Edición Reloaded, tanda C: proyectiles (23-10-2026) ----------------
+    { id: 'dragon-pulse', name: 'Pulso Dragón', type: 'dragon', kind: 'projectile',
+      desc: 'Una onda de dragón enorme y lenta que atraviesa a todos los que pilla.',
+      cd: 0.9, dmg: 24, speed: 270, count: 1, life: 1.7, size: 12, pierce: 99 },
+    { id: 'sludge-bomb', name: 'Bomba Lodo', type: 'poison', kind: 'projectile',
+      desc: 'Una bomba de lodo que envenena y deja un charco tóxico al estallar.',
+      cd: 0.75, dmg: 20, speed: 300, count: 1, life: 1.4, size: 9, poison: 1, puddle: 3, pr: 32 },
+    { id: 'scald', name: 'Escaldar', type: 'water', kind: 'projectile',
+      desc: 'Agua hirviendo que atraviesa a uno y quema.',
+      cd: 0.55, dmg: 16, speed: 360, count: 1, life: 1.3, size: 7, pierce: 1, burn: 1 },
+    { id: 'moonblast', name: 'Fuerza Lunar', type: 'fairy', kind: 'homing',
+      desc: 'La luz de la luna persigue al enemigo y estalla alrededor.',
+      cd: 0.8, dmg: 22, speed: 280, life: 2.0, size: 10, homing: 5, splash: 56 },
+    { id: 'hurricane', name: 'Vendaval', type: 'flying', kind: 'projectile',
+      desc: 'Un remolino de viento que atraviesa y aparta de un soplido a todos.',
+      cd: 1.0, dmg: 15, speed: 330, count: 1, life: 1.2, size: 13, pierce: 99, knock: 240 },
+    { id: 'lava-plume', name: 'Ola-Lava', type: 'fire', kind: 'nova',
+      desc: 'Lava en todas las direcciones que quema y deja charcos ardiendo.',
+      cd: 1.4, dmg: 12, speed: 220, count: 8, life: 0.7, size: 7, pierce: 1, burn: 1, puddle: 2.5, pr: 24 },
+    { id: 'silver-wind', name: 'Viento Plata', type: 'bug', kind: 'cone',
+      desc: 'Un abanico de escamas de plata; a veces te sube el Ataque y la Velocidad.',
+      cd: 0.75, dmg: 7, count: 8, arc: 1.1, speed: 320, life: 0.5, size: 6, pierce: 1, boost: 0.15 },
+    { id: 'psyshock', name: 'Psicocarga', type: 'psychic', kind: 'bounce',
+      desc: 'Una onda psíquica que rebota entre cuatro enemigos.',
+      cd: 0.7, dmg: 14, speed: 360, life: 1.6, size: 8, bounce: 4 },
+    { id: 'water-pulse', name: 'Hidropulso', type: 'water', kind: 'projectile',
+      desc: 'Un anillo de agua que deja aturdido un momento al que toca.',
+      cd: 0.7, dmg: 15, speed: 360, count: 1, life: 1.4, size: 10, stun: 0.45 },
+    { id: 'stone-edge', name: 'Roca Afilada', type: 'rock', kind: 'projectile',
+      desc: 'Una roca afiladísima que atraviesa a uno y hace críticos muy a menudo.',
+      cd: 0.85, dmg: 22, speed: 420, count: 1, life: 1.2, size: 8, pierce: 1, critUp: 0.3 }
   ];
 
   // Cuerpo a cuerpo (12-10-2026): +20 % de daño y +25 % de alcance y de arco
@@ -752,7 +790,9 @@
     'earthquake',
     // tanda B de MT (23-10-2026): golpes
     'fire-punch', 'ice-punch', 'thunder-punch', 'drain-punch', 'x-scissor', 'crunch', 'waterfall', 'megahorn',
-    'extreme-speed', 'acrobatics']);
+    'extreme-speed', 'acrobatics',
+    // tanda C de MT (23-10-2026): proyectiles
+    'stone-edge']);
 
   // Los que disparan bolas necesitan count y spread de base: las mejoras los
   // multiplican y, sin ellos, "+1 proyectil" no sumaba ninguno y el abanico se
@@ -901,7 +941,13 @@
     'thunder-punch': ['Plasma Puños', 'cd'], 'drain-punch': ['Puño Certero', 'rgn'],
     'x-scissor': ['Corte Furia', 'cd'],      'crunch': ['Desarme', 'atk'],
     'waterfall': ['Martillazo', 'atk'],      'megahorn': ['Aguijón Letal', 'atk'],
-    'extreme-speed': ['Golpes Furia', 'spd'], 'acrobatics': ['Ala Bis', 'spd']
+    'extreme-speed': ['Golpes Furia', 'spd'], 'acrobatics': ['Ala Bis', 'spd'],
+    // tanda C de MT (23-10-2026)
+    'dragon-pulse': ['Distorsión', 'atk'],   'sludge-bomb': ['Cadena Virulenta', 'rgn'],
+    'scald': ['Vapor Volcánico', 'atk'],     'moonblast': ['Geocontrol', 'cd'],
+    'hurricane': ['Ala Mortífera', 'spd'],   'lava-plume': ['Llama Embrujada', 'rgn'],
+    'silver-wind': ['Danza Aleteo', 'def'],  'psyshock': ['Psicoataque', 'atk'],
+    'water-pulse': ['Hidrovapor', 'cd'],     'stone-edge': ['Roca Veloz', 'spd']
   };
   // Lo que gana al evolucionar, según cómo funcione.
   const EVO_MODS = {
