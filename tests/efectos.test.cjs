@@ -61,5 +61,8 @@ test('effects come and go slowly: a calm level most of the time and a spark now 
     if (v < 0.4) calm++;
   }
   assert.ok(calm > 600, 'las chispas de Pikachu están tranquilas la mayor parte del tiempo');
-  for (let t = 0; t < 10; t += 0.1) assert.ok(A.emitLevel(94, t, 3) <= 0.9 + 1e-9, 'los ojos de Gengar no van siempre a tope');
+  // Los ojos de Gengar respiran despacio: suben y bajan, pero tardan unos segundos en hacerlo.
+  const eye = []; for (let t = 0; t < 10; t += 0.1) eye.push(A.emitLevel(94, t, 3));
+  assert.ok(Math.min(...eye) >= 0.5 && Math.max(...eye) > Math.min(...eye) + 0.3, 'suben y bajan');
+  for (let i = 1; i < eye.length; i++) assert.ok(Math.abs(eye[i] - eye[i - 1]) < 0.05, 'y despacio');
 });
