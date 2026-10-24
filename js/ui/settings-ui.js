@@ -159,7 +159,7 @@ G.SettingsUI = (() => {
         + section('Créditos')
         + `<ul class="credits">
              <li><b>Sprites:</b> PMD SpriteCollab y sus artistas (CC BY-NC 4.0).</li>
-             <li><b>Pokémon Edición Reloaded, de F3R:</b> colores de algunos shiny, gritos de los Pokémon, sprites de sus megaevoluciones y huevos. <a href="https://pokemon-reloaded.blogspot.com" target="_blank" rel="noopener" translate="no">pokemon-reloaded.blogspot.com</a></li>
+             <li><b>Pokémon Edición Reloaded, de F3R:</b> colores de algunos shiny, gritos de los Pokémon, sprites de sus megaevoluciones, huevos, retratos, iconos Físico / Especial / Estado y fondos de caja. <a href="https://pokemon-reloaded.blogspot.com" target="_blank" rel="noopener" translate="no">pokemon-reloaded.blogspot.com</a></li>
              <li><b>Datos de los Pokémon:</b> PokéAPI.</li>
              <li><b>Música y sonidos:</b> originales, generados por el propio juego.</li>
              <li><b>Fuente:</b> Pixelify Sans (OFL).</li>

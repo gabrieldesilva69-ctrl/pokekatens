@@ -46,6 +46,10 @@ no se sube).
   oficiales (normal y shiny), convertidos con `tools/import_reloaded.py --mega N`, y sus
   gritos. Sus datos (tipos, estadísticas, habilidad) son de PokeAPI (`tools/fetch_megas.py`).
 - **Huevos** (`assets/eggs/`): uno por familia, normal y shiny, recortados con `tools/import_eggs.py`.
+- **Retratos** (`assets/portraits/`): los retratos de frente de 96x96 de cada Pokémon, normal y
+  shiny, para la ficha de la colección y las cartas del gacha (`tools/import_visual.py --retratos`).
+- **Iconos Físico / Especial / Estado** (`assets/ui/cat-*.png`) y **fondos de caja del PC**
+  (`assets/ui/box/`, uno por región en la colección): `tools/import_visual.py --iconos --cajas`.
 '''
 
 

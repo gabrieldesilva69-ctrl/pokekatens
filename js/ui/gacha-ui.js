@@ -129,6 +129,8 @@ G.GachaUI = (() => {
       c.style.setProperty('--rc', r.shiny ? '#9ae6ff' : G.Gacha.RARITY_COLOR[r.rarity]);
       c.innerHTML = `<div class="stars">${G.UI.stars(r.rarity, 24)}</div>`;
       c.appendChild(G.UI.spriteCanvas(r.dex, 132, 120, { lively: r.rarity >= 4 || r.shiny, scale: 2, shiny: r.shiny }));
+      // Las cartas grandes (no en la ×100): las nuevas, las de 4 y 5 estrellas y los shiny, con su retrato.
+      if (n < 100 && (r.isNew || r.rarity >= 4 || r.shiny)) c.insertAdjacentHTML('beforeend', G.UI.portrait(r.dex, r.shiny, 'portrait pcard-portrait'));
       const tag = r.isNew
         ? `<span class="new">${r.shiny ? '¡SHINY NUEVO!' : '¡NUEVO!'}</span>`
         : `Repetido · <span class="coin"></span> +${r.refund}`;

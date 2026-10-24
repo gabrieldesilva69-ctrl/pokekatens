@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Material visual de Pokémon Edición Reloaded (de F3R, https://pokemon-reloaded.blogspot.com)
+para el juego (unidad 8 de docs/IDEAS-RELOADED.md). Sólo lo que se usa, ligero:
+
+    python tools/import_visual.py --iconos     # Físico / Especial / Estado -> assets/ui/cat-*.png
+    python tools/import_visual.py --retratos   # retratos 96x96 -> assets/portraits/<dex>.png (+ s/ shiny)
+    python tools/import_visual.py --cajas      # fondos de caja, uno por región -> assets/ui/box/<gen>.png
+    python tools/import_visual.py --todo       # todo lo anterior
+
+- Iconos: image/at_fisico.png, at_especial.png y at_estado.png son de 240x180 con el
+  icono (22x15) en el centro sobre negro: se recorta.
+- Retratos: pkmn/<archivo>.gif y pkmn_shiny/<archivo>.gif (tools/reloaded_ids.py:
+  portrait_paths). Sólo los Pokémon de js/data/pokedex.js (los oficiales del juego);
+  cada uno se busca por su nombre, no por número. PNG con paleta, ~2-4 KB.
+- Cajas: caja/<n>.gif (156x141, con su franja de título arriba). Se usa el dibujo de
+  la caja (sin la franja ni el marco) como fondo de la colección; cuál de cada región va en BOXES.
+"""
+import io
+import os
+import re
+import sys
+
+from PIL import Image, ImageChops
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from fetch_sprites import save_optimized                        # noqa: E402
+from reloaded_ids import DATA, POKEDEX, portrait_paths, reloaded_ids  # noqa: E402
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UI = os.path.join(ROOT, 'assets', 'ui')
+PORTRAITS = os.path.join(ROOT, 'assets', 'portraits')
+
+CATS = {'physical': 'at_fisico', 'special': 'at_especial', 'status': 'at_estado'}
+# Fondo de la colección por región (0 = "Todas"): caja/<n>.gif de Reloaded.
+BOXES = {0: 17, 1: 1, 2: 33, 3: 10, 4: 7, 5: 22, 6: 13, 7: 9, 8: 21, 9: 26}
+BOX_IN = (5, 30, 5, 5)  # se quitan la franja de título (arriba) y el marco: izq., arriba, der., abajo
+
+
+def png(im):
+    b = io.BytesIO()
+    im.save(b, 'PNG')
+    return b.getvalue()
+
+
+def iconos():
+    os.makedirs(UI, exist_ok=True)
+    for cat, f in CATS.items():
+        im = Image.open(os.path.join(DATA, 'image', f + '.png')).convert('RGB')
+        bb = ImageChops.difference(im, Image.new('RGB', im.size, im.getpixel((0, 0)))).getbbox()
+        w, h = save_optimized(png(im.crop(bb).convert('RGBA')), os.path.join(UI, f'cat-{cat}.png'))
+        print(f'  {cat}: {w}x{h}')
+
+
+def dex_list():
+    out = []
+    for line in io.open(POKEDEX, encoding='utf-8'):
+        m = re.search(r'"dex":(\d+),', line)
+        if m and int(m.group(1)) <= 1025:
+            out.append(int(m.group(1)))
+    return sorted(set(out))
+
+
+def portrait(path):
+    """Primer fotograma (96x96) con su transparencia; None si está vacío."""
+    im = Image.open(path)
+    im.seek(0)
+    im = im.convert('RGBA')
+    return im if im.getbbox() else None
+
+
+def retratos():
+    os.makedirs(os.path.join(PORTRAITS, 's'), exist_ok=True)
+    done = shiny = 0
+    miss = []
+    for dex in dex_list():
+        ids = reloaded_ids(dex)
+        if not ids:
+            miss.append(dex)
+            continue
+        n, s = portrait_paths(ids[0])
+        if not os.path.exists(n):
+            miss.append(dex)
+            continue
+        im = portrait(n)
+        if im is None:
+            miss.append(dex)
+            continue
+        save_optimized(png(im), os.path.join(PORTRAITS, f'{dex}.png'))
+        done += 1
+        if os.path.exists(s):
+            si = portrait(s)
+            if si is not None:
+                save_optimized(png(si), os.path.join(PORTRAITS, 's', f'{dex}.png'))
+                shiny += 1
+    kb = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(PORTRAITS) for f in fs) // 1024
+    print(f'  retratos: {done} normales, {shiny} shiny, {kb} KB; sin retrato: {miss}')
+
+
+def cajas():
+    out = os.path.join(UI, 'box')
+    os.makedirs(out, exist_ok=True)
+    for gen, n in BOXES.items():
+        im = Image.open(os.path.join(DATA, 'caja', f'{n}.gif')).convert('RGBA')
+        l, t, r, b = BOX_IN
+        body = im.crop((l, t, im.width - r, im.height - b))
+        w, h = save_optimized(png(body), os.path.join(out, f'{gen}.png'))
+        print(f'  región {gen}: caja {n} ({w}x{h})')
+
+
+def main():
+    a = set(sys.argv[1:])
+    if not a or not a <= {'--iconos', '--retratos', '--cajas', '--todo'}:
+        sys.exit(__doc__)
+    if not os.path.isdir(DATA):
+        sys.exit(f'No encuentro la carpeta de Reloaded: {DATA}')
+    if a & {'--iconos', '--todo'}:
+        iconos()
+    if a & {'--retratos', '--todo'}:
+        retratos()
+    if a & {'--cajas', '--todo'}:
+        cajas()
+
+
+if __name__ == '__main__':
+    main()

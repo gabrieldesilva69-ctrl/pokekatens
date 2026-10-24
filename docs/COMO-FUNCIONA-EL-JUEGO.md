@@ -62,6 +62,11 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Formas primigenias** (24-10-2026): Kyogre y Groudon, como una mega (`primal:1` en `js/data/megas.js`), con su
   Orbe Azul / Rojo en vez de Megapiedra y lluvia / sol mientras duran. Sprites de SpriteCollab con
   `tools/fetch_forms.py` (`fm:1` en `sprites-meta.js`). No salen en el gacha.
+- **Material visual de Reloaded** (`tools/import_visual.py`): retrato de frente de cada Pokémon (`G.UI.portrait`,
+  `assets/portraits/`) en la ficha de la colección y en las cartas nuevas, de 4 y 5 estrellas y shiny del gacha (no en la
+  tabla de la ×100); icono Físico / Especial / Estado de los juegos (`G.Stats.catOf` y `catIcon`) en las cartas de nivel,
+  la pausa y la Tienda; y de fondo de la colección una caja del PC por región (`assets/ui/box/<gen>.png`, la 0 con
+  "Todas" o al buscar). Todo se descarga sólo al verlo.
 - **Tamaño de las megas** (`G.Mega.megaScale`): en pantalla, todas al menos un 40 % más altas que su forma normal
   (como mucho 1,6 veces lo que dan sus sprites). `tools/import_reloaded.py` ya no las encoge: al volver a convertirlas
   con `--megas` (en el ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.

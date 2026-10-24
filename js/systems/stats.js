@@ -15,13 +15,28 @@
  */
 G.Stats = (() => {
   const REF = 75, EXP = 0.35, LO = 0.78, HI = 1.25;
-  const NAME = { physical: 'Físico', special: 'Especial' };
+  const NAME = { physical: 'Físico', special: 'Especial', status: 'Estado' };
+
+  /*
+   * Categoría de un ataque para enseñarla: la suya o, en los potenciadores, la del lado que
+   * suben (Danza Espada físico, Maquinación especial); los demás de apoyo, Estado.
+   * El icono es el de los juegos, de Pokémon Edición Reloaded (tools/import_visual.py --iconos).
+   */
+  function catOf(d) {
+    if (!d) return '';
+    return d.cat || (d.stat === 'patk' ? 'physical' : d.stat === 'satk' ? 'special' : G.Moves.isStatus(d) ? 'status' : '');
+  }
+  function catIcon(cat) {
+    if (!NAME[cat]) return '';
+    const t = G.T(NAME[cat]);
+    return `<img class="cat-ico" src="assets/ui/cat-${cat}.png" alt="${t}" title="${t}" width="33" height="22">`;
+  }
 
   /** Multiplicador del daño que recibe quien tiene esa defensa base. */
   function guard(def) { return G.U.clamp(Math.pow(REF / Math.max(5, def || REF), EXP), LO, HI); }
 
   return {
-    NAME,
+    NAME, catOf, catIcon,
     /**
      * Daño que recibe un Pokémon (mon con df/sd) de un golpe de categoría cat.
      * Sin categoría o sin datos: ×1.
