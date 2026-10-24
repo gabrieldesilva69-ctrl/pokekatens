@@ -16,6 +16,8 @@
  *   - Despacio y a ratos (24-10-2026): los brillos suben y bajan despacio y las partículas
  *     salen en olas de unos segundos con pausas (wave), no sin parar.
  *   - Se pueden quitar: Ajustes → "Efectos de los Pokémon" y en la ficha de cada uno (enabled).
+ *   - En píxeles (24-10-2026): las partículas son cuadraditos en píxeles enteros, como los
+ *     sprites, y dejan un rastro pixelado al moverse (las redondas y borrosas no pegaban).
  *   - Partículas suaves según su tipo (PARTS): ascuas, burbujas, hojas, chispas...
  *   - Contorno que brilla (glow): megaevolución, racha alta, jefes y legendarios.
  *   - Destello shiny: una franja de luz cruza el sprite de vez en cuando.
@@ -352,7 +354,8 @@ G.Aura = (() => {
   function emitLevel(dex, t, seed = 0) {
     const rule = SPOTS[dex];
     if (!rule) return 0;
-    if (rule.kind === 'flame') return 0.62 + 0.14 * Math.sin(t * 6) + 0.06 * Math.sin(t * 15.3);
+    // Las llamas parpadean vivas, como un fuego de verdad (igual que en la primera versión).
+    if (rule.kind === 'flame') return 0.6 + 0.25 * Math.sin(t * 13) + 0.15 * Math.sin(t * 31);
     // Las chispas: tranquilas y, de vez en cuando, un chispazo.
     if (rule.kind === 'spark') { const w = wave(t, seed, 4.5, 1.1); return 0.35 + 0.65 * w * (0.85 + 0.15 * Math.sin(t * 40)); }
     if (rule.kind === 'eye') return 0.55 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + seed));
@@ -423,12 +426,12 @@ G.Aura = (() => {
     const P = PARTS[types[0]] || PARTS.normal;
     const w = wave(performance.now() / 1000, seedOf(ent), 7, 4);
     if (w <= 0) return;
-    ent._auraAcc = (ent._auraAcc || 0) + dt * P.rate * 0.6 * k * w;
+    ent._auraAcc = (ent._auraAcc || 0) + dt * P.rate * 0.9 * k * w;
     while (ent._auraAcc >= 1 && parts.length < MAX) {
       ent._auraAcc -= 1;
       const h = ent.bodyH || 24, r = ent.r || 12;
-      parts.push({ x: ent.x + G.U.rand(-r, r), y: ent.y - G.U.rand(0.1, 0.95) * h, vx: G.U.rand(-1, 1) * P.spread * 0.3,
-        vy: -P.up * 0.7 * G.U.rand(0.6, 1.2), t: 0, life: P.life * 1.3 * G.U.rand(0.7, 1.2), c: G.U.pick(P.c), r: P.r * G.U.rand(0.8, 1.3) * G.Sprites.PX, P });
+      parts.push({ x: ent.x + G.U.rand(-r, r), y: ent.y - G.U.rand(0.1, 0.95) * h, vx: G.U.rand(-1, 1) * P.spread * 0.4,
+        vy: -P.up * G.U.rand(0.6, 1.2), t: 0, life: P.life * G.U.rand(0.7, 1.2), c: G.U.pick(P.c), r: P.r * G.U.rand(0.8, 1.3) * G.Sprites.PX, P });
     }
   }
   function update(dt) {
@@ -441,13 +444,16 @@ G.Aura = (() => {
     }
   }
   /** En el mundo (con la cámara puesta), encima de los Pokémon. */
+  // Corazón de 7 × 6 píxeles.
+  const HEART = ['.xx.xx.', 'xxxxxxx', 'xxxxxxx', '.xxxxx.', '..xxx..', '...x...'];
   function draw(ctx) {
     if (!parts.length) return;
     ctx.save();
     for (const p of parts) {
-      // Aparece y se apaga suave (sin cortes).
-      const a = Math.sin(Math.PI * Math.min(1, p.t / p.life));
-      ctx.globalAlpha = Math.max(0, a) * (p.P.soft ? 0.4 : 0.9);
+      // Aparece rápido y se apaga despacio; en píxeles enteros, como los sprites.
+      const k = p.t / p.life, a = k < 0.2 ? k / 0.2 : 1 - (k - 0.2) / 0.8;
+      const x = Math.round(p.x), y = Math.round(p.y);
+      ctx.globalAlpha = Math.max(0, a) * (p.P.soft ? 0.45 : 0.85);
       ctx.globalCompositeOperation = p.P.glow ? 'lighter' : 'source-over';
       ctx.fillStyle = p.c;
       if (p.P.bolt) {
@@ -463,46 +469,37 @@ G.Aura = (() => {
         ctx.globalCompositeOperation = 'lighter';
         ctx.strokeStyle = p.c; ctx.lineWidth = 1.5; zig();
       } else if (p.P.star) {
-        // Destello de cuatro puntas que titila (como los brillos de los juegos).
-        const s = p.r * (1.2 + 0.8 * Math.abs(Math.sin(p.t * 5)));
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y - s * 1.6); ctx.lineTo(p.x + s * 0.3, p.y - s * 0.3); ctx.lineTo(p.x + s * 1.6, p.y);
-        ctx.lineTo(p.x + s * 0.3, p.y + s * 0.3); ctx.lineTo(p.x, p.y + s * 1.6); ctx.lineTo(p.x - s * 0.3, p.y + s * 0.3);
-        ctx.lineTo(p.x - s * 1.6, p.y); ctx.lineTo(p.x - s * 0.3, p.y - s * 0.3); ctx.closePath(); ctx.fill();
+        // Destello de cuatro puntas, en píxeles, que titila.
+        const s = Math.max(1, Math.round(p.r * (0.8 + 0.6 * Math.abs(Math.sin(p.t * 5)))));
+        ctx.fillRect(x - s, y, s * 2 + 1, 1);
+        ctx.fillRect(x, y - s, 1, s * 2 + 1);
+        ctx.fillRect(x - 1, y - 1, 2, 2);
       } else if (p.P.heart) {
-        // Corazón: dos círculos y una punta.
-        const s = p.r * 1.1;
-        ctx.beginPath();
-        ctx.arc(p.x - s * 0.5, p.y - s * 0.3, s * 0.55, 0, 6.2832);
-        ctx.arc(p.x + s * 0.5, p.y - s * 0.3, s * 0.55, 0, 6.2832);
-        ctx.fill();
-        ctx.beginPath(); ctx.moveTo(p.x - s * 1.05, p.y - s * 0.15); ctx.lineTo(p.x, p.y + s * 1.1); ctx.lineTo(p.x + s * 1.05, p.y - s * 0.15); ctx.fill();
+        // Corazón de píxeles.
+        const u = Math.max(1, Math.round(p.r / 2.5));
+        HEART.forEach((row, ry) => { for (let rx = 0; rx < row.length; rx++) if (row[rx] === 'x') ctx.fillRect(x + (rx - 3) * u, y + (ry - 3) * u, u, u); });
       } else if (p.P.zzz) {
         // Zzz de los dormilones: crece al subir (con borde, para que se lea sobre cualquier fondo).
         ctx.font = 'bold ' + Math.round(8 + 8 * (p.t / p.life)) + 'px sans-serif'; ctx.textAlign = 'center';
-        ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,24,48,.6)'; ctx.strokeText('z', p.x, p.y);
-        ctx.fillText('z', p.x, p.y);
+        ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,24,48,.6)'; ctx.strokeText('z', x, y);
+        ctx.fillText('z', x, y);
       } else if (p.P.petal) {
-        // Hoja o pétalo que gira mientras cae.
-        ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r * 1.3, p.r * 0.65, p.t * 3, 0, 6.2832); ctx.fill();
+        // Hoja o pétalo de píxeles que da vueltas mientras cae (ancho y estrecho por turnos).
+        const s = Math.max(1, Math.round(p.r)), w = Math.abs(Math.cos(p.t * 3)) > 0.5;
+        ctx.fillRect(x - (w ? s : 0), y, w ? s * 2 : Math.max(1, s >> 1), w ? Math.max(1, s >> 1) : s * 2);
       } else if (p.P.note) {
         // Nota musical (Meloetta, Jigglypuff...), con borde.
         ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
         const n = p.r > 2.2 ? '\u266B' : '\u266A';
-        ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,24,48,.55)'; ctx.strokeText(n, p.x, p.y);
-        ctx.fillText(n, p.x, p.y);
+        ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,24,48,.55)'; ctx.strokeText(n, x, y);
+        ctx.fillText(n, x, y);
       } else if (p.P.ring) {
         ctx.strokeStyle = p.c; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.stroke();
-      } else if (p.P.glow) {
-        // Lucecita redonda con halo.
-        const ga = ctx.globalAlpha;
-        ctx.globalAlpha = ga * 0.3;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 1.9, 0, 6.2832); ctx.fill();
-        ctx.globalAlpha = ga;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.75, 0, 6.2832); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, Math.max(1, Math.round(p.r)), 0, 6.2832); ctx.stroke();
       } else {
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.8, 0, 6.2832); ctx.fill();
+        // Lo normal: un cuadradito, como un píxel del sprite (deja un rastro pixelado al moverse).
+        const s = Math.max(1, Math.round(p.r));
+        ctx.fillRect(x - (s >> 1), y - (s >> 1), s, s);
       }
     }
     ctx.restore();
