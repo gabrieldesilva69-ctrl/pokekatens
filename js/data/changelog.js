@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: desafío semanal, evoluciones y noche', 'PokeKatens: weekly challenge, evolutions and night'], new: [
+    ["Cada Megapiedra tiene su propio icono, con los dos colores de su Pokémon (Venusaurita verde y rosa, Charizardita X azul y negra...), y el Orbe Rojo y el Orbe Azul el suyo, con su Ω y su α. Salen en la barra y el botón de megaevolucionar, en la Tienda, en la Mochila y en la ficha de la colección.",
+     "Every Mega Stone has its own icon, with the two colours of its Pokémon (Venusaurite green and pink, Charizardite X blue and black...), and the Red Orb and Blue Orb have theirs, with their Ω and α. They show on the Mega Evolution bar and button, in the Shop, in the Bag and on the collection page."],
     ["Avatares de entrenador: en tu Perfil puedes elegir uno de 60 entrenadores animados de Pokémon Edición Reloaded, de F3R (Red, Blue, líderes de gimnasio, campeones...). Sale en tu perfil, en la lista de amigos y en la sala del cooperativo.",
      "Trainer avatars: in your Profile you can choose one of 60 animated trainers from Pokémon Reloaded Edition, by F3R (Red, Blue, Gym Leaders, Champions...). It shows on your profile, in the friends list and in the co-op room."],
     ["Las arenas de las grietas de muchos tipos tienen suelo nuevo en pixel art (roca para los de roca, nieve para los de hielo, arena del desierto para los de tierra...) y las de agua, una playa, de los campos de combate de Pokémon Edición Reloaded, de F3R.",

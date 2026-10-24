@@ -120,7 +120,9 @@ G.LayoutUI = (() => {
     };
     place('bar', BAR_W, S);
     place('pause', 40, 40);
-    place('mega', MEGA_S, MEGA_S).style.backgroundImage = `url("${G.Icons.url('mega')}")`;
+    // El de megaevolucionar, con la Megapiedra (u Orbe) de tu compañero si tiene mega.
+    const pd = G.DB.save && G.DB.save.partner;
+    place('mega', MEGA_S, MEGA_S).style.backgroundImage = `url("${G.Icons.url(G.Mega.exists(pd) ? G.Mega.stoneIcon(pd) : 'mega')}")`;
     place('stick', r * 2, r * 2).classList.toggle('hidden', mode !== 'fixed');
     el.querySelectorAll('#lay-mode .chip').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
     el.querySelector('.lay-turn').classList.toggle('hidden', innerWidth >= innerHeight);

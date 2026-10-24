@@ -517,7 +517,7 @@ G.HUD = (() => {
    */
   function drawMega(ctx, w, h, pl, mb, px, py, touch) {
     const t = performance.now() / 1000, pulse = 0.5 + 0.5 * Math.sin(t * 6);
-    G.Icons.draw(ctx, 'mega', px + 28, py + 28, 14);
+    G.Icons.draw(ctx, G.Mega.stoneIcon(pl.dex), px + 26, py + 26, 16);      // su Megapiedra (u Orbe)
     const g = ctx.createLinearGradient(px + 48, 0, px + 216, 0);
     if (mb.on) { g.addColorStop(0, '#ffd23f'); g.addColorStop(1, '#fff4d6'); }
     else { g.addColorStop(0, '#c47bff'); g.addColorStop(1, '#ff8ad8'); }
@@ -546,7 +546,7 @@ G.HUD = (() => {
       ctx.fillStyle = 'rgba(10,16,28,.75)'; ctx.fill();
       ctx.lineWidth = 2; ctx.strokeStyle = '#ff8ad8'; ctx.stroke();
       ctx.restore();
-      G.Icons.draw(ctx, 'mega', bx + 10, by + 10, 32);
+      G.Icons.draw(ctx, G.Mega.stoneIcon(pl.dex), bx + 10, by + 10, 32);
       G.Touch.addButton(bx, by, S, S, () => G.Mega.press(pl), 8);
     }
   }

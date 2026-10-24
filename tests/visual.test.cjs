@@ -62,3 +62,16 @@ test('G.UI.avatar sólo pinta un número de la lista (lo de la sala llega sin co
   assert.ok(/trainers\/7\.gif/.test(avatar(7)));
   for (const bad of [0, 61, -1, 2.5, '3', '"><script>', null, undefined]) assert.strictEqual(avatar(bad), '', String(bad));
 });
+
+test('cada mega tiene su Megapiedra (dos colores) y las primigenias su Orbe', () => {
+  const G = load(['js/data/megas.js', 'js/data/stones.js']);
+  const hex = /^#[0-9a-f]{6}$/;
+  for (const [dex, d] of Object.entries(G.MEGAS)) {
+    if (d.primal) { assert.ok(!G.STONE_COLORS[dex], 'las primigenias llevan Orbe: ' + dex); continue; }
+    const c = G.STONE_COLORS[dex];
+    assert.ok(c && c.length === 2 && hex.test(c[0]) && hex.test(c[1]), 'colores de la piedra de ' + dex);
+  }
+  const src = read('js/systems/mega.js');
+  assert.ok(/'porb:' \+ \(d\.orb === 'Orbe Azul' \? 'blue' : 'red'\)/.test(src) && /'ms:' \+ dex/.test(src));
+  assert.ok(/js\/data\/stones\.js/.test(read('dev.html')));
+});

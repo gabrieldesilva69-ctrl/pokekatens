@@ -8,6 +8,7 @@
  *   'move:<id>'                  emblema del tipo + insignia de la familia
  *   'type:<tipo>'                sólo el emblema
  *   'stone:<tipo>'               Megapiedra del color de ese tipo
+ *   'ms:<dex>' · 'porb:red|blue' Megapiedra de esa mega (data/stones.js) · Orbe Rojo / Azul
  */
 G.Icons = (() => {
   const K = '#1b1528';          // contorno
@@ -409,6 +410,58 @@ G.Icons = (() => {
     return cv;
   }
 
+  /*
+   * Megapiedra de cada mega ('ms:<dex>', colores de data/stones.js: tools/make_stones.py) y los
+   * Orbes de las formas primigenias ('porb:red' con su Ω, 'porb:blue' con su α): esferas de 16x16
+   * dibujadas aquí, en el pixel art del juego. La piedra lleva la hélice de la megaevolución: arriba
+   * un color, abajo el otro, y entre los dos una franja blanca ondulada.
+   */
+  const darker = (c, k = 0.6) => '#' + [1, 3, 5].map(i => Math.round(parseInt(c.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');
+  // El círculo (16x16) a mano: 'k' el borde, '#' dentro.
+  const SPHERE = ['.....kkkkkk.....', '...kk######kk...', '..k##########k..', '.k############k.',
+    '.k############k.', 'k##############k', 'k##############k', 'k##############k', 'k##############k',
+    'k##############k', 'k##############k', '.k############k.', '.k############k.', '..k##########k..',
+    '...kk######kk...', '.....kkkkkk.....'];
+  function sphere(fill) {
+    return SPHERE.map((row, y) => [...row].map((ch, x) => {
+      if (ch !== '#') return ch;
+      if ((x === 4 || x === 5) && (y === 3 || y === 4)) return 'w';            // el brillo
+      return fill(x, y, Math.hypot(x - 7.5, y - 7.5));
+    }).join(''));
+  }
+  // La hélice: arriba a la izquierda un color, abajo a la derecha el otro, separados por una «S».
+  const STONE_ROWS = sphere((x, y, d) => {
+    const c = y < 7.5 ? 3.75 : 11.25, r = 3.9, q = Math.sqrt(Math.max(0, r * r - (y + 0.5 - c) * (y + 0.5 - c)));
+    const bx = y < 7.5 ? 7.5 - q : 7.5 + q;            // dos medias lunas: la «S» de la hélice
+    const t = x - Math.round(bx);
+    if (t === 0) return 'h';
+    const lo = d > 5.6 && x + y > 15;                  // el borde de abajo, más oscuro
+    return t < 0 ? (lo ? 'A' : 'a') : (lo ? 'B' : 'b');
+  });
+  const GLYPH = {
+    red: ['..####..', '.##..##.', '##....##', '##....##', '.##..##.', '###..###'],                 // Ω
+    blue: ['.##...##', '#..#.##.', '#...##..', '#..#.##.', '.##...##']                               // α
+  };
+  function orbRows(kind) {
+    const g = GLYPH[kind], gy = Math.round(8 - g.length / 2), gx = 4;
+    return sphere((x, y, d) => {
+      const ch = (g[y - gy] || '')[x - gx];
+      if (ch === '#') return 'g';
+      return d > 5.6 && x + y > 15 ? 'A' : 'a';
+    });
+  }
+  const PORB_PAL = { red: { a: '#d83a3a', A: '#8a1c24', g: '#ffd23f' }, blue: { a: '#3a5ed8', A: '#1c2a7a', g: '#bfe6ff' } };
+  function megaDef(name) {
+    if (name.startsWith('porb:')) {
+      const kind = name.slice(5) === 'blue' ? 'blue' : 'red';
+      return { rows: orbRows(kind), pal: Object.assign({ w: '#ffffff' }, PORB_PAL[kind]) };
+    }
+    const dex = +name.slice(3), sc = (G.STONE_COLORS || {})[dex];
+    const [a, b] = sc || [G.U.TYPE_COLOR[((G.MEGAS || {})[dex] || { types: ['normal'] }).types[0]] || '#c47bff', '#6a3aa8'];
+    return { rows: STONE_ROWS, pal: { a, b, A: darker(a), B: darker(b), h: '#f4f8ff', w: '#ffffff' } };
+  }
+  const isMegaIcon = name => name.startsWith('ms:') || name.startsWith('porb:');
+
   /** La Megapiedra con el color de un tipo (el primero de su mega). */
   function stoneDef(type) {
     const c = G.U.TYPE_COLOR[type];
@@ -427,6 +480,8 @@ G.Icons = (() => {
       cv = emblem(name.slice(5));
     } else if (name.startsWith('stone:')) {
       cv = fromRows(stoneDef(name.slice(6)));
+    } else if (isMegaIcon(name)) {
+      cv = fromRows(megaDef(name));
     } else {
       cv = fromRows(UI[name] || UI.star);
     }
@@ -440,6 +495,7 @@ G.Icons = (() => {
       // Los de interfaz, directamente de su dibujo; los emblemas (tipos, movimientos), del canvas.
       const plain = !name.startsWith('move:') && !name.startsWith('type:');
       u = name.startsWith('stone:') ? svgOfRows(stoneDef(name.slice(6)))
+        : isMegaIcon(name) ? svgOfRows(megaDef(name))
         : plain ? svgOfRows(UI[name] || UI.star) : svgOf(canvas(name));
       urls.set(name, u);
     }

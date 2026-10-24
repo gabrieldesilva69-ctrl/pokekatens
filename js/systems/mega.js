@@ -38,7 +38,8 @@ G.Mega = (() => {
     return primal(dex) ? G.T(data(dex).orb) : G.I18n.f('Megapiedra de {x}', G.DEX_BY[dex].name + suffix(dex));
   }
   /** Icono de su Megapiedra: del color del primer tipo de la mega (el orbe, del suyo). */
-  function stoneIcon(dex) { const d = data(dex); return 'stone:' + (d ? d.oc || d.types[0] : 'normal'); }
+  // La de esa mega (sus dos colores, data/stones.js), o su Orbe Rojo / Azul (ui/icons.js).
+  function stoneIcon(dex) { const d = data(dex); return !d ? 'megastone' : d.primal ? 'porb:' + (d.orb === 'Orbe Azul' ? 'blue' : 'red') : 'ms:' + dex; }
 
   /** Los stats de la mega con la naturaleza de tu Pokémon (la misma proporción). */
   function megaMon(pl) {
