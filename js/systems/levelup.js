@@ -72,6 +72,21 @@ G.LevelUp = (() => {
       }
     }
 
+    // --- su ataque exclusivo (data/moves.js, `only`): carta especial desde el nivel ONLY_LVL ---
+    if (pl.slots.length < pl.maxMoves && pl.level >= G.Moves.ONLY_LVL) {
+      for (const id of G.Moves.exclusiveFor(pl.mon.dex)) {
+        if (pl.hasMove(id) || (pl.banned && pl.banned.has(id))) continue;
+        const d = G.Moves.BY_ID[id];
+        out.push({
+          w: 30, type: 'excl', key: 'new:' + id,
+          icon: 'move:' + id, color: '#ffd23f', tag: 'EXCLUSIVO',
+          cat: G.Stats.NAME[d.cat || (d.stat === 'patk' ? 'physical' : d.stat === 'satk' ? 'special' : '')] || '',
+          title: G.T(d.name, 'move'), desc: d.desc + ` <span class="gold">${G.I18n.f('Sólo lo aprende {x}.', pl.mon.name)}</span>`,
+          apply: p => { p.addMove(id); G.Audio.sfx('legend'); }
+        });
+      }
+    }
+
     // --- evoluciones: movimiento al máximo + su condición cumplida ---
     const waiting = {};                   // stat -> movimiento que la espera para evolucionar
     for (const m of pl.moves) {
@@ -134,6 +149,9 @@ G.LevelUp = (() => {
     // Si hay una evolución lista, su carta dorada sale siempre.
     const evo = pool.findIndex(c => c.type === 'evo');
     if (evo >= 0) { const c = pool.splice(evo, 1)[0]; used.add(c.key); picked.push(c); }
+    // El ataque exclusivo, en cuanto se puede, siempre sale (una carta).
+    const ex = pool.findIndex(c => c.type === 'excl');
+    if (ex >= 0 && picked.length < n) { const c = pool.splice(ex, 1)[0]; used.add(c.key); picked.push(c); }
 
     while (picked.length < n && pool.length) {
       const total = pool.reduce((a, c) => a + c.w, 0);

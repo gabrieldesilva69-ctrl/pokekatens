@@ -812,7 +812,68 @@
       cd: 8, dur: 4, count: 1, radius: 260 },
     { id: 'explosion', name: 'Explosión', type: 'normal', kind: 'boom',
       desc: 'Una explosión enorme a tu alrededor; te cuesta un cuarto de la vida que te queda (nunca te deja KO).',
-      cd: 2.5, dmg: 70, radius: 150, cost: 0.25, knock: 220 }
+      cd: 2.5, dmg: 70, radius: 150, cost: 0.25, knock: 220 },
+
+    // ---------------- ataques exclusivos (24-10-2026) ----------------
+    // Sólo los aprende ese Pokémon (`only`: su número y los de su familia que también
+    // lo aprenden en los juegos), como en los juegos: no van en el pool de su tipo, no
+    // hay MT ni se pueden elegir de inicio. Salen como carta especial al subir de nivel
+    // desde el nivel ONLY_LVL (systems/levelup.js), también con su mega o forma primigenia.
+    // Más fuertes que los normales de su tipo y no evolucionan: ya son su versión fuerte.
+    { id: 'dragon-ascent', name: 'Ascenso Draco', type: 'flying', kind: 'dash', only: [384],
+      desc: 'Bajas del cielo a toda velocidad y arrasas todo lo que hay en tu camino.',
+      cd: 0.9, dmg: 34, radius: 175, width: 50, knock: 100 },
+    { id: 'psystrike', name: 'Onda Mental', type: 'psychic', kind: 'nova', only: [150],
+      desc: 'Una onda de poder mental sale en todas direcciones y atraviesa a varios enemigos.',
+      cd: 1.2, dmg: 17, speed: 300, count: 16, pierce: 3, life: 1.4, size: 9, homing: 1.2 },
+    { id: 'sacred-fire', name: 'Fuego Sagrado', type: 'fire', kind: 'meteor', only: [244, 250],
+      desc: 'Llamas sagradas caen sobre los enemigos cercanos y los queman.',
+      cd: 1.3, dmg: 34, count: 4, radius: 58, burn: 1.5 },
+    { id: 'origin-pulse', name: 'Pulso Primigenio', type: 'water', kind: 'nova', only: [382],
+      desc: 'Rayos de agua salen de ti en todas direcciones y empujan a los enemigos.',
+      cd: 1.3, dmg: 22, speed: 320, count: 10, pierce: 4, life: 1.3, size: 11, knock: 60 },
+    { id: 'precipice-blades', name: 'Filo del Abismo', type: 'ground', kind: 'quake', only: [383],
+      desc: 'Hojas de piedra brotan del suelo en línea, una detrás de otra.',
+      cd: 1.25, dmg: 30, count: 8, radius: 40 },
+    { id: 'roar-of-time', name: 'Distorsión', type: 'dragon', kind: 'charge', only: [483],
+      desc: 'Cargas un momento y sale un rayo enorme que distorsiona el tiempo.',
+      cd: 2.4, charge: 0.8, dmg: 82, radius: 330, width: 58 },
+    { id: 'shadow-force', name: 'Golpe Umbrío', type: 'ghost', kind: 'leap', only: [487],
+      desc: 'Desapareces y caes sobre el enemigo con una onda de sombra.',
+      cd: 1.3, dmg: 40, radius: 90, range: 260 },
+    { id: 'dark-void', name: 'Brecha Negra', type: 'dark', kind: 'stun', only: [491],
+      desc: 'Una brecha oscura deja aturdidos un buen rato a todos los que pilla.',
+      cd: 2.0, dmg: 16, radius: 110, stun: 1.8 },
+    { id: 'volt-tackle', name: 'Placaje Eléctrico', type: 'electric', kind: 'dash', only: [172, 25, 26],
+      desc: 'Te lanzas envuelto en electricidad y arrollas todo a tu paso.',
+      cd: 0.9, dmg: 36, radius: 150, width: 44, knock: 120 },
+    { id: 'judgment', name: 'Sentencia', type: 'normal', kind: 'storm', only: [493],
+      desc: 'Caen rayos de luz sobre muchos enemigos de la pantalla.',
+      cd: 1.4, dmg: 30, count: 8, radius: 40 },
+    { id: 'diamond-storm', name: 'Tormenta de Diamantes', type: 'rock', kind: 'meteor', only: [719],
+      desc: 'Una lluvia de diamantes cae sobre los enemigos cercanos.',
+      cd: 1.25, dmg: 26, count: 5, radius: 50, knock: 50 },
+    { id: 'secret-sword', name: 'Sable Místico', type: 'fighting', kind: 'boomerang', only: [647],
+      desc: 'Dos tajos de energía salen hacia el enemigo y vuelven a ti.',
+      cd: 0.85, dmg: 28, speed: 360, count: 2, spread: 0.5, radius: 240, size: 9 },
+    { id: 'doom-desire', name: 'Deseo Oculto', type: 'steel', kind: 'meteor', only: [385],
+      desc: 'Un rayo de luz cae al rato sobre un enemigo y explosiona con mucha fuerza.',
+      cd: 2.4, dmg: 90, count: 1, radius: 95, knock: 120 },
+    { id: 'geomancy', name: 'Geocontrol', type: 'fairy', kind: 'buff', only: [716],
+      desc: 'No hace daño: acumula mucho ATAQUE ESPECIAL mientras esté activo.',
+      cd: 0.85, stat: 'satk', amount: 0.18, dur: 8, stacks: 5 },
+    { id: 'glaciate', name: 'Mundo Gélido', type: 'ice', kind: 'tremor', only: [646],
+      desc: 'Un anillo de hielo sale de ti, golpea a todos los que alcanza y los frena.',
+      cd: 1.5, dmg: 30, radius: 190, slow: 0.6 },
+    { id: 'seed-flare', name: 'Fulgor Semilla', type: 'grass', kind: 'cross', only: [492],
+      desc: 'Una explosión de semillas en cruz sobre un enemigo.',
+      cd: 1.4, dmg: 40, radius: 110, width: 30 },
+    { id: 'mortal-spin', name: 'Giro Mortífero', type: 'poison', kind: 'spin', only: [970],
+      desc: 'Giras golpeando todo lo que tienes alrededor y lo envenenas.',
+      cd: 1.0, dmg: 14, count: 4, radius: 72, poison: 1.5 },
+    { id: 'attack-order', name: 'Al Ataque', type: 'bug', kind: 'homing', only: [416],
+      desc: 'Un enjambre de bichos persigue a los enemigos.',
+      cd: 0.75, dmg: 12, count: 4, spread: 0.6, speed: 300, life: 2.0, size: 7, homing: 6 }
   ];
 
   // Cuerpo a cuerpo (12-10-2026): +20 % de daño y +25 % de alcance y de arco
@@ -826,8 +887,14 @@
   }
 
   // Pool de movimientos por tipo. El pool `normal` lo tienen todos.
-  const POOL = {};
-  for (const m of RAW) (POOL[m.type] = POOL[m.type] || []).push(m.id);
+  // Los exclusivos (`only`) no: van aparte, por Pokémon (ONLY).
+  const POOL = {}, ONLY = {}, ONLY_LVL = 10;
+  for (const m of RAW) {
+    if (m.only) for (const d of m.only) (ONLY[d] = ONLY[d] || []).push(m.id);
+    else (POOL[m.type] = POOL[m.type] || []).push(m.id);
+  }
+  /** Ataques exclusivos de ese Pokémon (los de sus formas y su mega van con su número). */
+  const exclusiveFor = dex => ONLY[dex] || [];
 
   /*
    * Físico o especial (G.Stats), como en los juegos. Los de estado que aquí sí
@@ -850,7 +917,10 @@
     // tanda C de MT (23-10-2026): proyectiles
     'stone-edge',
     // tanda D (23-10-2026)
-    'explosion']);
+    'explosion',
+    // ataques exclusivos (24-10-2026)
+    'dragon-ascent', 'sacred-fire', 'precipice-blades', 'shadow-force', 'volt-tackle', 'diamond-storm',
+    'mortal-spin', 'attack-order']);
 
   // Los que disparan bolas necesitan count y spread de base: las mejoras los
   // multiplican y, sin ellos, "+1 proyectil" no sumaba ninguno y el abanico se
@@ -946,7 +1016,7 @@
     'tackle': ['Derribo', 'hp'],             'quick-attack': ['Velocidad Extrema', 'spd'],
     'body-slam': ['Gigaimpacto', 'atk'],     'hyper-voice': ['Alboroto', 'cd'],
     'ember': ['Llamarada', 'atk'],           'flamethrower': ['Sofoco', 'cd'],
-    'fire-spin': ['Fuego Sagrado', 'rgn'],   'heat-wave': ['Erupción', 'hp'],
+    'fire-spin': ['Calcinación', 'rgn'],   'heat-wave': ['Erupción', 'hp'],
     'water-gun': ['Escaldar', 'atk'],        'bubble': ['Surf', 'spd'],
     'hydro-pump': ['Hidrocañón', 'atk'],     'vine-whip': ['Latigazo', 'atk'],
     'razor-leaf': ['Lluevehojas', 'cd'],     'leaf-storm': ['Danza Pétalo', 'rgn'],
@@ -983,18 +1053,18 @@
     'sand-tomb': ['Fuerza Equina', 'hp'],    'magnitude': ['Taladradora', 'atk'],
     'whirlwind': ['Huracán', 'spd'],         'air-slash': ['Ataque Aéreo', 'cd'],
     'signal-beam': ['Megacuerno', 'atk'],    'u-turn': ['Sanguijuela', 'rgn'],
-    'rock-tomb': ['Testarazo', 'hp'],        'ancient-power': ['Tormenta de Diamantes', 'def'],
+    'rock-tomb': ['Testarazo', 'hp'],        'ancient-power': ['Pedrada', 'def'],
     'power-gem': ['Rayo Meteórico', 'atk'],  'ice-shard': ['Carámbano', 'cd'],
     'freeze-dry': ['Frío Polar', 'atk'],     'rolling-kick': ['Patada Salto Alta', 'spd'],
     'vacuum-wave': ['Puño Incremento', 'def'], 'dynamic-punch': ['Megapuño', 'atk'],
-    'shadow-sneak': ['Garra Umbría', 'cd'],  'ominous-wind': ['Golpe Umbrío', 'mag'],
+    'shadow-sneak': ['Garra Umbría', 'cd'],  'ominous-wind': ['Impresionar', 'mag'],
     'dragon-breath': ['Pulso Dragón', 'atk'], 'dragon-claw': ['Carga Dragón', 'atk'],
     'outrage': ['Dracoflecha', 'hp'],        'draining-kiss': ['Luz Lunar', 'rgn'],
     'play-rough': ['Choque Anímico', 'atk'], 'disarming-voice': ['Encanto', 'def'],
     'mirror-shot': ['Metaláser', 'atk'],     'gyro-ball': ['Cuerpo Pesado', 'def'],
     'sucker-punch': ['Juego Sucio', 'atk'],  'night-slash': ['Lariat Oscuro', 'spd'],
     // tanda A de MT (23-10-2026); los de clima no evolucionan, como los potenciadores
-    'earthquake': ['Precipicio Espadas', 'atk'], 'surf': ['Pulso Primigenio', 'spd'],
+    'earthquake': ['Pataleta', 'atk'], 'surf': ['Envite Acuático', 'spd'],
     'blizzard': ['Lanza Glacial', 'cd'],     'fire-blast': ['Llama Fusión', 'atk'],
     'thunder': ['Rayo Fusión', 'cd'],
     // tanda B de MT (23-10-2026)
@@ -1004,8 +1074,8 @@
     'waterfall': ['Martillazo', 'atk'],      'megahorn': ['Aguijón Letal', 'atk'],
     'extreme-speed': ['Golpes Furia', 'spd'], 'acrobatics': ['Ala Bis', 'spd'],
     // tanda C de MT (23-10-2026)
-    'dragon-pulse': ['Distorsión', 'atk'],   'sludge-bomb': ['Cadena Virulenta', 'rgn'],
-    'scald': ['Vapor Volcánico', 'atk'],     'moonblast': ['Geocontrol', 'cd'],
+    'dragon-pulse': ['Cola Dragón', 'atk'],   'sludge-bomb': ['Veneno X', 'rgn'],
+    'scald': ['Agua Lodosa', 'atk'],     'moonblast': ['Bruma Explosiva', 'cd'],
     'hurricane': ['Ala Mortífera', 'spd'],   'lava-plume': ['Llama Embrujada', 'rgn'],
     'silver-wind': ['Danza Aleteo', 'def'],  'psyshock': ['Psicoataque', 'atk'],
     'water-pulse': ['Hidrovapor', 'cd'],     'stone-edge': ['Roca Veloz', 'spd'],
@@ -1070,6 +1140,6 @@
   /** ¿Es de los que no hacen daño (potenciadores y de clima)? */
   const isStatus = m => !!m && STATUS_KINDS.includes(m.kind);
 
-  G.Moves = { ALL: RAW, BY_ID, POOL, poolFor, instance, levelUp, nextUpText, startFor,
+  G.Moves = { ALL: RAW, BY_ID, POOL, ONLY, ONLY_LVL, exclusiveFor, poolFor, instance, levelUp, nextUpText, startFor,
               EVO, NEED_NAME, evoInfo, evolve, isStatus };
 })();

@@ -7,10 +7,17 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
+    ["18 ataques exclusivos, uno por tipo: sólo los aprende su Pokémon, como en los juegos. Salen como carta especial al subir de nivel desde el nivel 10 (también con su mega o su forma primigenia), y en la ficha de la colección pone cuál es.",
+     "18 signature moves, one per type: only their Pokémon learns them, like in the games. They're offered as a special card when you level up from level 10 (also with its Mega or primal form), and the collection page shows which one it is.",
+     ['Ascenso Draco', 'Onda Mental', 'Fuego Sagrado', 'Pulso Primigenio', 'Filo del Abismo', 'Distorsión', 'Golpe Umbrío', 'Brecha Negra', 'Placaje Eléctrico', 'Sentencia', 'Tormenta de Diamantes', 'Sable Místico', 'Deseo Oculto', 'Geocontrol', 'Mundo Gélido', 'Fulgor Semilla', 'Giro Mortífero', 'Al Ataque']],
     ['Groudon y Kyogre ya pueden pasar a su forma primigenia en la partida, como una mega: compra su Orbe Rojo u Orbe Azul en la Tienda Kecleon (o consíguelo, muy de vez en cuando, al ganar a un legendario en una grieta). Mientras dura, Groudon pone sol abrasador y Kyogre, lluvia.',
      'Groudon and Kyogre can now take their primal form during the run, like a Mega: buy their Red Orb or Blue Orb in the Kecleon Shop (or get it, very rarely, by beating a legendary in a rift). While it lasts, Groudon brings scorching sun and Kyogre, rain.'],
     ['Novedades: las listas largas (ataques, MT, objetos...) salen resumidas en una línea, con un botón «Ver cuáles» para desplegarlas.',
      'News: long lists (moves, TMs, items...) are summed up in one line, with a “Show which” button to expand them.']
+  ], chg: [
+    ['Las evoluciones de Giro Fuego, Surf, Terremoto, Pulso Dragón, Viento Aciago, Bomba Lodo, Fuerza Lunar, Escaldar y Poder Pasado tienen otro nombre, porque el que tenían es el de un ataque exclusivo. Funcionan igual.',
+     'The evolutions of Fire Spin, Surf, Earthquake, Dragon Pulse, Ominous Wind, Sludge Bomb, Moonblast, Scald and Ancient Power have a new name, because the old one belongs to a signature move. They work the same.',
+     ['Calcinación', 'Envite Acuático', 'Pataleta', 'Cola Dragón', 'Impresionar', 'Veneno X', 'Bruma Explosiva', 'Agua Lodosa', 'Pedrada']]
   ], fix: [
     ['Las megas ya se ven más grandes que su forma normal: al menos un 20 %, y las de Pokémon grandes, como Mega Charizard, Mega Metagross o Mega Mewtwo, un 40 %. Antes algunas salían casi iguales o más pequeñas.',
      'Megas now look bigger than their normal form: at least 20%, and the big Pokémon ones, like Mega Charizard, Mega Metagross or Mega Mewtwo, 40%. Before, some looked almost the same or smaller.']
