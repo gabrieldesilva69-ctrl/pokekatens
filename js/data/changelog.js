@@ -46,6 +46,8 @@ G.CHANGELOG = [
     ["Todas las megas se ven nítidas y al menos un 40 % más grandes que su forma normal (antes sólo las de los Pokémon grandes; las demás, un 20 %).",
      "Every Mega Evolution now looks sharp and at least 40% bigger than its normal form (before, only the big Pokémon's did; the rest were 20% bigger)."]
   ], fix: [
+    ["Desafío semanal: los botones «Volver» y «Jugar el desafío» parecían no hacer nada, porque la ventana del desafío se quedaba abierta encima del menú o de la partida. Ya se cierra.",
+     "Weekly challenge: the “Back” and “Play the challenge” buttons seemed to do nothing, because the challenge window stayed open on top of the menu or the run. It now closes."],
     ["Perfil: al crear tu apodo, tu perfil público (favoritos, título, avatar y récords) no se publicaba hasta que cambiabas algo y a veces nunca. Ahora se publica a los pocos segundos.",
      "Profile: when you created your nickname, your public profile (favourites, title, avatar and records) wasn't published until you changed something, and sometimes never. It is now published a few seconds later."],
     ['Las megas ya se ven más grandes que su forma normal: al menos un 20 %, y las de Pokémon grandes, como Mega Charizard, Mega Metagross o Mega Mewtwo, un 40 %. Antes algunas salían casi iguales o más pequeñas.',
