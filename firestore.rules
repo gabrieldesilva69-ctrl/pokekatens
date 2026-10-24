@@ -73,7 +73,10 @@ service cloud.firestore {
     function saneSave(s) {
       return s.get('coins', 0) is number && s.get('coins', 0) >= 0
         && tk(s, 't1') is number && tk(s, 't1') >= 0
-        && tk(s, 't10') is number && tk(s, 't10') >= 0;
+        && tk(s, 't10') is number && tk(s, 't10') >= 0
+        // Pokédex de vistos y derrotados (systems/seen.js): un texto corto cada uno.
+        && s.get('seen', '') is string && s.get('seen', '').size() <= 260
+        && s.get('beat', '') is string && s.get('beat', '').size() <= 260;
     }
 
     // ---------- apodos ----------

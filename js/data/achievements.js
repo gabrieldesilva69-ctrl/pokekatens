@@ -12,6 +12,8 @@ G.AchDefs = (() => {
   const legends = s => Object.keys(s.legends || {}).length;
   const st = k => s => (s.stats && s.stats[k]) || 0;
   const count = k => s => Object.keys(s[k] || {}).length;
+  // Pokédex de vistos y derrotados (systems/seen.js): cuántos de los del juego.
+  const dexN = k => s => { const b = G.Seen.decode(s[k]); return G.DEX.filter(p => b[p.dex]).length; };
 
   const CATS = [['coleccion', 'Colección'], ['supervivencia', 'Supervivencia'], ['combate', 'Combate'],
                 ['grietas', 'Grietas'], ['legendarios', 'Legendarios'], ['otros', 'Misiones y más']];
@@ -52,6 +54,11 @@ G.AchDefs = (() => {
     { id: 'boss100', cat: 'combate', tier: 3, name: 'Terror de los jefes', desc: 'Derrota a 100 jefes.', value: st('bossesTotal'), goal: 100, reward: { t10: 2 } },
     { id: 'evo1', cat: 'combate', tier: 1, name: 'Evolución', desc: 'Evoluciona un movimiento.', value: st('evolutions'), goal: 1, reward: { t1: 3 } },
     { id: 'evo25', cat: 'combate', tier: 2, name: 'Evolucionista', desc: 'Evoluciona 25 movimientos.', value: st('evolutions'), goal: 25, reward: { t10: 1 }, title: 'Evolucionista' },
+    { id: 'seen100', cat: 'coleccion', tier: 1, name: 'Observador', desc: 'Ve 100 Pokémon distintos en tus partidas.', value: dexN('seen'), goal: 100, reward: { t1: 3 } },
+    { id: 'seen400', cat: 'coleccion', tier: 2, name: 'Rastreador', desc: 'Ve 400 Pokémon distintos en tus partidas.', value: dexN('seen'), goal: 400, reward: { t10: 1 }, title: 'Rastreador' },
+    { id: 'beat100', cat: 'coleccion', tier: 1, name: 'Investigador de campo', desc: 'Derrota a 100 Pokémon distintos.', value: dexN('beat'), goal: 100, reward: { t1: 5 } },
+    { id: 'beat300', cat: 'coleccion', tier: 2, name: 'Ayudante del profesor', desc: 'Derrota a 300 Pokémon distintos.', value: dexN('beat'), goal: 300, reward: { t10: 1 } },
+    { id: 'beat600', cat: 'coleccion', tier: 3, name: 'Pokédex viviente', desc: 'Derrota a 600 Pokémon distintos.', value: dexN('beat'), goal: 600, reward: { t10: 3 }, title: 'Pokédex viviente' },
     { id: 'pevo1', cat: 'combate', tier: 1, name: '¡Está evolucionando!', desc: 'Haz evolucionar a tu compañero en la partida.', value: st('pevolves'), goal: 1, reward: { t1: 3 } },
     { id: 'pevo25', cat: 'combate', tier: 2, name: 'Entrenador veterano', desc: 'Haz evolucionar a tu compañero 25 veces en la partida.', value: st('pevolves'), goal: 25, reward: { t10: 1 }, title: 'Entrenador veterano' },
     { id: 'evoAll', cat: 'combate', tier: 3, name: 'Maestro de movimientos', desc: 'Evoluciona los 47 movimientos distintos.', value: count('evoMoves'), goal: 47, reward: { t10: 3 }, title: 'Maestro de movimientos' },

@@ -101,6 +101,9 @@ G.DB = (() => {
       eggs: [],               // [{ id, dex, shiny, need, done, from }]
       eggsHatched: {},        // id -> fecha: los ya abiertos (que no vuelvan al juntar aparatos)
       eggGacha: {},           // generación del banner -> tiradas ×10 hacia el próximo huevo
+      // Pokédex (24-10-2026, systems/seen.js): mapas de bits en hexadecimal.
+      seen: '',               // especies vistas en la partida
+      beat: '',               // especies derrotadas
       missions: {},           // misiones del día / semana (systems/progress.js)
       profile: { favs: [], title: '' },   // perfil público: 3 favoritos y título
       stats: { runs: 0, bestTime: 0, bestLevel: 0, totalKills: 0, pulls: 0, coinsEarned: 0, shinies: 0,
@@ -178,6 +181,8 @@ G.DB = (() => {
       if (!isObj(s[k])) s[k] = {};
       for (const id of Object.keys(s[k])) if (!Number.isFinite(+s[k][id])) delete s[k][id];
     }
+    // Pokédex: sólo hexadecimal y de largo razonable.
+    for (const k of ['seen', 'beat']) s[k] = G.Seen ? G.Seen.clean(s[k]) : (typeof s[k] === 'string' ? s[k].slice(0, 260) : '');
     // MT aprendidas: movimientos que existen, sin repetir.
     if (!isObj(s.ptm)) s.ptm = {};
     for (const d of Object.keys(s.ptm)) {
@@ -411,6 +416,8 @@ G.DB = (() => {
     }
     r.eggs = [...eggs.values()];
     r.eggsHatched = hatched;
+    // Pokédex: lo visto y lo derrotado en cualquiera de los dos.
+    if (G.Seen) for (const k of ['seen', 'beat']) r[k] = G.Seen.union(a[k], b[k]);
     r.eggGacha = r.eggGacha || {};
     for (const g in older.eggGacha || {}) r.eggGacha[g] = Math.max(num(r.eggGacha[g]), num(older.eggGacha[g]));
     if (r.starter == null) r.starter = older.starter;

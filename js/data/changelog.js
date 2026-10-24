@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
+    ['Pokédex de vistos y derrotados: el juego apunta cada Pokémon que ves y cada uno que derrotas en tus partidas (también en grupo). En la Colección se ven aunque no los tengas, con una marca los derrotados, y hay filtros nuevos y cinco logros nuevos.',
+     'Pokédex of seen and defeated: the game records every Pokémon you see and every one you defeat in your runs (also in a group). In the Collection they show even if you do not have them, the defeated ones with a mark, and there are new filters and five new achievements.'],
     ['Tu compañero ya puede evolucionar en la partida: al llegar al nivel 12 (y al 24 si tiene otra fase), sale una carta dorada para evolucionar (Charmander a Charmeleon y luego a Charizard; Eevee te deja elegir). Cambian su aspecto, sus tipos y sus stats, y se quedan sus ataques, su objeto y sus mejoras. Es sólo en esa partida: tu colección no cambia. Nueva misión semanal y dos logros.',
      'Your partner can now evolve during the run: at level 12 (and 24 if it has another stage), a golden card lets it evolve (Charmander into Charmeleon and then Charizard; Eevee lets you choose). Its look, types and stats change, and it keeps its moves, item and upgrades. It only lasts that run: your collection does not change. New weekly mission and two achievements.'],
     ["18 ataques exclusivos, uno por tipo: sólo los aprende su Pokémon, como en los juegos. Salen como carta especial al subir de nivel desde el nivel 10 (también con su mega o su forma primigenia), y en la ficha de la colección pone cuál es.",

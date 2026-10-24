@@ -96,5 +96,13 @@ const read = (user, uid) => fetch(`${DOCS}/saves/${uid}`, { headers: { Authoriza
   if (!e4 || e4.id.stringValue !== 'mh3k2a9z' || e4.done.integerValue !== '340') fail('el huevo sigue igual', 'mh3k2a9z 340/1000', JSON.stringify(e4));
   console.log('ok el huevo sigue igual');
 
+  // Pokédex de vistos y derrotados (save.seen / save.beat, systems/seen.js): textos cortos.
+  const dex = await signUp('pokedex@jugadores.pokekatens.invalid');
+  const hex = n => ({ stringValue: 'f'.repeat(n) });
+  expect('guardar una partida con su Pokédex', 200, (await commit(dex, false, { seen: hex(260), beat: hex(40) })).status);
+  const dex2 = await signUp('pokedex2@jugadores.pokekatens.invalid');
+  expect('una Pokédex demasiado larga no se guarda', 403, (await commit(dex2, false, { seen: hex(261) })).status);
+  expect('ni una que no es texto', 403, (await commit(dex2, false, { beat: { integerValue: '5' } })).status);
+
   console.log('EMULATOR_SMOKE_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

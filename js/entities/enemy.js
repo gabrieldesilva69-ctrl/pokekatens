@@ -55,6 +55,7 @@
       this.def = def;
       this.dex = def.dex;
       this.name = (G.DEX_BY[def.dex] && G.DEX_BY[def.dex].name) || def.name;
+      G.Seen.onSpawn(def.dex);                 // Pokédex de vistos (systems/seen.js)
       this.x = x; this.y = y;
       this.boss = boss;
       this.scale = boss ? bossScale(def.dex) : 1;

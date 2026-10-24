@@ -123,7 +123,8 @@ G.MenuUI = (() => {
     const s = G.DB.save;
     if (dexSel == null) { dexSel = s.partner; dexGen = G.DEX_BY[s.partner].gen; }
     const owned = Object.keys(s.owned).filter(d => G.DEX_BY[d]).length;
-    $('dex-total').textContent = `${owned} / ${G.DEX.length}`;
+    // Y la Pokédex (systems/seen.js): los vistos y derrotados en las partidas.
+    $('dex-total').textContent = `${owned} / ${G.DEX.length} · ${G.I18n.f('Vistos: {x}', G.Seen.count('seen'))} · ${G.I18n.f('Derrotados: {x}', G.Seen.count('beat'))}`;
 
     // Pestañas de generación (y "Todas"), con cuántos tienes de cada una.
     const tabs = $('dex-gens');
@@ -148,7 +149,9 @@ G.MenuUI = (() => {
       c.onclick = () => { fn(); openDex(); };
       fb.appendChild(c);
     };
-    for (const [k, label] of [['all', 'Todos'], ['own', 'Tengo'], ['miss', 'Me faltan']]) chip(label, dexF.status === k, () => { dexF.status = k; });
+    for (const [k, label] of [['all', 'Todos'], ['own', 'Tengo'], ['miss', 'Me faltan'], ['beat', 'Derrotados'], ['unseen', 'Sin ver']]) {
+      chip(label, dexF.status === k, () => { dexF.status = k; });
+    }
     chip(G.Icons.html('shiny', 12) + ' Shiny', dexF.shiny, () => { dexF.shiny = !dexF.shiny; });
     chip(G.Icons.html('star', 12) + ' Favoritos', dexF.fav, () => { dexF.fav = !dexF.fav; });
     for (const r of [5, 4, 3, 2, 1]) {
@@ -196,10 +199,12 @@ G.MenuUI = (() => {
       const own = !!s.owned[p.dex];
       if (q) {
         // Por número, o por nombre (sin tildes); de los que no tienes no se busca el nombre.
-        if (num != null ? p.dex !== num : !(own && [p.name, G.T(p.name)].some(name => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(q)))) return false;
+        if (num != null ? p.dex !== num : !((own || G.Seen.seen(p.dex)) && [p.name, G.T(p.name)].some(name => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(q)))) return false;
       } else if (dexGen && p.gen !== dexGen) return false;
       if (f.status === 'own' && !own) return false;
       if (f.status === 'miss' && own) return false;
+      if (f.status === 'beat' && !G.Seen.beat(p.dex)) return false;
+      if (f.status === 'unseen' && (own || G.Seen.seen(p.dex))) return false;
       if (f.shiny && !(s.shiny && s.shiny[p.dex])) return false;
       if (f.fav && !G.DB.isFav(p.dex)) return false;
       if (f.rar.size && !f.rar.has(p.rarity)) return false;
@@ -260,6 +265,8 @@ G.MenuUI = (() => {
   function dexCell(p) {
     const s = G.DB.save;
     const own = !!s.owned[p.dex], sh = !!(s.shiny && s.shiny[p.dex]);
+    // Los que no tienes pero has visto en una partida se ven (y su nombre); los demás, silueta.
+    const seen = own || G.Seen.seen(p.dex);
     const cell = document.createElement('div');
     cell.className = 'cell' + (own ? '' : ' locked') + (p.dex === dexSel ? ' on' : '');
     cell.dataset.pad = '1';
@@ -267,8 +274,9 @@ G.MenuUI = (() => {
     if (p.dex === s.partner) cell.insertAdjacentHTML('beforeend', `<span class="badge-r" title="Compañero">${G.Icons.html('crown', 14)}</span>`);
     else if (sh) cell.insertAdjacentHTML('beforeend', `<span class="badge-r" title="Tienes su shiny">${G.Icons.html('shiny', 12)}</span>`);
     const useShiny = sh && p.dex === s.partner && s.partnerShiny;
-    cell.appendChild(G.UI.spriteCanvas(p.dex, 92, 80, { scale: 2, silhouette: !own, shadow: own, shiny: useShiny }));
-    cell.insertAdjacentHTML('beforeend', `<b>${own ? p.name : '???'}</b>${G.UI.stars(p.rarity, 9)}`);
+    if (G.Seen.beat(p.dex)) cell.insertAdjacentHTML('beforeend', `<span class="badge-b" title="${G.T('Derrotado en una partida')}">${G.Icons.html('fist', 11)}</span>`);
+    cell.appendChild(G.UI.spriteCanvas(p.dex, 92, 80, { scale: 2, silhouette: !seen, shadow: seen, shiny: useShiny }));
+    cell.insertAdjacentHTML('beforeend', `<b>${seen ? p.name : '???'}</b>${G.UI.stars(p.rarity, 9)}`);
     cell.onclick = () => {
       dexSel = p.dex;
       $('dex-grid').querySelectorAll('.cell').forEach(c => c.classList.remove('on'));
