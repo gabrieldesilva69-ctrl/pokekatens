@@ -8,6 +8,7 @@
 (() => {
   const languages = ['fr', 'it', 'pt-BR', 'zh-Hans', 'zh-Hant'];
   const rows = [
+    ["PokeKatens: desafío semanal, evoluciones y noche", "PokeKatens : défi hebdomadaire, évolutions et nuit", "PokeKatens: sfida settimanale, evoluzioni e notte", "PokeKatens: desafio semanal, evoluções e noite", "PokeKatens：每周挑战、进化与夜晚", "PokeKatens：每週挑戰、進化與夜晚"],
     ["Desafío semanal", "Défi hebdomadaire", "Sfida settimanale", "Desafio semanal", "每周挑战", "每週挑戰"],
     ["La misma partida para todos", "La même partie pour tous", "La stessa partita per tutti", "A mesma partida para todos", "所有人玩同一局", "所有人玩同一局"],
     ["Todos juegan esta semana la misma partida: el mismo mapa, el mismo Pokémon prestado (sin mejoras) y la misma condición. Sólo en solitario.", "Cette semaine, tout le monde joue la même partie : la même carte, le même Pokémon prêté (sans améliorations) et la même condition. En solo uniquement.", "Questa settimana tutti giocano la stessa partita: la stessa mappa, lo stesso Pokémon in prestito (senza potenziamenti) e la stessa condizione. Solo in singolo.", "Esta semana todos jogam a mesma partida: o mesmo mapa, o mesmo Pokémon emprestado (sem melhorias) e a mesma condição. Só no modo solo.", "本周所有人玩同一局：同样的地图、同样的借用宝可梦（没有强化）和同样的条件。仅限单人。", "本週所有人玩同一局：同樣的地圖、同樣的借用寶可夢（沒有強化）和同樣的條件。僅限單人。"],

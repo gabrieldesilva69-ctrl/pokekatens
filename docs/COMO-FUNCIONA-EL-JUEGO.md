@@ -40,6 +40,18 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   60 % y duermes 2 s sin moverte ni atacar), Reflejo / Pantalla Luz (`screen`: −35 % de daño físico / especial 8 s),
   Doble Equipo (`decoy`: una copia que atrae a los enemigos a 260 px, menos a los jefes; la mueve el anfitrión) y
   Explosión (`boom`: te cuesta un 25 % de la vida que te queda, nunca KO).
+- **Ataques exclusivos** (24-10-2026): 18, uno por tipo, con `only: [dex…]` en `js/data/moves.js` (Ascenso Draco de
+  Rayquaza, Onda Mental de Mewtwo, Placaje Eléctrico de Pichu/Pikachu/Raichu…; nombres y quién los aprende, de
+  PokeAPI). No van en el pool de su tipo, no hay MT y no evolucionan. Salen como carta especial al subir de nivel desde
+  el nivel 10 (`G.Moves.ONLY_LVL`, `systems/levelup.js`) y la ficha de la colección dice cuál es.
+- **Evolución del compañero en la partida** (`js/systems/evolve.js`, cadenas en `js/data/evolutions.js` con
+  `tools/fetch_evolutions.py`): al nivel 12 (24 para la segunda fase) sale una carta dorada (varias si tiene varias
+  evoluciones). Cambian sprite, tipos y stats (con la naturaleza del que empezó); se quedan ataques, objeto, mejoras y
+  habilidad. Sólo en la run: la colección, "más usados" y el ranking siguen con el Pokémon con el que empezaste
+  (`pl.startDex`). En grupo se ve (evento `pe`).
+- **Rachas** (`js/systems/streak.js`): cada enemigo que cae sube la racha y un golpe que hace daño la corta; con
+  50 / 150 / 300 las monedas que recoges valen ×1,1 / ×1,25 / ×1,5. Se ve bajo la vida; mejor racha en el resumen y en
+  `save.stats.bestStreak`.
 - **Tabla de tipos:** p. ej. un Rayo Burbuja le quita más a un Charmander.
 - **Climas** de vez en cuando (sol, lluvia, arena, nieve, niebla): potencian unos tipos y debilitan otros.
 - **Objetos** que salen en las runs (Restos, Cinta Elección…): 23 equipables, uno por run (`js/data/items.js`;
@@ -47,6 +59,12 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   (20 %; el de candado, siempre) y jefes (50 %) sin ocupar el hueco: Caramelo Exp. (un nivel al equipo), Bayas
   Zidra, Atania y Meloc (se guardan, una de cada, y se usan solas; repetida, al momento) y cuatro Mochis (+5 %).
   En grupo, Capa Furtiva e Incienso Raro sólo valen si los lleva el anfitrión (es quien mueve a los enemigos).
+- **Formas primigenias** (24-10-2026): Kyogre y Groudon, como una mega (`primal:1` en `js/data/megas.js`), con su
+  Orbe Azul / Rojo en vez de Megapiedra y lluvia / sol mientras duran. Sprites de SpriteCollab con
+  `tools/fetch_forms.py` (`fm:1` en `sprites-meta.js`). No salen en el gacha.
+- **Tamaño de las megas** (`G.Mega.megaScale`): en pantalla, al menos un 20 % más altas que su forma normal (un 40 %
+  las de Pokémon grandes). `tools/import_reloaded.py` ya no las encoge: al volver a convertirlas con `--megas` (en el
+  ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.
 - **Megaevolución** (`js/systems/mega.js`): con la Megapiedra de tu compañero (Tienda Kecleon, 8000 monedas,
   sólo la de tu compañero actual; o un 3 % al ganar una grieta), una barra se llena con 150 enemigos (un jefe
   cuenta 25) y con F (X en el mando, botón en el móvil) megaevoluciona 45 s: sprite, tipos, estadísticas y
@@ -59,6 +77,10 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - Tienen **personalidad**: curan, ponen escudos, llaman a su manada o atacan con aviso en el suelo.
 - **Shiny salvaje:** cada enemigo tiene 1/4096 de salir shiny (`js/systems/spawner.js`). Brilla, una flecha
   en el borde de la pantalla dice dónde está y, si lo derrotas, te lo quedas.
+
+- **Noche** (`js/systems/night.js`): desde el minuto 7, 3 minutos de cada 10 (sale del reloj: igual en grupo sin red).
+  Oscuridad con luz alrededor de tu Pokémon (Ajustes → "Noches oscuras"), la mitad de los enemigos son nocturnos del
+  tramo (Fantasma, Siniestro y `NIGHT_DEX` de `js/data/enemies.js`) y +25 % de monedas y experiencia.
 
 ## Mapa
 
@@ -84,6 +106,16 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   200 monedas. Necesitan 500/1000/2000/4000/8000 según la rareza. Huevos de Reloaded, uno por familia
   (`tools/import_eggs.py`). Al juntar aparatos se unen por id sin repetir los abiertos (`G.DB.merge`).
 - **Perfil:** enseña tus 3 Pokémon favoritos, tus marcas y tus medallas.
+- **Pokédex de vistos y derrotados** (`js/systems/seen.js`): `save.seen` / `save.beat`, mapas de bits en hexadecimal
+  (≤ 260 caracteres, lo limita `firestore.rules`) que se unen al juntar aparatos. En la Colección se ven los vistos y
+  se marcan los derrotados; cinco logros.
+- **Regalos entre amigos** (`G.Social.gift`): un ticket ×1 al día a cada amigo, al buzón `gifts/{uid}/g` con id
+  `f_<uid>_<día>` (las reglas sólo lo dejan crear una vez y entre amigos aceptados). Quien lo recibe lo suma al entrar,
+  como mucho 10 al día.
+- **Desafío semanal** (`js/systems/challenge.js`, botón en el menú): cada semana el mismo mapa, el mismo Pokémon
+  prestado (sin mejoras) y una condición para todos, sacados de la semilla de la semana. Sólo en solitario, tabla propia
+  del ranking (`s_c<semana>`) y un ticket ×10 la primera vez de la semana que aguantas 3 minutos (`save.wch`).
+- **Novedades:** una línea `[es, en, [nombres…]]` de `js/data/changelog.js` sale resumida con un botón "Ver cuáles".
 
 ## Guardado
 

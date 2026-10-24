@@ -1,5 +1,9 @@
 # Ideas para la nueva versión (para una sola sesión)
 
+> **Hecho (24-10-2026):** los 10 apartados están en el juego (pasos `step-01` … `step-10`). Queda en manos de los
+> dueños: desplegar las reglas nuevas de Firestore y volver a convertir las megas con `--megas` en su ordenador
+> (ver "Al terminar todo"). Cómo funciona cada cosa: `docs/COMO-FUNCIONA-EL-JUEGO.md`.
+
 Lo que los dueños han elegido para la próxima versión de PokeKatens (24-10-2026). Está pensado para
 pasarlo **entero** a una sesión nueva (o a un generador de prompts) y hacerlo todo en esa sesión, en el
 orden de abajo: los primeros apartados preparan lo que usan los siguientes.
