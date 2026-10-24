@@ -624,6 +624,7 @@ G.I18n.add({
   "12 objetos nuevos. Y otros de un solo uso que salen de cofres y jefes y no ocupan el hueco del objeto: el Caramelo Exp. (subes un nivel), las Bayas Zidra, Atania y Meloc (se guardan y se usan solas cuando hace falta) y cuatro Mochis (+5 % a una estadística hasta acabar la run). El logro «Coleccionista de objetos» pide ahora los 23.": "12 new items. Plus single-use ones that drop from chests and bosses and don't take the item slot: the Exp. Candy (you level up), the Sitrus, Atania and Meloc Berries (kept and used on their own when needed) and four Mochis (+5% to a stat until the run ends). The “Item collector” achievement now asks for all 23.",
   "PokeKatens: novedades más cortas": "PokeKatens: shorter news",
   "Novedades: las listas largas (ataques, MT, objetos...) salen resumidas en una línea, con un botón «Ver cuáles» para desplegarlas.": "News: long lists (moves, TMs, items...) are summed up in one line, with a “Show which” button to expand them.",
+  "Las megas ya se ven más grandes que su forma normal: al menos un 20 %, y las de Pokémon grandes, como Mega Charizard, Mega Metagross o Mega Mewtwo, un 40 %. Antes algunas salían casi iguales o más pequeñas.": "Megas now look bigger than their normal form: at least 20%, and the big Pokémon ones, like Mega Charizard, Mega Metagross or Mega Mewtwo, 40%. Before, some looked almost the same or smaller.",
   "Protección": "Protect",
   "Descanso": "Rest",
   "Reflejo": "Reflect",

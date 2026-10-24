@@ -9,6 +9,9 @@ G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
     ['Novedades: las listas largas (ataques, MT, objetos...) salen resumidas en una línea, con un botón «Ver cuáles» para desplegarlas.',
      'News: long lists (moves, TMs, items...) are summed up in one line, with a “Show which” button to expand them.']
+  ], fix: [
+    ['Las megas ya se ven más grandes que su forma normal: al menos un 20 %, y las de Pokémon grandes, como Mega Charizard, Mega Metagross o Mega Mewtwo, un 40 %. Antes algunas salían casi iguales o más pequeñas.',
+     'Megas now look bigger than their normal form: at least 20%, and the big Pokémon ones, like Mega Charizard, Mega Metagross or Mega Mewtwo, 40%. Before, some looked almost the same or smaller.']
   ] },
   { d: '2026-10-23', title: ['PokeKatens: shiny para todos y red en la sala', 'PokeKatens: shiny for everyone and network in the room'], new: [
     ["6 MT de apoyo nuevas en la Tienda Kecleon (de la lista de Pokémon Edición Reloaded). Con ellas, la lista de MT de Reloaded que encaja en el juego ya está completa.",

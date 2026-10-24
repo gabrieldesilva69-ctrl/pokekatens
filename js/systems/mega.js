@@ -79,6 +79,50 @@ G.Mega = (() => {
     }
   }
 
+  /*
+   * Tamaño de la mega (24-10-2026: Mega Charizard X o Mega Metagross se veían casi como su forma
+   * normal): en pantalla, como mínimo GROW veces el alto de su forma normal (BIG_GROW las que en los
+   * juegos son mucho más grandes) y nunca más pequeña que con sus propios sprites; como mucho
+   * MAX_GROW de lo que darían sus sprites. El alto es el del dibujo (del pixel más alto a los pies)
+   * en el primer fotograma de Idle; si no se puede medir, el ancla de los pies (ay).
+   * No cambia con qué choca (pl.r).
+   */
+  const GROW = 1.2, BIG_GROW = 1.4, MAX_GROW = 1.6;
+  const BIG = new Set([3, 6, 9, 115, 130, 142, 150, 208, 248, 254, 257, 260, 306, 373, 376, 384, 445, 460]);
+  const tall = new Map();
+  function height(dex) {
+    const m = G.Sprites.animMeta(dex, 'Idle');
+    if (!m) return 0;
+    if (tall.has(dex)) return tall.get(dex);
+    const s = G.Sprites.sheet(dex, 'Idle');
+    if (!s || !s.ready) return m.ay;                  // aún no ha cargado: no se guarda
+    let h = m.ay;
+    try {
+      const c = document.createElement('canvas');
+      c.width = m.w; c.height = m.h;
+      const x = c.getContext('2d');
+      x.drawImage(s.img, 0, 0, m.w, m.h, 0, 0, m.w, m.h);
+      const px = x.getImageData(0, 0, m.w, m.h).data;
+      let top = 0;
+      while (top < m.h) {
+        let i = top * m.w * 4 + 3, end = i + m.w * 4, hit = false;
+        for (; i < end; i += 4) if (px[i] > 40) { hit = true; break; }
+        if (hit) break;
+        top++;
+      }
+      if (top < m.ay) h = m.ay - top;
+    } catch (e) { /* file:// no deja leer los píxeles: vale el ancla */ }
+    tall.set(dex, h);
+    return h;
+  }
+  function megaScale(pl, gid) {
+    const s = G.Sprites.playerScale(gid);
+    const a = height(pl.dex), b = height(gid);
+    if (!a || !b) return s;
+    const want = (BIG.has(pl.dex) ? BIG_GROW : GROW) * a * pl.scale;
+    return s * G.U.clamp(want / (b * s), 1, MAX_GROW);
+  }
+
   // ---------------- el cambio (tu Pokémon o el de otro jugador) ----------------
 
   function apply(pl, on) {
@@ -90,7 +134,7 @@ G.Mega = (() => {
       const d = data(pl.dex), gid = ID + pl.dex;
       pl.mon = megaMon(pl);
       pl.baseAtk = pl.mon.atk; pl.baseSpd = pl.mon.spd;
-      pl.scale = G.Sprites.playerScale(gid);
+      pl.scale = megaScale(pl, gid);
       pl.anim = new G.Sprites.Animator(gid, pl.scale, pl.shiny);
       pl.bodyH = G.Sprites.bodyHeight(gid, pl.scale);
       if (d.ab) {
@@ -131,5 +175,6 @@ G.Mega = (() => {
       : { k: pl.mega.fill / KILLS, on: false, ready: pl.mega.fill >= KILLS };
   }
 
-  return { KILLS, BOSS, DUR, ID, data, exists, can, name, stoneName, stoneIcon, setup, ready, onKill, press, update, apply, bar };
+  return { KILLS, BOSS, DUR, ID, data, exists, can, name, stoneName, stoneIcon, setup, ready, onKill, press, update, apply, bar,
+           megaScale, height };
 })();

@@ -44,6 +44,7 @@ frente a 25; Charizard 34 frente a 26). Si tenemos la
 especie (o, para una mega, su forma normal) de SpriteCollab, se escala para
 que mida lo mismo que la nuestra; si no, se deja tal cual. Siempre con vecino
 más próximo, y si la diferencia es menor del 8 % no se escala.
+Las megas no se escalan nunca (salvo con --escala): van a su tamaño de Reloaded.
 """
 import argparse
 import io
@@ -342,7 +343,11 @@ def job_mega(dex, out, metas, k, have):
     if rid is None:
         print(f'  Mega {dex}: no esta en Reloaded')
         return None
-    k = auto_scale(dex, metas) if k is None else k     # como su forma normal
+    # Las megas, a su tamaño de Reloaded (24-10-2026): encogerlas a la altura de su forma normal
+    # (Charizard 34 -> 26 px) las dejaba pequeñas y perdían píxeles. Sin escalar se ven nítidas y
+    # más grandes que su forma normal, como en los juegos; el juego aún las agranda si hace falta
+    # (G.Mega.megaScale).
+    k = 1.0 if k is None else k
     res = convert(mega_file(rid), os.path.join(out, str(gid)), k)
     if not res:
         print(f'  Mega {dex} (Reloaded {mega_file(rid)}): sprites incompletos')
