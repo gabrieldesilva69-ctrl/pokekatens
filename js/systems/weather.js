@@ -70,6 +70,8 @@ G.Weather = (() => {
   }
 
   function start(kind, dur) {
+    // El mismo clima que ya hay (Día Soleado lanzado otra vez): sólo dura más, sin volver a avisar.
+    if (cur && cur.kind === kind && cur.t < cur.dur) { cur.dur = Math.max(cur.dur, cur.t + dur); return; }
     cur = { kind, t: 0, dur };
     const d = KINDS[kind];
     G.Spawner.say(d.name + ': ' + d.hint, 3.4, true);
@@ -176,6 +178,8 @@ G.Weather = (() => {
     force(kind, dur) { start(kind, dur); },
     /** Quita el clima de golpe (al salir de la arena). */
     clear() { cur = null; parts.length = 0; },
-    debugStart(kind = 'rain', dur = 60) { start(kind, dur); if (G.Coop.isHost) G.Coop.broadcast(['wx', kind, dur]); }
+    debugStart(kind = 'rain', dur = 60) { start(kind, dur); if (G.Coop.isHost) G.Coop.broadcast(['wx', kind, dur]); },
+    /** Un ataque de clima (Día Soleado, Danza Lluvia, Tormenta Arena): lo pone quien manda el clima. */
+    cast(kind, dur) { if (G.Coop.active && !G.Coop.isHost) return; start(kind, dur); if (G.Coop.isHost) G.Coop.broadcast(['wx', kind, dur]); }
   };
 })();

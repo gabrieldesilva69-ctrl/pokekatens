@@ -26,6 +26,12 @@
  *   vortex      un remolino atrae a los enemigos a su centro y les va dañando
  *   shove       onda alrededor que daña y aparta a los enemigos
  *   stun        zona con aviso que daña y deja aturdidos (quietos) `stun` s
+ *   ---- desde 2026-10-23 (MT de Pokémon Edición Reloaded, tanda A) ----
+ *   tremor      un anillo sale de ti hasta `radius` y golpea una vez a lo que alcanza
+ *   wave        una ola de `width` de ancho cruza la pantalla y arrastra a los enemigos
+ *   cross       explosión en cruz (brazos de `radius`) sobre un enemigo
+ *   storm       caen `count` rayos sobre enemigos al azar de la pantalla (avisan antes)
+ *   weather     no hace daño: pone el clima `wx` durante `dur` segundos (systems/weather.js)
  *
  * Sólo el movimiento ACTIVO se ejecuta. Se cambia con 1-4 / Q / E.
  *
@@ -169,6 +175,36 @@
       { t: '+25% radio',                    m: { radius: 1.25 } },
       { t: '+50% aturdimiento',             m: { stun: 1.50 } },
       { t: '-25% recarga y +30% daño',      m: { cd: 0.75, dmg: 1.30 } }
+    ],
+    tremor: [
+      { t: '+40% daño',                     m: { dmg: 1.40 } },
+      { t: '+25% radio',                    m: { radius: 1.25 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+50% daño y +20% radio',        m: { dmg: 1.50, radius: 1.20 } }
+    ],
+    wave: [
+      { t: '+40% daño',                     m: { dmg: 1.40 } },
+      { t: 'Ola un 30% más ancha',          m: { width: 1.30 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+50% daño y arrastra más',      m: { dmg: 1.50, knock: 1.40 } }
+    ],
+    cross: [
+      { t: '+40% daño',                     m: { dmg: 1.40 } },
+      { t: 'Brazos un 30% más largos',      m: { radius: 1.30 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+50% daño y brazos más anchos', m: { dmg: 1.50, width: 1.40 } }
+    ],
+    storm: [
+      { t: '+2 rayos',                      m: { count: 2 } },
+      { t: '+45% daño',                     m: { dmg: 1.45 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+2 rayos y +30% radio',         m: { count: 2, radius: 1.30 } }
+    ],
+    weather: [
+      { t: '+35% duración',                 m: { dur: 1.35 } },
+      { t: '+35% duración',                 m: { dur: 1.35 } },
+      { t: '+35% duración',                 m: { dur: 1.35 } },
+      { t: '+50% duración',                 m: { dur: 1.50 } }
     ],
     buff: [
       { t: '+1 acumulación máxima',         m: { stacks: 1 } },
@@ -594,7 +630,33 @@
       cd: 0.7, dmg: 22, speed: 330, life: 1.6, size: 7, homing: 6 },
     { id: 'night-slash', name: 'Tajo Umbrío', type: 'dark', kind: 'spin',
       desc: 'Cortes en giro que alcanzan a todo lo que te rodea.',
-      cd: 1.0, dmg: 11, count: 3, radius: 62 }
+      cd: 1.0, dmg: 11, count: 3, radius: 62 },
+
+    // ---------------- MT de Pokémon Edición Reloaded, tanda A: área y clima (23-10-2026) ----------------
+    { id: 'earthquake', name: 'Terremoto', type: 'ground', kind: 'tremor',
+      desc: 'Un temblor sale de ti en anillo y golpea a todo lo que alcanza.',
+      cd: 1.6, dmg: 30, radius: 170, knock: 60 },
+    { id: 'surf', name: 'Surf', type: 'water', kind: 'wave',
+      desc: 'Una ola enorme cruza la pantalla y arrastra a los enemigos.',
+      cd: 2.2, dmg: 26, radius: 560, width: 190, speed: 560, knock: 160 },
+    { id: 'blizzard', name: 'Ventisca', type: 'ice', kind: 'cone',
+      desc: 'Un abanico de nieve ancho que deja a los enemigos casi quietos.',
+      cd: 0.9, dmg: 8, count: 9, arc: 1.3, speed: 300, life: 0.55, size: 7, pierce: 1, slow: 0.55 },
+    { id: 'fire-blast', name: 'Llamarada', type: 'fire', kind: 'cross',
+      desc: 'Una explosión de fuego en cruz sobre el enemigo que quema.',
+      cd: 1.6, dmg: 32, radius: 90, width: 26, burn: 1 },
+    { id: 'thunder', name: 'Trueno', type: 'electric', kind: 'storm',
+      desc: 'Caen rayos sobre enemigos al azar de la pantalla.',
+      cd: 1.5, dmg: 30, count: 5, radius: 34 },
+    { id: 'sunny-day', name: 'Día Soleado', type: 'fire', kind: 'weather',
+      desc: 'No hace daño: sale el sol (Fuego ×1,5, Agua ×0,5) un rato aunque cambies de ataque.',
+      cd: 4, dur: 20, wx: 'sun' },
+    { id: 'rain-dance', name: 'Danza Lluvia', type: 'water', kind: 'weather',
+      desc: 'No hace daño: llueve (Agua ×1,5, Eléctrico ×1,2, Fuego ×0,5) un rato aunque cambies de ataque.',
+      cd: 4, dur: 20, wx: 'rain' },
+    { id: 'sandstorm', name: 'Tormenta Arena', type: 'rock', kind: 'weather',
+      desc: 'No hace daño: tormenta de arena (Roca, Tierra y Acero ×1,3; los demás sufren, también tú) un rato.',
+      cd: 4, dur: 20, wx: 'sand' }
   ];
 
   // Cuerpo a cuerpo (12-10-2026): +20 % de daño y +25 % de alcance y de arco
@@ -623,7 +685,9 @@
     // nuevos del 19-10-2026
     'rapid-spin', 'flame-charge', 'seed-bomb', 'sand-tomb', 'magnitude', 'u-turn', 'rock-tomb', 'ice-shard',
     'rolling-kick', 'dynamic-punch', 'shadow-sneak', 'dragon-claw', 'outrage', 'play-rough', 'gyro-ball',
-    'sucker-punch', 'night-slash']);
+    'sucker-punch', 'night-slash',
+    // tanda A de MT (23-10-2026)
+    'earthquake']);
 
   // Los que disparan bolas necesitan count y spread de base: las mejoras los
   // multiplican y, sin ellos, "+1 proyectil" no sumaba ninguno y el abanico se
@@ -636,7 +700,7 @@
 
   const BY_ID = {};
   for (const m of RAW) {
-    m.cat = m.kind === 'buff' ? null : PHYSICAL.has(m.id) ? 'physical' : 'special';
+    m.cat = m.kind === 'buff' || m.kind === 'weather' ? null : PHYSICAL.has(m.id) ? 'physical' : 'special';
     m.ups = LADDERS[m.kind];
     m.maxLvl = m.ups.length + 1;
     BY_ID[m.id] = m;
@@ -762,7 +826,11 @@
     'outrage': ['Dracoflecha', 'hp'],        'draining-kiss': ['Luz Lunar', 'rgn'],
     'play-rough': ['Choque Anímico', 'atk'], 'disarming-voice': ['Encanto', 'def'],
     'mirror-shot': ['Metaláser', 'atk'],     'gyro-ball': ['Cuerpo Pesado', 'def'],
-    'sucker-punch': ['Juego Sucio', 'atk'],  'night-slash': ['Lariat Oscuro', 'spd']
+    'sucker-punch': ['Juego Sucio', 'atk'],  'night-slash': ['Lariat Oscuro', 'spd'],
+    // tanda A de MT (23-10-2026); los de clima no evolucionan, como los potenciadores
+    'earthquake': ['Precipicio Espadas', 'atk'], 'surf': ['Pulso Primigenio', 'spd'],
+    'blizzard': ['Lanza Glacial', 'cd'],     'fire-blast': ['Llama Fusión', 'atk'],
+    'thunder': ['Rayo Fusión', 'cd']
   };
   // Lo que gana al evolucionar, según cómo funcione.
   const EVO_MODS = {
@@ -787,7 +855,11 @@
     quake:      { t: '×1,8 daño, +3 ondas y ondas más grandes', m: { dmg: 1.8, count: 3, radius: 1.25 } },
     vortex:     { t: '×1,8 daño, más radio y atrae más fuerte', m: { dmg: 1.8, radius: 1.3, pull: 1.4 } },
     shove:      { t: '×1,8 daño, más radio y empuja más', m: { dmg: 1.8, radius: 1.25, knock: 1.4 } },
-    stun:       { t: '×1,8 daño, más radio y aturde más rato', m: { dmg: 1.8, radius: 1.3, stun: 1.4 } }
+    stun:       { t: '×1,8 daño, más radio y aturde más rato', m: { dmg: 1.8, radius: 1.3, stun: 1.4 } },
+    tremor:     { t: '×1,8 daño y un 30% más de radio', m: { dmg: 1.8, radius: 1.3 } },
+    wave:       { t: '×1,8 daño, ola más ancha y arrastra más', m: { dmg: 1.8, width: 1.3, knock: 1.3 } },
+    cross:      { t: '×1,8 daño y brazos más largos y anchos', m: { dmg: 1.8, radius: 1.3, width: 1.3 } },
+    storm:      { t: '×1,7 daño, +3 rayos y más radio', m: { dmg: 1.7, count: 3, radius: 1.2 } }
   };
 
   /** ¿Puede evolucionar ya? → { name, needs, needName, text, ready } o null */
@@ -810,6 +882,9 @@
     return true;
   }
 
+  /** ¿Es de los que no hacen daño (potenciadores y de clima)? */
+  const isStatus = m => !!m && (m.kind === 'buff' || m.kind === 'weather');
+
   G.Moves = { ALL: RAW, BY_ID, POOL, poolFor, instance, levelUp, nextUpText, startFor,
-              EVO, NEED_NAME, evoInfo, evolve };
+              EVO, NEED_NAME, evoInfo, evolve, isStatus };
 })();

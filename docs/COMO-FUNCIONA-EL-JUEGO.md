@@ -23,6 +23,12 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Vínculos:** cada legendario vencido deja fusionar movimientos para lanzarlos a la vez desde un solo
   hueco (hasta 4). Con un vínculo ataca con todos los movimientos del vínculo.
 - Los movimientos **evolucionan** al llegar a su nivel máximo.
+- **MT** (Tienda Kecleon): enseñan ataques de fuera de tus tipos que el Pokémon aprende por MT en los juegos
+  (`js/data/tms.js`, se regenera con `tools/fetch_tms.py <ids nuevos>`; las que ya había no se tocan). Tanda A de
+  la lista de Reloaded (23-10-2026): Terremoto (anillo), Surf (ola que arrastra), Ventisca, Llamarada (cruz),
+  Trueno (rayos al azar) y Día Soleado / Danza Lluvia / Tormenta Arena (`kind: 'weather'`, ponen el clima 20 s
+  aunque cambies de ataque; en grupo lo pone el anfitrión). Comparten nombre con evoluciones de otros ataques
+  (Ascuas → Llamarada, Burbuja → Surf…): son ataques distintos.
 - **Tabla de tipos:** p. ej. un Rayo Burbuja le quita más a un Charmander.
 - **Climas** de vez en cuando (sol, lluvia, arena, nieve, niebla): potencian unos tipos y debilitan otros.
 - **Objetos** que salen en las runs (Restos, Cinta Elección…): 23 equipables, uno por run (`js/data/items.js`;

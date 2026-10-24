@@ -35,7 +35,7 @@ G.Combat = (() => {
       return;
     }
     // (Bromista: los potenciadores se recargan antes, ver data/ability-fx.js.)
-    m.t = Math.max(0.05, m.cd * pl.cdMul * (m.kind === 'buff' && pl.abil && pl.abil.statusCd || 1));
+    m.t = Math.max(0.05, m.cd * pl.cdMul * (G.Moves.isStatus(m) && pl.abil && pl.abil.statusCd || 1));
     pl.cast(m);
     if (G.Coop.active) G.Coop.cast(pl, m);
     // Vínculo: su icono destella en el HUD al lanzarse (uno que explota pegado al
@@ -69,14 +69,21 @@ G.Combat = (() => {
       case 'vortex':     vortex(pl, m); break;
       case 'shove':      shove(pl, m); break;
       case 'stun':       stunZone(pl, m); break;
+      case 'tremor':     tremor(pl, m); break;
+      case 'wave':       wave(pl, m); break;
+      case 'cross':      crossBlast(pl, m); break;
+      case 'storm':      storm(pl, m); break;
+      case 'weather':    weatherMove(pl, m); break;
     }
   }
 
   const TARGETED = ['melee', 'beam', 'projectile', 'boomerang', 'chain', 'meteor', 'dash', 'cone',
-                    'homing', 'bounce', 'charge', 'spin', 'quake', 'vortex', 'shove', 'stun'];
+                    'homing', 'bounce', 'charge', 'spin', 'quake', 'vortex', 'shove', 'stun',
+                    'tremor', 'wave', 'cross', 'storm'];
   // Con "Apuntar a mano" éstos se lanzan hacia donde apuntas aunque no haya
   // nadie (los decide el jugador); la cadena y los meteoros siguen esperando blanco.
-  const FREE_AIM = ['melee', 'beam', 'projectile', 'boomerang', 'dash', 'cone', 'homing', 'bounce', 'charge', 'spin', 'quake', 'shove'];
+  const FREE_AIM = ['melee', 'beam', 'projectile', 'boomerang', 'dash', 'cone', 'homing', 'bounce', 'charge', 'spin', 'quake', 'shove',
+                    'tremor', 'wave'];
   function needsTarget(m, pl) { return TARGETED.includes(m.kind) && !(pl && pl.manualAim && FREE_AIM.includes(m.kind)); }
   function reach(m) {
     if (m.kind === 'melee') return m.radius + 30;
@@ -88,7 +95,10 @@ G.Combat = (() => {
     if (m.kind === 'cone') return m.speed * m.life + 30;
     if (m.kind === 'spin' || m.kind === 'shove' || m.kind === 'charge') return m.radius + 20;
     if (m.kind === 'quake') return (m.count | 0) * QSTEP + m.radius;
-    if (m.kind === 'vortex' || m.kind === 'stun') return 300;
+    if (m.kind === 'vortex' || m.kind === 'stun' || m.kind === 'cross') return 300;
+    if (m.kind === 'tremor') return m.radius;
+    if (m.kind === 'wave') return m.radius * 0.8;
+    if (m.kind === 'storm') return 460;
     return 520;
   }
 
@@ -445,6 +455,54 @@ G.Combat = (() => {
     fields.push({ kind: 'stunzone', owner: pl, ghost, m, col, vis, x: tg.x, y: tg.y, t: 0, delay: 0.45, r: m.radius, dmg: m.dmg * pl.atkFor(m) });
   }
 
+  // ---------------- tanda A de MT (23-10-2026, de la lista de Pokémon Edición Reloaded) ----------------
+
+  /** Terremoto: un anillo sale de ti hasta `radius` y golpea una vez a cada uno que alcanza. */
+  function tremor(pl, m) {
+    const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m);
+    fields.push({ kind: 'tremor', owner: pl, ghost, m, col, vis, x: pl.x, y: pl.y, t: 0, life: 0.55, r: m.radius,
+                  dmg: m.dmg * pl.atkFor(m), hits: new Set() });
+    if (!ghost) G.Camera.kick(0.4);
+  }
+
+  /** Surf: una ola de `width` de ancho sale de detrás de ti y cruza hacia donde apuntas, arrastrando. */
+  function wave(pl, m) {
+    const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m), ca = Math.cos(pl.aim), sa = Math.sin(pl.aim);
+    fields.push({ kind: 'wave', owner: pl, ghost, m, col, vis, x: pl.x - ca * 50, y: pl.y - sa * 50, ca, sa, a: pl.aim,
+                  t: 0, d: 0, len: m.radius + 50, w: m.width, dmg: m.dmg * pl.atkFor(m), hits: new Set() });
+  }
+
+  /** Llamarada: explosión en cruz (brazos de `radius`) sobre un enemigo, tras un aviso corto. */
+  function crossBlast(pl, m) {
+    const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m), tg = spotFor(pl, m);
+    if (!tg) return;
+    fields.push({ kind: 'cross', owner: pl, ghost, m, col, vis, x: tg.x, y: tg.y, t: 0, delay: 0.3, r: m.radius,
+                  w: m.width, dmg: m.dmg * pl.atkFor(m) });
+  }
+
+  /** Trueno: caen `count` rayos sobre enemigos al azar de los que se ven (no los más cercanos). */
+  function storm(pl, m) {
+    const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m);
+    const seen = G.EnemyMgr.all().filter(e => !e.dead && G.Camera.sees(e.x, e.y, 0));
+    if (!seen.length) return;
+    const n = Math.max(1, m.count | 0);
+    for (let i = 0; i < n; i++) {
+      const e = G.U.pick(seen);
+      fields.push({ kind: 'bolt', owner: pl, ghost, m, col, vis, x: e.x + G.U.rand(-12, 12), y: e.y + G.U.rand(-8, 8),
+                    t: -i * 0.09, delay: 0.32, r: m.radius, dmg: m.dmg * pl.atkFor(m), struck: false });
+    }
+  }
+
+  /** Día Soleado, Danza Lluvia, Tormenta Arena: ponen el clima `wx` (lo decide quien manda el clima). */
+  function weatherMove(pl, m) {
+    const d = G.Weather.KINDS[m.wx];
+    if (!d) return;
+    G.FX.ring(pl.x, pl.y - G.LIFT * 0.5, pl.r, pl.r * 4, d.color, 0.5, 3);
+    for (let i = 0; i < 10; i++) G.FX.px(pl.x + G.U.rand(-20, 20), pl.y - G.U.rand(0, 40), d.color, { vy: -G.U.rand(60, 120), life: 0.6 });
+    // En el invitado no se pone: al anfitrión le llega el fantasma de su ataque y lo manda a todos.
+    if (!ghost || G.Coop.isHost) G.Weather.cast(m.wx, m.dur);
+  }
+
   /** Rebote: el proyectil sale hacia el enemigo más cercano que aún no ha tocado. → true si rebota. */
   function rebound(p, from) {
     if (!(p.bounce > 0)) return false;
@@ -530,6 +588,77 @@ G.Combat = (() => {
       }
       return false;
     }
+    if (f.kind === 'tremor') {
+      const rr = f.r * Math.min(1, f.t / f.life);
+      if (G.Camera.sees(f.x, f.y, f.r) && Math.random() < 0.9) {
+        const a = Math.random() * 6.2832;
+        G.FX.sp(f.vis.proj, f.vis.pal, f.x + Math.cos(a) * rr, f.y + Math.sin(a) * rr * 0.6 - 4, { vy: -G.U.rand(40, 90), life: 0.3 });
+      }
+      if (!f.ghost && !pl.dead) {
+        for (const e of G.EnemyMgr.queryCircle(f.x, f.y, rr)) {
+          if (f.hits.has(e)) continue;
+          f.hits.add(e);
+          hit(pl, e, f.dmg, f.col, e.x - f.x, e.y - f.y, m.knock || 0, m);
+        }
+        for (const p of G.World.propsInCircle(f.x, f.y, rr)) if (!f.hits.has(p)) { f.hits.add(p); G.World.damageProp(p, f.dmg, f.col); }
+      }
+      return f.t >= f.life;
+    }
+    if (f.kind === 'wave') {
+      f.d += m.speed * dt;
+      const cx = f.x + f.ca * f.d, cy = f.y + f.sa * f.d;
+      if (Math.random() < dt * 30 && G.Camera.sees(cx, cy, f.w)) {
+        const o = G.U.rand(-f.w / 2, f.w / 2);
+        G.FX.px(cx - f.sa * o, cy + f.ca * o - 6, '#e8fbff', { vx: f.ca * 80, vy: -40 + f.sa * 80, life: 0.4 });
+      }
+      if (!f.ghost && !pl.dead) {
+        for (const e of G.EnemyMgr.queryCircle(cx, cy, f.w / 2 + 30)) {
+          const along = (e.x - f.x) * f.ca + (e.y - f.y) * f.sa, side = -(e.x - f.x) * f.sa + (e.y - f.y) * f.ca;
+          if (Math.abs(side) > f.w / 2 || along < f.d - 34 || along > f.d + 14) continue;
+          if (!f.hits.has(e)) { f.hits.add(e); hit(pl, e, f.dmg, f.col, f.ca, f.sa, 0, m); }
+          // La ola los arrastra (menos a los jefes; las copias del invitado las mueve el anfitrión).
+          if (!e.dead && !e.remote) {
+            const k = m.speed * dt * (e.boss || e.judge ? 0.15 : 0.75) * Math.min(1.5, (m.knock || 160) / 160);
+            e.x += f.ca * k; e.y += f.sa * k;
+          }
+        }
+        for (const p of G.World.propsInCircle(cx, cy, f.w / 2)) if (!f.hits.has(p)) { f.hits.add(p); G.World.damageProp(p, f.dmg, f.col); }
+      }
+      return f.d >= f.len;
+    }
+    if (f.kind === 'cross') {
+      if (f.t < f.delay) return false;
+      if (G.Camera.sees(f.x, f.y, f.r)) {
+        G.FX.ring(f.x, f.y, 4, f.w * 1.4, f.col, 0.3, 4);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          for (let k = 1; k <= 4; k++) G.FX.burst(f.x + dx * f.r * k / 4, f.y + dy * f.r * 0.6 * k / 4 - 4, f.col, 4, 110);
+        }
+        G.Audio.sfx('break');
+        if (!f.ghost) G.Camera.kick(0.2);
+      }
+      if (!f.ghost) {
+        const inCross = (x, y, r) => {
+          const dx = Math.abs(x - f.x), dy = Math.abs(y - f.y) / 0.6;
+          return (dx <= f.r + r && dy <= f.w / 2 + r) || (dy <= f.r + r && dx <= f.w / 2 + r);
+        };
+        for (const e of G.EnemyMgr.queryCircle(f.x, f.y, f.r + 30)) if (inCross(e.x, e.y, e.r)) hit(pl, e, f.dmg, f.col, e.x - f.x, e.y - f.y, 40, m);
+        for (const p of G.World.propsInCircle(f.x, f.y, f.r)) if (inCross(p.x, p.y, p.r || 8)) G.World.damageProp(p, f.dmg, f.col);
+      }
+      return true;
+    }
+    if (f.kind === 'bolt') {
+      if (f.t < f.delay) return false;
+      if (!f.struck) {
+        f.struck = true;
+        if (G.Camera.sees(f.x, f.y, 60)) {
+          G.FX.ring(f.x, f.y, 3, f.r, '#fff7b0', 0.25, 3);
+          G.FX.burst(f.x, f.y - 6, f.col, 8, 140);
+          G.Audio.sfx('shot', { kind: 'beam', type: 'electric' });
+        }
+        blast(f, f.r);
+      }
+      return f.t >= f.delay + 0.16;            // el rayo se ve un momento
+    }
     if (f.kind === 'stunzone') {
       if (f.t < f.delay) return false;
       G.FX.ring(f.x, f.y, 4, f.r, f.col, 0.35, 4);
@@ -555,7 +684,7 @@ G.Combat = (() => {
     for (const p of G.World.propsInCircle(f.x, f.y, r)) G.World.damageProp(p, f.dmg * k, f.col);
   }
 
-  const NEW_FIELDS = new Set(['charge', 'spin', 'quake', 'vortex', 'stunzone']);
+  const NEW_FIELDS = new Set(['charge', 'spin', 'quake', 'vortex', 'stunzone', 'tremor', 'wave', 'cross', 'bolt']);
   function updateFields(dt) {
     for (let i = fields.length - 1; i >= 0; i--) {
       const f = fields[i];
@@ -611,7 +740,8 @@ G.Combat = (() => {
   function drawGroundFields(ctx) {
     const now = performance.now() / 1000;
     for (const f of fields) {
-      if (!G.Camera.sees(f.x, f.y, 60)) continue;
+      // (La ola de Surf se mueve lejos de donde salió: se mira dónde está ahora.)
+      if (f.kind === 'wave' ? !G.Camera.sees(f.x + f.ca * f.d, f.y + f.sa * f.d, f.w) : !G.Camera.sees(f.x, f.y, 60)) continue;
       ctx.save();
       if (f.kind === 'vortex') {
         const a = Math.min(1, (f.life - f.t) * 2, f.t * 6);
@@ -624,6 +754,33 @@ G.Combat = (() => {
           const rr = f.r * (0.35 + k * 0.28), a0 = now * (3 - k * 0.6) + k * 2;
           ctx.beginPath(); ctx.ellipse(f.x, f.y, rr, rr * 0.6, 0, a0, a0 + 3.4); ctx.stroke();
         }
+      } else if (f.kind === 'tremor') {
+        const k = Math.min(1, f.t / f.life), rr = f.r * k;
+        ctx.globalAlpha = 0.55 * (1 - k * 0.6);
+        ctx.strokeStyle = f.col; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.ellipse(f.x, f.y, rr, rr * 0.6, 0, 0, 6.2832); ctx.stroke();
+        ctx.globalAlpha = 0.25 * (1 - k);
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(f.x, f.y, rr * 0.8, rr * 0.48, 0, 0, 6.2832); ctx.stroke();
+      } else if (f.kind === 'wave') {
+        ctx.translate(f.x + f.ca * f.d, f.y + f.sa * f.d); ctx.rotate(f.a);
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = f.col;
+        ctx.fillRect(-36, -f.w / 2, 36, f.w);
+        ctx.globalAlpha = 0.85;
+        ctx.fillStyle = '#e8fbff';
+        for (let o = -f.w / 2; o < f.w / 2; o += 12) ctx.fillRect(Math.sin(now * 10 + o) * 3 - 4, o, 6, 9);
+      } else if (f.kind === 'cross' && f.t < f.delay) {
+        const k = G.U.clamp(f.t / f.delay, 0, 1);
+        ctx.globalAlpha = 0.18 + 0.3 * k;
+        ctx.fillStyle = f.col;
+        ctx.fillRect(f.x - f.r * k, f.y - f.w * 0.3, f.r * 2 * k, f.w * 0.6);
+        ctx.fillRect(f.x - f.w / 2, f.y - f.r * 0.6 * k, f.w, f.r * 1.2 * k);
+      } else if (f.kind === 'bolt' && f.t >= 0 && f.t < f.delay) {
+        const k = G.U.clamp(f.t / f.delay, 0, 1);
+        ctx.globalAlpha = 0.2 + 0.35 * k;
+        ctx.strokeStyle = '#fff7b0'; ctx.lineWidth = 2; ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.ellipse(f.x, f.y, f.r, f.r * 0.6, 0, 0, 6.2832); ctx.stroke();
       } else if (f.kind === 'stunzone') {
         const k = G.U.clamp(f.t / f.delay, 0, 1);
         ctx.globalAlpha = 0.15 + 0.25 * k;
@@ -669,7 +826,17 @@ G.Combat = (() => {
     const now = performance.now() / 1000;
     for (const f of fields) {
       if (!G.Camera.sees(f.x, f.y, 200)) continue;
-      if (f.kind === 'meteor' && f.t > 0) {
+      if (f.kind === 'bolt' && f.struck) {
+        // Trueno: el rayo baja del cielo en zigzag.
+        ctx.save();
+        ctx.globalAlpha = 1 - (f.t - f.delay) / 0.16;
+        ctx.strokeStyle = '#fff7b0'; ctx.lineWidth = 4; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(f.x + 10, f.y - 280);
+        for (let k = 1; k <= 6; k++) ctx.lineTo(f.x + (k % 2 ? -12 : 12) * (1 - k / 7), f.y - 280 + k * 280 / 6);
+        ctx.stroke();
+        ctx.strokeStyle = f.col; ctx.lineWidth = 2; ctx.stroke();
+        ctx.restore();
+      } else if (f.kind === 'meteor' && f.t > 0) {
         const k = G.U.clamp(f.t / f.fall, 0, 1);
         G.VFX.draw(ctx, f.vis.proj, f.vis.pal, f.x + (1 - k) * 40, f.y - (1 - k) * 170 - 6,
                    { scale: 1.5, angle: Math.atan2(170, -40), frame: Math.floor(now * 12) });
