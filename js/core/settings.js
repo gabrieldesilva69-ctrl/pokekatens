@@ -16,6 +16,9 @@
  *   padRumble   true/false                        que el mando vibre al recibir daño
  *   aimManual   true/false                        apuntar a mano (ratón o stick derecho) en vez de solo
  *   cries       true/false                        gritos de los Pokémon (audio.js → cry)
+ *   fx          'all' | 'partner' | 'off'         efectos de los Pokémon (entities/aura.js): todos,
+ *                                                 sólo tu compañero o ninguno
+ *   fxOff       [dex, ...]                        Pokémon a los que les has quitado los efectos (ficha)
  *   keys        { acción: [tecla, tecla] } | null  teclas cambiadas en PC (sólo las distintas de
  *                                                 las de fábrica); lo pone input.js
  *
@@ -24,7 +27,7 @@
  */
 G.Settings = (() => {
   const KEY = 'ps.settings';
-  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, ping: true, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false, cries: true, darkNight: true, keys: null };
+  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, ping: true, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false, cries: true, darkNight: true, fx: 'all', fxOff: [], keys: null };
   let s = Object.assign({}, DEF);
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* nada */ }
   const fns = new Set();

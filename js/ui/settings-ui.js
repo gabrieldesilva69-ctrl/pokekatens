@@ -99,6 +99,8 @@ G.SettingsUI = (() => {
              `<button class="chip ${G.I18n.lang === v ? 'on' : ''}" data-lang="${v}">${l}</button>`).join('')}</div>`
         + section('Calidad', 'Cuántos efectos y partículas se dibujan. <b>Auto</b> la baja sola si el juego va a tirones (ahora: ' + auto + ').')
         + choice('quality', [['auto', 'Auto'], ['high', 'Alta'], ['mid', 'Media'], ['low', 'Baja']])
+        + section('Efectos de los Pokémon', 'Brillos, partículas y auras de tu compañero, los jefes, los legendarios y los shiny. En la ficha de cada Pokémon de la Colección puedes quitárselos a uno solo.')
+        + choice('fx', [['all', 'Todos'], ['partner', 'Sólo mi compañero'], ['off', 'Ninguno']])
         + section('Pantalla')
         + toggle('dmgNumbers', 'Números de daño', 'Los números que salen al golpear y al recibir daño.')
         + toggle('calm', 'Menos sacudidas y destellos', 'La cámara tiembla menos y los fogonazos son suaves.')

@@ -279,7 +279,7 @@ G.Sprites = (() => {
       if (opts.glow) {
         ctx.save();
         ctx.shadowColor = opts.glow;
-        ctx.shadowBlur = 5 * k + Math.sin(performance.now() / 160) * k;
+        ctx.shadowBlur = 5 * k + Math.sin(performance.now() / 450) * 1.5 * k;   // respira despacio
         ctx.globalAlpha = prev * alpha * 0.9;
         ctx.drawImage(white(s.img), sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
         ctx.restore();

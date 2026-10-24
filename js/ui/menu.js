@@ -340,6 +340,8 @@ G.MenuUI = (() => {
       `<div class="stat${natCls(k)}"><span>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span>${txt}</span></div>`;
     const usingThis = isPartner && (!hasSh || !!s.partnerShiny === viewShiny);
 
+    // Sus efectos visuales (entities/aura.js): se le pueden quitar a uno solo.
+    const fxOn = !(G.Settings.get('fxOff') || []).includes(dex);
     const box = $('dex-detail');
     box.innerHTML = `
       <canvas id="dex-big" class="stage" width="220" height="190"></canvas>
@@ -350,6 +352,7 @@ G.MenuUI = (() => {
         <div style="color:var(--muted);font-size:13px">Nº ${String(p.dex).padStart(3, '0')} · ${GEN_NAMES[p.gen - 1]}</div>
         <h3>${own ? p.name : '???'}</h3>
         ${own ? `<button id="dex-fav" class="chip${G.DB.isFav(dex) ? ' on' : ''}" type="button">${G.Icons.html(G.DB.isFav(dex) ? 'star' : 'starDim', 12)} ${G.DB.isFav(dex) ? 'Favorito' : 'Marcar como favorito'}</button>` : ''}
+        ${own ? `<button id="dex-fx" class="chip${fxOn ? ' on' : ''}" type="button" title="${G.T('Brillos, partículas y auras de este Pokémon')}">${G.Icons.html('shiny', 12)} ${fxOn ? 'Efectos visuales: sí' : 'Efectos visuales: no'}</button>` : ''}
         <div style="color:${G.Gacha.RARITY_COLOR[p.rarity]}">${G.UI.stars(p.rarity, 24)} ${G.Gacha.RARITY_NAME[p.rarity]}</div>
         <div style="margin:6px 0">${own ? G.UI.typeChips(p.types) : ''}</div>
       </div>
@@ -390,6 +393,8 @@ G.MenuUI = (() => {
     });
     const fav = $('dex-fav');
     if (fav) fav.onclick = () => { G.DB.setFav(dex, !G.DB.isFav(dex)); renderGrid(true); showDetail(dex); };
+    const fxb = $('dex-fx');
+    if (fxb) fxb.onclick = () => { G.Aura.setEnabled(dex, !fxOn); showDetail(dex); };
     const pick = $('dex-pick');
     if (pick) pick.onclick = () => {
       s.partner = dex;
