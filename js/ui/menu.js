@@ -10,13 +10,14 @@ G.MenuUI = (() => {
   const SORTS = [['num', 'Nº'], ['name', 'Nombre'], ['rar', 'Rareza'], ['new', 'Recién conseguidos'], ['used', 'Más usados']];
 
   function init() {
-    const ICON = { play: 'ball', dex: 'book', upgrades: 'up', shop: 'shop', bag: 'bag', gacha: 'ball4', goals: 'medal3', friends: 'friends', rank: 'trophy', settings: 'gear' };
+    const ICON = { play: 'ball', chal: 'flag', dex: 'book', upgrades: 'up', shop: 'shop', bag: 'bag', gacha: 'ball4', goals: 'medal3', friends: 'friends', rank: 'trophy', settings: 'gear' };
     document.querySelectorAll('#scr-menu [data-go]').forEach(b => {
       b.insertAdjacentHTML('afterbegin', `<span class="mi-ico">${G.Icons.html(ICON[b.dataset.go], 26)}</span>`);
       b.dataset.sfx = b.dataset.go === 'play' ? 'confirm' : 'click';
       b.onclick = () => {
         const go = b.dataset.go;
         if (go === 'play') { if (G.Social.room) G.LobbyUI.open(); else G.Flow.play(); }
+        else if (go === 'chal') openChallenge();
         else if (go === 'dex') openDex();
         else if (go === 'upgrades') openUpgrades();
         else if (go === 'shop') G.ShopUI.open();
@@ -114,6 +115,33 @@ G.MenuUI = (() => {
     if (req) parts.push(req + (req === 1 ? ' solicitud' : ' solicitudes'));
     $('menu-friends-sub').textContent = parts.length ? parts.join(' · ') : 'Juega en grupo, hasta 4';
     $('menu-friends-sub').classList.toggle('gold', req > 0);
+  }
+
+  // ---------------- desafío semanal (systems/challenge.js) ----------------
+
+  function openChallenge() {
+    G.UI.show('scr-chal', true);
+    const c = G.Challenge.current(), p = G.DEX_BY[c.dex];
+    const cv = $('chal-mon'), x = cv.getContext('2d');
+    x.clearRect(0, 0, cv.width, cv.height);
+    const st = G.UI.spriteCanvas(c.dex, 180, 150, { scale: 3 });
+    cv.replaceWith(st); st.id = 'chal-mon'; st.className = 'stage';
+    $('chal-name').textContent = G.T(p.name);
+    $('chal-types').innerHTML = G.UI.typeChips(p.types);
+    $('chal-cond').textContent = G.T(c.cond.name);
+    $('chal-desc').textContent = G.T(c.cond.desc);
+    const h = Math.floor(G.Challenge.endsIn() / 36e5);
+    const days = Math.floor(h / 24);
+    $('chal-left').textContent = days >= 2 ? G.I18n.f('Cambia en {x} días', days) : days === 1 ? G.T('Cambia mañana')
+      : h >= 2 ? G.I18n.f('Cambia en {x} horas', h) : G.T('Cambia en menos de 2 horas');
+    const got = G.DB.save.wch === c.week;
+    $('chal-prize').innerHTML = got ? G.T('Premio de esta semana conseguido.')
+      : G.I18n.f('Aguanta {x} minutos para ganar un ticket ×10 (una vez por semana).', G.Challenge.PRIZE_T / 60);
+    $('chal-play').onclick = () => {
+      if (G.Social.room) { G.UI.toast(G.T('El desafío es sólo en solitario: sal de la sala para jugarlo.')); return; }
+      G.Game.startRun(null, c);
+    };
+    $('chal-rank').onclick = () => G.RankingUI.open('c');
   }
 
   // ---------------- colección ----------------
@@ -639,5 +667,5 @@ G.MenuUI = (() => {
     return el;
   }
 
-  return { init, open, openDex, GEN_NAMES };
+  return { init, open, openDex, openChallenge, GEN_NAMES };
 })();

@@ -181,6 +181,8 @@ G.DB = (() => {
       if (!isObj(s[k])) s[k] = {};
       for (const id of Object.keys(s[k])) if (!Number.isFinite(+s[k][id])) delete s[k][id];
     }
+    // Desafío semanal (systems/challenge.js): la semana del último premio cogido ("w2026-43").
+    if (typeof s.wch !== 'string' || !/^w\d{4}-\d{2}$/.test(s.wch)) delete s.wch;
     // Pokédex: sólo hexadecimal y de largo razonable.
     for (const k of ['seen', 'beat']) s[k] = G.Seen ? G.Seen.clean(s[k]) : (typeof s[k] === 'string' ? s[k].slice(0, 260) : '');
     // MT aprendidas: movimientos que existen, sin repetir.
@@ -428,6 +430,9 @@ G.DB = (() => {
     }
     r.eggs = [...eggs.values()];
     r.eggsHatched = hatched;
+    // Desafío semanal: la semana más reciente en que se cogió el premio (no se cobra dos veces).
+    const wch = [a.wch, b.wch].filter(w => typeof w === 'string').sort().pop();
+    if (wch) r.wch = wch;
     // Pokédex: lo visto y lo derrotado en cualquiera de los dos.
     if (G.Seen) for (const k of ['seen', 'beat']) r[k] = G.Seen.union(a[k], b[k]);
     r.eggGacha = r.eggGacha || {};

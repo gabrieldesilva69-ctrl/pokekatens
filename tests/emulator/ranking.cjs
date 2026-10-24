@@ -29,11 +29,11 @@ async function signUp(email) {
 }
 
 /** Marca de una persona en la tabla de prueba s_test, con `t` segundos aguantados. */
-function entry(user, t) {
+function entry(user, t, board = 's_test') {
   return {
     writes: [{
       update: {
-        name: `projects/demo-pokekatens/databases/(default)/documents/lb/s_test/e/${user.uid}`,
+        name: `projects/demo-pokekatens/databases/(default)/documents/lb/${board}/e/${user.uid}`,
         fields: {
           t: { integerValue: String(t) },
           uids: { arrayValue: { values: [{ stringValue: user.uid }] } },
@@ -131,6 +131,10 @@ const commit = (user, body) => fetch(`${DOCS}:commit`, {
   expect('seis lee su buzón', 200, box.status);
   if (((await box.json()).documents || []).length !== 1) fail('regalos de amigos en el buzón', 1, '?');
   console.log('ok un regalo de amigo en el buzón');
+
+  // ---- desafío semanal (systems/challenge.js): su tabla es de solitario, con las mismas reglas ----
+  expect('marca del desafío semanal', 200, (await commit(cinco, entry(cinco, 300, 's_cw2026-43r'))).status);
+  expect('marca imposible en el desafío', 403, (await commit(seis, entry(seis, 2701, 's_cw2026-43r'))).status);
 
   console.log('EMULATOR_RANKING_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

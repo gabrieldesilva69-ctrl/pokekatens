@@ -101,13 +101,17 @@ G.Game = (() => {
 
   // ---------------- run ----------------
 
-  /** @param coop  { seed, host, members } para una partida en grupo */
-  function startRun(coop = null) {
+  /**
+   * @param coop  { seed, host, members } para una partida en grupo
+   * @param chal  el desafío semanal (systems/challenge.js): su Pokémon prestado, sin mejoras, y su mapa
+   */
+  function startRun(coop = null, chal = null) {
     holdBy = []; awayBy = null;
     const save = G.DB.save;
+    if (coop) chal = null;
     // Con su naturaleza aplicada (una copia: ver systems/mons.js).
-    const mon = G.Mons.monFor(save.partner);
-    const perks = G.Upgrades.perks(G.DB.upgradesOf(mon.dex));
+    const mon = chal ? G.Challenge.monFor(chal) : G.Mons.monFor(save.partner);
+    const perks = G.Upgrades.perks(chal ? {} : G.DB.upgradesOf(mon.dex));
 
     G.UI.hideAll();
     G.UI.chrome(false);
@@ -125,20 +129,21 @@ G.Game = (() => {
     G.Night.reset();
     G.Path.clear();
     G.Hazards.clear();
-    G.World.reset(coop ? coop.seed : Math.floor(Math.random() * 1e6));
+    G.World.reset(coop ? coop.seed : chal ? chal.seed : Math.floor(Math.random() * 1e6));
     G.World.setBiome(0, true);
     biome = 0;
     time = 0; pendingLevels = 0;
     runReal = performance.now(); tampered = false;
 
-    pl = new G.Player(mon, perks, !!save.partnerShiny && G.DB.ownsShiny(mon.dex));
+    pl = new G.Player(mon, perks, !chal && !!save.partnerShiny && G.DB.ownsShiny(mon.dex));
     pl.setAbility(G.Mons.abilityOf(mon.dex).id);
     G.Mega.setup(pl);
+    if (chal) G.Challenge.begin(chal, pl); else G.Challenge.end();
     banked = { t1: 0, t10: 0 };
     caught = [];
     // Atajos: movimientos con hueco fijo (save.pbind[dex] = [id del 1, id del 2, ...]),
     // antes de aprender nada: addMove ya los coloca.
-    (save.pbind && save.pbind[mon.dex] || []).forEach((id, i) => { if (id) pl.bind[id] = i; });
+    if (!chal) (save.pbind && save.pbind[mon.dex] || []).forEach((id, i) => { if (id) pl.bind[id] = i; });
     pl.addMove(G.startMoveOf(mon.dex));
     // Mejora "Veto": movimientos que no quieres que te salgan.
     pl.banned = new Set((save.pban && save.pban[mon.dex] || []).slice(0, perks.bans));
@@ -334,7 +339,10 @@ G.Game = (() => {
     bankTickets(false);
     save.stats.runs++;
     save.pused = save.pused || {};
-    save.pused[pl.startDex] = (+save.pused[pl.startDex] || 0) + 1;     // para "más usados" en la colección (con el que empezó)
+    const chal = G.Challenge.active;
+    if (!chal) save.pused[pl.startDex] = (+save.pused[pl.startDex] || 0) + 1;     // para "más usados" en la colección (con el que empezó)
+    // Desafío semanal: el premio de la semana (un ticket ×10, la primera vez que aguantas 3 min).
+    const chalPrize = chal ? G.Challenge.prize(save, time) : false;
     save.stats.totalKills += pl.kills;
     save.stats.bestTime = Math.max(save.stats.bestTime, Math.floor(time));
     if (coop) save.stats.bestGroupTime = Math.max(save.stats.bestGroupTime || 0, Math.floor(time));
@@ -357,17 +365,19 @@ G.Game = (() => {
     const mark = { t: Math.floor(time), lv: pl.level, kills: pl.kills };
     // Si la partida se ha tocado (ver clean()), no sube al ranking (sin avisar); lo demás, sí.
     const ok = clean();
-    const sent = ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.startDex, shiny: pl.startShiny }))
+    const sent = ok && chal ? G.Ranking.submitChallenge(Object.assign(mark, { dex: pl.startDex }))
+               : ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.startDex, shiny: pl.startShiny }))
                : ok && wasHost ? G.Ranking.submitGroup(Object.assign(mark, { members: team })) : null;
     if (sent) sent.then(b => { if (b && b.some(p => p !== 'a')) G.DB.commit(true); }).catch(() => {});
 
     G.RunUI.showOver({
       dead, time, level: pl.level, kills: pl.kills, bosses: pl.bosses, coins, record, t1: pl.t1, t10: pl.t10, judge,
-      streak: G.Streak.best,
+      streak: G.Streak.best, chal: chal ? { cond: chal.cond, prize: chalPrize } : null,
       moves: pl.moves, caught,
       breakdown: Object.entries(parts).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(' · ') +
                  (mul > 1 ? ` · ×${mul.toFixed(2)} Fortuna` : '')
     }, () => { pl = null; G.Flow.afterRun(); });
+    G.Challenge.end();
   }
 
   /*
@@ -471,6 +481,8 @@ G.Game = (() => {
   /** Has cogido un objeto: si no llevas ninguno te lo pones; si no, eliges. */
   function offerItem(id) {
     if (!pl || !G.Items.BY[id]) return;
+    // Desafío "Sin objetos" (systems/challenge.js): monedas en su lugar.
+    if (G.Challenge.noItems()) { pl.coins += 60; G.FX.dmgText(pl.x, pl.y - pl.bodyH - 6, '+60', '#ffd23f'); return; }
     if (state === 'levelup' || G.UI.isOpen('scr-levelup')) { laterItems.push(id); return; }
     let mine = false;            // esta elección es la que ha parado el juego
     const take = got => {
@@ -741,6 +753,7 @@ G.Game = (() => {
     G.Events.update(dt, all, time);
     G.Weather.update(dt, time, pl);
     G.Night.update();
+    G.Challenge.update();
     G.FX.update(dt);
 
     G.Audio.music(G.Judgment.active ? G.Judgment.music : G.Rift.inArena ? 'rift' : G.EnemyMgr.bossAlive() ? 'boss' : G.BIOME_MUSIC[biome % G.BIOME_MUSIC.length]);

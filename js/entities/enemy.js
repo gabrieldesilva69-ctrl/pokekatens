@@ -65,7 +65,7 @@
 
       this.maxHp = Math.round(def.hp * sc.hp);
       this.hp = this.maxHp;
-      this.spd = def.spd * sc.spd;
+      this.spd = def.spd * sc.spd * G.Challenge.enemySpeed();     // desafío "Enemigos veloces"
       this.dmg = def.dmg * sc.dmg;
       this.xp = def.xp;
       this.behavior = def.behavior;

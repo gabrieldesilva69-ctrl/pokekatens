@@ -31,8 +31,10 @@ G.RankingUI = (() => {
     tabs(); load();
   }
 
-  function open() {
+  /** p: periodo con el que se abre (el desafío semanal lo abre en 'c'). */
+  function open(p) {
     if (!G.SocialUI.needOnline()) return;
+    if (p) { period = p; mode = 's'; dex = null; }
     G.UI.show('scr-rank', true);
     if (!G.Social.started) G.Social.start();
     $('rk-mod').classList.toggle('hidden', !G.Ranking.isAdmin());
@@ -53,7 +55,9 @@ G.RankingUI = (() => {
     };
     mk($('rk-mode'), [['s', `<b>${G.Icons.html('user', 16)} Solo</b>`], ['g', `<b>${G.Icons.html('friends', 16)} Grupo</b>`]],
        mode, k => { mode = k; }, 'gen-tab');
-    mk($('rk-period'), G.Ranking.PERIODS, period, k => {
+    // El desafío semanal (systems/challenge.js) sólo es en solitario.
+    if (mode === 'g' && period === 'c') period = 'w';
+    mk($('rk-period'), G.Ranking.PERIODS.filter(([k]) => mode === 's' || k !== 'c'), period, k => {
       period = k;
       if (k !== 'a' && dex) { dex = null; $('rk-poke').value = ''; $('rk-clear').classList.add('hidden'); }
     }, 'chip');
@@ -99,8 +103,8 @@ G.RankingUI = (() => {
         : G.T('Aún no tienes marca.');
       return;
     }
-    const pn = en ? { d: 'today', w: 'this week', m: 'this month', y: 'this year', a: 'of all time' }[period]
-                  : { d: 'de hoy', w: 'de esta semana', m: 'de este mes', y: 'de este año', a: 'de siempre' }[period];
+    const pn = en ? { d: 'today', w: 'this week', m: 'this month', y: 'this year', a: 'of all time', c: 'in this week\'s challenge' }[period]
+                  : { d: 'de hoy', w: 'de esta semana', m: 'de este mes', y: 'de este año', a: 'de siempre', c: 'en el desafío de esta semana' }[period];
     const mon = dex ? G.DEX_BY[dex].name : '';
     const where = en ? (mode === 's' ? 'solo' : 'group') + (dex ? ' with ' + mon : '')
                      : (mode === 's' ? 'en solitario' : 'en grupo') + (dex ? ' con ' + mon : '');

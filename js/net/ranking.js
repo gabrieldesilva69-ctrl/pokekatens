@@ -11,6 +11,8 @@
  *     s_d20261008   solitario, hoy            g_...   en grupo
  *     s_w2026-41    semana ISO                s_m202610  mes
  *     s_all2        histórico   (la tabla anual se quitó el 2026-10-10)
+ *     s_cw2026-43r  desafío semanal (24-10-2026, systems/challenge.js): sólo en
+ *                   solitario y sólo con las partidas del desafío; top 50 como la semanal
  *     s_all2_p25    histórico sólo con Pikachu (el filtro por Pokémon sólo
  *                   existe en el histórico: así cada partida escribe la mitad)
  *                   (all2 desde la Sentencia de Arceus: con el final en el
@@ -36,11 +38,13 @@
  */
 G.Ranking = (() => {
   const TZ = 'Europe/Madrid';
-  const PERIODS = [['d', 'Diario'], ['w', 'Semanal'], ['m', 'Mensual'], ['a', 'Histórico']];
+  const PERIODS = [['d', 'Diario'], ['w', 'Semanal'], ['m', 'Mensual'], ['a', 'Histórico'], ['c', 'Desafío semanal']];
+  // Los periodos de las partidas normales (el desafío tiene su tabla aparte: submitChallenge).
+  const NORMAL = PERIODS.filter(([p]) => p !== 'c');
   // Periodos en los que sólo se guarda el top 50 (ver arriba).
   // ('p' = histórico de un Pokémon: casi cada partida entraba en el de su
   //  Pokémon y escribía; ahora también sólo el top 50.)
-  const TOP_ONLY = new Set(['d', 'w', 'm', 'p']);
+  const TOP_ONLY = new Set(['d', 'w', 'm', 'p', 'c']);
   const TOP = 50;
   // Las runs de menos de 2 minutos no se suben (nunca entran en un top que
   // importe y eran muchas lecturas y escrituras para nada: los que empiezan
@@ -90,7 +94,7 @@ G.Ranking = (() => {
   const GEN = 'r';
   function boardIds(date) {
     const p = periodIds(date);
-    return Object.assign({}, p, { d: p.d + GEN, w: p.w + GEN, m: p.m + GEN, y: p.y + GEN });
+    return Object.assign({}, p, { d: p.d + GEN, w: p.w + GEN, m: p.m + GEN, y: p.y + GEN, c: 'c' + p.w + GEN });
   }
 
   /** El filtro por Pokémon sólo existe en el histórico. */
@@ -305,7 +309,7 @@ G.Ranking = (() => {
 
   function announce(better) {
     if (!better.length) return;
-    const names = { d: 'de hoy', w: 'de la semana', m: 'del mes', a: 'histórico' };
+    const names = { d: 'de hoy', w: 'de la semana', m: 'del mes', a: 'histórico', c: 'del desafío semanal' };
     const best = PERIODS.map(p => p[0]).filter(p => better.includes(p)).pop();
     G.UI.toast('¡Nueva mejor marca ' + names[best] + ' en el ranking!', 3400);
   }
@@ -317,9 +321,20 @@ G.Ranking = (() => {
     flushDeferred();
     const ids = boardIds();
     const entry = { t: r.t, uids: [fb.uid], names: [G.Social.me.name], dex: [r.dex], shiny: [!!r.shiny], lv: r.lv, kills: r.kills };
-    const boards = PERIODS.map(([p]) => ['s_' + ids[p], p]);
+    const boards = NORMAL.map(([p]) => ['s_' + ids[p], p]);
     if (r.t >= MIN_T_MON) boards.push(['s_' + ALL + '_p' + r.dex, 'p']);
     const better = await store(boards, fb.uid, entry);
+    announce(better);
+    return better;
+  }
+
+  /** Una partida del desafío semanal (systems/challenge.js): sólo a su tabla. */
+  function submitChallenge(r) { return track(submitChallengeNow(r)); }
+  async function submitChallengeNow(r) {
+    const fb = fbx();
+    if (!fb || !G.Social.me || r.t < MIN_T) return [];
+    const entry = { t: r.t, uids: [fb.uid], names: [G.Social.me.name], dex: [r.dex], shiny: [false], lv: r.lv, kills: r.kills };
+    const better = await store([['s_' + boardIds().c, 'c']], fb.uid, entry);
     announce(better);
     return better;
   }
@@ -334,7 +349,7 @@ G.Ranking = (() => {
     const entry = { t: r.t, uids: ms.map(m => m.uid), names: ms.map(m => m.name), dex: ms.map(m => m.dex),
                     shiny: ms.map(m => !!m.shiny), lv: r.lv, kills: r.kills };
     const ids = boardIds();
-    const boards = PERIODS.map(([p]) => ['g_' + ids[p], p]);
+    const boards = NORMAL.map(([p]) => ['g_' + ids[p], p]);
     if (r.t >= MIN_T_MON) for (const d of new Set(entry.dex)) boards.push(['g_' + ALL + '_p' + d, 'p']);
     const better = await store(boards, id, entry);
     announce(better);
@@ -607,6 +622,6 @@ G.Ranking = (() => {
     return uid;
   }
 
-  return { PERIODS, periodIds, board, runStarted, submitSolo, submitGroup, top, myRank, removeMine,
+  return { PERIODS, periodIds, board, runStarted, submitSolo, submitGroup, submitChallenge, top, myRank, removeMine,
            report, reported, isAdmin, reports, entryInfo, removeEntry, purgeAbove, removeEverywhere, setMarked, dismiss, markedAccounts, sendGift };
 })();

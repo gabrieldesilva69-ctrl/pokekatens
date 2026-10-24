@@ -533,6 +533,12 @@ img.pix { image-rendering: pixelated; image-rendering: crisp-edges; vertical-ali
 .stars-row { display: inline-flex; gap: 1px; vertical-align: middle; }
 .cell .stars-row { display: flex; justify-content: center; margin-top: 2px; }
 .badge-r { position: absolute; top: 3px; right: 4px; }
+.chal-box { width: min(620px, 100%); }
+.chal-main { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.chal-main .stage { flex: none; border-radius: 10px; background: rgba(0,0,0,.25); }
+.chal-info { flex: 1; min-width: 200px; }
+.chal-info .nm { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.chal-cond { margin: 10px 0 6px; }
 .badge-b { position: absolute; bottom: 4px; right: 5px; opacity: .85; }   /* derrotado en una partida (Pokédex) */
 .move-icons { display: flex; flex-wrap: wrap; gap: 3px; margin: 0 0 10px; }
 .card .ico img { display: block; }

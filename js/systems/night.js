@@ -18,7 +18,10 @@ G.Night = (() => {
 
   /** 0..1: cuánto es de noche en el segundo t de la partida. */
   function level(t) {
-    if (t < FROM || G.Rift.inArena || G.Judgment.active) return 0;
+    if (G.Rift.inArena || G.Judgment.active) return 0;
+    // Desafío semanal "Noche eterna" (systems/challenge.js): siempre, tras el primer anochecer.
+    if (G.Challenge && G.Challenge.alwaysNight()) return Math.min(1, t / FADE);
+    if (t < FROM) return 0;
     const k = (t - FROM) % EVERY;
     if (k >= LONG) return 0;
     return Math.min(1, k / FADE, (LONG - k) / FADE);

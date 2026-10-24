@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
+    ['Desafío semanal: cada semana todos juegan la misma partida, con el mismo mapa, el mismo Pokémon prestado y una condición (siempre llueve, sin objetos, noche eterna...). Tiene su propio ranking y, la primera vez de la semana que aguantas 3 minutos, te da un ticket ×10. Está en el menú, debajo de Jugar.',
+     "Weekly challenge: every week everyone plays the same run, with the same map, the same borrowed Pokémon and a condition (always raining, no items, endless night...). It has its own ranking and, the first time each week you survive 3 minutes, it gives you a ×10 ticket. It's in the menu, under Play."],
     ['Regalos entre amigos: una vez al día puedes regalar un ticket ×1 a cada amigo con el botón «Regalar» de la lista de amigos. Le llega la próxima vez que entre (como mucho 10 regalos al día).',
      'Gifts between friends: once a day you can give each friend a ×1 ticket with the “Gift” button in the friends list. They get it the next time they log in (at most 10 gifts a day).'],
     ['Noche en la partida: desde el minuto 7, cada 10 minutos anochece durante 3. Se ve menos (sólo hay luz alrededor de tu Pokémon), salen más Pokémon nocturnos (Fantasma, Siniestro, Zubat, Murkrow...) y las monedas y la experiencia que recoges valen un 25 % más. En Ajustes > Pantalla se puede quitar la oscuridad.',

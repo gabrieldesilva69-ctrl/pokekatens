@@ -24,8 +24,8 @@
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 <link rel="preload" href="assets/fonts/PixelifyPS-400.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="assets/fonts/PixelifyPS-700.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=9eedcf7d66">
-<script src="js/core/locales.js?v=08086143e4"></script>
+<link rel="stylesheet" href="css/style.css?v=b4fd856c49">
+<script src="js/core/locales.js?v=b042c8f41b"></script>
 <script src="js/noframe.js"></script>
 </head>
 <body>
@@ -124,6 +124,7 @@
     <div class="box">
       <div class="menu-list">
         <button class="menu-item play" data-go="play">Jugar<small>Entra en la mazmorra</small></button>
+        <button class="menu-item" data-go="chal">Desafío semanal<small id="menu-chal-sub">La misma partida para todos</small></button>
         <button class="menu-item" data-go="dex">Pokémon<small id="menu-dex-count">Tu colección</small></button>
         <button class="menu-item" data-go="upgrades">Mejoras<small>Haz más fuerte cada run</small></button>
         <button class="menu-item" data-go="shop">Tienda Kecleon<small>Mentas, Cápsulas y MT</small></button>
@@ -387,6 +388,28 @@
   </div>
 </section>
 
+<!-- ====== Desafío semanal (24-10-2026, js/systems/challenge.js y js/ui/menu.js) ====== -->
+<section id="scr-chal" class="scr dim hidden">
+  <div class="box chal-box">
+    <div class="row between"><h2>Desafío semanal</h2><button class="btn small ghost" data-back>Volver</button></div>
+    <p class="sub" style="margin:4px 0 10px">Todos juegan esta semana la misma partida: el mismo mapa, el mismo Pokémon prestado (sin mejoras) y la misma condición. Sólo en solitario.</p>
+    <div class="chal-main">
+      <canvas id="chal-mon" class="stage" width="180" height="150"></canvas>
+      <div class="chal-info">
+        <div class="nm" id="chal-name"></div>
+        <div id="chal-types"></div>
+        <p class="chal-cond"><b class="gold" id="chal-cond"></b><br><span class="sub" id="chal-desc"></span></p>
+        <p class="sub" id="chal-left"></p>
+        <p class="sub" id="chal-prize"></p>
+      </div>
+    </div>
+    <div class="row" style="gap:8px;margin-top:12px">
+      <button class="btn gold grow" id="chal-play">Jugar el desafío</button>
+      <button class="btn ghost" id="chal-rank">Ranking del desafío</button>
+    </div>
+  </div>
+</section>
+
 <!-- ====== Tienda Kecleon (20-10-2026, del PR #236 de TheAdro7) ====== -->
 <section id="scr-shop" class="scr dim hidden">
   <div class="box wide shop-box">
@@ -522,6 +545,6 @@
 </section>
 
 <!-- datos generados -->
-<script defer src="js/app.min.js?v=46f4dfe891"></script>
+<script defer src="js/app.min.js?v=064ff3671f"></script>
 </body>
 </html>
