@@ -5,6 +5,7 @@
  *   quality     'auto' | 'high' | 'mid' | 'low'   efectos y partículas
  *   dmgNumbers  true/false                        números de daño
  *   calm        true/false                        menos sacudidas y destellos
+ *   darkNight   true/false                        la noche oscurece la pantalla (systems/night.js)
  *   fps         true/false                        contador de FPS
  *   ping        true/false                        ping en ms en las partidas en grupo
  *   stick       0.8 | 1 | 1.25                    tamaño del joystick táctil
@@ -23,7 +24,7 @@
  */
 G.Settings = (() => {
   const KEY = 'ps.settings';
-  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, ping: true, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false, cries: true, keys: null };
+  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, ping: true, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false, cries: true, darkNight: true, keys: null };
   let s = Object.assign({}, DEF);
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* nada */ }
   const fns = new Set();

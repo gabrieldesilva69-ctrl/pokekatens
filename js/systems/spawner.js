@@ -93,7 +93,8 @@ G.Spawner = (() => {
 
   function spawnOne(pl, t, angle) {
     const bag = G.Enemies.bagAt(t);
-    let def = G.U.pick(bag);
+    // De noche (systems/night.js), la mitad son nocturnos del tramo de ahora.
+    let def = (G.Night.nightSpawn() && G.Enemies.nightDef(t)) || G.U.pick(bag);
     if (SUPPORT.has(def.behavior)) {
       const full = supportFull();
       if (full.has(def.behavior)) {

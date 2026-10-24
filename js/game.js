@@ -122,6 +122,7 @@ G.Game = (() => {
     G.Events.reset();
     G.Weather.reset();
     G.Streak.reset();
+    G.Night.reset();
     G.Path.clear();
     G.Hazards.clear();
     G.World.reset(coop ? coop.seed : Math.floor(Math.random() * 1e6));
@@ -508,12 +509,12 @@ G.Game = (() => {
     if (G.Coop.active) G.Coop.collected(p, who);
     if (mine || p.kind === 'bomb') G.Audio.sfx(PICK_SFX[p.kind]);
     if (p.kind === 'xp' || p.kind === 'xpBig') {
-      pendingLevels += pl.gainXp(p.value * (G.Coop.active ? G.Coop.xpFactor() : 1));
+      pendingLevels += pl.gainXp(p.value * (G.Coop.active ? G.Coop.xpFactor() : 1) * G.Night.bonus());
       return;
     }
     if (p.kind === 'coin') {
-      // Con racha (systems/streak.js), valen más.
-      const v = Math.round(p.value * G.Streak.mul());
+      // Con racha (systems/streak.js) y de noche (systems/night.js), valen más.
+      const v = Math.round(p.value * G.Streak.mul() * G.Night.bonus());
       pl.coins += v;
       G.FX.dmgText(who.x, who.y - who.bodyH - 6, '+' + v, '#ffd23f');
       return;
@@ -739,6 +740,7 @@ G.Game = (() => {
     G.Judgment.update(dt, pl, time);
     G.Events.update(dt, all, time);
     G.Weather.update(dt, time, pl);
+    G.Night.update();
     G.FX.update(dt);
 
     G.Audio.music(G.Judgment.active ? G.Judgment.music : G.Rift.inArena ? 'rift' : G.EnemyMgr.bossAlive() ? 'boss' : G.BIOME_MUSIC[biome % G.BIOME_MUSIC.length]);
@@ -836,6 +838,7 @@ G.Game = (() => {
     ctx.restore();
 
     G.Weather.draw(ctx, w, h, frameDt);
+    G.Night.draw(ctx, w, h, pl);
     G.World.drawVignette(ctx, w, h);
     // Niebla: la viñeta se cierra un poco (sin tapar el centro).
     const fog = G.Weather.vignette;

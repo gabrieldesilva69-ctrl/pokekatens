@@ -102,6 +102,7 @@ G.SettingsUI = (() => {
         + section('Pantalla')
         + toggle('dmgNumbers', 'Números de daño', 'Los números que salen al golpear y al recibir daño.')
         + toggle('calm', 'Menos sacudidas y destellos', 'La cámara tiembla menos y los fogonazos son suaves.')
+        + toggle('darkNight', 'Noches oscuras', 'De noche la pantalla se oscurece alrededor de tu Pokémon. Sin esto, sólo cambia un poco el color.')
         + toggle('fps', 'Mostrar FPS', 'Fotogramas por segundo, en la esquina de abajo.')
         + toggle('ping', 'Mostrar ping', 'En las partidas en grupo, en la esquina de abajo: verde por debajo de 100 ms, amarillo hasta 200 ms y rojo por encima.')
         + (canFull() ? `<div class="set-row"><div class="grow"><b>Pantalla completa</b><small>Sin barras del navegador.</small></div>

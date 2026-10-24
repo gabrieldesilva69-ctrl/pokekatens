@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
+    ['Noche en la partida: desde el minuto 7, cada 10 minutos anochece durante 3. Se ve menos (sólo hay luz alrededor de tu Pokémon), salen más Pokémon nocturnos (Fantasma, Siniestro, Zubat, Murkrow...) y las monedas y la experiencia que recoges valen un 25 % más. En Ajustes > Pantalla se puede quitar la oscuridad.',
+     'Night during the run: from minute 7, every 10 minutes night falls for 3. You see less (there is only light around your Pokémon), more nocturnal Pokémon appear (Ghost, Dark, Zubat, Murkrow...) and the coins and experience you pick up are worth 25% more. You can turn off the darkness in Settings > Display.'],
     ['Rachas: cada enemigo que cae sube tu racha y un golpe la corta. Con 50 seguidos las monedas que recoges valen ×1,1; con 150, ×1,25, y con 300, ×1,5. Se ve debajo de tu vida, la mejor sale en el resumen de la partida y hay dos logros nuevos.',
      'Streaks: every enemy that falls raises your streak and a hit breaks it. With 50 in a row the coins you pick up are worth ×1.1; with 150, ×1.25, and with 300, ×1.5. It shows under your HP, the best one appears in the run summary and there are two new achievements.'],
     ['Pokédex de vistos y derrotados: el juego apunta cada Pokémon que ves y cada uno que derrotas en tus partidas (también en grupo). En la Colección se ven aunque no los tengas, con una marca los derrotados, y hay filtros nuevos y cinco logros nuevos.',

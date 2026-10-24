@@ -192,6 +192,19 @@ G.Enemies = (() => {
     const all = candidates(TIERS[tierAt(t)]).filter(p => !NO_HORDE.has(behaviorOf(p)));
     return Object.keys(G.U.TYPE_COLOR).filter(ty => all.filter(p => p.types.includes(ty)).length >= 3);
   }
+  // Nocturnos (systems/night.js): los de tipo Fantasma y Siniestro y estos.
+  const NIGHT_DEX = new Set([41, 42, 92, 93, 163, 164, 167, 168, 169, 197, 198, 200, 215, 228, 229, 261, 262, 302, 353, 354,
+    355, 356, 425, 426, 429, 430, 431, 432, 434, 435, 442, 461, 491, 509, 510, 551, 552, 553, 562, 563, 570, 571, 592, 593,
+    607, 608, 609, 622, 623, 714, 715]);
+  const nightCache = {};
+  /** Un Pokémon nocturno del tramo de ahora, con sus stats (o null si el tramo no tiene). */
+  function nightDef(t) {
+    const ti = tierAt(t);
+    const pool = nightCache[ti] = nightCache[ti] || candidates(TIERS[ti]).filter(p =>
+      (NIGHT_DEX.has(p.dex) || p.types.includes('ghost') || p.types.includes('dark')) && !NO_HORDE.has(behaviorOf(p)));
+    return pool.length ? defFor(G.U.pick(pool), TIERS[ti], ti) : null;
+  }
+
   /** Hasta 4 Pokémon de un tipo, con los stats del tramo actual. */
   function hordeDefs(type, t) {
     const ti = tierAt(t);
@@ -224,7 +237,7 @@ G.Enemies = (() => {
   }
 
   return {
-    TIERS, BOSS_SLOTS, rollRun, scale, bossScale, bagAt, upcomingDex, candidates, hordeTypes, hordeDefs,
+    TIERS, BOSS_SLOTS, rollRun, scale, bossScale, bagAt, upcomingDex, candidates, hordeTypes, hordeDefs, nightDef,
     get BOSSES() { if (!bosses) rollRun(); return bosses; },
     get cast() { if (!cast) rollRun(); return cast; }
   };
