@@ -397,6 +397,7 @@ G.World = (() => {
       if (Math.random() < 0.08) G.Pickups.drop('item', p.x, p.y - 12, G.Items.roll());
       // De un solo uso (Caramelo, bayas, Mochis: data/items.js), uno de cada 5.
       if (Math.random() < 0.2) G.Pickups.drop('treat', p.x + 12, p.y - 6, G.Items.rollTreat());
+      if (Math.random() < 0.35) G.Pickups.drop('sphere', p.x - 12, p.y - 12, G.Orbs.roll());
       return;
     }
     if (p.type === 'bigchest') {
@@ -410,6 +411,8 @@ G.World = (() => {
       if (Math.random() < 0.15) G.Pickups.drop('ticket10', p.x, p.y - 10, 1);
       if (Math.random() < 0.5) G.Pickups.drop('item', p.x + 14, p.y - 14, G.Items.roll());
       G.Pickups.drop('treat', p.x - 14, p.y - 14, G.Items.rollTreat());       // siempre uno de un solo uso
+      G.Pickups.drop('sphere', p.x - 14, p.y - 14, G.Orbs.roll());
+      if (Math.random() < 0.5) G.Pickups.drop('sphere', p.x, p.y - 20, G.Orbs.roll());
       G.Pickups.dropXp(p.x, p.y, G.Game.levelXp());
       G.Progress.event('chest');
       return;

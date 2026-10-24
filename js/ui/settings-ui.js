@@ -13,7 +13,8 @@ G.SettingsUI = (() => {
   // Teclas de PC: nombre de cada acción, en el orden en que salen.
   const KEY_ROWS = [['up', 'Arriba'], ['down', 'Abajo'], ['left', 'Izquierda'], ['right', 'Derecha'],
     ['prev', 'Ataque anterior'], ['next', 'Ataque siguiente'],
-    ['slot1', 'Ataque 1'], ['slot2', 'Ataque 2'], ['slot3', 'Ataque 3'], ['slot4', 'Ataque 4'], ['mega', 'Megaevolucionar'], ['pause', 'Pausa']];
+    ['slot1', 'Ataque 1'], ['slot2', 'Ataque 2'], ['slot3', 'Ataque 3'], ['slot4', 'Ataque 4'], ['mega', 'Megaevolucionar'],
+    ['orb1', 'Esfera 1'], ['orb2', 'Esfera 2'], ['orb3', 'Esfera 3'], ['orb4', 'Esfera 4'], ['pause', 'Pausa']];
 
   function init() {
     document.querySelectorAll('#set-tabs .gen-tab').forEach(b => { b.onclick = () => { tab = b.dataset.t; capture = null; render(); }; });

@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: desafío semanal, evoluciones y noche', 'PokeKatens: weekly challenge, evolutions and night'], new: [
+    ["Lo nuevo de PokéSurvivor (de JPTER78): la Sentencia de Arceus con Tablas y ranking de daño a Arceus (todas las tablas del ranking empiezan de cero), Esferas de Mundo Misterioso, Amuletos Iris, tirada ×100 con botón Saltar (la tirada ×1 ya no está) y movimientos evolucionados que se llaman igual con un «+». Lo tienes todo en sus novedades del 22 y el 23-10.",
+     "New from PokéSurvivor (by JPTER78): Arceus's Judgment with Plates and an Arceus damage ranking (every leaderboard starts from zero), Mystery Dungeon orbs, Shiny Charms, a ×100 pull with a Skip button (the ×1 pull is gone) and evolved moves that keep their name with a «+». It is all in its news of 22 and 23-10."],
     ['Desafío semanal: cada semana todos juegan la misma partida, con el mismo mapa, el mismo Pokémon prestado y una condición (siempre llueve, sin objetos, noche eterna...). Tiene su propio ranking y, la primera vez de la semana que aguantas 3 minutos, te da un ticket ×10. Está en el menú, debajo de Jugar.',
      "Weekly challenge: every week everyone plays the same run, with the same map, the same borrowed Pokémon and a condition (always raining, no items, endless night...). It has its own ranking and, the first time each week you survive 3 minutes, it gives you a ×10 ticket. It's in the menu, under Play."],
     ['Regalos entre amigos: una vez al día puedes regalar un ticket ×1 a cada amigo con el botón «Regalar» de la lista de amigos. Le llega la próxima vez que entre (como mucho 10 regalos al día).',
@@ -30,7 +32,9 @@ G.CHANGELOG = [
   ], chg: [
     ['Las evoluciones de Giro Fuego, Surf, Terremoto, Pulso Dragón, Viento Aciago, Bomba Lodo, Fuerza Lunar, Escaldar y Poder Pasado tienen otro nombre, porque el que tenían es el de un ataque exclusivo. Funcionan igual.',
      'The evolutions of Fire Spin, Surf, Earthquake, Dragon Pulse, Ominous Wind, Sludge Bomb, Moonblast, Scald and Ancient Power have a new name, because the old one belongs to a signature move. They work the same.',
-     ['Calcinación', 'Envite Acuático', 'Pataleta', 'Cola Dragón', 'Impresionar', 'Veneno X', 'Bruma Explosiva', 'Agua Lodosa', 'Pedrada']]
+     ['Calcinación', 'Envite Acuático', 'Pataleta', 'Cola Dragón', 'Impresionar', 'Veneno X', 'Bruma Explosiva', 'Agua Lodosa', 'Pedrada']],
+    ["En el mando, X megaevoluciona a tu compañero si ya puedes y, si no, usa la esfera elegida (Y cambia de esfera). Las teclas de las esferas (5-8) se pueden cambiar en Ajustes > Controles.",
+     "On the controller, X Mega Evolves your partner when you can and otherwise uses the selected orb (Y switches orbs). The orb keys (5-8) can be changed in Settings > Controls."]
   ], fix: [
     ['Las megas ya se ven más grandes que su forma normal: al menos un 20 %, y las de Pokémon grandes, como Mega Charizard, Mega Metagross o Mega Mewtwo, un 40 %. Antes algunas salían casi iguales o más pequeñas.',
      'Megas now look bigger than their normal form: at least 20%, and the big Pokémon ones, like Mega Charizard, Mega Metagross or Mega Mewtwo, 40%. Before, some looked almost the same or smaller.']
@@ -85,6 +89,42 @@ G.CHANGELOG = [
     ['Se entra sólo con nombre y contraseña (ya no hay botón de Google). Si olvidas la contraseña, pídele al administrador que te cree otra cuenta.',
      'You sign in with name and password only (the Google button is gone). If you forget your password, ask the admin to create a new account for you.']
   ] },
+  { d: '2026-10-23', title: ['Ranking de daño a Arceus y Tablas', 'Arceus damage ranking and Plates'], new: [
+    ["Ranking partido en dos: a la izquierda, el daño que le has hecho a Arceus; a la derecha, el tiempo aguantado, como siempre. Las dos mitades se cargan a la vez. Todas las tablas empiezan de cero.",
+     "The ranking is now split in two: on the left, the damage you dealt to Arceus; on the right, the time survived, as always. Both halves load at once. Every board starts from zero."],
+    ["Sentencia de Arceus: ahora se le puede pegar. Es invencible y sólo recibe una pequeña parte del daño (cada vez menos), y los ataques le apuntan cuando no queda ningún legendario.",
+     "Arceus's Judgment: you can now hit it. It is invincible and only takes a small part of the damage (less and less over time), and your attacks aim at it when no legendary is left."],
+    ["Tablas: en cada partida Arceus lleva una al azar, que le da su tipo (se avisa al entrar en la arena). Ya no hay un tipo de ataque que sea siempre el mejor.",
+     "Plates: in every run Arceus holds a random one, which gives it its type (you are told when you enter the arena). No move type is always the best anymore."]
+  ], chg: [
+    ["En el minuto 35, Arceus rompe el objeto de todos (Banda Focus incluida).",
+     "At minute 35, Arceus breaks everyone's item (Focus Sash included)."],
+    ["Los legendarios de la Sentencia ya no son el doble de fuertes que el anterior: cada uno tiene un 25 % más de vida y un 15 % más de daño, así que se pueden tumbar. Ya no hay límite de 45 minutos en el ranking.",
+     "The Judgment legendaries are no longer twice as strong as the previous one: each one has 25% more HP and 15% more damage, so they can be taken down. There is no 45-minute limit in the ranking anymore."],
+    ['Los movimientos evolucionados ya no cambian de nombre: se llaman igual con un «+» (Puño Meteoro pasa a Puño Meteoro +). Hacen lo mismo que antes y se siguen distinguiendo por el borde dorado.',
+     'Evolved moves no longer change their name: they keep it with a "+" (Meteor Mash becomes Meteor Mash +). They work just like before and still stand out with their golden border.'],
+    ["Puño Meteoro pega menos: 24 de daño en vez de 34 y una zona un poco más pequeña. Al máximo y evolucionado hacía casi el doble que Avalancha; ahora están a la par.",
+     "Meteor Mash hits softer: 24 damage instead of 34 and a slightly smaller area. Maxed and evolved it dealt almost twice as much as Rock Slide; now they are on par."],
+    ["En la Sentencia de Arceus, el veneno y las quemaduras quitan poco y siempre lo mismo a los legendarios (antes el veneno quitaba un % de su vida): envenenar y huir ya no sirve, hay que pegarles.",
+     "In Arceus's Judgment, poison and burns deal a small, fixed amount to the legendaries (poison used to take a % of their HP): poisoning them and running away no longer works, you have to hit them."]
+  ] },
+  { d: '2026-10-22', title: ['Esferas de Mundo Misterioso, Amuletos Iris y gacha ×100', 'Mystery Dungeon orbs, Shiny Charms and ×100 gacha'], new: [
+    ['Esferas de Mundo Misterioso: objetos de un solo uso que se encuentran durante la partida (cofres, jefes y, a veces, al derrotar a un Pokémon). Soporesfera, Ralentosfera y Rafagaesfera duermen, frenan o lanzan lejos a los enemigos; Focosfera, Luminosfera y Rapidosfera te dan crítico, más campo de visión o velocidad a ti y a los compañeros cercanos. Llevas hasta 4 distintas (3 de cada) y se usan con las teclas 5-8, tocando su casilla encima de los ataques o con X / Y en el mando. A los jefes y legendarios les afectan menos.',
+     'Mystery Dungeon orbs: single-use items you find during the run (chests, bosses and sometimes when you defeat a Pokémon). Slumber Orb, Slow Orb and Blowback Orb put enemies to sleep, slow them down or blow them away; Focus Orb, Luminous Orb and Quick Orb give critical hits, a wider view or speed to you and nearby teammates. You carry up to 4 different ones (3 of each) and use them with keys 5-8, by tapping their slot above your moves, or with X / Y on a controller. Bosses and legendaries are less affected.'],
+    ['Amuletos Iris: uno por región (Kanto, Johto, Hoenn, Sinnoh, Teselia, Kalos, Alola, Galar y Paldea). Al completar la Pokédex de una región (legendarios incluidos) te dan su Amuleto Iris y en su banner del gacha los shiny salen el doble: del 1 % al 2 %. Los tienes en la Mochila, con lo que te falta para cada uno. Si ya habías completado alguna región, el suyo ya es tuyo.',
+     'Shiny Charms: one per region (Kanto, Johto, Hoenn, Sinnoh, Unova, Kalos, Alola, Galar and Paldea). Complete a region\'s Pokédex (legendaries included) to get its Shiny Charm, and shinies become twice as likely in its gacha banner: from 1% to 2%. You can find them in your Bag, along with how many you still need for each one. If you had already completed a region, its charm is already yours.'],
+    ['Gacha: nueva tirada ×100, con 100 tickets normales o con 10 tickets ×10 (son diez ×10 seguidas, cada una con su Épica asegurada). La tragaperras gira 10 veces enseñando lo mejor de cada ×10 y al final ves un resumen (nuevos, shiny y Pokémonedas) con las cartas de mejor a peor. Para que quepa, ya no está la tirada ×1: se tira de 10 en 10 o de 100 en 100.',
+     'Gacha: new ×100 pull, with 100 normal tickets or with 10 ×10 tickets (ten ×10 pulls in a row, each with its guaranteed Epic). The slot machine spins 10 times showing the best of each ×10, and at the end you get a summary (new, shiny and PokéCoins) with the cards sorted from best to worst. To make room, the ×1 pull is gone: you pull 10 or 100 at a time.'],
+    ['Gacha: botón Saltar (o Esc) durante la animación: se acaba la tragaperras y salen todas las cartas de golpe.',
+     'Gacha: Skip button (or Esc) during the animation: the slot machine ends and all the cards show up at once.']
+  ], fix: [
+    ['Cooperativo: a los invitados ya no les sale «La sala se ha cerrado» a mitad de partida (a veces a los pocos minutos o al entrar en una grieta) mientras los demás seguían jugando. Pasaba cuando su conexión con el servidor de las salas se cortaba un momento; ahora la partida sigue y la sala se recupera sola.',
+     'Co-op: guests no longer get "The room has been closed" in the middle of a run (sometimes after a few minutes or when entering a rift) while the others kept playing. It happened when their connection to the rooms server dropped for a moment; now the run goes on and the room recovers on its own.'],
+    ['Cooperativo: si se corta un momento la conexión con el anfitrión (un bache de la wifi o de los datos), el invitado ya no pierde la partida: se queda en pausa hasta 45 segundos mientras se vuelve a conectar y sigue jugando.',
+     'Co-op: if the connection with the host drops for a moment (a Wi-Fi or mobile data hiccup), the guest no longer loses the run: it pauses for up to 45 seconds while reconnecting and then keeps playing.'],
+    ['Cooperativo: si te quedas fuera de una partida mientras los demás siguen, ya no te sale «La sala se ha cerrado»: esperas en la sala y, cuando acaben, seguís juntos.',
+     'Co-op: if you drop out of a run while the others keep playing, you no longer get "The room has been closed": you wait in the room and, when they finish, you play together again.']
+  ]},
   { d: '2026-10-21', title: ['La gran actualización: Tienda Kecleon', 'The big update: Kecleon Shop'], new: [
     ['Mejora nueva: Tienda Kecleon (botón en el menú) con Mentas, Cápsulas Habilidad y 8 MT nuevas cada día. Cada Pokémon tiene ahora su naturaleza (±10 % a dos stats) y su habilidad, con efecto en la partida; se ven y se cambian en su ficha de la colección. Las MT enseñan para siempre ataques de fuera de sus tipos, pero sólo si los aprende en los juegos (Mewtwo puede aprender Bola Sombra; Psyduck no puede aprender Lanzallamas). Gracias a TheAdro7 por la idea y el trabajo de base.',
      'New: the Kecleon Shop (button in the menu) with Mints, Ability Capsules and 8 new TMs every day. Every Pokémon now has its own nature (±10% to two stats) and ability, with an effect in the run; you can see and change them on its page in the collection. TMs permanently teach moves outside its types, but only if it learns them in the games (Mewtwo can learn Shadow Ball; Psyduck cannot learn Flamethrower). Thanks to TheAdro7 for the idea and the groundwork.'],

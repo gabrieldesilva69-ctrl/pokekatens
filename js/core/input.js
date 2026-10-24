@@ -14,7 +14,8 @@ G.Input = (() => {
     left: ['keya', 'arrowleft'], right: ['keyd', 'arrowright'],
     prev: ['keyq', ''], next: ['keye', 'tab'], pause: ['keyp', ''],
     slot1: ['digit1', 'numpad1'], slot2: ['digit2', 'numpad2'], slot3: ['digit3', 'numpad3'], slot4: ['digit4', 'numpad4'],
-    mega: ['keyf', '']
+    mega: ['keyf', ''],
+    orb1: ['digit5', 'numpad5'], orb2: ['digit6', 'numpad6'], orb3: ['digit7', 'numpad7'], orb4: ['digit8', 'numpad8']
   };
   const ACTIONS = Object.keys(DEF_KEYS);
   const RESERVED = new Set(['escape']);
@@ -105,6 +106,8 @@ G.Input = (() => {
     // ---------------- teclas configurables (Ajustes → Controles) ----------------
     ACTIONS,
     keys(a) { return keysOf(a).slice(); },
+    /** Nombre corto de la primera tecla de la acción ('' si no tiene). */
+    actKey(a) { const k = keysOf(a).find(Boolean); return k ? keyName(k) : ''; },
     /** Pone `c` en el hueco `slot` (0 o 1) de la acción. Si otra acción la usaba, se intercambian. */
     bind(a, slot, c) {
       if (!binds) load();

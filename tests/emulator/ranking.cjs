@@ -28,10 +28,12 @@ async function signUp(email) {
   return { token: j.idToken, uid: j.localId };
 }
 
-/** Marca de una persona en la tabla de prueba s_test, con `t` segundos aguantados. */
-function entry(user, t, board = 's_test') {
+/** Marca de una persona en la tabla de prueba s_test, con `t` segundos aguantados y `dmg` a Arceus. */
+function entry(user, t, dmg, board = 's_test') {
+  return { writes: [entryWrite(user, t, dmg, board)] };
+}
+function entryWrite(user, t, dmg, board = 's_test') {
   return {
-    writes: [{
       update: {
         name: `projects/demo-pokekatens/databases/(default)/documents/lb/${board}/e/${user.uid}`,
         fields: {
@@ -41,12 +43,26 @@ function entry(user, t, board = 's_test') {
           dex: { arrayValue: { values: [{ integerValue: '25' }] } },
           shiny: { arrayValue: { values: [{ booleanValue: false }] } },
           lv: { integerValue: '1' },
-          kills: { integerValue: '0' }
+          kills: { integerValue: '0' },
+          ...(dmg === undefined ? {} : { dmg: typeof dmg === 'number' ? { integerValue: String(dmg) } : { stringValue: String(dmg) } })
         }
       },
       updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }]
-    }]
   };
+}
+const arr = (k, v) => ({ arrayValue: { values: [{ [k]: v }] } });
+/** El resumen lbs/s_test con tu fila en top (tiempo) y en dtop (daño), en la misma transacción que la marca. */
+function withSummary(user, t, dmg, rowDmg) {
+  const who = { uids: arr('stringValue', user.uid), names: arr('stringValue', 'Tres'), dex: arr('integerValue', '25') };
+  const row = { t: { integerValue: String(t) }, ...who, shiny: arr('booleanValue', false), lv: { integerValue: '1' }, kills: { integerValue: '0' } };
+  const drow = { d: { integerValue: String(rowDmg) }, ...who, shiny: arr('booleanValue', false) };
+  return { writes: [entryWrite(user, t, dmg), { update: {
+    name: 'projects/demo-pokekatens/databases/(default)/documents/lbs/s_test',
+    fields: {
+      top: { mapValue: { fields: { [user.uid]: { mapValue: { fields: row } } } } },
+      dtop: { mapValue: { fields: { [user.uid]: { mapValue: { fields: drow } } } } },
+      me: { stringValue: user.uid }, ev: { stringValue: '' }, dev: { stringValue: '' }
+    } } }] };
 }
 
 // El admin de firestore.rules (js/core/fork-config.js, G.FORK.admins). El emulador acepta
@@ -69,8 +85,17 @@ const commit = (user, body) => fetch(`${DOCS}:commit`, {
 (async () => {
   const tres = await signUp('tres@jugadores.pokekatens.invalid');
 
-  expect('marca imposible (t = 2701)', 403, (await commit(tres, entry(tres, 2701))).status);
+  expect('marca imposible (t = 86401, más de un día)', 403, (await commit(tres, entry(tres, 86401))).status);
   expect('marca válida (t = 600)', 200, (await commit(tres, entry(tres, 600))).status);
+
+  // ---- daño a Arceus (dmg, desde el 23-10-2026): se mejora el tiempo o el daño, sin bajar el otro ----
+  expect('daño negativo', 403, (await commit(tres, entry(tres, 700, -5))).status);
+  expect('daño que no es un número', 403, (await commit(tres, entry(tres, 700, 'mucho'))).status);
+  expect('mismo tiempo y más daño (600 s, 5000)', 200, (await commit(tres, entry(tres, 600, 5000))).status);
+  expect('más tiempo pero menos daño', 403, (await commit(tres, entry(tres, 900, 10))).status);
+  expect('lo mismo otra vez (no mejora nada)', 403, (await commit(tres, entry(tres, 600, 5000))).status);
+  expect('resumen con su fila de daño copiada', 200, (await commit(tres, withSummary(tres, 650, 6000, 6000))).status);
+  expect('resumen con un daño inventado en dtop', 403, (await commit(tres, withSummary(tres, 700, 7000, 99999))).status);
 
   const r = await fetch(`${DOCS}/reports/nada`, { headers: { Authorization: 'Bearer ' + tres.token } });
   expect('un jugador sin permisos no lee reportes', 403, r.status);
@@ -133,8 +158,8 @@ const commit = (user, body) => fetch(`${DOCS}:commit`, {
   console.log('ok un regalo de amigo en el buzón');
 
   // ---- desafío semanal (systems/challenge.js): su tabla es de solitario, con las mismas reglas ----
-  expect('marca del desafío semanal', 200, (await commit(cinco, entry(cinco, 300, 's_cw2026-43r'))).status);
-  expect('marca imposible en el desafío', 403, (await commit(seis, entry(seis, 2701, 's_cw2026-43r'))).status);
+  expect('marca del desafío semanal', 200, (await commit(cinco, entry(cinco, 300, undefined, 's_cw2026-43a'))).status);
+  expect('marca imposible en el desafío', 403, (await commit(seis, entry(seis, 86401, undefined, 's_cw2026-43a'))).status);
 
   console.log('EMULATOR_RANKING_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

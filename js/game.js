@@ -137,6 +137,7 @@ G.Game = (() => {
     runReal = performance.now(); tampered = false;
 
     pl = new G.Player(mon, perks, !chal && !!save.partnerShiny && G.DB.ownsShiny(mon.dex));
+    G.Orbs.reset();
     pl.setAbility(G.Mons.abilityOf(mon.dex).id);
     G.Mega.setup(pl);
     if (chal) G.Challenge.begin(chal, pl); else G.Challenge.end();
@@ -261,6 +262,8 @@ G.Game = (() => {
     lost(msg) { G.UI.toast(msg, 3600); endRun(false); },
     item(id) { offerItem(id); },
     treat(id) { if (pl) pl.takeTreat(id); },
+    /** El anfitrión te da una esfera que has cogido. */
+    orb(id) { if (pl && state !== 'over') G.Orbs.got(pl, id); },
     mateLeft() {},
     /** Grupo: quién está eligiendo fusión. Mientras haya alguien, todo parado. */
     hold(names) {
@@ -300,12 +303,21 @@ G.Game = (() => {
     else pl.coins += 150;
     G.Spawner.say(isNew ? '¡' + name + ' se une a tu equipo!' : '¡' + name + ' te da las gracias! (+150 monedas, ya lo tenías)', 4);
     G.Audio.sfx('shinyGet');
+    if (isNew) irisSay(dex);
   };
+
+  /** Si `dex` (recién conseguido) era el último que faltaba de su generación: su Amuleto Iris. */
+  function irisSay(dex) {
+    const gen = G.DEX_BY[dex].gen;
+    if (!G.Gacha.hasIris(G.DB.save, gen)) return;
+    setTimeout(() => G.Spawner.say(G.I18n.f('¡Amuleto Iris de {x}! Shiny al 2 % en su banner', G.T(G.Gacha.BANNERS[gen - 1].name)), 5), 4000);
+  }
 
   /** Un shiny salvaje cae: te lo quedas (y la versión normal si no la tenías). */
   G.onShinyCaught = e => {
     if (!G.DB.save || !pl) return;
     if (G.Coop.isHost) G.Coop.shinyCaught(e);
+    const wasOwned = G.DB.owns(e.dex);
     const isNew = G.DB.grantShiny(e.dex, 'wild');
     G.DB.save.stats.shinies++;
     G.DB.commit(true);
@@ -313,6 +325,7 @@ G.Game = (() => {
     G.Spawner.say(isNew ? '¡Has conseguido a ' + e.name + ' shiny!' : '¡Otro ' + e.name + ' shiny! (+300 monedas)', 4);
     if (!isNew) pl.coins += 300;
     G.Audio.sfx('shinyGet');
+    if (!wasOwned) irisSay(e.dex);
   };
 
   function endRun(dead = true) {
@@ -323,6 +336,7 @@ G.Game = (() => {
     if (G.Coop.active) G.Coop.end();
     if (coop) G.Social.setPlaying(false);
     state = 'over';
+    G.Orbs.reset();
     G.Audio.music(null);
     G.Audio.sfx(dead ? 'gameover' : 'back');
     const save = G.DB.save;
@@ -363,7 +377,7 @@ G.Game = (() => {
     if (G.Social.me) G.Social.publishProfile();
 
     // Ranking: en solitario cada uno lo suyo; en grupo lo sube el anfitrión.
-    const mark = { t: Math.floor(time), lv: pl.level, kills: pl.kills };
+    const mark = { t: Math.floor(time), lv: pl.level, kills: pl.kills, dmg: judge ? judge.dmg : 0 };   // dmg: a Arceus
     // Si la partida se ha tocado (ver clean()), no sube al ranking (sin avisar); lo demás, sí.
     const ok = clean();
     const sent = ok && chal ? G.Ranking.submitChallenge(Object.assign(mark, { dex: pl.startDex }))
@@ -457,7 +471,7 @@ G.Game = (() => {
 
   // ---------------- recogida ----------------
 
-  const PICK_SFX = { xp: 'xp', xpBig: 'xp', coin: 'coin', heal: 'heal', bomb: 'break', magnet: 'confirm', ticket: 'shiny', ticket10: 'legend', item: 'legend', treat: 'confirm' };
+  const PICK_SFX = { xp: 'xp', xpBig: 'xp', coin: 'coin', heal: 'heal', bomb: 'break', magnet: 'confirm', ticket: 'shiny', ticket10: 'legend', item: 'legend', treat: 'confirm', sphere: 'confirm' };
 
   /*
    * Cooperativo: la elección de objeto y las cartas de nivel no pueden taparse.
@@ -534,6 +548,11 @@ G.Game = (() => {
     }
     if (p.kind === 'item') {
       if (mine) offerItem(p.value);
+      return;
+    }
+    if (p.kind === 'sphere') {
+      // La de un invitado: el anfitrión lleva la cuenta de lo que tiene (para saber si le cabe otra).
+      if (mine) G.Orbs.got(pl, p.value); else G.Orbs.add(who, p.value);
       return;
     }
     // De un solo uso (data/items.js). El Caramelo sube un nivel al equipo (la experiencia es común);
@@ -620,6 +639,11 @@ G.Game = (() => {
     if (G.Input.act('prev')) pl.cycle(-1);
     if (G.Input.act('next')) pl.cycle(1);
     if (G.Input.act('mega')) G.Mega.press(pl);
+    // Esferas: 5-8 (se cambian en Ajustes > Controles); en el mando, X megaevoluciona si
+    // puedes y si no usa la esfera elegida, e Y cambia de esfera.
+    for (let i = 0; i < 4; i++) if (G.Input.act('orb' + (i + 1))) G.Orbs.use(pl, i);
+    if (G.Input.tap('padx') && !G.Mega.press(pl)) G.Orbs.useSelected(pl);
+    if (G.Input.tap('pady')) G.Orbs.next(pl);
   }
 
   // ---------------- bucle ----------------
@@ -729,6 +753,7 @@ G.Game = (() => {
     pl.frozen = coop && (G.UI.isOpen('scr-pause') || G.UI.isOpen('scr-item'));
     pl.update(dt);
     G.Mega.update(pl, dt);
+    G.Orbs.update(dt, pl);
     if (coop) {
       for (const p of G.Coop.puppets()) { p.netUpdate(dt); G.Combat.ghostOrbit(p, dt, time); }
       if (pl.dead) reviveTick(dt);

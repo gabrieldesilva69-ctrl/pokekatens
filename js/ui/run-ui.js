@@ -130,7 +130,8 @@ G.RunUI = (() => {
       <div><span>Jefes</span><b>${r.bosses}</b></div>
       ${r.chal ? `<div style="grid-column:1/-1"><span>${G.T('Desafío semanal')}</span><b>${G.T(r.chal.cond.name)}${r.chal.prize ? ` · <span class="gold">${G.Icons.html('ticket10', 18)} +1 ×10</span>` : ''}</b></div>` : ''}
       ${r.streak >= 10 ? `<div style="grid-column:1/-1"><span>Mejor racha</span><b>${r.streak}</b></div>` : ''}
-      ${r.judge ? `<div style="grid-column:1/-1"><span>Ante Arceus</span><b class="gold">${G.U.mmss(r.judge.time)} · ${r.judge.bosses} ${r.judge.bosses === 1 ? 'legendario' : 'legendarios'}</b></div>` : ''}
+      ${r.judge ? `<div style="grid-column:1/-1"><span>Ante Arceus</span><b class="gold">${G.U.mmss(r.judge.time)} · ${r.judge.bosses} ${r.judge.bosses === 1 ? 'legendario' : 'legendarios'}</b></div>
+        <div style="grid-column:1/-1"><span>Daño a Arceus</span><b class="gold">${(r.judge.dmg || 0).toLocaleString(G.I18n.locale)}</b></div>` : ''}
       <div style="grid-column:1/-1"><span>Pokémonedas ganadas</span>
         <b class="gold"><span class="coin"></span> +${r.coins}</b>
         <div style="font-size:12px;color:var(--muted)">${r.breakdown}</div></div>
@@ -285,7 +286,23 @@ G.RunUI = (() => {
       <h3>Tus estadísticas</h3><div class="sum-stats">${st}</div>
       <h3>Objeto y cartas</h3>
       <p class="sub">${it ? G.Icons.html(pl.item, 18) + ' <b>' + it.name + '</b>: ' + it.desc : 'Sin objeto.'}</p>
-      <div class="chips">${cards || '<span class="sub">Aún no has cogido cartas de mejora.</span>'}</div>`;
+      <div class="chips">${cards || '<span class="sub">Aún no has cogido cartas de mejora.</span>'}</div>
+      <h3>Tus esferas</h3>${orbsSummary(pl)}`;
+  }
+
+  /** Las esferas que llevas (con su tecla y lo que hacen) y las mejoras que tienes puestas. */
+  function orbsSummary(pl) {
+    const key = i => G.Touch.active ? '' : (G.Input.actKey('orb' + (i + 1)) ? `<kbd>${G.Input.actKey('orb' + (i + 1))}</kbd> ` : '');
+    const rows = (pl.orbs || []).map((s, i) => {
+      if (!s) return '';
+      const o = G.Orbs.BY[s.id];
+      return `<p class="sub orb-row">${key(i)}${G.Icons.html('orb:' + s.id, 18)} <b>${G.T(o.name)}</b>${s.n > 1 ? ' ×' + s.n : ''}: ${G.T(o.desc)}</p>`;
+    }).join('');
+    const ob = pl.orbBuff || {};
+    const on = Object.keys(ob).filter(id => ob[id] > 0)
+      .map(id => `<span class="chip">${G.Icons.html('orb:' + id, 12)} ${G.T(G.Orbs.BY[id].name)} · ${Math.ceil(ob[id])} s</span>`).join('');
+    return (rows || '<p class="sub">Aún no llevas esferas. Salen de los cofres, de los jefes y, a veces, al derrotar a un Pokémon.</p>')
+      + (on ? `<div class="chips">${on}</div>` : '');
   }
 
   function showPause(coop = false) {

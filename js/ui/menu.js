@@ -93,14 +93,16 @@ G.MenuUI = (() => {
     G.InvitePop.refresh();
   }
 
-  /** Texto bajo "Mochila": cuántos objetos y MT llevas. */
+  /** Texto bajo "Mochila": cuántos objetos y MT llevas (y los Amuletos Iris, si hay). */
   function bagLine() {
     const s = G.DB.save, sum = o => Object.values(o || {}).reduce((a, b) => a + (+b || 0), 0);
-    const items = sum(s.bag), tms = sum(s.tms);
+    const items = sum(s.bag), tms = sum(s.tms), iris = G.Gacha.BANNERS.filter(b => G.Gacha.hasIris(s, b.gen)).length;
     const eggs = (s.eggs || []).length, ready = G.Eggs.anyReady();
-    const txt = items || tms ? G.I18n.f('Objetos: {x} · MT: {x}', items, tms) : eggs ? '' : G.T('Vacía');
-    $('menu-bag-sub').textContent = ready ? G.T('¡Un huevo está listo para abrirse!')
-      : [txt, eggs ? G.I18n.f('Huevos: {x}', eggs) : ''].filter(Boolean).join(' · ');
+    const parts = [];
+    if (items || tms) parts.push(G.I18n.f('Objetos: {x} · MT: {x}', items, tms));
+    if (eggs) parts.push(G.I18n.f('Huevos: {x}', eggs));
+    if (iris) parts.push(G.I18n.f('Amuletos Iris: {x}', iris));
+    $('menu-bag-sub').textContent = ready ? G.T('¡Un huevo está listo para abrirse!') : parts.join(' · ') || G.T('Vacía');
     $('menu-bag-sub').classList.toggle('gold', ready);
   }
 

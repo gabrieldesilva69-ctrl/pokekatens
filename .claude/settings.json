@@ -80,7 +80,50 @@
       "Bash(git remote:*)",
       "Bash(npx --yes firebase-tools@15.34.0 deploy:*)",
       "Bash(npx --yes firebase-tools@15.34.0 login:*)",
-      "Bash(rm -rf:*)"
+      "Bash(rm -rf:*)",
+      "mcp__plugin_firebase_firebase__firebase_deploy",
+      "mcp__plugin_firebase_firebase__firebase_init",
+      "mcp__plugin_firebase_firebase__firebase_login",
+      "mcp__plugin_firebase_firebase__firebase_logout",
+      "mcp__plugin_firebase_firebase__firebase_update_environment",
+      "mcp__plugin_firebase_firebase__firebase_create_project",
+      "mcp__plugin_firebase_firebase__firebase_create_app",
+      "mcp__plugin_firebase_firebase__firebase_create_android_sha",
+      "mcp__plugin_firebase_firebase__auth_update_user",
+      "mcp__plugin_firebase_firebase__auth_set_sms_region_policy",
+      "mcp__plugin_firebase_firebase__firestore_add_document",
+      "mcp__plugin_firebase_firebase__firestore_update_document",
+      "mcp__plugin_firebase_firebase__firestore_delete_document",
+      "mcp__plugin_firebase_firebase__firestore_create_database",
+      "mcp__plugin_firebase_firebase__firestore_update_database",
+      "mcp__plugin_firebase_firebase__firestore_delete_database",
+      "mcp__plugin_firebase_firebase__firestore_create_index",
+      "mcp__plugin_firebase_firebase__firestore_delete_index",
+      "mcp__plugin_firebase_firebase__firestore_create_backup_schedule",
+      "mcp__plugin_firebase_firebase__firestore_update_backup_schedule",
+      "mcp__plugin_firebase_firebase__firestore_delete_backup_schedule",
+      "mcp__plugin_firebase_firebase__firestore_delete_backup",
+      "mcp__plugin_firebase_firebase__realtimedatabase_set_data",
+      "mcp__plugin_firebase_firebase__remoteconfig_update_template",
+      "mcp__plugin_firebase_firebase__messaging_send_message"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash|PowerShell",
+        "hooks": [
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/proteger-archivos.cjs\"" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/probar-idiomas.cjs\"", "timeout": 90 }
+        ]
+      }
     ]
   }
 }
