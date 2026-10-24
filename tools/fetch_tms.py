@@ -36,11 +36,16 @@ def post(query):
     return json.load(urllib.request.urlopen(req, timeout=60))
 
 
-def learners(move):
-    q = ('query { pokemonmove(where: {move: {name: {_eq: "%s"}}, movelearnmethod: {name: {_eq: "machine"}}}, '
-         'distinct_on: pokemon_id) { pokemon_id } }' % move)
-    rows = post(q)['data']['pokemonmove']
-    return move, sorted({r['pokemon_id'] for r in rows})
+def learners(move, methods=('machine',)):
+    """Quién lo aprende por MT. Si en los juegos no es MT (Velocidad Extrema: sí lo es en
+    Reloaded), quien lo aprende por nivel o por tutor."""
+    q = ('query { pokemonmove(where: {move: {name: {_eq: "%s"}}, movelearnmethod: {name: {_in: %s}}}, '
+         'distinct_on: pokemon_id) { pokemon_id } }' % (move, json.dumps(list(methods))))
+    ids = sorted({r['pokemon_id'] for r in post(q)['data']['pokemonmove']})
+    if not ids and methods == ('machine',):
+        print(f'  {move}: no es MT en los juegos; se usa quien lo aprende por nivel o tutor')
+        return learners(move, ('level-up', 'tutor'))
+    return move, ids
 
 
 def price(move):

@@ -32,6 +32,12 @@
  *   cross       explosión en cruz (brazos de `radius`) sobre un enemigo
  *   storm       caen `count` rayos sobre enemigos al azar de la pantalla (avisan antes)
  *   weather     no hace daño: pone el clima `wx` durante `dur` segundos (systems/weather.js)
+ *   ---- tanda B (golpes, 23-10-2026) ----
+ *   punch       ráfaga de `count` directos delante (con su extra: burn, slow+stun, zap, drain)
+ *   scissor     dos tajos cruzados en X: lo del centro recibe los dos
+ *   blitz       saltas de enemigo en enemigo golpeando a `count`
+ *   leap        un salto sobre el enemigo y una onda al caer (`noItem`: × daño sin objeto)
+ *   (y en melee, `shred`: el enemigo recibe +25 % de tus golpes durante `shred` s)
  *
  * Sólo el movimiento ACTIVO se ejecuta. Se cambia con 1-4 / Q / E.
  *
@@ -199,6 +205,30 @@
       { t: '+45% daño',                     m: { dmg: 1.45 } },
       { t: '-25% recarga',                  m: { cd: 0.75 } },
       { t: '+2 rayos y +30% radio',         m: { count: 2, radius: 1.30 } }
+    ],
+    punch: [
+      { t: '+40% daño',                     m: { dmg: 1.40 } },
+      { t: '+1 directo',                    m: { count: 1 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+50% daño y +20% alcance',      m: { dmg: 1.50, radius: 1.20 } }
+    ],
+    scissor: [
+      { t: '+40% daño',                     m: { dmg: 1.40 } },
+      { t: '+25% alcance',                  m: { radius: 1.25 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+50% daño y tajos más abiertos', m: { dmg: 1.50, arc: 1.30 } }
+    ],
+    blitz: [
+      { t: '+1 salto',                      m: { count: 1 } },
+      { t: '+45% daño',                     m: { dmg: 1.45 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+2 saltos y +30% daño',         m: { count: 2, dmg: 1.30 } }
+    ],
+    leap: [
+      { t: '+40% daño',                     m: { dmg: 1.40 } },
+      { t: 'Onda un 30% más grande',        m: { radius: 1.30 } },
+      { t: '-25% recarga',                  m: { cd: 0.75 } },
+      { t: '+50% daño y salta más lejos',   m: { dmg: 1.50, range: 1.30 } }
     ],
     weather: [
       { t: '+35% duración',                 m: { dur: 1.35 } },
@@ -656,7 +686,39 @@
       cd: 4, dur: 20, wx: 'rain' },
     { id: 'sandstorm', name: 'Tormenta Arena', type: 'rock', kind: 'weather',
       desc: 'No hace daño: tormenta de arena (Roca, Tierra y Acero ×1,3; los demás sufren, también tú) un rato.',
-      cd: 4, dur: 20, wx: 'sand' }
+      cd: 4, dur: 20, wx: 'sand' },
+
+    // ---------------- MT de Pokémon Edición Reloaded, tanda B: golpes (23-10-2026) ----------------
+    { id: 'fire-punch', name: 'Puño Fuego', type: 'fire', kind: 'punch',
+      desc: 'Tres directos de fuego seguidos que queman.',
+      cd: 0.85, dmg: 12, count: 3, radius: 60, arc: 1.0, burn: 1 },
+    { id: 'ice-punch', name: 'Puño Hielo', type: 'ice', kind: 'punch',
+      desc: 'Tres directos helados: frenan y el último deja congelado un momento.',
+      cd: 0.85, dmg: 11, count: 3, radius: 60, arc: 1.0, slow: 0.4, stun: 0.35 },
+    { id: 'thunder-punch', name: 'Puño Trueno', type: 'electric', kind: 'punch',
+      desc: 'Tres directos eléctricos: el último salta a dos enemigos cercanos.',
+      cd: 0.85, dmg: 11, count: 3, radius: 60, arc: 1.0, zap: 2 },
+    { id: 'drain-punch', name: 'Puño Drenaje', type: 'fighting', kind: 'punch',
+      desc: 'Tres directos que te curan con cada golpe.',
+      cd: 0.9, dmg: 11, count: 3, radius: 60, arc: 1.0, drain: 1.5 },
+    { id: 'x-scissor', name: 'Tijera X', type: 'bug', kind: 'scissor',
+      desc: 'Dos tajos cruzados en X: lo que pilles en el centro recibe los dos.',
+      cd: 0.75, dmg: 15, radius: 70, arc: 1.3 },
+    { id: 'crunch', name: 'Triturar', type: 'dark', kind: 'melee',
+      desc: 'Un mordisco brutal que deja al enemigo débil a tus golpes (+25 % durante 4 s).',
+      cd: 1.0, dmg: 26, radius: 50, arc: 1.1, knock: 60, shred: 4 },
+    { id: 'waterfall', name: 'Cascada', type: 'water', kind: 'stun',
+      desc: 'Una columna de agua cae sobre el enemigo y lo deja aturdido.',
+      cd: 1.4, dmg: 26, radius: 46, stun: 0.8 },
+    { id: 'megahorn', name: 'Megacuerno', type: 'bug', kind: 'dash',
+      desc: 'Una embestida larguísima con el cuerno que atraviesa todo.',
+      cd: 1.8, dmg: 40, radius: 220, width: 40, knock: 120 },
+    { id: 'extreme-speed', name: 'Velocidad Extrema', type: 'normal', kind: 'blitz',
+      desc: 'Saltas de enemigo en enemigo tan rápido que no te tocan.',
+      cd: 1.3, dmg: 18, count: 3, radius: 220 },
+    { id: 'acrobatics', name: 'Acróbata', type: 'flying', kind: 'leap',
+      desc: 'Un salto acrobático sobre el enemigo con onda al caer; sin objeto equipado, pega ×1,5.',
+      cd: 1.3, dmg: 24, radius: 70, range: 220, noItem: 1.5 }
   ];
 
   // Cuerpo a cuerpo (12-10-2026): +20 % de daño y +25 % de alcance y de arco
@@ -687,7 +749,10 @@
     'rolling-kick', 'dynamic-punch', 'shadow-sneak', 'dragon-claw', 'outrage', 'play-rough', 'gyro-ball',
     'sucker-punch', 'night-slash',
     // tanda A de MT (23-10-2026)
-    'earthquake']);
+    'earthquake',
+    // tanda B de MT (23-10-2026): golpes
+    'fire-punch', 'ice-punch', 'thunder-punch', 'drain-punch', 'x-scissor', 'crunch', 'waterfall', 'megahorn',
+    'extreme-speed', 'acrobatics']);
 
   // Los que disparan bolas necesitan count y spread de base: las mejoras los
   // multiplican y, sin ellos, "+1 proyectil" no sumaba ninguno y el abanico se
@@ -730,7 +795,7 @@
   }
 
   const MULT = ['dmg', 'cd', 'speed', 'radius', 'dur', 'amount', 'arc', 'width', 'spread', 'life', 'size', 'rate',
-                'pull', 'knock', 'stun', 'charge'];
+                'pull', 'knock', 'stun', 'charge', 'range'];
   const ADD = ['count', 'pierce', 'stacks', 'bounce'];
 
   function applyMods(s, m) {
@@ -830,7 +895,13 @@
     // tanda A de MT (23-10-2026); los de clima no evolucionan, como los potenciadores
     'earthquake': ['Precipicio Espadas', 'atk'], 'surf': ['Pulso Primigenio', 'spd'],
     'blizzard': ['Lanza Glacial', 'cd'],     'fire-blast': ['Llama Fusión', 'atk'],
-    'thunder': ['Rayo Fusión', 'cd']
+    'thunder': ['Rayo Fusión', 'cd'],
+    // tanda B de MT (23-10-2026)
+    'fire-punch': ['Patada Ígnea', 'atk'],   'ice-punch': ['Colmillo Hielo', 'spd'],
+    'thunder-punch': ['Plasma Puños', 'cd'], 'drain-punch': ['Puño Certero', 'rgn'],
+    'x-scissor': ['Corte Furia', 'cd'],      'crunch': ['Desarme', 'atk'],
+    'waterfall': ['Martillazo', 'atk'],      'megahorn': ['Aguijón Letal', 'atk'],
+    'extreme-speed': ['Golpes Furia', 'spd'], 'acrobatics': ['Ala Bis', 'spd']
   };
   // Lo que gana al evolucionar, según cómo funcione.
   const EVO_MODS = {
@@ -859,7 +930,11 @@
     tremor:     { t: '×1,8 daño y un 30% más de radio', m: { dmg: 1.8, radius: 1.3 } },
     wave:       { t: '×1,8 daño, ola más ancha y arrastra más', m: { dmg: 1.8, width: 1.3, knock: 1.3 } },
     cross:      { t: '×1,8 daño y brazos más largos y anchos', m: { dmg: 1.8, radius: 1.3, width: 1.3 } },
-    storm:      { t: '×1,7 daño, +3 rayos y más radio', m: { dmg: 1.7, count: 3, radius: 1.2 } }
+    storm:      { t: '×1,7 daño, +3 rayos y más radio', m: { dmg: 1.7, count: 3, radius: 1.2 } },
+    punch:      { t: '×1,8 daño y +2 directos', m: { dmg: 1.8, count: 2 } },
+    scissor:    { t: '×1,8 daño y tajos más largos', m: { dmg: 1.8, radius: 1.25 } },
+    blitz:      { t: '×1,7 daño y +3 saltos', m: { dmg: 1.7, count: 3 } },
+    leap:       { t: '×1,8 daño y onda más grande', m: { dmg: 1.8, radius: 1.3 } }
   };
 
   /** ¿Puede evolucionar ya? → { name, needs, needName, text, ready } o null */

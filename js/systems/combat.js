@@ -74,16 +74,20 @@ G.Combat = (() => {
       case 'cross':      crossBlast(pl, m); break;
       case 'storm':      storm(pl, m); break;
       case 'weather':    weatherMove(pl, m); break;
+      case 'punch':      punch(pl, m); break;
+      case 'scissor':    scissor(pl, m); break;
+      case 'blitz':      blitz(pl, m); break;
+      case 'leap':       leap(pl, m); break;
     }
   }
 
   const TARGETED = ['melee', 'beam', 'projectile', 'boomerang', 'chain', 'meteor', 'dash', 'cone',
                     'homing', 'bounce', 'charge', 'spin', 'quake', 'vortex', 'shove', 'stun',
-                    'tremor', 'wave', 'cross', 'storm'];
+                    'tremor', 'wave', 'cross', 'storm', 'punch', 'scissor', 'blitz', 'leap'];
   // Con "Apuntar a mano" éstos se lanzan hacia donde apuntas aunque no haya
   // nadie (los decide el jugador); la cadena y los meteoros siguen esperando blanco.
   const FREE_AIM = ['melee', 'beam', 'projectile', 'boomerang', 'dash', 'cone', 'homing', 'bounce', 'charge', 'spin', 'quake', 'shove',
-                    'tremor', 'wave'];
+                    'tremor', 'wave', 'punch', 'scissor'];
   function needsTarget(m, pl) { return TARGETED.includes(m.kind) && !(pl && pl.manualAim && FREE_AIM.includes(m.kind)); }
   function reach(m) {
     if (m.kind === 'melee') return m.radius + 30;
@@ -99,6 +103,9 @@ G.Combat = (() => {
     if (m.kind === 'tremor') return m.radius;
     if (m.kind === 'wave') return m.radius * 0.8;
     if (m.kind === 'storm') return 460;
+    if (m.kind === 'punch' || m.kind === 'scissor') return m.radius + 30;
+    if (m.kind === 'blitz') return m.radius;
+    if (m.kind === 'leap') return m.range || 220;
     return 520;
   }
 
@@ -503,6 +510,53 @@ G.Combat = (() => {
     if (!ghost || G.Coop.isHost) G.Weather.cast(m.wx, m.dur);
   }
 
+  // ---------------- tanda B de MT (23-10-2026): golpes ----------------
+
+  /** Puños: `count` directos seguidos delante; el último con su extra (stun, zap). */
+  function punch(pl, m) {
+    const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m);
+    fields.push({ kind: 'punch', owner: pl, ghost, m, col, vis, x: pl.x, y: pl.y, t: 0, n: Math.max(1, m.count | 0), i: 0, next: 0 });
+  }
+
+  /** Tijera X: dos tajos cruzados; lo que está en los dos arcos recibe dos golpes. */
+  function scissor(pl, m) {
+    const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m), half = m.arc / 2;
+    for (const off of [-0.45, 0.45]) {
+      const a = pl.aim + off;
+      G.FX.slash(pl.x, pl.y - G.LIFT * 0.5, a, m.radius, m.arc, col, vis);
+      if (ghost) continue;
+      for (const e of G.EnemyMgr.queryCircle(pl.x, pl.y, m.radius)) {
+        if (inArc(pl.x, pl.y, e.x, e.y, a, half)) hit(pl, e, m.dmg * pl.atkFor(m), col, e.x - pl.x, e.y - pl.y, 30, m);
+      }
+      for (const p of G.World.propsInCircle(pl.x, pl.y, m.radius)) if (inArc(pl.x, pl.y, p.x, p.y, a, half)) G.World.damageProp(p, m.dmg * pl.atkFor(m), col);
+    }
+  }
+
+  /** Puño Trueno: desde `from`, un chispazo a los `m.zap` enemigos más cercanos. */
+  function zapFrom(pl, from, m, d, col) {
+    const near = G.EnemyMgr.queryCircle(from.x, from.y, 130).filter(e => e !== from && !e.dead)
+      .sort((a, b) => G.U.dist2(a.x, a.y, from.x, from.y) - G.U.dist2(b.x, b.y, from.x, from.y)).slice(0, m.zap);
+    for (const e of near) {
+      G.FX.beam(from.x, from.y - G.LIFT * 0.5, Math.atan2(e.y - from.y, e.x - from.x), Math.hypot(e.x - from.x, e.y - from.y), 8, col, { pal: 'electric', beam: 'lightning' });
+      hit(pl, e, d, col, e.x - from.x, e.y - from.y, 0, m);
+    }
+  }
+
+  /** Velocidad Extrema: saltas de un enemigo al siguiente más cercano, `count` veces. */
+  function blitz(pl, m) {
+    const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m);
+    fields.push({ kind: 'blitz', owner: pl, ghost, m, col, vis, x: pl.x, y: pl.y, t: 0, n: Math.max(1, m.count | 0), i: 0, next: 0, done: new Set() });
+  }
+
+  /** Acróbata: salto sobre el enemigo y onda al caer (×noItem si no llevas objeto). */
+  function leap(pl, m) {
+    const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m), tg = spotFor(pl, m);
+    if (!tg) return;
+    fields.push({ kind: 'leap', owner: pl, ghost, m, col, vis, x: tg.x, y: tg.y, sx: pl.x, sy: pl.y, t: 0, fly: 0.32, r: m.radius,
+                  dmg: m.dmg * pl.atkFor(m) * (m.noItem && !pl.item ? m.noItem : 1) });
+    if (!ghost) pl.invuln = Math.max(pl.invuln || 0, 0.45);
+  }
+
   /** Rebote: el proyectil sale hacia el enemigo más cercano que aún no ha tocado. → true si rebota. */
   function rebound(p, from) {
     if (!(p.bounce > 0)) return false;
@@ -587,6 +641,58 @@ G.Combat = (() => {
                   spin: G.VFX.spins(f.vis.proj) ? 8 : 0 });
       }
       return false;
+    }
+    if (f.kind === 'punch') {
+      f.next -= dt;
+      if (f.next > 0) return false;
+      f.next = 0.09;
+      f.i++;
+      const last = f.i >= f.n, a = pl.aim + (f.i % 2 ? -0.18 : 0.18), half = m.arc / 2;
+      G.FX.slash(pl.x + Math.cos(a) * 10, pl.y + Math.sin(a) * 10 - G.LIFT * 0.5, a, m.radius, m.arc * 0.7, f.col, f.vis);
+      if (!f.ghost && !pl.dead) {
+        let healed = 0;
+        const d = m.dmg * pl.atkFor(m) * (last ? 1.4 : 1);         // el último, más fuerte
+        for (const e of G.EnemyMgr.queryCircle(pl.x, pl.y, m.radius)) {
+          if (!inArc(pl.x, pl.y, e.x, e.y, a, half)) continue;
+          hit(pl, e, d, f.col, e.x - pl.x, e.y - pl.y, last ? 70 : 10, m);
+          if (m.drain) healed += m.drain;
+          if (last && m.stun && !e.dead) e.applyStun(m.stun * (e.boss || e.judge ? 0.35 : 1));
+          if (last && m.zap && !e.dead) zapFrom(pl, e, m, d * 0.6, f.col);
+        }
+        for (const p of G.World.propsInCircle(pl.x, pl.y, m.radius)) if (inArc(pl.x, pl.y, p.x, p.y, a, half)) G.World.damageProp(p, d, f.col);
+        if (healed > 0) pl.heal(Math.min(healed, 6));
+      }
+      return last;
+    }
+    if (f.kind === 'blitz') {
+      f.next -= dt;
+      if (f.next > 0) return false;
+      f.next = 0.08;
+      if (f.ghost || pl.dead) return true;
+      const e = G.EnemyMgr.queryCircle(pl.x, pl.y, m.radius).filter(x => !x.dead && !f.done.has(x))
+        .sort((a, b) => G.U.dist2(a.x, a.y, pl.x, pl.y) - G.U.dist2(b.x, b.y, pl.x, pl.y))[0];
+      if (!e) return true;
+      f.done.add(e);
+      const sx = pl.x, sy = pl.y, ang = Math.atan2(e.y - sy, e.x - sx);
+      // Te pones a su lado (si cabes) y le golpeas.
+      const tx = e.x - Math.cos(ang) * (e.r + pl.r), ty = e.y - Math.sin(ang) * (e.r + pl.r);
+      if (G.World.isFree(tx, ty, pl.r * 0.8, true)) { pl.x = tx; pl.y = ty; G.World.collide(pl); }
+      for (let d = 0; d <= 1; d += 0.2) G.FX.sp(f.vis.proj || 'streak', f.vis.pal, sx + (pl.x - sx) * d, sy + (pl.y - sy) * d - G.LIFT * 0.6, { life: 0.2, angle: ang });
+      pl.invuln = Math.max(pl.invuln || 0, 0.25);
+      hit(pl, e, m.dmg * pl.atkFor(m), f.col, Math.cos(ang), Math.sin(ang), 50, m);
+      G.FX.slash(e.x, e.y - G.LIFT * 0.5, ang, 30, 2, f.col, f.vis);
+      return ++f.i >= f.n;
+    }
+    if (f.kind === 'leap') {
+      if (f.t < f.fly) return false;
+      if (!f.ghost && !pl.dead && G.World.isFree(f.x, f.y, pl.r * 0.8, true)) { pl.x = f.x; pl.y = f.y; G.World.collide(pl); }
+      if (G.Camera.sees(f.x, f.y, f.r)) {
+        G.FX.ring(f.x, f.y, 4, f.r, f.col, 0.3, 4);
+        G.FX.burst(f.x, f.y - 6, f.col, 10, 160);
+        if (!f.ghost) G.Camera.kick(0.25);
+      }
+      blast(f, f.r);
+      return true;
     }
     if (f.kind === 'tremor') {
       const rr = f.r * Math.min(1, f.t / f.life);
@@ -684,7 +790,8 @@ G.Combat = (() => {
     for (const p of G.World.propsInCircle(f.x, f.y, r)) G.World.damageProp(p, f.dmg * k, f.col);
   }
 
-  const NEW_FIELDS = new Set(['charge', 'spin', 'quake', 'vortex', 'stunzone', 'tremor', 'wave', 'cross', 'bolt']);
+  const NEW_FIELDS = new Set(['charge', 'spin', 'quake', 'vortex', 'stunzone', 'tremor', 'wave', 'cross', 'bolt',
+                              'punch', 'blitz', 'leap']);
   function updateFields(dt) {
     for (let i = fields.length - 1; i >= 0; i--) {
       const f = fields[i];
@@ -770,6 +877,14 @@ G.Combat = (() => {
         ctx.globalAlpha = 0.85;
         ctx.fillStyle = '#e8fbff';
         for (let o = -f.w / 2; o < f.w / 2; o += 12) ctx.fillRect(Math.sin(now * 10 + o) * 3 - 4, o, 6, 9);
+      } else if (f.kind === 'leap') {
+        // Acróbata: tu sombra va hacia donde caerás.
+        const k = G.U.clamp(f.t / f.fly, 0, 1), x = f.sx + (f.x - f.sx) * k, y = f.sy + (f.y - f.sy) * k;
+        ctx.globalAlpha = 0.35;
+        ctx.fillStyle = '#000';
+        ctx.beginPath(); ctx.ellipse(x, y, 14, 6, 0, 0, 6.2832); ctx.fill();
+        ctx.globalAlpha = 0.5; ctx.strokeStyle = f.col; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(f.x, f.y, f.r * k, f.r * 0.6 * k, 0, 0, 6.2832); ctx.stroke();
       } else if (f.kind === 'cross' && f.t < f.delay) {
         const k = G.U.clamp(f.t / f.delay, 0, 1);
         ctx.globalAlpha = 0.18 + 0.3 * k;
@@ -921,13 +1036,13 @@ G.Combat = (() => {
     const a = pl.abil;
     if (!a || e.dead) return;
     if (a.hit) a.hit(pl, e, m);
-    if (a.touchPoison && m && (m.kind === 'melee' || m.kind === 'dash')) e.applyPoison(1);
+    if (a.touchPoison && m && ['melee', 'dash', 'punch', 'scissor', 'blitz', 'leap'].includes(m.kind)) e.applyPoison(1);
   }
 
   function hit(pl, e, dmg, col, dx, dy, knock, m) {
     const k = typeK(m.type, e, pl) * G.Stats.taken(e.mon, m.cat) * abilOut(pl, m, e);
     const crit = isCrit(pl), sk = statusK(pl);
-    dmg *= k * (crit ? critMul(pl) : 1);
+    dmg *= k * (crit ? critMul(pl) : 1) * (e.shredUntil > performance.now() ? 1.25 : 1);
     e.hurt(dmg, col, dx, dy, sk ? knock : 0, crit ? 'crit' : G.Types.label(G.Types.mult(m.type, e.types)));
     if (!ghost) pl.onDealt(dmg);
     pl.dmgDealt += dmg;
@@ -935,6 +1050,8 @@ G.Combat = (() => {
     if (m.burn && sk) e.applyBurn(m.burn * sk);
     if (m.poison && sk) e.applyPoison(m.poison * sk);
     if (m.slow && sk) e.applySlow(Math.min(0.8, m.slow * sk));
+    // Triturar: tus golpes le hacen +25 % durante `shred` s (cada uno lo mira en su pantalla).
+    if (m.shred && !e.dead) e.shredUntil = performance.now() + m.shred * 1000;
     afterHit(pl, e, m);
   }
 

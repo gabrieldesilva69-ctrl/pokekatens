@@ -26,6 +26,8 @@
  * (muchas son el mismo texto con otro tipo: '+20 % de daño con movimientos de tipo {x}.').
  */
 G.AbilityFX = (() => {
+  // Cuerpo a cuerpo y embestidas (Garra Dura, Toque Tóxico): y los golpes de la tanda B de MT.
+  const TOUCH = ['melee', 'dash', 'punch', 'scissor', 'blitz', 'leap'];
   const low = pl => pl.hp < pl.maxHp / 3;
   const half = pl => pl.hp < pl.maxHp / 2;
   const wx = () => (G.Weather.current || {}).kind;
@@ -66,7 +68,7 @@ G.AbilityFX = (() => {
     'sheer-force': { d: '+25 % de daño con movimientos que queman, envenenan, frenan o empujan, pero pierden ese efecto.',
       out: (pl, m) => (m.burn || m.poison || m.slow || m.knock ? 1.25 : 1), sheer: true },
     'serene-grace': { d: 'Las quemaduras, venenos y frenazos de sus movimientos son el doble de fuertes.', serene: true },
-    'tough-claws': { d: '+25 % de daño con ataques cuerpo a cuerpo y embestidas.', out: (pl, m) => (m.kind === 'melee' || m.kind === 'dash' ? 1.25 : 1) },
+    'tough-claws': { d: '+25 % de daño con ataques cuerpo a cuerpo y embestidas.', out: (pl, m) => (TOUCH.includes(m.kind) ? 1.25 : 1) },
     'reckless': { d: '+25 % de daño con las embestidas.', out: (pl, m) => (m.kind === 'dash' ? 1.25 : 1) },
     'iron-fist': byName(/punch/, 'los puñetazos', 1.25),
     'strong-jaw': byName(/bite|fang|crunch|jaw/, 'los mordiscos'),

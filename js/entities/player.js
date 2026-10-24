@@ -125,8 +125,8 @@ G.Player = class Player {
     else if (this.item === 'throatspray' && this.sprayT > 0 && m.cat === 'special') k *= 1.25;
     return k;
   }
-  /** Guante de Boxeo: los ataques de contacto (golpe, giro, carga y empujón). */
-  static get CONTACT() { return ['melee', 'spin', 'dash', 'shove']; }
+  /** Los de contacto (Guante de Boxeo, Garra Dura, Toque Tóxico): golpe, giro, carga, empujón y los golpes de la tanda B de MT. */
+  static get CONTACT() { return ['melee', 'spin', 'dash', 'shove', 'punch', 'scissor', 'blitz', 'leap']; }
   /** Monotipo (19-10-2026): los de un solo tipo pegan un +20 % con los ataques de su tipo (tienen menos variedad). */
   static get MONO_K() { return 1.2; }
   monoType(type) { return this.mon.types.length === 1 && type === this.mon.types[0]; }
@@ -259,10 +259,12 @@ G.Player = class Player {
     const anim = { melee: 'Attack', beam: 'Shoot', projectile: 'Shoot', nova: 'Attack',
                    aura: 'Charge', buff: 'Charge', orbit: 'Charge', boomerang: 'Shoot', chain: 'Shoot',
                    mine: 'Charge', meteor: 'Charge', turret: 'Charge', dash: 'Attack', trail: 'Walk', cone: 'Shoot',
-                   tremor: 'Attack', wave: 'Shoot', cross: 'Shoot', storm: 'Charge', weather: 'Charge' }[m.kind] || 'Attack';
+                   tremor: 'Attack', wave: 'Shoot', cross: 'Shoot', storm: 'Charge', weather: 'Charge',
+                   punch: 'Attack', scissor: 'Attack', blitz: 'Attack', leap: 'Attack' }[m.kind] || 'Attack';
     // Las familias nuevas suenan como la parecida de las de siempre.
     const SND = { boomerang: 'projectile', chain: 'beam', mine: 'nova', meteor: 'nova', turret: 'buff', dash: 'melee', trail: 'aura', cone: 'projectile',
-                  tremor: 'nova', wave: 'beam', cross: 'nova', storm: 'beam', weather: 'buff' };
+                  tremor: 'nova', wave: 'beam', cross: 'nova', storm: 'beam', weather: 'buff',
+                  punch: 'melee', scissor: 'melee', blitz: 'melee', leap: 'melee' };
     // El rastro no suena a cada charco (sería un zumbido constante).
     if (m.kind !== 'trail') G.Audio.sfx('shot', { kind: SND[m.kind] || m.kind, type: m.type });
     if (m.kind === 'trail') return;
@@ -307,7 +309,7 @@ G.Player = class Player {
     }
     // Con un ataque cuerpo a cuerpo activo se recibe un 25 % menos: hay que
     // estar encima de los enemigos para pegar (iban muy por detrás).
-    const close = this.activeGroup().some(m => m.kind === 'melee') ? 0.75 : 1;
+    const close = this.activeGroup().some(m => m.kind === 'melee' || m.kind === 'punch' || m.kind === 'scissor') ? 0.75 : 1;
     const d = pure ? Math.max(1, amount) : Math.max(1, amount * (1 - this.reduction) * close);
     this.hp -= d;
     this.invuln = 0.45;

@@ -29,6 +29,10 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   Trueno (rayos al azar) y Día Soleado / Danza Lluvia / Tormenta Arena (`kind: 'weather'`, ponen el clima 20 s
   aunque cambies de ataque; en grupo lo pone el anfitrión). Comparten nombre con evoluciones de otros ataques
   (Ascuas → Llamarada, Burbuja → Surf…): son ataques distintos.
+  Tanda B (golpes): Puño Fuego / Hielo / Trueno / Drenaje (`punch`: tres directos con su extra), Tijera X
+  (`scissor`), Triturar (`shred`: tus golpes +25 % 4 s), Cascada, Megacuerno, Velocidad Extrema (`blitz`) y
+  Acróbata (`leap`, ×1,5 sin objeto). Cuentan como cuerpo a cuerpo (−25 % de daño recibido, Guante de Boxeo).
+  Velocidad Extrema no es MT en los juegos: la aprenden los que la tienen por nivel o tutor.
 - **Tabla de tipos:** p. ej. un Rayo Burbuja le quita más a un Charmander.
 - **Climas** de vez en cuando (sol, lluvia, arena, nieve, niebla): potencian unos tipos y debilitan otros.
 - **Objetos** que salen en las runs (Restos, Cinta Elección…): 23 equipables, uno por run (`js/data/items.js`;
