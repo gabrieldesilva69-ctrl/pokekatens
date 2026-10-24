@@ -94,6 +94,8 @@ for (const [i, lang] of langs.entries()) {
     if (lang !== 'en') for (const entry of G.CHANGELOG.filter(e => e.d >= '2026-10-18')) {
       for (const pair of [entry.title, ...(entry.new || []), ...(entry.chg || []), ...(entry.fix || [])]) {
         assert.ok(G.I18n.has(pair[0]), pair[0]);
+        // Lista plegada ("Ver cuáles"): cada nombre, traducido en este idioma.
+        for (const n of pair[2] || []) assert.ok(G.I18n.has(n), n);
       }
     }
   });

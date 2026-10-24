@@ -14,6 +14,13 @@ G.NewsUI = (() => {
     b.innerHTML = G.Icons.html('book', 18) + ' <span>Novedades</span><i class="dot"></i>';
     b.onclick = open;
     $('news-close').onclick = close;
+    $('news-body').addEventListener('click', e => {
+      const btn = e.target.closest && e.target.closest('.news-more');
+      if (!btn) return;
+      const shown = !btn.nextElementSibling.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', String(shown));
+      btn.textContent = G.I18n.lang === 'es' ? (shown ? 'Ocultar' : 'Ver cuáles') : G.T(shown ? 'Ocultar' : 'Ver cuáles');
+    });
     refresh();
   }
   function refresh() { $('btn-news').classList.toggle('new', seen() < latest()); }
@@ -30,10 +37,16 @@ G.NewsUI = (() => {
       : G.I18n.lang === 'en' || !G.I18n.has(pair[0]) ? pair[1] : G.T(pair[0]);
     // Cada texto ya va en su idioma: translate="no" para que no lo toque i18n.
     const PARTS = [['new', ['Nuevo', 'New']], ['chg', ['Cambios', 'Changes']], ['fix', ['Arreglos', 'Fixes']]];
+    // Una línea [es, en, lista] es un resumen con su lista plegada ("Ver cuáles"): los nombres de la
+    // lista son los del juego (ataques, objetos...) y se traducen con su diccionario.
+    const name = s => G.I18n.lang === 'es' ? s : G.T(s);
+    const line = t => !Array.isArray(t[2]) ? `<li>${esc(text(t))}</li>` :
+      `<li>${esc(text(t))} <button type="button" class="news-more" aria-expanded="false">${esc(name('Ver cuáles'))}</button>` +
+      `<ul class="news-list hidden">${t[2].map(n => `<li>${esc(name(n))}</li>`).join('')}</ul></li>`;
     $('news-body').innerHTML = G.CHANGELOG.map(v =>
       `<div class="news-day" translate="no"><h3>${esc(v.title ? text(v.title) : '')}<small>${fmt(v.d)}</small></h3>` +
       PARTS.filter(([k]) => v[k] && v[k].length).map(([k, lbl]) =>
-        `<div class="news-part"><span class="news-tag ${k}">${text(lbl)}</span><ul>${v[k].map(t => `<li>${esc(text(t))}</li>`).join('')}</ul></div>`).join('') +
+        `<div class="news-part"><span class="news-tag ${k}">${text(lbl)}</span><ul>${v[k].map(line).join('')}</ul></div>`).join('') +
       '</div>').join('');
     $('news-body').scrollTop = 0;
     $('scr-news').classList.remove('hidden');

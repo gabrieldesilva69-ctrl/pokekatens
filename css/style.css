@@ -945,6 +945,11 @@ a.btn { text-decoration: none; display: inline-block; color: var(--ink); }
 .news-tag.new { background: #5fe08a; } .news-tag.chg { background: #4fb4ff; } .news-tag.fix { background: #ffb347; }
 .news-day ul { margin: 0; padding-left: 20px; }
 .news-day li { margin: 4px 0; line-height: 1.35; font-size: 15px; }
+.news-more { font: inherit; font-size: 13px; padding: 1px 8px; margin-left: 4px; cursor: pointer; color: var(--gold); background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-radius: 4px; }
+.news-more:hover, .news-more:focus-visible { background: rgba(255,255,255,.16); }
+.news-list { columns: 2; column-gap: 18px; margin-top: 4px !important; }
+.news-list li { break-inside: avoid; font-size: 14px; margin: 2px 0; }
+@media (max-width: 520px) { .news-list { columns: 1; } }
 @media (max-width: 760px) { .news-btn span { display: none; } }
 /* Botón Guardar (barra de arriba). */
 .save-btn { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; }
