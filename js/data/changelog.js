@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: desafío semanal, evoluciones y noche', 'PokeKatens: weekly challenge, evolutions and night'], new: [
+    ["Avatares de entrenador: en tu Perfil puedes elegir uno de 60 entrenadores animados de Pokémon Edición Reloaded, de F3R (Red, Blue, líderes de gimnasio, campeones...). Sale en tu perfil, en la lista de amigos y en la sala del cooperativo.",
+     "Trainer avatars: in your Profile you can choose one of 60 animated trainers from Pokémon Reloaded Edition, by F3R (Red, Blue, Gym Leaders, Champions...). It shows on your profile, in the friends list and in the co-op room."],
     ["Las arenas de las grietas y la de la Sentencia de Arceus tienen suelo nuevo, uno por tipo (lava y roca para los de fuego, una isla de arena para los de agua, nieve para los de hielo...), de los campos de combate de Pokémon Edición Reloaded, de F3R.",
      "The rift arenas and Arceus's Judgment arena have a new floor, one per type (lava and rock for Fire, a sand island for Water, snow for Ice...), from the battlefields of Pokémon Reloaded Edition, by F3R."],
     ["Retratos de Pokémon Edición Reloaded, de F3R: cada Pokémon tiene su retrato de frente (y el shiny) en su ficha de la colección y en las cartas nuevas, de 4 y 5 estrellas y shiny del gacha. Los ataques llevan el icono Físico, Especial o Estado de los juegos, y la colección tiene de fondo una caja del PC distinta en cada región.",
@@ -42,6 +44,8 @@ G.CHANGELOG = [
     ["Todas las megas se ven nítidas y al menos un 40 % más grandes que su forma normal (antes sólo las de los Pokémon grandes; las demás, un 20 %).",
      "Every Mega Evolution now looks sharp and at least 40% bigger than its normal form (before, only the big Pokémon's did; the rest were 20% bigger)."]
   ], fix: [
+    ["Perfil: al crear tu apodo, tu perfil público (favoritos, título, avatar y récords) no se publicaba hasta que cambiabas algo y a veces nunca. Ahora se publica a los pocos segundos.",
+     "Profile: when you created your nickname, your public profile (favourites, title, avatar and records) wasn't published until you changed something, and sometimes never. It is now published a few seconds later."],
     ['Las megas ya se ven más grandes que su forma normal: al menos un 20 %, y las de Pokémon grandes, como Mega Charizard, Mega Metagross o Mega Mewtwo, un 40 %. Antes algunas salían casi iguales o más pequeñas.',
      'Megas now look bigger than their normal form: at least 20%, and the big Pokémon ones, like Mega Charizard, Mega Metagross or Mega Mewtwo, 40%. Before, some looked almost the same or smaller.']
   ] },

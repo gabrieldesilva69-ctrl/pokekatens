@@ -148,11 +148,15 @@
 
     function profile(box) {
       const s = G.DB.save;
-      s.profile = s.profile || { favs: [], title: '' };
+      s.profile = s.profile || { favs: [], title: '', avatar: 0 };
       const P = s.profile;
       box.insertAdjacentHTML('beforeend', `<p class="sub">${G.DB.online ? 'Así te ven los demás jugadores (desde el ranking y la lista de amigos).'
         : 'Tu perfil se publica cuando juegas con una cuenta online.'}</p>
+        <h3>Avatar de entrenador</h3>
+        <div class="ava-now">${G.UI.avatar(P.avatar | 0, 'avatar ava-big') || `<span class="sub">${G.T('Sin avatar')}</span>`}
+          <button class="btn small gold" id="ava-pick" type="button">${G.T('Elegir avatar')}</button></div>
         <h3>Tus 3 Pokémon favoritos</h3>`);
+      $('ava-pick').onclick = pickAvatar;
       const favs = document.createElement('div');
       favs.className = 'fav-slots';
       for (let i = 0; i < 3; i++) {
@@ -183,6 +187,29 @@
       prev.textContent = 'Ver mi perfil público';
       prev.onclick = () => G.ProfileUI.showData(G.Social.profileData());
       box.appendChild(prev);
+    }
+
+    /** Los entrenadores de Pokémon Edición Reloaded (data/avatars.js), y "sin avatar". */
+    function pickAvatar() {
+      const s = G.DB.save;
+      const box = $('goals-body');
+      box.innerHTML = `<div class="row between"><h3>${G.T('Elige tu avatar')}</h3>
+        <button class="btn small ghost" id="ava-back">Volver</button></div>
+        <div class="ava-grid" id="ava-grid"></div>`;
+      $('ava-back').onclick = () => { tab = 'profile'; render(); };
+      const g = $('ava-grid');
+      for (let n = 0; n <= G.AVATARS; n++) {
+        const c = document.createElement('button');
+        c.type = 'button';
+        c.className = 'ava-cell' + ((s.profile.avatar | 0) === n ? ' on' : '');
+        c.innerHTML = n ? G.UI.avatar(n) : `<span class="sub">${G.T('Sin avatar')}</span>`;
+        c.onclick = () => {
+          s.profile.avatar = n;
+          save(); G.Social.refreshMember();
+          tab = 'profile'; render();
+        };
+        g.appendChild(c);
+      }
     }
 
     function pickFav(i) {
@@ -250,7 +277,7 @@
       const b = d.best || {};
       const body = $('prof-body');
       body.innerHTML = `
-        <div class="prof-head"><h2 translate="no">${esc(d.name || '???')}</h2>${d.title ? `<span class="prof-title">${esc(d.title)}</span>` : ''}</div>
+        <div class="prof-head">${G.UI.avatar(d.avatar | 0, 'avatar ava-big')}<h2 translate="no">${esc(d.name || '???')}</h2>${d.title ? `<span class="prof-title">${esc(d.title)}</span>` : ''}</div>
         <div class="fav-slots view" id="prof-favs"></div>
         <div class="prof-marks">
           <div><span>Mejor tiempo</span><b>${fmt(b.solo || 0)}</b></div>

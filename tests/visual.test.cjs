@@ -63,3 +63,27 @@ test('cada arena (los 18 tipos y la Sentencia) tiene su suelo, ligero', () => {
   }
   assert.ok(/arenas/.test(read('sw.js')));
 });
+
+test('los 60 avatares de entrenador están, ligeros, y las reglas aceptan su número (0-60)', () => {
+  const G = load(['js/data/avatars.js']);
+  assert.strictEqual(G.AVATARS, 60);
+  for (let n = 1; n <= G.AVATARS; n++) {
+    const f = `assets/trainers/${n}.gif`;
+    assert.ok(has(f), f);
+    assert.ok(fs.statSync(path.join(ROOT, f)).size < 80 * 1024, f + ' pesa demasiado');
+  }
+  assert.ok(!has(`assets/trainers/${G.AVATARS + 1}.gif`));
+  const rules = read('firestore.rules');
+  assert.ok(/'medals', 'avatar'\]/.test(rules) && /avatar <= 60/.test(rules));
+  assert.ok(/trainers/.test(read('sw.js')));
+  assert.ok(/js\/data\/avatars\.js/.test(read('dev.html')));
+});
+
+test('G.UI.avatar sólo pinta un número de la lista (lo de la sala llega sin comprobar)', () => {
+  const src = read('js/ui/ui.js');
+  const body = src.slice(src.indexOf('function avatar('), src.indexOf('/** Rareza'));
+  const G = { AVATARS: 60 };
+  const avatar = new Function('G', body + '; return avatar;')(G);
+  assert.ok(/trainers\/7\.gif/.test(avatar(7)));
+  for (const bad of [0, 61, -1, 2.5, '3', '"><script>', null, undefined]) assert.strictEqual(avatar(bad), '', String(bad));
+});

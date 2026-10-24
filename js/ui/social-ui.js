@@ -106,8 +106,12 @@
         el.className = 'fr-row';
         const dot = f.status !== 'ok' ? 'pend' : 'on';
         const inRoom = room && room.members.some(m => m.uid === f.uid);
-        el.innerHTML = `<i class="dot ${dot}"></i><b translate="no"><a href="#" class="plink" title="Ver su perfil">${esc(f.name)}</a></b><span class="st">${inRoom ? 'En tu sala' : stateText(f)}</span><span class="grow"></span>`;
-        if (f.status === 'ok') el.querySelector('.plink').onclick = e => { e.preventDefault(); G.ProfileUI.show(f.uid); };
+        el.innerHTML = `<i class="dot ${dot}"></i><span class="fr-ava"></span><b translate="no"><a href="#" class="plink" title="Ver su perfil">${esc(f.name)}</a></b><span class="st">${inRoom ? 'En tu sala' : stateText(f)}</span><span class="grow"></span>`;
+        if (f.status === 'ok') {
+          el.querySelector('.plink').onclick = e => { e.preventDefault(); G.ProfileUI.show(f.uid); };
+          // Su avatar, del perfil público (G.Social.getProfile lo guarda 10 min: no se lee cada vez).
+          G.Social.getProfile(f.uid).then(p => { const a = el.querySelector('.fr-ava'); if (a && p) a.innerHTML = G.UI.avatar(p.avatar | 0); });
+        }
         else el.querySelector('.plink').onclick = e => e.preventDefault();
         const btn = (txt, cls, fn) => {
           const b = document.createElement('button');
@@ -209,7 +213,7 @@
         : 'Estás en la sala de ' + ((ms.find(m => m.uid === room.host) || {}).name || '…') + '. El anfitrión empezará la partida.';
 
       // Las tarjetas sólo se rehacen si cambian los miembros (los sprites no parpadean).
-      const key = ms.map(m => m.uid + ':' + m.dex + ':' + (m.shiny ? 1 : 0)).join('|');
+      const key = ms.map(m => m.uid + ':' + m.dex + ':' + (m.shiny ? 1 : 0) + ':' + m.avatar).join('|');
       const box = $('lobby-members');
       if (key !== membersKey) {
         membersKey = key;
@@ -221,6 +225,8 @@
           if (m) {
             c.style.setProperty('--pc', G.Coop.COLORS[i]);
             c.appendChild(G.UI.spriteCanvas(m.dex, 120, 96, { scale: 2, lively: true, shiny: !!m.shiny }));
+            // Su avatar (llega de la sala sin comprobar: G.UI.avatar sólo acepta un número de la lista).
+            c.insertAdjacentHTML('beforeend', G.UI.avatar(m.avatar, 'avatar lob-ava'));
             c.insertAdjacentHTML('beforeend', `<b translate="no">${esc(m.name)}</b><small>${esc((G.DEX_BY[m.dex] || {}).name || '')}</small><span class="conn" data-u="${m.uid}"></span><span class="net" data-u="${m.uid}"></span>`);
           } else c.innerHTML = '<span>Libre</span>';
           box.appendChild(c);

@@ -104,5 +104,21 @@ const read = (user, uid) => fetch(`${DOCS}/saves/${uid}`, { headers: { Authoriza
   expect('una Pokédex demasiado larga no se guarda', 403, (await commit(dex2, false, { seen: hex(261) })).status);
   expect('ni una que no es texto', 403, (await commit(dex2, false, { beat: { integerValue: '5' } })).status);
 
+  // Avatar de entrenador en el perfil público (profiles/{uid}.avatar, data/avatars.js): 0 a 60.
+  const prof = (user, nick, avatar, withName) => fetch(`${DOCS}:commit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + user.token },
+    body: JSON.stringify({ writes: [
+      ...(withName ? [{ update: { name: `projects/demo-pokekatens/databases/(default)/documents/names/${nick}`,
+        fields: { uid: { stringValue: user.uid } } }, currentDocument: { exists: false } }] : []),
+      { update: { name: `projects/demo-pokekatens/databases/(default)/documents/profiles/${user.uid}`,
+        fields: { name: { stringValue: nick }, lower: { stringValue: nick }, avatar: avatar } },
+        updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }] }] })
+  });
+  const ava = await signUp('avatar@jugadores.pokekatens.invalid');
+  expect('un avatar que no existe (61)', 403, (await prof(ava, 'avatarin', { integerValue: '61' }, true)).status);
+  expect('ni uno que no es un número', 403, (await prof(ava, 'avatarin', { stringValue: '<img>' }, true)).status);
+  expect('perfil con el avatar 60', 200, (await prof(ava, 'avatarin', { integerValue: '60' }, true)).status);
+
   console.log('EMULATOR_SMOKE_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

@@ -316,7 +316,7 @@ G.Social = (() => {
 
   function memberInfo() {
     const s = G.DB.save;
-    return { name: me.name, dex: s.partner, shiny: !!s.partnerShiny && G.DB.ownsShiny(s.partner), at: ts() };
+    return { name: me.name, dex: s.partner, shiny: !!s.partnerShiny && G.DB.ownsShiny(s.partner), avatar: ((s.profile || {}).avatar) | 0, at: ts() };
   }
 
   /**
@@ -437,7 +437,7 @@ G.Social = (() => {
         if (host !== uid) {
           if (host) throw Error('otra');
           const m = {};
-          for (const x of room.members) m[x.uid] = { name: x.name, dex: x.dex, shiny: !!x.shiny, at: x.at || 0 };
+          for (const x of room.members) m[x.uid] = { name: x.name, dex: x.dex, shiny: !!x.shiny, avatar: x.avatar | 0, at: x.at || 0 };
           m[uid] = Object.assign(memberInfo(), m[uid] ? { at: m[uid].at } : {});
           await within(base.set({ host: uid, open: playing ? false : room.open, at: ts(), m }), 5000);
         }
@@ -513,10 +513,11 @@ G.Social = (() => {
     if (room && room.isHost) fb.rtdb.ref('rooms/' + room.id + '/open').set(!!open).catch(() => {});
   }
 
-  /** Actualiza tu Pokémon en la sala (si cambias de compañero). */
+  /** Actualiza tu Pokémon y tu avatar en la sala (si los cambias). */
   function refreshMember() {
     if (room && me) fb.rtdb.ref('rooms/' + room.id + '/m/' + uid).update(
-      { dex: G.DB.save.partner, shiny: !!G.DB.save.partnerShiny && G.DB.ownsShiny(G.DB.save.partner) }).catch(() => {});
+      { dex: G.DB.save.partner, shiny: !!G.DB.save.partnerShiny && G.DB.ownsShiny(G.DB.save.partner),
+        avatar: ((G.DB.save.profile || {}).avatar) | 0 }).catch(() => {});
   }
 
   // ---------------- invitaciones ----------------
@@ -578,6 +579,7 @@ G.Social = (() => {
       name: me ? me.name : G.DB.user,
       favs: (prof.favs || []).slice(0, 3).map(f => ({ dex: f.dex | 0, shiny: !!f.shiny })),
       title: prof.title || '',
+      avatar: prof.avatar | 0,
       best: { solo: st.bestTime | 0, group: st.bestGroupTime | 0, level: st.bestLevel | 0, bosses: st.bossesTotal | 0,
               legends: Object.keys(s.legends || {}).length, kills: st.totalKills | 0, medals: unlocked.length },
       medals
@@ -593,7 +595,7 @@ G.Social = (() => {
    * cuando toca, no por sí solos: el perfil se escribía 200.000 veces al día
    * (13-10-2026). Si cambias favoritos o título (force), al momento.
    */
-  function publishProfile(force = false) {
+  function publishProfile(force = false, retry = false) {
     if (!me || !fb) return;
     if (!force && Date.now() - pubAt < 2 * 3600 * 1000) return;    // como mucho cada 2 h (era 30 min)
     clearTimeout(pubT);
@@ -609,7 +611,15 @@ G.Social = (() => {
       try { localStorage.setItem(lsKey, key); } catch (e) { /* nada */ }
       fb.fs.collection('profiles').doc(uid).set(Object.assign(d, {
         name: me.name, lower: me.name.toLowerCase(), at: firebase.firestore.FieldValue.serverTimestamp()
-      })).catch(e => { pubLast = ''; console.warn('[Social] perfil:', e.code || e.message); });
+      })).catch(e => {
+        // Que no se quede apuntado como subido. Las reglas sólo dejan una escritura cada 20 s
+        // (24-10-2026: justo después de crear el apodo se rechazaba siempre y ya no se volvía a
+        // intentar): se prueba otra vez pasado ese tiempo.
+        pubLast = '';
+        try { localStorage.removeItem(lsKey); } catch (er) { /* nada */ }
+        console.warn('[Social] perfil:', e.code || e.message);
+        if (e.code === 'permission-denied' && !retry) setTimeout(() => publishProfile(true, true), 21000);
+      });
     }, 800);
   }
 
@@ -617,7 +627,7 @@ G.Social = (() => {
   function cleanProfile(d) {
     const U = G.U, b = d.best || {};
     return {
-      name: U.str(d.name, 24), title: U.str(d.title, 40),
+      name: U.str(d.name, 24), title: U.str(d.title, 40), avatar: U.int(d.avatar, G.AVATARS || 0),
       favs: U.list(d.favs, 3).filter(f => f && G.DEX_BY[U.int(f.dex)]).map(f => ({ dex: U.int(f.dex), shiny: f.shiny === true })),
       best: { solo: U.int(b.solo, 86400), group: U.int(b.group, 86400), level: U.int(b.level, 999), bosses: U.int(b.bosses, 1e9),
               legends: U.int(b.legends, 999), kills: U.int(b.kills, 1e12), medals: U.int(b.medals, 999) },
@@ -632,11 +642,13 @@ G.Social = (() => {
     // El tuyo sale de tu partida (sin leer nada y siempre al día).
     if (other === uid && me) return Object.assign(profileData(), { name: me.name });
     const c = profCache.get(other);
-    if (c && Date.now() - c.at < 10 * 60 * 1000) return c.v;     // lo leído vale 10 min
-    const d = await fb.fs.collection('profiles').doc(other).get().catch(() => null);
-    const v = d && d.exists ? cleanProfile(d.data()) : null;
-    profCache.set(other, { at: Date.now(), v });
-    return v;
+    if (c && Date.now() - c.at < 10 * 60 * 1000) return c.p;     // lo leído vale 10 min
+    // Se guarda la lectura en curso: la lista de amigos se pinta varias veces seguidas
+    // y cada fila pide el perfil (su avatar); así se lee una sola vez.
+    const p = fb.fs.collection('profiles').doc(other).get().catch(() => null)
+      .then(d => (d && d.exists ? cleanProfile(d.data()) : null));
+    profCache.set(other, { at: Date.now(), p });
+    return p;
   }
 
   // Al cerrar sesión o borrar la cuenta.

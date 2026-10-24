@@ -68,7 +68,10 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   la pausa y la Tienda; y de fondo de la colección una caja del PC por región (`assets/ui/box/<gen>.png`, la 0 con
   "Todas" o al buscar). En las grietas y en la Sentencia, el suelo de la arena es un campo de combate de Reloaded
   según el tipo (`assets/arenas/<tipo>.jpg`, `paintArenaArt` en `js/world/world.js`): sólo en las baldosas de suelo,
-  con las paredes, columnas y charcos de siempre encima. Todo se descarga sólo al verlo.
+  con las paredes, columnas y charcos de siempre encima. **Avatar de entrenador**: en Misiones → Perfil se elige uno
+  de 60 (`G.UI.avatar`, `assets/trainers/<n>.gif`); se guarda sólo su número (`save.profile.avatar`, 0 = ninguno) y
+  sale en el perfil público (`profiles/{uid}.avatar`, 0-60 en `firestore.rules`), en la lista de amigos y en la sala
+  (`rooms/<id>/m/<uid>.avatar`). Todo se descarga sólo al verlo.
 - **Tamaño de las megas** (`G.Mega.megaScale`): en pantalla, todas al menos un 40 % más altas que su forma normal
   (como mucho 1,6 veces lo que dan sus sprites). `tools/import_reloaded.py` ya no las encoge: al volver a convertirlas
   con `--megas` (en el ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.

@@ -103,12 +103,14 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create, update: if signedIn()
         && me() == uid
-        && request.resource.data.keys().hasOnly(['name', 'lower', 'at', 'favs', 'title', 'best', 'medals'])
+        && request.resource.data.keys().hasOnly(['name', 'lower', 'at', 'favs', 'title', 'best', 'medals', 'avatar'])
         && request.resource.data.name is string
         && request.resource.data.lower == request.resource.data.name.lower()
         && request.resource.data.at == request.time
         && (!('favs' in request.resource.data) || (request.resource.data.favs is list && request.resource.data.favs.size() <= 3))
         && (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 40))
+        // Avatar de entrenador (24-10-2026, data/avatars.js): 0 = ninguno, 1-60 uno de los de Reloaded.
+        && (!('avatar' in request.resource.data) || (request.resource.data.avatar is int && request.resource.data.avatar >= 0 && request.resource.data.avatar <= 60))
         && (!('best' in request.resource.data) || validBest(request.resource.data.best))
         && (!('medals' in request.resource.data) || (request.resource.data.medals is list && request.resource.data.medals.size() <= 8))
         && getAfter(/databases/$(database)/documents/names/$(request.resource.data.lower)).data.uid == me()

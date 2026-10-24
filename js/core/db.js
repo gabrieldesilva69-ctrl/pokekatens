@@ -105,7 +105,7 @@ G.DB = (() => {
       seen: '',               // especies vistas en la partida
       beat: '',               // especies derrotadas
       missions: {},           // misiones del día / semana (systems/progress.js)
-      profile: { favs: [], title: '' },   // perfil público: 3 favoritos y título
+      profile: { favs: [], title: '', avatar: 0 },   // perfil público: 3 favoritos, título y avatar (0 = ninguno)
       stats: { runs: 0, bestTime: 0, bestLevel: 0, totalKills: 0, pulls: 0, coinsEarned: 0, shinies: 0,
                bossesTotal: 0, riftWins: 0, evolutions: 0, missionsDone: 0, groupRuns: 0, bestGroupTime: 0 }
     };
@@ -142,6 +142,8 @@ G.DB = (() => {
     s.coins = n(s.coins);
     s.tickets.t1 = n(s.tickets.t1);
     s.tickets.t10 = n(s.tickets.t10);
+    // Avatar de entrenador (data/avatars.js): un número de 1 a G.AVATARS, o 0.
+    if (isObj(s.profile)) { const a = n(s.profile.avatar); s.profile.avatar = a <= (G.AVATARS || 60) ? a : 0; }
     if (isObj(s.led)) {
       for (const dev of Object.keys(s.led)) {
         const e = s.led[dev];

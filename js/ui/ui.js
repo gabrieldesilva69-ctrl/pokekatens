@@ -66,6 +66,16 @@ G.UI = (() => {
       loading="lazy" onerror="this.remove()">`;
   }
 
+  /**
+   * Avatar de entrenador n (1..G.AVATARS) de Pokémon Edición Reloaded, de F3R: assets/trainers/<n>.gif
+   * (tools/import_visual.py --entrenadores), animado. Con otro número (o 0), nada.
+   */
+  function avatar(n, cls = 'avatar') {
+    n = Number.isInteger(n) ? n : -1;
+    if (n < 1 || n > (G.AVATARS || 0)) return '';
+    return `<img class="${cls}" src="assets/trainers/${n}.gif" alt="" loading="lazy" onerror="this.remove()">`;
+  }
+
   /** Rareza: la Poké Ball que le corresponde (ver G.Icons.rarity). */
   function stars(n, size = 12) { return G.Icons.rarity(n, size > 16 ? 24 : 12); }
 
@@ -369,6 +379,6 @@ G.UI = (() => {
     return cv;
   }
 
-  return { $, show, hide, hideAll, isOpen, chrome, refreshCoins, toast, typeChips, stars, portrait, confirmDelete,
+  return { $, show, hide, hideAll, isOpen, chrome, refreshCoins, toast, typeChips, stars, portrait, avatar, confirmDelete,
            sprite, spriteCanvas, tick, initChrome, soundControls, hueSwap };
 })();

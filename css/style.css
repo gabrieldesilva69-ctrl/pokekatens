@@ -750,7 +750,21 @@ select.field { font-family: var(--font); }
 .fav-slots.view .fav-slot { cursor: default; border-style: solid; border-color: rgba(255,210,63,.55); }
 .fav-slot b { font-size: 14px; }
 .profile-box { width: min(640px, 100%); max-height: 90vh; overflow-y: auto; }
-.prof-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: -10px; }
+.prof-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: -10px; }
+/* Avatares de entrenador de Pokémon Edición Reloaded (G.UI.avatar): pixel art animado, sin suavizar. */
+.avatar { image-rendering: pixelated; pointer-events: none; height: 40px; width: auto; vertical-align: middle; }
+.avatar.ava-big { height: 96px; }
+.ava-now { display: flex; align-items: center; gap: 14px; margin: 4px 0 10px; }
+.ava-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; max-height: 60vh; overflow-y: auto; }
+.ava-cell { display: flex; align-items: center; justify-content: center; height: 100px; cursor: pointer;
+  background: rgba(0,0,0,.2); border: 2px solid rgba(244,248,255,.18); border-radius: 10px; color: inherit; font: inherit; }
+.ava-cell:hover { border-color: var(--edge); background: rgba(255,255,255,.08); }
+.ava-cell.on { border-color: var(--gold); background: rgba(255,210,63,.14); }
+.ava-cell .avatar { height: 88px; }
+.fr-ava { display: inline-flex; width: 34px; justify-content: center; }
+.fr-ava .avatar { height: 36px; }
+.lob-card { position: relative; }
+.lob-ava { position: absolute; left: 4px; top: 4px; height: 52px; }
 .prof-head h2 { margin: 0; }
 .prof-title { color: var(--gold); font-size: 15px; border: 2px solid var(--gold); border-radius: 8px; padding: 1px 8px; }
 .prof-marks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0; }
