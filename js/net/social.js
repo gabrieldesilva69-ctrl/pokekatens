@@ -282,6 +282,36 @@ G.Social = (() => {
     catch (e) { return { ok: false, error: 'No se pudo borrar (' + (e.code || 'error') + ').' }; }
   }
 
+  // ---------------- regalos entre amigos (24-10-2026) ----------------
+  /*
+   * Una vez al día a cada amigo, un ticket ×1 que le llega a su buzón (gifts/{uid}/g, el
+   * mismo de los regalos del admin: js/core/db.js lo suma al entrar). El documento se
+   * llama f_<tu uid>_<día>: firestore.rules sólo deja crearlo una vez y sólo entre amigos.
+   * Este navegador recuerda a quién has regalado hoy (para no gastar una escritura en balde).
+   */
+  const today = () => Math.floor((Date.now() + skew) / 864e5);
+  const sentKey = other => 'ps.giftsent.' + uid + '.' + other;
+  function giftedToday(other) { try { return +localStorage.getItem(sentKey(other)) === today(); } catch (e) { return false; } }
+  function markGifted(other) { try { localStorage.setItem(sentKey(other), String(today())); } catch (e) { /* nada */ } }
+  async function gift(other) {
+    const f = friends.get(other);
+    if (!me || !f || f.status !== 'ok') return { ok: false, error: 'Sólo puedes regalar a tus amigos.' };
+    if (giftedToday(other)) return { ok: false, error: 'Hoy ya le has regalado.' };
+    const day = today();
+    try {
+      await fb.fs.collection('gifts').doc(other).collection('g').doc('f_' + uid + '_' + day).set({
+        t1: 1, from: uid, name: me.name, day, at: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      markGifted(other);
+      emit('friends');
+      return { ok: true, msg: G.I18n.f('Le has regalado un ticket a {x}', f.name) };
+    } catch (e) {
+      // Ya existe (le regalaste hoy desde otro aparato) o no sois amigos.
+      if (e && e.code === 'permission-denied') { markGifted(other); emit('friends'); return { ok: false, error: 'Hoy ya le has regalado.' }; }
+      return { ok: false, error: 'No se pudo regalar (' + ((e && e.code) || 'error') + ').' };
+    }
+  }
+
   // ---------------- salas ----------------
 
   function memberInfo() {
@@ -613,7 +643,7 @@ G.Social = (() => {
   G.DB.onLeave(why => stop(why));
 
   return {
-    start, stop, claimNick, request, accept, remove, publishProfile, getProfile, profileData,
+    start, stop, claimNick, request, accept, remove, gift, giftedToday, publishProfile, getProfile, profileData,
     createRoom, joinRoom, leaveRoom, setOpen, refreshMember, dropMember, setPlaying, refreshPresence, ensureFriends,
     invite, acceptInvite, declineInvite,
     on(fn) { listeners.add(fn); }, off(fn) { listeners.delete(fn); },

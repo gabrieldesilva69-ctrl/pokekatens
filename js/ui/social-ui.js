@@ -126,6 +126,15 @@
               if (r.ok) G.LobbyUI.open();
             });
           }
+          // Regalo del día (js/net/social.js): un ticket ×1.
+          const g = btn(G.Social.giftedToday(f.uid) ? 'Regalado hoy' : 'Regalar', 'gold', async () => {
+            g.disabled = true;
+            const r = await G.Social.gift(f.uid);
+            msg(r.ok ? r.msg : r.error, !r.ok);
+          });
+          g.insertAdjacentHTML('afterbegin', G.Icons.html('ticket', 12) + ' ');
+          g.disabled = G.Social.giftedToday(f.uid);
+          g.title = G.T('Un ticket ×1 al día para cada amigo');
           btn('Quitar', 'ghost', () => { if (confirm('¿Quitar a ' + f.name + ' de tus amigos?')) G.Social.remove(f.uid); });
         }
         box.appendChild(el);

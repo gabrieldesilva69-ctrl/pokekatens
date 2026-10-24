@@ -98,5 +98,39 @@ const commit = (user, body) => fetch(`${DOCS}:commit`, {
   const cuatro = await signUp('cuatro@jugadores.pokekatens.invalid');
   expect('otro jugador no lee ese buzón', 403, (await fetch(`${DOCS}/gifts/${tres.uid}/g`, { headers: { Authorization: 'Bearer ' + cuatro.token } })).status);
 
+  // ---- regalos entre amigos (24-10-2026, js/net/social.js): un ticket al día a cada amigo ----
+  const cinco = await signUp('cinco@jugadores.pokekatens.invalid');
+  const seis = await signUp('seis@jugadores.pokekatens.invalid');
+  const [u0, u1] = [cinco.uid, seis.uid].sort();
+  const pid = u0 + '_' + u1;
+  const fdoc = `projects/demo-pokekatens/databases/(default)/documents/friendships/${pid}`;
+  const str = v => ({ stringValue: v });
+  const names = { mapValue: { fields: { [cinco.uid]: str('cinco'), [seis.uid]: str('seis') } } };
+  expect('cinco pide amistad a seis', 200, (await commit(cinco, { writes: [{
+    update: { name: fdoc, fields: { users: { arrayValue: { values: [str(u0), str(u1)] } }, from: str(cinco.uid), to: str(seis.uid),
+      status: str('pending'), names } },
+    updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }], currentDocument: { exists: false } }] })).status);
+  const day = Math.floor(Date.now() / 864e5);
+  const fgift = (who, to, d = day, extra = {}) => gift(who, to.uid, `f_${who.uid}_${d}`,
+    Object.assign({ t1: { integerValue: '1' }, from: str(who.uid), name: str(who === cinco ? 'cinco' : 'seis'), day: { integerValue: String(d) } }, extra));
+  expect('sin amistad aceptada no se regala', 403, (await fgift(cinco, seis)).status);
+  expect('seis acepta', 200, (await commit(seis, { writes: [{
+    update: { name: fdoc, fields: { status: str('ok') } }, updateMask: { fieldPaths: ['status'] },
+    updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }] }] })).status);
+  expect('un ticket a un amigo', 200, (await fgift(cinco, seis)).status);
+  expect('el mismo día, otra vez no', 403, (await fgift(cinco, seis)).status);
+  expect('ni con el día de mañana', 403, (await fgift(cinco, seis, day + 1)).status);
+  expect('ni más de un ticket', 403, (await fgift(seis, cinco, day, { t1: { integerValue: '5' } })).status);
+  expect('ni monedas', 403, (await fgift(seis, cinco, day, { c: { integerValue: '100' } })).status);
+  expect('ni con otro apodo', 403, (await fgift(seis, cinco, day, { name: str('admin') })).status);
+  expect('ni a quien no es su amigo', 403, (await fgift(cinco, tres)).status);
+  expect('ni a sí mismo', 403, (await fgift(cinco, cinco)).status);
+  expect('el amigo también regala', 200, (await fgift(seis, cinco)).status);
+  expect('quien regala no lee el buzón del otro', 403, (await fetch(`${DOCS}/gifts/${seis.uid}/g`, { headers: { Authorization: 'Bearer ' + cinco.token } })).status);
+  const box = await fetch(`${DOCS}/gifts/${seis.uid}/g`, { headers: { Authorization: 'Bearer ' + seis.token } });
+  expect('seis lee su buzón', 200, box.status);
+  if (((await box.json()).documents || []).length !== 1) fail('regalos de amigos en el buzón', 1, '?');
+  console.log('ok un regalo de amigo en el buzón');
+
   console.log('EMULATOR_RANKING_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

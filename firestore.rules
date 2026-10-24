@@ -275,15 +275,33 @@ service cloud.firestore {
     // Un regalo no se cambia ni se borra: así nunca se cobra dos veces ni se pierde.
     match /gifts/{uid}/g/{gid} {
       allow read: if signedIn() && (me() == uid || admin());
-      allow create: if admin()
+      allow create: if (admin()
         && request.resource.data.keys().hasOnly(['c', 't1', 't10', 'at'])
         && giftAmount(request.resource.data, 'c', 1000000)
         && giftAmount(request.resource.data, 't1', 1000)
         && giftAmount(request.resource.data, 't10', 1000)
         && request.resource.data.get('c', 0) + request.resource.data.get('t1', 0) + request.resource.data.get('t10', 0) > 0
-        && request.resource.data.at == request.time;
+        && request.resource.data.at == request.time)
+        || friendGift(uid, gid);
     }
     function giftAmount(d, k, max) { return d.get(k, 0) is int && d.get(k, 0) >= 0 && d.get(k, 0) <= max; }
+
+    // Regalo de un amigo (24-10-2026, js/net/social.js): un ticket ×1, una vez al día
+    // a cada amigo. El documento se llama f_<quien regala>_<día UTC desde 1970> y no se
+    // puede cambiar: el mismo día no se puede volver a crear. Sólo entre amigos de verdad
+    // (amistad aceptada) y con el apodo que tiene en esa amistad.
+    function friendGift(uid, gid) {
+      let d = request.resource.data;
+      let pid = me() < uid ? me() + '_' + uid : uid + '_' + me();
+      let fr = get(/databases/$(database)/documents/friendships/$(pid)).data;
+      return signedIn() && me() != uid
+        && d.keys().hasOnly(['t1', 'from', 'name', 'day', 'at'])
+        && d.t1 == 1 && d.from == me() && d.at == request.time
+        && d.day is int && d.day == math.floor(request.time.toMillis() / 86400000)
+        && gid == 'f_' + me() + '_' + string(d.day)
+        && fr.status == 'ok' && me() in fr.users
+        && d.name == fr.names[me()];
+    }
 
     match /{document=**} {
       allow read, write: if false;

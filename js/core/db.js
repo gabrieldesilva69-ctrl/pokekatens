@@ -319,16 +319,27 @@ G.DB = (() => {
    * REGALOS del admin (buzón gifts/{uid}/g, ver firestore.rules). Cada regalo
    * es un apunte más de la libreta, "g_<id>", como si fuera otro aparato: al
    * fusionar se conserva y, si ya está, no se vuelve a sumar.
-   *   gifts: [[id, { c, t1, t10 }], ...]  → lo que es nuevo, sumado: { c, t1, t10 } o null
+   *   gifts: [[id, { c, t1, t10 }], ...]  → lo que es nuevo, sumado: { c, t1, t10, friends } o null
+   * Los de los amigos (24-10-2026, G.Social.gift: id f_<uid>_<día>, un ticket ×1) van
+   * igual, con su apodo en friends; como mucho FRIEND_MAX al día (los demás no se suman).
    */
-  const GIFT_MAX = { c: 1000000, t1: 1000, t10: 1000 };
+  const GIFT_MAX = { c: 1000000, t1: 1000, t10: 1000 }, FRIEND_MAX = 10;
   function addGifts(s, gifts) {
     s.led = ledOf(s, DEV);
-    const got = { c: 0, t1: 0, t10: 0 };
+    const got = { c: 0, t1: 0, t10: 0, friends: [] };
     let any = false;
-    for (const [id, g] of gifts) {
+    const perDay = {};
+    for (const k in s.led) { const m = /^g_f_[A-Za-z0-9]+_(\d+)$/.exec(k); if (m) perDay[m[1]] = (perDay[m[1]] || 0) + 1; }
+    for (const [id, g0] of gifts) {
       const k = 'g_' + id;
-      if (s.led[k] || !/^[A-Za-z0-9]{1,40}$/.test(id)) continue;
+      if (s.led[k] || !/^[A-Za-z0-9_]{1,60}$/.test(id)) continue;
+      const fm = /^f_[A-Za-z0-9]+_(\d+)$/.exec(id);
+      let g = g0;
+      if (fm) {
+        if ((perDay[fm[1]] = (perDay[fm[1]] || 0) + 1) > FRIEND_MAX) continue;
+        g = { t1: 1 };
+        got.friends.push(String((g0 && g0.name) || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 16));
+      } else if (id.includes('_')) continue;
       const e = {};
       for (const c in CUR) {
         const v = Math.min(num(g && g[c]), GIFT_MAX[c]);
@@ -337,6 +348,7 @@ G.DB = (() => {
       if (Object.keys(e).length) s.led[k] = e;
     }
     for (const c in CUR) CUR[c][1](s, Math.max(0, ledSum(s.led, c)));
+    if (!got.friends.length) delete got.friends;
     return any ? got : null;
   }
 

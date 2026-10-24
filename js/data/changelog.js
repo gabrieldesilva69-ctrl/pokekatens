@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
+    ['Regalos entre amigos: una vez al día puedes regalar un ticket ×1 a cada amigo con el botón «Regalar» de la lista de amigos. Le llega la próxima vez que entre (como mucho 10 regalos al día).',
+     'Gifts between friends: once a day you can give each friend a ×1 ticket with the “Gift” button in the friends list. They get it the next time they log in (at most 10 gifts a day).'],
     ['Noche en la partida: desde el minuto 7, cada 10 minutos anochece durante 3. Se ve menos (sólo hay luz alrededor de tu Pokémon), salen más Pokémon nocturnos (Fantasma, Siniestro, Zubat, Murkrow...) y las monedas y la experiencia que recoges valen un 25 % más. En Ajustes > Pantalla se puede quitar la oscuridad.',
      'Night during the run: from minute 7, every 10 minutes night falls for 3. You see less (there is only light around your Pokémon), more nocturnal Pokémon appear (Ghost, Dark, Zubat, Murkrow...) and the coins and experience you pick up are worth 25% more. You can turn off the darkness in Settings > Display.'],
     ['Rachas: cada enemigo que cae sube tu racha y un golpe la corta. Con 50 seguidos las monedas que recoges valen ×1,1; con 150, ×1,25, y con 300, ×1,5. Se ve debajo de tu vida, la mejor sale en el resumen de la partida y hay dos logros nuevos.',

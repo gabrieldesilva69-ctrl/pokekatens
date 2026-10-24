@@ -42,7 +42,7 @@ G.I18n = (() => {
     'Estás en la sala de {x}. El anfitrión empezará la partida.', 'Invitación enviada a {x}',
     '{x} te invita a jugar en su sala', 'Pausa: {x} está eligiendo…',
     'Pausa: {x} están eligiendo…', 'Pausa: esperando a {x} (anfitrión)…',
-    '¿Reportar la marca de {x} como trampa?'
+    '¿Reportar la marca de {x} como trampa?', 'Le has regalado un ticket a {x}', '{x} te ha regalado un ticket'
   ]);
   const L = '\\p{L}\\p{N}';
   const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

@@ -48,3 +48,19 @@ test('a gift survives merging with an older copy that never saw it, and spending
   assert.equal(D.addGifts(m, [['a1', { c: 500 }]]), null);
   assert.equal(m.coins, 400);
 });
+test('gifts from friends: one ticket each whatever the document says, at most 10 a day, with the friend\'s nick', () => {
+  const D = db(), s = save(100, 0);
+  const list = [];
+  for (let i = 0; i < 12; i++) list.push(['f_uid' + i + '_20385', { t1: 50, c: 999, name: 'Ami<b>' + i }]);
+  const got = D.addGifts(s, list);
+  assert.equal(got.t1, 10);
+  assert.equal(got.c, 0);
+  assert.equal(s.tickets.t1, 10);
+  assert.equal(got.friends.length, 10);
+  assert.equal(got.friends[0], 'Amib0');
+  // Otro día, otros 10; el mismo regalo no vuelve a contar.
+  assert.equal(D.addGifts(s, [['f_uid0_20385', { t1: 1 }]]), null);
+  assert.equal(D.addGifts(s, [['f_uid0_20386', { t1: 1, name: 'Ami' }]]).t1, 1);
+  // Un id raro con guiones bajos que no es de un amigo no cuenta.
+  assert.equal(D.addGifts(s, [['x_y', { c: 5 }]]), null);
+});

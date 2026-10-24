@@ -8,6 +8,16 @@
 (() => {
   const languages = ['fr', 'it', 'pt-BR', 'zh-Hans', 'zh-Hant'];
   const rows = [
+    ["Le has regalado un ticket a {x}", "Tu as offert un ticket à {x}", "Hai regalato un ticket a {x}", "Você deu um ticket para {x}", "你送给了{x}一张抽奖券", "你送給了{x}一張抽獎券"],
+    ["{x} te ha regalado un ticket", "{x} t’a offert un ticket", "{x} ti ha regalato un ticket", "{x} te deu um ticket", "{x}送给你一张抽奖券", "{x}送給你一張抽獎券"],
+    ["Tus amigos te han regalado {x} tickets", "Tes amis t’ont offert {x} tickets", "I tuoi amici ti hanno regalato {x} ticket", "Seus amigos te deram {x} tickets", "好友们送给你{x}张抽奖券", "好友們送給你{x}張抽獎券"],
+    ["Sólo puedes regalar a tus amigos.", "Tu ne peux offrir des cadeaux qu’à tes amis.", "Puoi fare regali solo ai tuoi amici.", "Você só pode dar presentes para seus amigos.", "只能送礼物给好友。", "只能送禮物給好友。"],
+    ["Hoy ya le has regalado.", "Tu lui as déjà offert un cadeau aujourd’hui.", "Oggi gli hai già fatto un regalo.", "Hoje você já deu um presente.", "今天已经送过礼物了。", "今天已經送過禮物了。"],
+    ["No se pudo regalar ({x}).", "Impossible d’offrir le cadeau ({x}).", "Impossibile fare il regalo ({x}).", "Não foi possível dar o presente ({x}).", "无法送出礼物（{x}）。", "無法送出禮物（{x}）。"],
+    ["Regalar", "Offrir", "Regala", "Presentear", "送礼", "送禮"],
+    ["Regalado hoy", "Offert aujourd’hui", "Regalato oggi", "Presenteado hoje", "今天已送", "今天已送"],
+    ["Un ticket ×1 al día para cada amigo", "Un ticket ×1 par jour pour chaque ami", "Un ticket ×1 al giorno per ogni amico", "Um ticket ×1 por dia para cada amigo", "每天可送每位好友一张×1抽奖券", "每天可送每位好友一張×1抽獎券"],
+    ["Regalos entre amigos: una vez al día puedes regalar un ticket ×1 a cada amigo con el botón «Regalar» de la lista de amigos. Le llega la próxima vez que entre (como mucho 10 regalos al día).", "Cadeaux entre amis : une fois par jour, tu peux offrir un ticket ×1 à chaque ami avec le bouton « Offrir » de la liste d’amis. Il le reçoit la prochaine fois qu’il se connecte (10 cadeaux par jour au maximum).", "Regali tra amici: una volta al giorno puoi regalare un ticket ×1 a ogni amico con il pulsante «Regala» della lista amici. Lo riceve la prossima volta che entra (al massimo 10 regali al giorno).", "Presentes entre amigos: uma vez por dia você pode dar um ticket ×1 para cada amigo com o botão «Presentear» da lista de amigos. Ele recebe na próxima vez que entrar (no máximo 10 presentes por dia).", "好友互送礼物：每天可以用好友列表中的「送礼」按钮送每位好友一张×1抽奖券。对方下次登录时就会收到（每天最多10份）。", "好友互送禮物：每天可以用好友列表中的「送禮」按鈕送每位好友一張×1抽獎券。對方下次登入時就會收到（每天最多10份）。"],
     ["Anochece: salen Pokémon nocturnos y se gana más", "La nuit tombe : des Pokémon nocturnes apparaissent et tu gagnes plus", "Cala la notte: compaiono Pokémon notturni e si guadagna di più", "Anoitece: aparecem Pokémon noturnos e você ganha mais", "夜幕降临：夜行宝可梦出现，收获也更多", "夜幕降臨：夜行寶可夢出現，收穫也更多"],
     ["Amanece", "Le jour se lève", "Sorge il giorno", "Amanhece", "天亮了", "天亮了"],
     ["Noches oscuras", "Nuits sombres", "Notti buie", "Noites escuras", "黑夜变暗", "黑夜變暗"],

@@ -72,11 +72,17 @@ G.LoginUI = (() => {
   function giftNotice() {
     const g = G.DB.takeGift && G.DB.takeGift();
     if (!g) return;
+    // Los de tus amigos (js/net/social.js): un ticket ×1 cada uno.
+    const fr = g.friends || [], t1 = g.t1 - fr.length;
+    if (fr.length) {
+      G.UI.toast(fr.length === 1 ? G.I18n.f('{x} te ha regalado un ticket', fr[0])
+        : G.I18n.f('Tus amigos te han regalado {x} tickets', fr.length), 6000);
+    }
     const parts = [];
     if (g.c) parts.push(G.I18n.f('+{x} monedas', g.c.toLocaleString(G.I18n.locale)));
-    if (g.t1) parts.push(G.I18n.f('+{x} tickets', g.t1));
+    if (t1 > 0) parts.push(G.I18n.f('+{x} tickets', t1));
     if (g.t10) parts.push(G.I18n.f('+{x} tickets ×10', g.t10));
-    G.UI.toast(G.T('¡Regalo del administrador!') + ' ' + parts.join(' · '), 6000);
+    if (parts.length) setTimeout(() => G.UI.toast(G.T('¡Regalo del administrador!') + ' ' + parts.join(' · '), 6000), fr.length ? 6200 : 0);
     if (G.UI.refreshCoins) G.UI.refreshCoins();
   }
 
