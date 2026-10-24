@@ -55,12 +55,21 @@ G.Night = (() => {
       ctx.fillRect(0, 0, w, h);
       return;
     }
-    const r = Math.min(w, h);
+    // Los de Fuego y Eléctrico alumbran más, con luz cálida que tiembla un poco (entities/aura.js).
+    const types = (pl.mon && pl.mon.types) || [];
+    const lamp = types.includes('fire') ? '255,150,60' : types.includes('electric') ? '255,230,90' : null;
+    const r = Math.min(w, h) * (lamp ? 1.3 + 0.03 * Math.sin(performance.now() / 90) : 1);
     const g = ctx.createRadialGradient(x, y, r * 0.16, x, y, r * 0.62);
     g.addColorStop(0, 'rgba(8,12,34,0)');
     g.addColorStop(1, `rgba(8,12,34,${0.72 * k})`);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
+    if (lamp) {
+      const l = ctx.createRadialGradient(x, y, 0, x, y, r * 0.3);
+      l.addColorStop(0, `rgba(${lamp},${0.16 * k})`);
+      l.addColorStop(1, `rgba(${lamp},0)`);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = l; ctx.fillRect(0, 0, w, h); ctx.restore();
+    }
   }
 
   return { FROM, EVERY, LONG, BONUS, level, isNight, bonus, nightSpawn, update, reset, draw };

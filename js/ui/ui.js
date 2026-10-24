@@ -216,7 +216,10 @@ G.UI = (() => {
    *                   Pokémon de una vista salen con el mismo píxel, aunque
    *                   los gigantes no quepan enteros
    *         hero      vista de un solo Pokémon: puede reducir la escala para
-   *                   que quepa, porque ahí no se compara con nada }
+   *                   que quepa, porque ahí no se compara con nada
+   *         deluxe    vista de lujo (24-10-2026, entities/aura.js): luz de fondo de su
+   *                   tipo, reflejo en el suelo, respiración suave, detalles que brillan
+   *                   y destello shiny }
    */
   function sprite(cv, dex, opts = {}) {
     const prev = byCanvas.get(cv);
@@ -262,11 +265,35 @@ G.UI = (() => {
       const big = ay * k > cv.height * 0.8;
       const fx = cv.width / 2, fy = big ? cv.height / 2 + ay * k * 0.45 : cv.height * 0.88;
 
+      const lux = s.opts.deluxe && !s.opts.silhouette;
+      const now = performance.now() / 1000;
+      if (lux) {
+        // Luz de fondo del color de su tipo.
+        const p = G.DEX_BY[s.dex], col = (p && G.U.TYPE_COLOR[p.types[0]]) || '#ffffff';
+        const g = ctx.createRadialGradient(fx, fy - ay * k * 0.5, 0, fx, fy - ay * k * 0.5, Math.max(cv.width, cv.height) * 0.55);
+        g.addColorStop(0, col + '55'); g.addColorStop(1, col + '00');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, cv.width, cv.height);
+      }
       if (s.opts.shadow !== false && !s.opts.silhouette) {
         ctx.fillStyle = 'rgba(0,0,0,.35)';
         ctx.beginPath(); ctx.ellipse(fx, fy, 9 * k, 3.4 * k, 0, 0, 6.2832); ctx.fill();
       }
-      if (s.opts.silhouette) {
+      if (lux) {
+        const fxo = { emit: G.Aura.SPOTS[s.dex] ? { dex: s.dex, level: G.Aura.emitLevel(s.dex, now), color: '#fff' } : null };
+        const sw = s.opts.shiny ? G.Aura.sweep(now, 0) : -1;
+        if (sw >= 0) fxo.sweep = sw;
+        // Reflejo en el suelo (boca abajo y muy suave).
+        ctx.save();
+        ctx.translate(0, fy * 2); ctx.scale(1, -1);
+        ctx.globalAlpha = 0.16;
+        s.a.draw(ctx, fx, fy);
+        ctx.restore();
+        // Respiración: se estira un pelín hacia arriba y vuelve.
+        ctx.save();
+        ctx.translate(fx, fy); ctx.scale(1, 1 + 0.018 * Math.sin(now * 2.4)); ctx.translate(-fx, -fy);
+        s.a.draw(ctx, fx, fy, fxo);
+        ctx.restore();
+      } else if (s.opts.silhouette) {
         ctx.save();
         ctx.filter = 'brightness(0)';
         ctx.globalAlpha = 0.55;

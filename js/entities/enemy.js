@@ -750,7 +750,10 @@
       // Los que flotan ya van en el aire en su sprite: sólo se mecen un poco.
       // (Y los que saltan, en arco.)
       const lift = (this.flying && !this.boss ? 1 + Math.sin(this.bob) * 1.5 : 0) + (this.jumpLift || 0);
-      this.anim.draw(ctx, this.x, this.y - lift, { flash: this.flash > 0, alpha });
+      // Jefes, legendarios y shiny: sus efectos (entities/aura.js). Los demás enemigos, nada (rendimiento).
+      const t = performance.now() / 1000, fx = G.Aura.forEnemy(this, t);
+      if (fx) { G.Aura.emit(this, this.types, Math.min(0.05, t - (this._auraT || t))); this._auraT = t; }
+      this.anim.draw(ctx, this.x, this.y - lift, Object.assign(fx || {}, { flash: this.flash > 0, alpha }));
       ctx.restore();
 
       if (this.dead) return;

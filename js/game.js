@@ -126,6 +126,7 @@ G.Game = (() => {
     G.Events.reset();
     G.Weather.reset();
     G.Streak.reset();
+    G.Aura.clear();
     G.Night.reset();
     G.Path.clear();
     G.Hazards.clear();
@@ -753,6 +754,7 @@ G.Game = (() => {
     G.Events.update(dt, all, time);
     G.Weather.update(dt, time, pl);
     G.Night.update();
+    G.Aura.update(dt);
     G.Challenge.update();
     G.FX.update(dt);
 
@@ -844,6 +846,7 @@ G.Game = (() => {
     ctx.scale(G.Camera.scale, G.Camera.scale);
     G.Camera.apply(ctx);
     drawScene(G.Camera, G.Coop.active ? [pl, ...G.Coop.puppets()] : [pl]);
+    G.Aura.draw(ctx);                        // partículas de los Pokémon con efectos (entities/aura.js)
     G.Projectiles.draw(ctx);
     G.Combat.drawAirFields(ctx);
     G.FX.draw(ctx);

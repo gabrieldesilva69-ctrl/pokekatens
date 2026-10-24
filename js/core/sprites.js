@@ -247,7 +247,11 @@ G.Sprites = (() => {
       }
     }
 
-    /** Dibuja con los pies en (x, y). opts: { flash, alpha } */
+    /**
+     * Dibuja con los pies en (x, y). opts: { flash, alpha } y los efectos de entities/aura.js:
+     *   glow  color del contorno que brilla · emit { dex, level, color } detalles que brillan
+     *   sweep 0..1 franja de luz del shiny
+     */
     draw(ctx, x, y, opts = {}) {
       let m = animMeta(this.dex, this.cur, this.shiny);
       let s = sheet(this.dex, this.cur, this.shiny);
@@ -271,8 +275,31 @@ G.Sprites = (() => {
       const dx = Math.round(x - m.ax * k), dy = Math.round(y - m.ay * k);
       const prev = ctx.globalAlpha;
       if (alpha < 1) ctx.globalAlpha = prev * alpha;
+      // Contorno que brilla (aura.js): la silueta blanca con su resplandor, debajo del sprite.
+      if (opts.glow) {
+        ctx.save();
+        ctx.shadowColor = opts.glow;
+        ctx.shadowBlur = 5 * k + Math.sin(performance.now() / 160) * k;
+        ctx.globalAlpha = prev * alpha * 0.9;
+        ctx.drawImage(white(s.img), sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
+        ctx.restore();
+      }
       // Destello: blanco entero (enemigos) o medio blanco encima (tu Pokémon).
       if (!opts.flash || opts.softFlash) ctx.drawImage(s.img, sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
+      // Detalles que brillan (la llama de Charmander...) y la franja del shiny (aura.js).
+      if (opts.emit && G.Aura) {
+        const em = G.Aura.emissive(s.img, opts.emit.dex, m);
+        if (em && opts.emit.level > 0) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalAlpha = prev * alpha * Math.min(1, opts.emit.level);
+          ctx.shadowColor = opts.emit.color;
+          ctx.shadowBlur = 4 * k;
+          ctx.drawImage(em, sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
+          ctx.restore();
+        }
+      }
+      if (opts.sweep != null && opts.sweep >= 0 && G.Aura) G.Aura.drawSweep(ctx, s.img, sx, sy, m.w, m.h, dx, dy, k, opts.sweep, alpha);
       if (opts.flash) {
         if (opts.softFlash) ctx.globalAlpha = prev * alpha * 0.55;
         ctx.drawImage(white(s.img), sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
