@@ -461,6 +461,17 @@ G.Icons = (() => {
     return { rows: STONE_ROWS, pal: { a, b, A: darker(a), B: darker(b), h: '#f4f8ff', w: '#ffffff' } };
   }
   const isMegaIcon = name => name.startsWith('ms:') || name.startsWith('porb:');
+  // Los iconos que han hecho los dueños (data/stones.js, tools/import_stone_icons.py): imágenes.
+  // Mientras se decodifican (un momento al empezar), se pinta la esfera de arriba.
+  const imgs = new Map();
+  function imageOf(name) {
+    if (!isMegaIcon(name)) return null;
+    const u = name.startsWith('porb:') ? (G.ORB_ICONS || {})[name.slice(5)] : (G.STONE_ICONS || {})[+name.slice(3)];
+    if (!u) return null;
+    let im = imgs.get(name);
+    if (!im) { im = new Image(); im.src = u; imgs.set(name, im); }
+    return im;
+  }
 
   /** La Megapiedra con el color de un tipo (el primero de su mega). */
   function stoneDef(type) {
@@ -473,7 +484,13 @@ G.Icons = (() => {
   function canvas(name) {
     let cv = cache.get(name);
     if (cv) return cv;
-    if (name.startsWith('move:')) {
+    const im = imageOf(name);
+    if (im && !(im.complete && im.naturalWidth)) return fromRows(megaDef(name));    // aún no: sin guardar
+    if (im) {
+      cv = document.createElement('canvas');
+      cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+      cv.getContext('2d').drawImage(im, 0, 0);
+    } else if (name.startsWith('move:')) {
       const m = G.Moves.BY_ID[name.slice(5)];
       cv = emblem(m ? m.type : 'normal', m ? m.kind : null);
     } else if (name.startsWith('type:')) {
@@ -494,7 +511,9 @@ G.Icons = (() => {
     if (!u) {
       // Los de interfaz, directamente de su dibujo; los emblemas (tipos, movimientos), del canvas.
       const plain = !name.startsWith('move:') && !name.startsWith('type:');
-      u = name.startsWith('stone:') ? svgOfRows(stoneDef(name.slice(6)))
+      const im = imageOf(name);
+      u = im ? im.src
+        : name.startsWith('stone:') ? svgOfRows(stoneDef(name.slice(6)))
         : isMegaIcon(name) ? svgOfRows(megaDef(name))
         : plain ? svgOfRows(UI[name] || UI.star) : svgOf(canvas(name));
       urls.set(name, u);
@@ -553,6 +572,7 @@ G.Icons = (() => {
    * icono de 16 px pintado a 24 duplicaría unos píxeles sí y otros no.
    */
   function snap(name, size) {
+    if (imageOf(name)) return size;               // las imágenes, al tamaño que se pida
     const w = canvas(name).width;
     return w * Math.max(1, Math.round(size / w));
   }
@@ -560,6 +580,7 @@ G.Icons = (() => {
   /** <img> pixelado para el DOM. */
   function html(name, size = 20, cls = '') {
     const cv = canvas(name), w = snap(name, size), h = w * cv.height / cv.width;
+    if (name.startsWith('porb:')) cls += ' smooth';            // los Orbes: dibujo grande reducido
     return `<img class="pix ${cls}" src="${url(name)}" width="${w}" height="${h}" alt="" draggable="false">`;
   }
 
@@ -568,7 +589,7 @@ G.Icons = (() => {
     const s2 = snap(name, size);
     x += (size - s2) / 2; y += (size - s2) / 2; size = s2;
     const prev = ctx.imageSmoothingEnabled;
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = name.startsWith('porb:');       // los Orbes son dibujos grandes reducidos
     ctx.drawImage(cv, Math.round(x), Math.round(y), size, size * cv.height / cv.width);
     ctx.imageSmoothingEnabled = prev;
   }

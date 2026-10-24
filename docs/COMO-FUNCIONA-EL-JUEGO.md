@@ -71,10 +71,12 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   de 60 (`G.UI.avatar`, `assets/trainers/<n>.gif`); se guarda sólo su número (`save.profile.avatar`, 0 = ninguno) y
   sale en el perfil público (`profiles/{uid}.avatar`, 0-60 en `firestore.rules`), en la lista de amigos y en la sala
   (`rooms/<id>/m/<uid>.avatar`). Todo se descarga sólo al verlo.
-- **Icono de cada Megapiedra** (`G.Mega.stoneIcon`): `'ms:<dex>'`, una esfera de 16x16 con la hélice en los dos
-  colores de su mega (`js/data/stones.js`, sacados de su sprite con `tools/make_stones.py`), y `'porb:red'` /
-  `'porb:blue'` para el Orbe Rojo (Ω) y el Orbe Azul (α) de las primigenias. Sale en la barra y el botón de
-  megaevolucionar, la Tienda, la Mochila y la ficha (`js/ui/icons.js`).
+- **Icono de cada Megapiedra** (`G.Mega.stoneIcon`): `'ms:<dex>'` y `'porb:red'` / `'porb:blue'` (Orbe Rojo y
+  Orbe Azul de las primigenias). Son las imágenes que hicieron los dueños (con IA, no oficiales): `tools/art/`
+  `megapiedras.jpg` y `orbes.jpg`, recortadas con `tools/import_stone_icons.py` a `js/data/stones.js`
+  (`G.STONE_ICONS`, `G.ORB_ICONS`). Si una mega nueva no está en la hoja, se dibuja una esfera con los dos colores
+  de su sprite (`tools/make_stones.py`). Salen en la barra y el botón de megaevolucionar, la Tienda, la Mochila y
+  la ficha (`js/ui/icons.js`).
 - **Tamaño de las megas** (`G.Mega.megaScale`): en pantalla, todas al menos un 40 % más altas que su forma normal
   (como mucho 1,6 veces lo que dan sus sprites). `tools/import_reloaded.py` ya no las encoge: al volver a convertirlas
   con `--megas` (en el ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.

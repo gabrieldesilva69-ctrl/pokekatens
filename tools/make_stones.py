@@ -79,11 +79,16 @@ def main():
     for dex in megas():
         a, b = colors(dex)
         rows.append(f"  {dex}: ['{a}', '{b}']")
+    # Los iconos de tools/import_stone_icons.py van al final del mismo archivo: se conservan.
+    old = io.open(OUT, encoding='utf-8').read() if os.path.exists(OUT) else ''
+    i = old.find('\n// ---- iconos (tools/import_stone_icons.py) ----\n')
+    tail = old[i:] if i >= 0 else ''
     with io.open(OUT, 'w', encoding='utf-8', newline='\n') as f:
-        f.write('/* ============ stones.js — colores de la Megapiedra de cada mega ============\n'
-                ' * Generado por tools/make_stones.py (de su sprite de mega): no editar a mano.\n'
-                " * [color de arriba, color de abajo] de la esfera; el icono es 'ms:<dex>' (js/ui/icons.js).\n */\n")
-        f.write('G.STONE_COLORS = {\n' + ',\n'.join(rows) + '\n};\n')
+        f.write('/* ============ stones.js — Megapiedras de cada mega ============\n'
+                ' * Generado por tools/make_stones.py (los colores, de su sprite de mega) y\n'
+                ' * tools/import_stone_icons.py (los iconos, de tools/art/): no editar a mano.\n'
+                " * El icono es 'ms:<dex>' (js/ui/icons.js): el de G.STONE_ICONS o, si no hay, la esfera con estos colores.\n */\n")
+        f.write('G.STONE_COLORS = {\n' + ',\n'.join(rows) + '\n};\n' + tail)
     print(f'{len(rows)} Megapiedras en js/data/stones.js')
 
 

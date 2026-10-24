@@ -70,7 +70,10 @@ test('cada mega tiene su Megapiedra (dos colores) y las primigenias su Orbe', ()
     if (d.primal) { assert.ok(!G.STONE_COLORS[dex], 'las primigenias llevan Orbe: ' + dex); continue; }
     const c = G.STONE_COLORS[dex];
     assert.ok(c && c.length === 2 && hex.test(c[0]) && hex.test(c[1]), 'colores de la piedra de ' + dex);
+    assert.ok(/^data:image\/png;base64,/.test(G.STONE_ICONS[dex] || ''), 'icono de la piedra de ' + dex);
   }
+  for (const k of ['red', 'blue']) assert.ok(/^data:image\/png;base64,/.test(G.ORB_ICONS[k] || ''), 'Orbe ' + k);
+  assert.ok(fs.statSync(path.join(ROOT, 'js/data/stones.js')).size < 80 * 1024, 'stones.js pesa demasiado');
   const src = read('js/systems/mega.js');
   assert.ok(/'porb:' \+ \(d\.orb === 'Orbe Azul' \? 'blue' : 'red'\)/.test(src) && /'ms:' \+ dex/.test(src));
   assert.ok(/js\/data\/stones\.js/.test(read('dev.html')));
