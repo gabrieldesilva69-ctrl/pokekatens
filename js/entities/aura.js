@@ -148,6 +148,53 @@ G.Aura = (() => {
     854: { on: ['69bcac', 'a8dcd4'], color: '#9fe8d0', kind: 'glow' },                                        // Sinistea: el té
     855: { on: ['69bcac', 'a8dcd4'], color: '#9fe8d0', kind: 'glow' },                                        // Polteageist: el té
     873: { on: ['e9ffda', '9fca90'], color: '#9fe8ff', kind: 'ice' },                                         // Frosmoth
+    // Cuarta tanda (24-10-2026): propuestas por tools de color y revisadas una a una.
+    2: { on: ['d73f00', 'ff875f', '9f0000'], color: '#ff5e38', kind: 'glow' },                              // Ivysaur
+    10: { on: ['fff700', 'dfb700', 'a76f00'], color: '#ffd619', kind: 'eye' },                              // Caterpie
+    12: { on: ['d73f00', 'ff875f'], color: '#ff7f50', kind: 'eye' },                                        // Butterfree
+    24: { on: ['d73f00', '9f0000'], color: '#ff4c19', kind: 'eye' },                                        // Arbok
+    46: { on: ['fff700'], color: '#fff719', kind: 'glow' },                                                 // Paras
+    47: { on: ['fff700'], color: '#fff719', kind: 'glow' },                                                 // Parasect
+    48: { on: ['d73f00', 'ff875f', '9f0000'], color: '#ff4b26', kind: 'eye' },                              // Venonat
+    49: { on: ['879fff', '5767b7'], color: '#8ba0ff', kind: 'eye' },                                        // Venomoth
+    55: { on: ['ff875f', 'bf7727', 'dfaf67'], color: '#ffb66d', kind: 'glow' },                             // Golduck
+    64: { on: ['e73f67'], color: '#ff587f', kind: 'psy' },                                                  // Kadabra
+    113: { on: ['b78727', 'd7bf67'], color: '#ffda73', kind: 'glow' },                                      // Chansey
+    175: { on: ['1f9fe7', '0067b7', '7fcfff'], color: '#4dbdff', kind: 'psy' },                             // Togepi
+    214: { on: ['dfb700', 'a76f00'], color: '#ffca19', kind: 'eye' },                                       // Heracross
+    218: { on: ['fff700'], color: '#fff719', kind: 'flame' },                                               // Slugma
+    248: { on: ['d73f00', '9f0000'], color: '#ff3519', kind: 'eye' },                                       // Tyranitar
+    261: { on: ['d73f00', '9f0000'], color: '#ff3019', kind: 'eye' },                                       // Poochyena
+    267: { on: ['d73f00', '9f0000', 'bf7727', 'dfaf67'], color: '#ff9150', kind: 'glow' },                  // Beautifly
+    269: { on: ['fff700', 'dfb700'], color: '#ffe619', kind: 'glow' },                                      // Dustox
+    285: { on: ['8fff67', '5fb727', '7fdf57'], color: '#97ff64', kind: 'glow' },                            // Shroomish
+    343: { on: ['9f0000'], color: '#ff1919', kind: 'eye' },                                                 // Baltoy
+    494: { on: ['73acff', '395aac'], color: '#6d9bff', kind: 'eye' },                                       // Victini
+    505: { on: ['fad83f'], color: '#ffdf53', kind: 'glow' },                                                // Watchog
+    549: { on: ['d73f00', 'ff6a39', 'ff875f'], color: '#ff7848', kind: 'glow' },                            // Lilligant
+    561: { on: ['f3c83e', 'caa428'], color: '#ffd54d', kind: 'psy' },                                       // Sigilyph
+    570: { on: ['ac1041'], color: '#ff2e70', kind: 'eye' },                                                 // Zorua
+    585: { on: ['e5a734', 'f7d154'], color: '#ffcf5b', kind: 'glow' },                                      // Deerling
+    586: { on: ['ff7097', 'bb2c4a'], color: '#ff688c', kind: 'glow' },                                      // Sawsbuck
+    608: { on: ['ffef5a', 'bc8728'], color: '#a58fff', kind: 'flame' },                                     // Lampent
+    648: { on: ['4294aa'], color: '#72e1ff', kind: 'psy' },                                                 // Meloetta
+    666: { on: ['df74a3'], color: '#ff90c1', kind: 'glow' },                                                // Vivillon
+    708: { on: ['d66f86'], color: '#ff90a9', kind: 'eye' },                                                 // Phantump
+    712: { on: ['ffc42d'], color: '#ffc941', kind: 'ice' },                                                 // Bergmite
+    790: { on: ['4159b4'], color: '#6c8aff', kind: 'psy' },                                                 // Cosmoem
+    796: { on: ['c27e41', 'd1a359'], color: '#ffc173', kind: 'spark' },                                     // Xurkitree
+    804: { on: ['ca5198', 'b0489b'], color: '#ff76d2', kind: 'glow' },                                      // Naganadel
+    826: { on: ['f7d342', 'c0a24f'], color: '#ffdc63', kind: 'psy' },                                       // Orbeetle
+    910: { on: ['ffc53f', 'ffef69'], color: '#ffe36b', kind: 'flame' },                                     // Crocalor
+    911: { on: ['ffa300', 'ffeb04'], color: '#ffcc1b', kind: 'flame' },                                     // Skeledirge
+    935: { on: ['ff36d3'], color: '#ff4ad7', kind: 'flame' },                                               // Charcadet
+    936: { on: ['cfac07'], color: '#ffd821', kind: 'flame' },                                               // Armarouge
+    939: { on: ['fff700', 'efc700', 'df8f00'], color: '#ffbf19', kind: 'spark' },                           // Bellibolt
+    989: { on: ['d73f00'], color: '#ff5c19', kind: 'spark' },                                               // Pelarena
+    1004: { on: ['f3b042'], color: '#ffbf57', kind: 'flame' },                                              // Chi-Yu
+    1010: { on: ['ff3263', 'b90730'], color: '#ff3564', kind: 'psy' },                                      // Ferroverdor
+    1012: { on: ['6fd973'], color: '#8eff93', kind: 'eye' },                                                // Poltchageist
+    1013: { on: ['6fd973'], color: '#8eff93', kind: 'eye' },                                                // Sinistcha
     // Megas (su sprite es otro número).
     100006: { on: ['68c0f0', '118dea', 'a4ddf9', '1898d0'], color: '#5fc8ff', kind: 'flame', parts: { c: ['#a4ddf9', '#5fc8ff', '#ffffff'] } }, // Mega Charizard X
     100150: { on: ['cc6898', 'dc98b8'], color: '#e08aff', kind: 'psy' },                                     // Mega Mewtwo Y
@@ -422,10 +469,28 @@ G.Aura = (() => {
         ctx.moveTo(p.x, p.y - s * 1.6); ctx.lineTo(p.x + s * 0.3, p.y - s * 0.3); ctx.lineTo(p.x + s * 1.6, p.y);
         ctx.lineTo(p.x + s * 0.3, p.y + s * 0.3); ctx.lineTo(p.x, p.y + s * 1.6); ctx.lineTo(p.x - s * 0.3, p.y + s * 0.3);
         ctx.lineTo(p.x - s * 1.6, p.y); ctx.lineTo(p.x - s * 0.3, p.y - s * 0.3); ctx.closePath(); ctx.fill();
+      } else if (p.P.heart) {
+        // Corazón: dos círculos y una punta.
+        const s = p.r * 1.1;
+        ctx.beginPath();
+        ctx.arc(p.x - s * 0.5, p.y - s * 0.3, s * 0.55, 0, 6.2832);
+        ctx.arc(p.x + s * 0.5, p.y - s * 0.3, s * 0.55, 0, 6.2832);
+        ctx.fill();
+        ctx.beginPath(); ctx.moveTo(p.x - s * 1.05, p.y - s * 0.15); ctx.lineTo(p.x, p.y + s * 1.1); ctx.lineTo(p.x + s * 1.05, p.y - s * 0.15); ctx.fill();
+      } else if (p.P.zzz) {
+        // Zzz de los dormilones: crece al subir (con borde, para que se lea sobre cualquier fondo).
+        ctx.font = 'bold ' + Math.round(8 + 8 * (p.t / p.life)) + 'px sans-serif'; ctx.textAlign = 'center';
+        ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,24,48,.6)'; ctx.strokeText('z', p.x, p.y);
+        ctx.fillText('z', p.x, p.y);
+      } else if (p.P.petal) {
+        // Hoja o pétalo que gira mientras cae.
+        ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r * 1.3, p.r * 0.65, p.t * 3, 0, 6.2832); ctx.fill();
       } else if (p.P.note) {
-        // Nota musical (Meloetta).
-        ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(p.r > 1.1 ? '\u266B' : '\u266A', p.x, p.y);
+        // Nota musical (Meloetta, Jigglypuff...), con borde.
+        ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+        const n = p.r > 2.2 ? '\u266B' : '\u266A';
+        ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,24,48,.55)'; ctx.strokeText(n, p.x, p.y);
+        ctx.fillText(n, p.x, p.y);
       } else if (p.P.ring) {
         ctx.strokeStyle = p.c; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.stroke();
@@ -483,7 +548,8 @@ G.Aura = (() => {
   // aura: luz suave de su color DETRÁS del cuerpo, que respira despacio (como en los juegos) ·
   // back: lo que va en el suelo, a ratos ('ripple' ondas, 'clock' el reloj de Dialga) con su color c ·
   // parts: partículas propias, que salen de su cuerpo a ratos (hue: cada una de un color del
-  // arcoíris · low: sólo de la parte de abajo · star / note: destellos de cuatro puntas o notas).
+  // arcoíris · low: sólo de la parte de abajo · star / note / heart / zzz / petal: destellos de
+  // cuatro puntas, notas, corazones, Zzz u hojas que giran).
   const SPECIAL = {
     150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', parts: { c: ['#e08aff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.4, rate: 2, glow: true, star: true } }, // Mewtwo: aura psíquica
     151: { parts: { c: ['#ffc4ee', '#ffffff'], up: 10, spread: 14, r: 2.2, life: 1.4, rate: 2, ring: true } },   // Mew: burbujas
@@ -547,6 +613,12 @@ G.Aura = (() => {
     896: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 20, r: 1.4, life: 1.6, rate: 4 } },            // Glastrier: nieve
     897: { aura: '#8f6bff', parts: { c: ['#1a1428', '#3a2c50'], up: 6, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true } }, // Spectrier: sombra
     898: { aura: '#7fe8a0', parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 20, r: 1.5, life: 1.6, rate: 3, leaf: true } }, // Calyrex: hojas
+    // Cuarta tanda: auras de los que en el anime y los juegos la tienen.
+    447: { aura: '#3f8fff' },                                                                                   // Riolu: aura
+    448: { aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 3, glow: true } }, // Lucario: aura
+    282: { aura: '#ff8ad8', parts: { c: ['#ff8ad8', '#ffc4ee'], up: 6, spread: 12, r: 2, life: 1.3, rate: 1.5, ring: true } }, // Gardevoir
+    100448: { aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 4, glow: true } }, // Mega Lucario
+    100282: { aura: '#ff8ad8' },                                                                                // Mega Gardevoir
     100006: { parts: { c: ['#a4ddf9', '#5fc8ff'], up: 30, spread: 16, r: 1.5, life: 0.8, rate: 6, glow: true } }, // Mega Charizard X: llamas azules
     100150: { aura: '#b060ff', back: 'ripple', c: '#e08aff' },                                                  // Mega Mewtwo Y
     100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true } }, // Mega Rayquaza
@@ -554,6 +626,104 @@ G.Aura = (() => {
     100382: { aura: '#3fa8ff', back: 'ripple', c: '#7fe8ff', parts: { c: ['#9fd8ff', '#d6f0ff'], up: 26, spread: 16, r: 1.8, life: 1.2, rate: 5, ring: true } }, // Kyogre primigenio
     100383: { aura: '#ff6a1a', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 34, spread: 20, r: 1.6, life: 0.9, rate: 8, glow: true } } // Groudon primigenio
   };
+
+  // Efectos con firma (24-10-2026): partículas según lo que es cada Pokémon conocido (los
+  // corazones de Chansey, las notas de Jigglypuff, los Zzz de Snorlax, las burbujas de los de
+  // agua...). Sólo los que no tienen ya un efecto propio arriba.
+  const SIG_PARTS = {
+    ember: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 24, spread: 16, r: 1.3, life: 0.9, rate: 4, glow: true },
+    spark: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 36, r: 1, life: 0.2, rate: 5, glow: true, bolt: true },
+    bubble: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.8, life: 1.3, rate: 3, ring: true },
+    snow: { c: ['#d8f1ff', '#ffffff'], up: -8, spread: 18, r: 1.3, life: 1.6, rate: 3 },
+    leaf: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true },
+    petal: { c: ['#ff9fcf', '#ffc4e2', '#ffffff'], up: -6, spread: 24, r: 2, life: 2, rate: 3, leaf: true, petal: true },
+    spore: { c: ['#d8e89f', '#f0f0c0'], up: 8, spread: 16, r: 1.4, life: 1.8, rate: 2.5, soft: true },
+    heart: { c: ['#ff6aa8', '#ff9fc8'], up: 12, spread: 16, r: 2.6, life: 1.6, rate: 2.5, heart: true },
+    note: { c: ['#ffffff', '#ffe680', '#9fe8ff'], up: 14, spread: 20, r: 1, life: 1.7, rate: 2.5, note: true },
+    zzz: { c: ['#ffffff', '#d6e8ff'], up: 12, spread: 6, r: 1, life: 2.2, rate: 1.4, zzz: true },
+    star: { c: ['#ffe680', '#ffb3e6', '#ffffff'], up: 6, spread: 18, r: 1.3, life: 1.3, rate: 2.5, glow: true, star: true },
+    psy: { c: ['#ff8ad8', '#ffc4ee'], up: 6, spread: 12, r: 2, life: 1.3, rate: 1.5, ring: true },
+    wisp: { c: ['#9b7bff', '#c9b5ff'], up: 12, spread: 12, r: 2.4, life: 1.6, rate: 2.5, soft: true },
+    smoke: { c: ['#1a1428', '#3a2c50'], up: 4, spread: 18, r: 2.8, life: 1.6, rate: 3, soft: true, low: true },
+    sand: { c: ['#d8b878', '#b89458'], up: 4, spread: 24, r: 1.8, life: 1, rate: 3, soft: true, low: true },
+    dragon: { c: ['#8f7bff', '#5fb8ff', '#ffffff'], up: 10, spread: 16, r: 1.3, life: 1.2, rate: 2.5, glow: true, star: true },
+    gas: { c: ['#c86bdc', '#a07bb0'], up: 6, spread: 20, r: 3, life: 1.6, rate: 2.5, soft: true },
+    slime: { c: ['#c9a0ff', '#e6d6ff'], up: -14, spread: 10, r: 1.6, life: 1.2, rate: 2 },
+    coin: { c: ['#ffd23f', '#fff2b0'], up: 8, spread: 14, r: 1.3, life: 1.2, rate: 2, glow: true, star: true }
+  };
+  const SIG = {
+    ember: [
+      37, 38, 58, 59, 126, 155, 156, 157, 228, 229, 240, 255, 256, 257, 322, 323,
+      467, 498, 499, 500, 513, 653, 654, 655, 667, 725, 726, 727, 813, 814, 815, 909,
+      910, 911, 935, 936, 1004
+    ],   // ascuas
+    spark: [
+      100, 101, 125, 179, 180, 181, 239, 417, 587, 595, 596, 694, 695, 702, 835, 836,
+      877, 921, 922, 923, 939
+    ],   // chispas
+    bubble: [
+      7, 8, 9, 54, 55, 60, 61, 62, 98, 99, 116, 117, 118, 119, 129, 130,
+      134, 158, 159, 160, 183, 184, 194, 195, 222, 223, 224, 226, 258, 259, 260, 393,
+      394, 395, 418, 419, 501, 502, 503, 535, 536, 537, 656, 657, 658, 692, 693, 728,
+      729, 816, 817, 818, 912, 913, 914
+    ],   // burbujas
+    snow: [
+      86, 87, 124, 215, 220, 221, 225, 238, 361, 362, 363, 364, 365, 459, 460, 461,
+      471, 473, 478, 582, 583, 584, 613, 614, 712, 713, 872, 873, 875, 996, 997, 998
+    ],   // nieve
+    leaf: [
+      1, 2, 69, 70, 71, 102, 103, 114, 465, 152, 153, 191, 192, 252, 253, 254,
+      273, 274, 275, 357, 387, 388, 389, 470, 495, 496, 497, 511, 512, 650, 651, 652,
+      722, 723, 724, 810, 811, 812, 906, 907, 908
+    ],   // hojas
+    petal: [
+      3, 43, 44, 45, 154, 182, 315, 406, 407, 420, 421, 492, 548, 549, 669, 670,
+      671
+    ],   // pétalos
+    spore: [
+      46, 47, 285, 286, 590, 187, 188, 189, 546, 547
+    ],   // esporas
+    heart: [
+      113, 242, 440, 370, 594, 531, 700
+    ],   // corazones
+    note: [
+      39, 40, 174, 131, 401, 402, 441, 358, 433, 730
+    ],   // notas
+    zzz: [
+      143, 446, 79, 80, 775
+    ],   // Zzz (dormilones)
+    star: [
+      35, 36, 173, 175, 176, 468, 209, 210, 303, 682, 684, 685, 868, 869, 707
+    ],   // destellos de hada
+    psy: [
+      63, 64, 65, 96, 97, 122, 177, 178, 202, 280, 281, 325, 326, 437, 475, 574,
+      575, 576, 577, 578, 579, 677, 678, 856, 857, 858
+    ],   // aros psíquicos
+    wisp: [
+      92, 93, 94, 353, 354, 425, 426, 708, 709, 710, 711, 885, 886, 887
+    ],   // fuegos fatuos
+    smoke: [
+      198, 430, 261, 262, 359, 509, 510, 559, 560, 570, 571, 629, 630, 633, 634, 635,
+      778, 859, 860, 861
+    ],   // humo oscuro
+    sand: [
+      27, 28, 50, 51, 74, 75, 76, 95, 104, 105, 111, 112, 246, 247, 248, 328,
+      329, 330, 443, 444, 445, 449, 450, 551, 552, 553, 769, 770
+    ],   // arena
+    dragon: [
+      147, 148, 149, 371, 372, 373, 610, 611, 612, 714, 715
+    ],   // destellos de dragón
+    gas: [
+      88, 89, 109, 110, 316, 317, 434, 435, 568, 569
+    ],   // gas
+    slime: [
+      704, 705, 706
+    ],   // gotas de baba
+    coin: [
+      52, 53, 863, 1000
+    ],   // monedas
+  };
+  for (const [k, list] of Object.entries(SIG)) for (const d of list) if (!SPECIAL[d]) SPECIAL[d] = { parts: SIG_PARTS[k] };
 
   const rgb = c => hex(c.slice(1)).join(',');
 

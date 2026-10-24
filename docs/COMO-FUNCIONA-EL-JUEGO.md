@@ -84,9 +84,9 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 
 - **Efectos visuales** (`js/entities/aura.js`): sólo en tu compañero (y los del grupo), jefes, legendarios y
   shiny; los demás enemigos, nada (rendimiento). Partes que brillan sacadas de los colores del sprite (`SPOTS`,
-  unos 180 Pokémon y megas; de noche brillan más; los shiny no, que tienen otros colores), partículas por tipo (`PARTS`),
+  más de 220 Pokémon y megas; de noche brillan más; los shiny no, que tienen otros colores), partículas por tipo (`PARTS`),
   contorno de luz (megas, racha ×1,25, jefes y legendarios), destello que cruza a los shiny y efectos propios de
-  legendarios y megas (`SPECIAL`, unos 65: aura suave detrás, reloj de Dialga, notas de Meloetta...). Todo va despacio y a ratos (`wave`); cuanto más grande es lo que brilla, más suave. Se quitan en Ajustes → Gráficos → "Efectos de los Pokémon" (`fx`) o a uno solo desde su ficha (`fxOff`). Con calidad "Baja", sin partículas.
+  legendarios y megas (`SPECIAL`, unos 70: aura suave detrás, reloj de Dialga, notas de Meloetta...) y efectos con firma para unos 370 Pokémon conocidos (`SIG`: corazones, notas, Zzz, burbujas, pétalos, esporas, ascuas...). Todo va despacio y a ratos (`wave`); cuanto más grande es lo que brilla, más suave. Se quitan en Ajustes → Gráficos → "Efectos de los Pokémon" (`fx`) o a uno solo desde su ficha (`fxOff`). Con calidad "Baja", sin partículas.
 
 ## Mapa
 
