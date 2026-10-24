@@ -11,10 +11,11 @@
  *   judgeEnd  { time, bosses }  aguantado ante Arceus (al acabar la partida)
  *   missionDone { daily }   (lo lanza claim)
  *   mega      megaevolucionas en la partida (systems/mega.js)
+ *   pevolve   { from, to }  tu compañero evoluciona en la partida (systems/evolve.js)
  *
  * y esto actualiza en la partida guardada:
  *   stats.bossesTotal · riftWins · evolutions · missionsDone · groupRuns
- *   stats.megas (veces que has megaevolucionado)
+ *   stats.megas (veces que has megaevolucionado) · pevolves (tu compañero ha evolucionado en la partida)
  *   stats.judged · judgeTime (mejor tiempo ante Arceus) · judgeBosses (mejor nº de jefes)
  *   legends{dex} · arenas{tipo} · itemsFound{id} · evoMoves{id} · ach{id}
  *   missions { day, daily[], rerolled, week, weekly[] }
@@ -164,6 +165,9 @@ G.Progress = (() => {
         break;
       case 'mega':
         S.megas = (S.megas || 0) + 1;
+        break;
+      case 'pevolve':
+        S.pevolves = (S.pevolves || 0) + 1;
         break;
       case 'judge':
         S.judged = (S.judged || 0) + 1;

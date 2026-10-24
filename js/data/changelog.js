@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
+    ['Tu compañero ya puede evolucionar en la partida: al llegar al nivel 12 (y al 24 si tiene otra fase), sale una carta dorada para evolucionar (Charmander a Charmeleon y luego a Charizard; Eevee te deja elegir). Cambian su aspecto, sus tipos y sus stats, y se quedan sus ataques, su objeto y sus mejoras. Es sólo en esa partida: tu colección no cambia. Nueva misión semanal y dos logros.',
+     'Your partner can now evolve during the run: at level 12 (and 24 if it has another stage), a golden card lets it evolve (Charmander into Charmeleon and then Charizard; Eevee lets you choose). Its look, types and stats change, and it keeps its moves, item and upgrades. It only lasts that run: your collection does not change. New weekly mission and two achievements.'],
     ["18 ataques exclusivos, uno por tipo: sólo los aprende su Pokémon, como en los juegos. Salen como carta especial al subir de nivel desde el nivel 10 (también con su mega o su forma primigenia), y en la ficha de la colección pone cuál es.",
      "18 signature moves, one per type: only their Pokémon learns them, like in the games. They're offered as a special card when you level up from level 10 (also with its Mega or primal form), and the collection page shows which one it is.",
      ['Ascenso Draco', 'Onda Mental', 'Fuego Sagrado', 'Pulso Primigenio', 'Filo del Abismo', 'Distorsión', 'Golpe Umbrío', 'Brecha Negra', 'Placaje Eléctrico', 'Sentencia', 'Tormenta de Diamantes', 'Sable Místico', 'Deseo Oculto', 'Geocontrol', 'Mundo Gélido', 'Fulgor Semilla', 'Giro Mortífero', 'Al Ataque']],

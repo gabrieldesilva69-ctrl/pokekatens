@@ -332,7 +332,7 @@ G.Game = (() => {
     bankTickets(false);
     save.stats.runs++;
     save.pused = save.pused || {};
-    save.pused[pl.dex] = (+save.pused[pl.dex] || 0) + 1;     // para "más usados" en la colección
+    save.pused[pl.startDex] = (+save.pused[pl.startDex] || 0) + 1;     // para "más usados" en la colección (con el que empezó)
     save.stats.totalKills += pl.kills;
     save.stats.bestTime = Math.max(save.stats.bestTime, Math.floor(time));
     if (coop) save.stats.bestGroupTime = Math.max(save.stats.bestGroupTime || 0, Math.floor(time));
@@ -354,7 +354,7 @@ G.Game = (() => {
     const mark = { t: Math.floor(time), lv: pl.level, kills: pl.kills };
     // Si la partida se ha tocado (ver clean()), no sube al ranking (sin avisar); lo demás, sí.
     const ok = clean();
-    const sent = ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.dex, shiny: pl.shiny }))
+    const sent = ok && !coop ? G.Ranking.submitSolo(Object.assign(mark, { dex: pl.startDex, shiny: pl.startShiny }))
                : ok && wasHost ? G.Ranking.submitGroup(Object.assign(mark, { members: team })) : null;
     if (sent) sent.then(b => { if (b && b.some(p => p !== 'a')) G.DB.commit(true); }).catch(() => {});
 

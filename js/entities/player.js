@@ -12,6 +12,8 @@ G.Player = class Player {
     this.mon = mon;
     this.dex = mon.dex;
     this.shiny = shiny && G.Sprites.hasShiny(mon.dex);
+    // Con el que empezó la run (si evoluciona en la partida, systems/evolve.js, dex cambia).
+    this.startDex = mon.dex; this.startShiny = this.shiny;
     // Los grandes, algo más pequeños y con el choque de uno normal (ver sprites.js).
     this.scale = G.Sprites.playerScale(mon.dex);
     this.anim = new G.Sprites.Animator(mon.dex, this.scale, this.shiny);

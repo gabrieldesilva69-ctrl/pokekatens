@@ -72,6 +72,9 @@ G.LevelUp = (() => {
       }
     }
 
+    // --- tu compañero evoluciona (systems/evolve.js): carta dorada cuando toca ---
+    out.push(...G.Evolve.cards(pl));
+
     // --- su ataque exclusivo (data/moves.js, `only`): carta especial desde el nivel ONLY_LVL ---
     if (pl.slots.length < pl.maxMoves && pl.level >= G.Moves.ONLY_LVL) {
       for (const id of G.Moves.exclusiveFor(pl.mon.dex)) {
@@ -146,8 +149,12 @@ G.LevelUp = (() => {
     const pool = candidates(pl);
     const picked = [];
     const used = new Set();
+    // Si tu compañero puede evolucionar, sus cartas salen siempre (como mucho 3).
+    for (let i = pool.findIndex(c => c.type === 'pevo'); i >= 0 && picked.length < n; i = pool.findIndex(c => c.type === 'pevo')) {
+      const c = pool.splice(i, 1)[0]; used.add(c.key); picked.push(c);
+    }
     // Si hay una evolución lista, su carta dorada sale siempre.
-    const evo = pool.findIndex(c => c.type === 'evo');
+    const evo = picked.length < n ? pool.findIndex(c => c.type === 'evo') : -1;
     if (evo >= 0) { const c = pool.splice(evo, 1)[0]; used.add(c.key); picked.push(c); }
     // El ataque exclusivo, en cuanto se puede, siempre sale (una carta).
     const ex = pool.findIndex(c => c.type === 'excl');

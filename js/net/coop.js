@@ -346,6 +346,9 @@ G.Coop = (() => {
           G.Mega.apply(m.pl, !!ev[1]);
           emit(['mg', from, ev[1] ? 1 : 0], from);
           break;
+        case 'pe':
+          if (G.DEX_BY[ev[1]]) { G.Evolve.apply(m.pl, +ev[1]); emit(['pe', from, +ev[1]], from); }
+          break;
         case 'bye': mateGone(from); break;
       }
     }
@@ -444,6 +447,7 @@ G.Coop = (() => {
       case 'ha': hostAway = !!ev[1]; updateAway(); break;
       case 'sh': api.shiny(ev[1]); break;
       case 'mg': { const m = mates.get(ev[1]); if (m) G.Mega.apply(m.pl, !!ev[2]); break; }
+      case 'pe': { const m = mates.get(ev[1]); if (m && G.DEX_BY[ev[2]]) G.Evolve.apply(m.pl, +ev[2]); break; }
       case 'ov': { const cb = api.over; const d = ev[1]; end(); cb(d); break; }
       case 'rift': case 'riftx': case 'arena': case 'aw': case 'al': G.Rift.onEvent(ev); break;
       case 'jd': case 'jk': G.Judgment.onEvent(ev); break;
@@ -470,6 +474,13 @@ G.Coop = (() => {
     if (!active || pl !== local) return;
     if (host) emit(['mg', me, on ? 1 : 0]);
     else outEv.push(['mg', on ? 1 : 0]);
+  }
+
+  /** Tu compañero ha evolucionado (systems/evolve.js): los demás cambian tu sprite y tus tipos. */
+  function evolve(pl, to) {
+    if (!active || pl !== local) return;
+    if (host) emit(['pe', me, to]);
+    else outEv.push(['pe', to]);
   }
 
   // invitado
@@ -574,7 +585,7 @@ G.Coop = (() => {
 
   return {
     ANIMS, COLORS, begin, end, leave, keeps, tick, players, puppets, xpFactor, scaleRate, scaleHp,
-    cast, mega, hit, status, hurtShown, enemyAdded, enemyGone, enemyShot, pickupAdded, pickupGone, say,
+    cast, mega, evolve, hit, status, hurtShown, enemyAdded, enemyGone, enemyShot, pickupAdded, pickupGone, say,
     propBroken, collected, shinyCaught, levelStart, localPicked, over, holdStart, holdEnd,
     /** Anfitrión: evento para todos. Invitado: evento para el anfitrión. */
     broadcast(ev) { emit(ev); },

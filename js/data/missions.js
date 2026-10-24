@@ -53,6 +53,8 @@ G.MissionDefs = (() => {
     { id: 'wmega', ev: 'mega', goals: [3], reward: { t10: 1, coins: 900 },
       need: () => !!G.DB.save && Object.keys(G.DB.save.bag || {}).some(G.Shop.isStone),
       text: n => `Megaevoluciona ${n} veces` },
+    { id: 'wpevolve', ev: 'pevolve', goals: [2, 3], reward: { t10: 1, coins: 900 },
+      text: n => `Haz evolucionar a tu compañero ${n} veces en la partida` },
     { id: 'wdaily', ev: 'missionDone', match: d => d.daily, goals: [8, 12], reward: { t10: 1, coins: 800 },
       text: n => `Completa ${n} misiones diarias` }
   ];
