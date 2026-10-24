@@ -294,10 +294,12 @@ G.Sprites = (() => {
           ctx.globalCompositeOperation = 'lighter';
           ctx.globalAlpha = prev * alpha * Math.min(1, opts.emit.level);
           ctx.shadowColor = opts.emit.color;
-          ctx.shadowBlur = 4 * k;
+          ctx.shadowBlur = 9 * k;
           ctx.drawImage(em, sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
           ctx.restore();
         }
+        // Dónde se ha dibujado (para soltar partículas desde el detalle: aura.js spotEmit).
+        this.lastDraw = { img: s.img, m, sx, sy, dx, dy, k };
       }
       if (opts.sweep != null && opts.sweep >= 0 && G.Aura) G.Aura.drawSweep(ctx, s.img, sx, sy, m.w, m.h, dx, dy, k, opts.sweep, alpha);
       if (opts.flash) {

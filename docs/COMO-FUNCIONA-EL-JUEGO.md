@@ -82,6 +82,12 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   Oscuridad con luz alrededor de tu Pokémon (Ajustes → "Noches oscuras"), la mitad de los enemigos son nocturnos del
   tramo (Fantasma, Siniestro y `NIGHT_DEX` de `js/data/enemies.js`) y +25 % de monedas y experiencia.
 
+- **Efectos visuales** (`js/entities/aura.js`): sólo en tu compañero (y los del grupo), jefes, legendarios y
+  shiny; los demás enemigos, nada (rendimiento). Partes que brillan sacadas de los colores del sprite (`SPOTS`,
+  unos 44 Pokémon; de noche brillan más; los shiny no, que tienen otros colores), partículas por tipo (`PARTS`),
+  contorno de luz (megas, racha ×1,25, jefes y legendarios), destello que cruza a los shiny y efectos propios de
+  legendarios (`SPECIAL`: reloj de Dialga, halo de Arceus, arcoíris de Ho-Oh...). Con calidad "Baja", sin partículas.
+
 ## Mapa
 
 - Las **rocas, cofres y la hierba alta** se rompen.

@@ -649,9 +649,13 @@ G.Player = class Player {
     const alpha = this.invuln > 0 && !this.dead ? (Math.floor(this.invuln * 18) % 2 ? 0.45 : 1) : 1;
     // Efectos (entities/aura.js): detalles que brillan, contorno, destello shiny y partículas de su tipo.
     const t = performance.now() / 1000, fx = G.Aura.forPlayer(this, t);
-    if (!this.dead) G.Aura.emit(this, this.mon.types, Math.min(0.05, t - (this._auraT || t)));
+    const fdt = Math.min(0.05, t - (this._auraT || t));
+    if (!this.dead) G.Aura.emit(this, this.mon.types, fdt);
+    G.Aura.special(ctx, this, this.anim.dex, this.y, t, fdt);
     this._auraT = t;
     this.anim.draw(ctx, this.x, this.y, Object.assign(fx, { flash: this.flash > 0, softFlash: true, alpha, color: '#ffcb3d' }));
+    if (fx.emit) G.Aura.spotEmit(this, this.anim, this.anim.dex, Math.min(0.05, t - (this._spotT || t)));
+    this._spotT = t;
 
     // Protección: burbuja; Reflejo / Pantalla Luz: aro amarillo / morado.
     if (!this.dead && (this.guardT > 0 || this.screens.physical || this.screens.special)) {
