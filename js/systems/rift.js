@@ -218,7 +218,8 @@ G.Rift = (() => {
       if (egg && !egg.overflow) G.Spawner.say(G.T('¡El legendario ha dejado un huevo!'), 3.4, true);
       // Muy de vez en cuando, la Megapiedra de tu compañero (cada jugador la suya).
       if (Math.random() < STONE_CHANCE && G.Mega.exists(pl.dex) && G.Shop.giveStone(pl.dex)) {
-        G.Spawner.say(G.I18n.f('¡El legendario ha dejado una {x}!', G.Mega.stoneName(pl.dex)), 3.6, true);
+        G.Spawner.say(G.I18n.f(G.Mega.primal(pl.dex) ? '¡El legendario ha dejado el {x}!' : '¡El legendario ha dejado una {x}!',
+          G.Mega.stoneName(pl.dex)), 3.6, true);
         G.Audio.sfx('shinyGet');
       }
     }

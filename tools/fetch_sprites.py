@@ -254,8 +254,9 @@ def main():
         if d not in metas and os.path.isdir(os.path.join(OUT_ASSETS, str(d))):
             metas[d] = json.load(open(os.path.join(CACHE, fn), encoding='utf-8'))
 
-    # Respeta los de Pokémon Reloaded ("rl":1, tools/import_reloaded.py) y los
-    # shiny hechos con sus colores ("rs":1, tools/shiny_from_reloaded.py).
+    # Respeta los de Pokémon Reloaded ("rl":1, tools/import_reloaded.py), las formas
+    # ("fm":1, tools/fetch_forms.py) y los shiny hechos con colores de Reloaded
+    # ("rs":1, tools/shiny_from_reloaded.py).
     if os.path.exists(OUT_META):
         for line in io.open(OUT_META, encoding='utf-8'):
             m = re.match(r'^  (\d+): (\{.*\}),$', line.rstrip('\n'))
@@ -263,7 +264,7 @@ def main():
                 continue
             dex, meta = int(m.group(1)), json.loads(m.group(2))
             if dex not in metas:
-                if meta.get('rl'):
+                if meta.get('rl') or meta.get('fm'):
                     metas[dex] = meta
             elif meta.get('rs') and not metas[dex].get('sh'):
                 metas[dex] = dict(metas[dex], sh=1, rs=1)
@@ -279,6 +280,7 @@ def main():
         ' *                 sm animaciones que le faltan al shiny',
         ' *                 rl=1 si viene de Pokémon Edición Reloaded (tools/import_reloaded.py)',
         ' *                 rs=1 shiny con colores de Reloaded (tools/shiny_from_reloaded.py)',
+        ' *                 fm=1 forma de SpriteCollab que el juego usa como mega (tools/fetch_forms.py)',
         ' * Por animación:  w,h fotograma · n fotogramas · r filas',
         ' *                 d duración de cada fotograma (1/60 s)',
         ' *                 ax,ay ancla al suelo dentro del fotograma',

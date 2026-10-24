@@ -431,11 +431,13 @@ G.HUD = (() => {
     ctx.textAlign = 'left';
     if (mb.on) {
       ctx.fillStyle = '#ffd23f';
-      ctx.fillText(G.T('MEGA') + ' ' + Math.ceil(pl.mega.t) + 's', px + 222, py + 38);
+      ctx.fillText(G.T(G.Mega.primal(pl.dex) ? 'PRIMIGENIO' : 'MEGA') + ' ' + Math.ceil(pl.mega.t) + 's', px + 222, py + 38);
     } else if (mb.ready && !touch) {
       const k = G.Input.keys('mega').find(Boolean);
       ctx.fillStyle = `rgba(255,138,216,${0.6 + 0.4 * pulse})`;
-      ctx.fillText(k ? G.I18n.f('¡{x}: megaevolucionar!', G.Input.keyName(k)) : G.T('¡Megaevolucionar!'), px + 222, py + 38);
+      const pr = G.Mega.primal(pl.dex);
+      ctx.fillText(k ? G.I18n.f(pr ? '¡{x}: forma primigenia!' : '¡{x}: megaevolucionar!', G.Input.keyName(k))
+        : G.T(pr ? '¡Forma primigenia!' : '¡Megaevolucionar!'), px + 222, py + 38);
     }
     if (touch && mb.ready) {
       const S = 52, sa = G.Touch.safeArea(), sp = G.Touch.spot('mega');

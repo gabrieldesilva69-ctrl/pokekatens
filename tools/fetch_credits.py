@@ -12,8 +12,12 @@ traducen con el credit_names.txt de la raiz del repo.
 """
 import io
 import os
+import sys
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from fetch_forms import FORMS   # noqa: E402  (primigenias: otra carpeta de SpriteCollab)
 
 RAW = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -69,9 +73,16 @@ def main():
 
     def one(dex):
         # Créditos del sprite normal y del shiny (que puede ser de otro artista).
-        txt = fetch(f'{RAW}/sprite/{dex:04d}/credits.txt')
-        if os.path.isdir(os.path.join(ASSETS, str(dex), 's')):
-            txt += '\n' + fetch(f'{RAW}/sprite/{dex:04d}/0000/0001/credits.txt')
+        # Las formas de tools/fetch_forms.py (primigenias...) están en su carpeta.
+        if dex in FORMS:
+            d, form = FORMS[dex]
+            txt = fetch(f'{RAW}/sprite/{d:04d}/{form}/credits.txt')
+            txt += '\n' + fetch(f'{RAW}/sprite/{d:04d}/{form}/0001/credits.txt')
+            dex = d
+        else:
+            txt = fetch(f'{RAW}/sprite/{dex:04d}/credits.txt')
+            if os.path.isdir(os.path.join(ASSETS, str(dex), 's')):
+                txt += '\n' + fetch(f'{RAW}/sprite/{dex:04d}/0000/0001/credits.txt')
         authors = []
         for line in txt.splitlines():
             parts = line.split('\t')

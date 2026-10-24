@@ -23,7 +23,9 @@ test('every Mega has its data, its sprites (normal and shiny) and only official 
   for (const d of dexes) {
     const m = G.MEGAS[d], meta = G.SPRITE_META[100000 + d];
     assert.ok(G.SPRITE_META[d], `${d}: la especie está en el juego`);
-    assert.ok(meta && meta.rl && meta.sh, `${d}: sprites de mega de Reloaded, con shiny`);
+    // Las primigenias (Kyogre, Groudon) son de SpriteCollab (tools/fetch_forms.py), con su orbe y su clima.
+    if (m.primal) assert.ok(meta && meta.fm && meta.sh && m.orb && m.oc && m.wx, `${d}: forma primigenia de SpriteCollab, con shiny`);
+    else assert.ok(meta && meta.rl && meta.sh, `${d}: sprites de mega de Reloaded, con shiny`);
     assert.ok(m.types.length >= 1 && m.types.every(t => TYPES.has(t)), `${d}: tipos ${m.types}`);
     for (const k of ['hp', 'spd', 'pa', 'sa', 'df', 'sd']) assert.equal(typeof m[k], 'number', `${d}.${k}`);
     for (const a of Object.keys(meta.a)) {
@@ -32,6 +34,8 @@ test('every Mega has its data, its sprites (normal and shiny) and only official 
     }
   }
   assert.equal(G.MEGAS[6].types.join('/'), 'fire/dragon');    // Mega Charizard X, la que dibuja Reloaded
+  assert.deepEqual(Object.keys(G.MEGAS).filter(d => G.MEGAS[d].primal), ['382', '383']);
+  assert.equal(G.MEGAS[383].types.join('/'), 'ground/fire');  // Groudon Primigenio
 });
 
 test('Mega Stones: a valid bag key, only the current partner\'s is for sale, and buying it keeps it for good', () => {

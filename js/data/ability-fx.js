@@ -98,6 +98,11 @@ G.AbilityFX = (() => {
     'run-away': { d: '+8 % de velocidad.', speed: () => 1.08 },
 
     // --- climas ---
+    // Formas primigenias (systems/mega.js): el clima lo pone la transformación.
+    'primordial-sea': { d: 'Llueve mientras dura su forma primigenia y los ataques de tipo Fuego casi no le hacen daño.',
+      inMul: (pl, type) => (type === 'fire' ? 0 : 1) },
+    'desolate-land': { d: 'Hace sol abrasador mientras dura su forma primigenia y los ataques de tipo Agua casi no le hacen daño.',
+      inMul: (pl, type) => (type === 'water' ? 0 : 1) },
     'drought': summon('sun', 'sol'), 'orichalcum-pulse': summon('sun', 'sol'), 'drizzle': summon('rain', 'lluvia'),
     'sand-stream': summon('sand', 'una tormenta de arena'), 'snow-warning': summon('snow', 'nieve'),
     'rain-dish': { d: 'Con lluvia recupera un 1,5 % de vida por segundo.', tick: (pl, dt) => { if (wx() === 'rain') heal(pl, 0.015 * dt); } },

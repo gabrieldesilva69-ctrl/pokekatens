@@ -11,6 +11,10 @@
  *     durante la partida: lo que la habilidad hace "al empezar" no se aplica).
  *     No cambian el tamaño con el que choca, la vida ni los ataques.
  *   - En cooperativo los demás ven tu mega (G.Coop.mega → evento 'mg').
+ *   - Kyogre y Groudon (24-10-2026): en vez de mega, su forma primigenia, igual pero
+ *     con su Orbe (Azul / Rojo) en vez de Megapiedra (primal:1 en data/megas.js;
+ *     sprites de SpriteCollab, tools/fetch_forms.py). Mientras dura, ponen lluvia /
+ *     sol (wx), que en grupo manda el anfitrión.
  */
 G.Mega = (() => {
   const KILLS = 150, BOSS = 25, DUR = 45;
@@ -23,12 +27,18 @@ G.Mega = (() => {
   const can = dex => exists(dex) && G.Shop.hasStone(dex);
 
   function suffix(dex) { const d = data(dex); return d && d.sfx ? ' ' + d.sfx : ''; }
-  /** "Mega Charizard X" */
-  function name(dex) { return G.I18n.f('Mega {x}', G.DEX_BY[dex].name + suffix(dex)); }
-  /** "Megapiedra de Charizard X" */
-  function stoneName(dex) { return G.I18n.f('Megapiedra de {x}', G.DEX_BY[dex].name + suffix(dex)); }
-  /** Icono de su Megapiedra: del color del primer tipo de la mega. */
-  function stoneIcon(dex) { const d = data(dex); return 'stone:' + (d ? d.types[0] : 'normal'); }
+  /** ¿Es una forma primigenia (Kyogre, Groudon) y no una mega? */
+  const primal = dex => !!(data(dex) && data(dex).primal);
+  /** "Mega Charizard X" · "Kyogre Primigenio" */
+  function name(dex) {
+    return G.I18n.f(primal(dex) ? '{x} Primigenio' : 'Mega {x}', G.DEX_BY[dex].name + suffix(dex));
+  }
+  /** "Megapiedra de Charizard X" · "Orbe Azul" */
+  function stoneName(dex) {
+    return primal(dex) ? G.T(data(dex).orb) : G.I18n.f('Megapiedra de {x}', G.DEX_BY[dex].name + suffix(dex));
+  }
+  /** Icono de su Megapiedra: del color del primer tipo de la mega (el orbe, del suyo). */
+  function stoneIcon(dex) { const d = data(dex); return 'stone:' + (d ? d.oc || d.types[0] : 'normal'); }
 
   /** Los stats de la mega con la naturaleza de tu Pokémon (la misma proporción). */
   function megaMon(pl) {
@@ -150,9 +160,12 @@ G.Mega = (() => {
       if (pl === G.Game.player) {
         G.Game.flash('#ffffff', 0.5);
         G.Camera.kick(0.6);
-        G.Spawner.say(G.I18n.f('¡{x} ha megaevolucionado!', G.DEX_BY[pl.dex].name) + ' → ' + name(pl.dex), 2.6, true);
+        G.Spawner.say(G.I18n.f(d.primal ? '¡{x} ha regresado a su forma primigenia!' : '¡{x} ha megaevolucionado!',
+          G.DEX_BY[pl.dex].name) + ' → ' + name(pl.dex), 2.6, true);
       }
-      G.Audio.cry(pl.dex, { shiny: pl.shiny, mega: true });
+      // Su clima, lo que dure (el anfitrión lo pone para todos: G.Weather.cast).
+      if (d.wx && (pl === G.Game.player || G.Coop.isHost)) G.Weather.cast(d.wx, DUR);
+      G.Audio.cry(pl.dex, { shiny: pl.shiny, mega: !d.primal });     // las primigenias, con el de siempre
     } else {
       const o = pl._noMega;
       if (pl.abil !== o.abil) {
@@ -175,6 +188,6 @@ G.Mega = (() => {
       : { k: pl.mega.fill / KILLS, on: false, ready: pl.mega.fill >= KILLS };
   }
 
-  return { KILLS, BOSS, DUR, ID, data, exists, can, name, stoneName, stoneIcon, setup, ready, onKill, press, update, apply, bar,
+  return { KILLS, BOSS, DUR, ID, data, exists, can, primal, name, stoneName, stoneIcon, setup, ready, onKill, press, update, apply, bar,
            megaScale, height };
 })();

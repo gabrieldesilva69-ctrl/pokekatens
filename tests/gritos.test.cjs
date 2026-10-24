@@ -17,7 +17,7 @@ function load() {
 test('every Pokémon in the game has its cry or is listed as missing (tools/import_cries.py)', () => {
   const G = load();
   const dexes = Object.keys(G.SPRITE_META).map(Number).filter(d => d <= 1025)
-    .concat(Object.keys(G.MEGAS).map(d => 100000 + +d));     // y las megas
+    .concat(Object.keys(G.MEGAS).filter(d => !G.MEGAS[d].primal).map(d => 100000 + +d));     // y las megas (las primigenias usan el de siempre)
   for (const d of dexes) {
     const file = fs.existsSync(path.join(ROOT, 'assets', 'cries', d + '.mp3'));
     assert.ok(file !== G.CRY_MISSING.has(d), `${d}: ${file ? 'tiene grito y está en CRY_MISSING' : 'sin grito y fuera de CRY_MISSING'}`);

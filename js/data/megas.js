@@ -3,6 +3,8 @@
  * Edición Reloaded en assets/pokemon/<100000 + dex>/). Una mega por especie.
  * Por especie: slug de PokeAPI · sfx "X"/"Y" si la especie tiene dos ·
  * types · hp/spd/pa/sa/df/sd como en pokedex.js · ab habilidad de mega.
+ * Las formas primigenias (Kyogre, Groudon) van como megas con primal:1, su
+ * orbe (orb, nombre; oc, tipo del color del icono) y el clima que ponen (wx).
  */
 G.MEGAS = {
   3: {"slug":"venusaur-mega","sfx":"","types":["grass","poison"],"hp":106,"spd":112,"pa":1.25,"sa":1.37,"df":123,"sd":120,"ab":"thick-fat"},
@@ -51,6 +53,8 @@ G.MEGAS = {
   376: {"slug":"metagross-mega","sfx":"","types":["steel","psychic"],"hp":106,"spd":124,"pa":1.5,"sa":1.28,"df":150,"sd":110,"ab":"tough-claws"},
   380: {"slug":"latias-mega","sfx":"","types":["dragon","psychic"],"hp":106,"spd":124,"pa":1.25,"sa":1.47,"df":120,"sd":150,"ab":"levitate"},
   381: {"slug":"latios-mega","sfx":"","types":["dragon","psychic"],"hp":106,"spd":124,"pa":1.42,"sa":1.58,"df":100,"sd":120,"ab":"levitate"},
+  382: {"slug":"kyogre-primal","sfx":"","types":["water"],"hp":115,"spd":116,"pa":1.52,"sa":1.69,"df":90,"sd":160,"ab":"primordial-sea","primal":1,"orb":"Orbe Azul","oc":"water","wx":"rain"},
+  383: {"slug":"groudon-primal","sfx":"","types":["ground","fire"],"hp":115,"spd":116,"pa":1.69,"sa":1.52,"df":160,"sd":90,"ab":"desolate-land","primal":1,"orb":"Orbe Rojo","oc":"fire","wx":"sun"},
   384: {"slug":"rayquaza-mega","sfx":"","types":["dragon","flying"],"hp":117,"spd":126,"pa":1.69,"sa":1.69,"df":100,"sd":100,"ab":"delta-stream"},
   398: {"slug":"staraptor-mega","sfx":"","types":["fighting","flying"],"hp":108,"spd":124,"pa":1.47,"sa":1.03,"df":100,"sd":90,"ab":"contrary"},
   428: {"slug":"lopunny-mega","sfx":"","types":["normal","fighting"],"hp":99,"spd":135,"pa":1.45,"sa":1.0,"df":94,"sd":96,"ab":"scrappy"},

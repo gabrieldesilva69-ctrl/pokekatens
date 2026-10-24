@@ -559,7 +559,8 @@ G.ShopUI = (() => {
     const st = G.Shop.stoneForSale();
     if (st) {
       h += row(G.Icons.html(G.Mega.stoneIcon(st), 32), G.Mega.stoneName(st),
-        G.I18n.f('Con ella, {x} puede megaevolucionar en la partida. No se gasta.', G.DEX_BY[st].name),
+        G.I18n.f(G.Mega.primal(st) ? 'Con él, {x} puede pasar a su forma primigenia en la partida. No se gasta.'
+          : 'Con ella, {x} puede megaevolucionar en la partida. No se gasta.', G.DEX_BY[st].name),
         buyBtn(G.Shop.stoneId(st), G.Shop.STONE_PRICE));
     }
     h += `</div><h3 style="margin:14px 0 6px">${G.T('MT de hoy')}</h3>
@@ -593,7 +594,8 @@ G.ShopUI = (() => {
     }
     for (const dex of stones) {
       h += row(G.Icons.html(G.Mega.stoneIcon(dex), 32), G.Mega.stoneName(dex),
-        G.I18n.f('Se usa sola: con {x} de compañero, llena la barra de mega en la partida.', G.DEX_BY[dex].name), '');
+        G.I18n.f(G.Mega.primal(dex) ? 'Se usa solo: con {x} de compañero, llena la barra de la forma primigenia en la partida.'
+          : 'Se usa sola: con {x} de compañero, llena la barra de mega en la partida.', G.DEX_BY[dex].name), '');
     }
     for (const id of tms) {
       // Cuántos de tus Pokémon la pueden aprender.

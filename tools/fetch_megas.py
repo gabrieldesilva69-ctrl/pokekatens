@@ -13,6 +13,11 @@ de Charizard es la X y de Mewtwo la Y (la que dibuja: delgada, la cola en la
 cabeza); de Absol, Garchomp y Lucario, la de X/Y (no la Z).
 
 Los stats se convierten con la misma fórmula que tools/fetch_pokedex.py.
+
+Además, las formas primigenias de Kyogre y Groudon (PRIMALS), que el juego usa
+como megas: sprites de SpriteCollab (tools/fetch_forms.py), primal:1, su orbe
+(orb: nombre en español; oc: tipo que da color al icono) y el clima que ponen
+mientras duran (wx).
 """
 import io
 import json
@@ -30,6 +35,9 @@ OUT = os.path.join(ROOT, 'js', 'data', 'megas.js')
 META = os.path.join(ROOT, 'js', 'data', 'sprites-meta.js')
 # La forma que dibuja Reloaded cuando la especie tiene dos (sufijo en PokeAPI y en el nombre).
 WHICH = {6: 'x', 150: 'y'}
+# Formas primigenias: dex -> (slug de PokeAPI, orbe, color del icono, clima)
+PRIMALS = {382: ('kyogre-primal', 'Orbe Azul', 'water', 'rain'),
+           383: ('groudon-primal', 'Orbe Rojo', 'fire', 'sun')}
 
 
 def usable():
@@ -37,6 +45,29 @@ def usable():
     game = {int(d) for d in re.findall(r'^  (\d+): \{', text, re.M) if int(d) <= 1025}
     have = ir.reloaded_megas()
     return [d for d in ir.OFFICIAL_MEGAS if d in game and ir.mega_rid(d, have) is not None]
+
+
+def stats(p):
+    base = {s['stat']['name']: s['base_stat'] for s in p['stats']}
+    return {
+        'types': [t['type']['name'] for t in p['types']],
+        'hp': round(70 + base['hp'] * 0.45),
+        'spd': round(78 + base['speed'] * 0.42),
+        'pa': round(0.70 + base['attack'] / 100 * 0.55, 2),
+        'sa': round(0.70 + base['special-attack'] / 100 * 0.55, 2),
+        'df': base['defense'], 'sd': base['special-defense'],
+        # Las de Leyendas Z-A aún no traen habilidad en PokeAPI: se queda la suya.
+        'ab': p['abilities'][0]['ability']['name'] if p['abilities'] else '',
+    }
+
+
+def primal(dex):
+    slug, orb, oc, wx = PRIMALS[dex]
+    p = get(f'{API}/pokemon/{slug}')
+    if not p:
+        print(f'  ! {dex}: PokeAPI no tiene {slug}')
+        return None
+    return dict({'dex': dex, 'slug': slug, 'sfx': ''}, **stats(p), primal=1, orb=orb, oc=oc, wx=wx)
 
 
 def one(dex):
@@ -50,18 +81,7 @@ def one(dex):
         print(f'  ! {dex}: PokeAPI no tiene su mega ({names})')
         return None
     p = get(f'{API}/pokemon/{want[0]}')
-    base = {s['stat']['name']: s['base_stat'] for s in p['stats']}
-    return {
-        'dex': dex, 'slug': want[0], 'sfx': WHICH.get(dex, '').upper(),
-        'types': [t['type']['name'] for t in p['types']],
-        'hp': round(70 + base['hp'] * 0.45),
-        'spd': round(78 + base['speed'] * 0.42),
-        'pa': round(0.70 + base['attack'] / 100 * 0.55, 2),
-        'sa': round(0.70 + base['special-attack'] / 100 * 0.55, 2),
-        'df': base['defense'], 'sd': base['special-defense'],
-        # Las de Leyendas Z-A aún no traen habilidad en PokeAPI: se queda la suya.
-        'ab': p['abilities'][0]['ability']['name'] if p['abilities'] else '',
-    }
+    return dict({'dex': dex, 'slug': want[0], 'sfx': WHICH.get(dex, '').upper()}, **stats(p))
 
 
 def main():
@@ -69,12 +89,17 @@ def main():
     print(f'{len(dexes)} megas...')
     with ThreadPoolExecutor(max_workers=8) as ex:
         rows = [r for r in ex.map(one, dexes) if r]
+    text = io.open(META, encoding='utf-8').read()
+    rows += [r for r in map(primal, [d for d in PRIMALS if f'\n  {100000 + d}: {{' in text]) if r]
+    rows.sort(key=lambda r: r['dex'])
     lines = [
         '/* ============ megas.js — GENERADO, no editar a mano ============',
         ' * Lo produce tools/fetch_megas.py (datos de PokeAPI, sprites de Pokémon',
         ' * Edición Reloaded en assets/pokemon/<100000 + dex>/). Una mega por especie.',
         ' * Por especie: slug de PokeAPI · sfx "X"/"Y" si la especie tiene dos ·',
         ' * types · hp/spd/pa/sa/df/sd como en pokedex.js · ab habilidad de mega.',
+        ' * Las formas primigenias (Kyogre, Groudon) van como megas con primal:1, su',
+        ' * orbe (orb, nombre; oc, tipo del color del icono) y el clima que ponen (wx).',
         ' */',
         'G.MEGAS = {',
     ]

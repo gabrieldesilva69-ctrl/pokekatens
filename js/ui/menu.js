@@ -327,7 +327,8 @@ G.MenuUI = (() => {
         <p class="sub center" style="margin:6px 0 0">Pega mejor con ataques <b class="gold">${G.Stats.sideOf(q) === 'special' ? 'especiales' : 'físicos'}</b></p>
         ${monExtras(dex)}
         ${G.Mega.exists(dex) ? `<p class="sub center" style="margin:6px 0 0">${G.Icons.html(G.Mega.stoneIcon(dex), 14)} ${G.Mega.name(dex)}: ${G.UI.typeChips(G.Mega.data(dex).types)}
-          · ${G.Shop.hasStone(dex) ? `<b class="gold">${G.T('tienes su Megapiedra')}</b>` : G.T('sin Megapiedra (Tienda Kecleon)')}</p>` : ''}
+          · ${G.Shop.hasStone(dex) ? `<b class="gold">${G.T(G.Mega.primal(dex) ? 'tienes su Orbe' : 'tienes su Megapiedra')}</b>`
+            : G.T(G.Mega.primal(dex) ? 'sin Orbe (Tienda Kecleon)' : 'sin Megapiedra (Tienda Kecleon)')}</p>` : ''}
         ${p.types.length === 1 ? `<p class="sub center" style="margin:2px 0 0">Monotipo: +20 % de daño con sus ataques de tipo ${G.U.TYPE_NAME[p.types[0]]}</p>` : ''}
         <p style="font-size:14px;margin:10px 0 4px">Empieza con <b class="gold">${G.T(G.Moves.BY_ID[G.startMoveOf(dex)].name, 'move')}</b></p>
         <p class="move-icons" title="Movimientos que puede aprender">

@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
+    ['Groudon y Kyogre ya pueden pasar a su forma primigenia en la partida, como una mega: compra su Orbe Rojo u Orbe Azul en la Tienda Kecleon (o consíguelo, muy de vez en cuando, al ganar a un legendario en una grieta). Mientras dura, Groudon pone sol abrasador y Kyogre, lluvia.',
+     'Groudon and Kyogre can now take their primal form during the run, like a Mega: buy their Red Orb or Blue Orb in the Kecleon Shop (or get it, very rarely, by beating a legendary in a rift). While it lasts, Groudon brings scorching sun and Kyogre, rain.'],
     ['Novedades: las listas largas (ataques, MT, objetos...) salen resumidas en una línea, con un botón «Ver cuáles» para desplegarlas.',
      'News: long lists (moves, TMs, items...) are summed up in one line, with a “Show which” button to expand them.']
   ], fix: [
