@@ -97,7 +97,7 @@ G.Aura = (() => {
     3: { on: ['ff875f', 'd73f00'], color: '#ff9fb0', kind: 'glow' },                                          // Venusaur: la flor
     81: { on: ['d73f00', '0067b7'], color: '#7fd8ff', kind: 'spark', parts: { c: ['#d6f0ff', '#7fd8ff'] } },   // Magnemite: los tornillos
     82: { on: ['1f9fe7', '0067b7', 'd73f00'], color: '#7fd8ff', kind: 'spark', parts: { c: ['#d6f0ff', '#7fd8ff'] } }, // Magneton
-    136: { on: ['fff700', 'dfb700'], color: '#ffb347', kind: 'flame' },                                        // Flareon: el pelo
+    136: { on: ['fff700', 'dfb700'], soft: true, color: '#ffb347', kind: 'flame' },                                        // Flareon: el pelo
     163: { on: ['d73f00', 'ff875f'], color: '#ff7a4a', kind: 'eye' },                                         // Hoothoot: los ojos
     164: { on: ['e73f67', 'ff8faf', 'ffc7d7'], color: '#ff5a8a', kind: 'eye' },                               // Noctowl: los ojos
     176: { on: ['9f0000', 'd73f00', '0067b7', '1f9fe7'], keep: true, color: '#ffffff', kind: 'glow' },        // Togetic: los triángulos
@@ -133,7 +133,7 @@ G.Aura = (() => {
     605: { on: ['38ce69', '40f6a5', 'd24400', 'f4ba0b'], keep: true, color: '#9fffc0', kind: 'glow' },        // Elgyem: las luces de los dedos
     606: { on: ['6e9e3e', '82c242'], keep: true, color: '#9fff7f', kind: 'glow' },                            // Beheeyem: las luces de los dedos
     615: { on: ['83d5ee', '18c2f8', 'b7cfff'], color: '#9fe8ff', kind: 'ice' },                               // Cryogonal
-    636: { on: ['d73f00', '9f0000', 'ff875f'], color: '#ff6a1a', kind: 'flame' },                             // Larvesta: los cuernos
+    636: { on: ['d73f00', '9f0000', 'ff875f'], soft: true, color: '#ff6a1a', kind: 'flame' },                             // Larvesta: los cuernos
     686: { on: ['fdec3a', 'f3b761'], keep: true, color: '#ffe680', kind: 'glow' },                            // Inkay: las luces
     687: { on: ['f6efb7', 'c5ae67', 'db3f8a'], keep: true, color: '#ffe680', kind: 'glow' },                  // Malamar: las luces
     698: { on: ['f1f0a0', 'f6bdb6'], keep: true, color: '#fff2b0', kind: 'glow' },                            // Amaura: los cristales
@@ -144,9 +144,9 @@ G.Aura = (() => {
     755: { on: ['cfec7a', 'dba1e2', 'c583cd'], keep: true, color: '#e0b0ff', kind: 'glow' },                  // Morelull: luz de seta
     757: { on: ['e7523f', 'a5423d'], color: '#ff6a8a', kind: 'glow' },                                        // Salandit: las rayas
     758: { on: ['e329ad', 'f974d4'], color: '#ff6ad8', kind: 'glow' },                                        // Salazzle: las rayas
-    776: { on: ['ffee41', 'be9113'], color: '#ffd23f', kind: 'flame' },                                       // Turtonator: el caparazón
+    776: { on: ['ffee41', 'be9113'], soft: true, color: '#ffd23f', kind: 'flame' },                                       // Turtonator: el caparazón
     777: { on: ['f7df5f', 'cfa72f'], color: '#ffe14d', kind: 'spark' },                                       // Togedemaru: las púas
-    851: { on: ['ffd901', 'fc6e11', 'e49616'], color: '#ffb347', kind: 'flame' },                             // Centiskorch: las llamas
+    851: { on: ['ffd901', 'fc6e11', 'e49616'], soft: true, color: '#ffb347', kind: 'flame' },                             // Centiskorch: las llamas
     854: { on: ['69bcac', 'a8dcd4'], color: '#9fe8d0', kind: 'glow' },                                        // Sinistea: el té
     855: { on: ['69bcac', 'a8dcd4'], color: '#9fe8d0', kind: 'glow' },                                        // Polteageist: el té
     873: { on: ['e9ffda', '9fca90'], color: '#9fe8ff', kind: 'ice' },                                         // Frosmoth
@@ -253,8 +253,8 @@ G.Aura = (() => {
     789: { on: ['d8b000', 'eeed83', '28afea', '8dd5f3'], keep: true, color: '#9fe8ff', kind: 'glow' },         // Cosmog: la nube de estrellas
     793: { on: ['6abde0', '8fdfff', '227da4'], color: '#9fe8ff', kind: 'glow' },                              // Nihilego
     801: { on: ['d3676d', 'ffd5d6', 'e6d05a'], keep: true, color: '#ff9fb0', kind: 'glow' },                  // Magearna: el corazón
-    809: { on: ['f6be13', 'd68414'], color: '#ffd23f', kind: 'glow' },                                        // Melmetal: la tuerca
-    894: { on: ['fef9b4'], color: '#ffe14d', kind: 'spark' },                                                  // Regieleki
+    809: { on: ['f6be13', 'd68414'], soft: true, color: '#ffd23f', kind: 'glow' },                                        // Melmetal: la tuerca
+    894: { on: ['fef9b4'], soft: true, color: '#ffe14d', kind: 'spark' },                                                  // Regieleki
     897: { on: ['f7d1fc', 'af97d9'], color: '#c9b5ff', kind: 'glow' },                                        // Spectrier: la crin
     100382: { on: ['fff3ad', 'f5c26b', 'bc708c'], color: '#7fe8ff', kind: 'glow' },                          // Kyogre primigenio: las líneas
     100383: { on: ['fef9bb'], color: '#ffd27f', kind: 'flame' }                                               // Groudon primigenio: la lava
@@ -313,11 +313,14 @@ G.Aura = (() => {
       // Con keep, sus propios colores (aclarados).
       const res = x.createImageData(w, h), r = res.data, tint = hex(rule.color.slice(1)).map(v => Math.round(v + (255 - v) * 0.5));
       const pts = new Map();
-      // Cuanto más grande es lo que brilla (en proporción al cuerpo), más suave: la tuerca de
-      // Melmetal o el cuerpo de Regieleki no pueden brillar como las mejillas de Pikachu.
-      let lit = 0, body = 0;
-      for (let i = 0; i < w * h; i++) { if (d[i * 4 + 3] > 40) body++; if (keep[i]) lit++; }
-      const soft = Math.round(255 * Math.max(0.35, Math.min(1, 0.12 / Math.max(0.001, lit / Math.max(1, body)))));
+      // soft: los que brillan en una zona muy grande (la tuerca de Melmetal, el cuerpo de
+      // Regieleki), más suave cuanto más grande. Los demás, a tope, como en la primera versión.
+      let soft = 255;
+      if (rule.soft) {
+        let lit = 0, body = 0;
+        for (let i = 0; i < w * h; i++) { if (d[i * 4 + 3] > 40) body++; if (keep[i]) lit++; }
+        soft = Math.round(255 * Math.max(0.35, Math.min(1, 0.12 / Math.max(0.001, lit / Math.max(1, body)))));
+      }
       let any = false;
       for (let i = 0; i < w * h; i++) {
         if (!keep[i]) continue;
@@ -358,8 +361,9 @@ G.Aura = (() => {
     if (rule.kind === 'flame') return 0.6 + 0.25 * Math.sin(t * 13) + 0.15 * Math.sin(t * 31);
     // Las chispas: tranquilas y, de vez en cuando, un chispazo.
     if (rule.kind === 'spark') { const w = wave(t, seed, 4.5, 1.1); return 0.35 + 0.65 * w * (0.85 + 0.15 * Math.sin(t * 40)); }
-    if (rule.kind === 'eye') return 0.55 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + seed));
-    return 0.5 + 0.4 * (0.5 + 0.5 * Math.sin(t * 1.6 + seed));
+    // Ojos y detalles: tan brillantes como en la primera versión, pero respirando más despacio.
+    if (rule.kind === 'eye') return 0.75 + 0.25 * Math.sin(t * 1.3 + seed);
+    return 0.7 + 0.3 * Math.sin(t * 1.6 + seed);
   }
 
   // Partículas que salen del propio detalle, según su clase.
@@ -570,7 +574,7 @@ G.Aura = (() => {
     145: { parts: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 40, r: 1, life: 0.2, rate: 7, glow: true, bolt: true } }, // Zapdos: rayos
     146: { parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 30, spread: 20, r: 1.5, life: 0.9, rate: 7, glow: true } }, // Moltres: ascuas
     243: { parts: { c: ['#fffbe0', '#c9b5ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 6, glow: true, bolt: true } }, // Raikou: rayos
-    244: { aura: '#ff7a2a', parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 16, r: 1.4, life: 0.8, rate: 5, glow: true } }, // Entei: volcán
+    244: { back: 'ripple', c: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 16, r: 1.4, life: 0.8, rate: 5, glow: true } }, // Entei: volcán
     245: { back: 'ripple', c: '#9fe8ff', parts: { c: ['#d6f0ff', '#b8a8ff', '#ffffff'], up: 6, spread: 24, r: 1.2, life: 1.4, rate: 5, glow: true, star: true } }, // Suicune: aurora
     251: { parts: { c: ['#5fe08a', '#a5f07a'], up: -8, spread: 20, r: 1.6, life: 1.6, rate: 4, leaf: true } },  // Celebi: hojas
     385: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 22, r: 1.6, life: 1.1, rate: 4, glow: true, star: true } }, // Jirachi: estrellas
@@ -592,7 +596,7 @@ G.Aura = (() => {
     800: { parts: { hue: true, up: 10, spread: 22, r: 1.4, life: 1, rate: 6, glow: true, star: true } },        // Necrozma: luz del prisma
     802: { parts: { c: ['#1a1428', '#2f3a2f'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 4, soft: true, low: true } }, // Marshadow: sombra
     807: { parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 7, glow: true, bolt: true } }, // Zeraora: rayos
-    890: { aura: '#ff3a5a', parts: { c: ['#ff5a6a', '#b04aff'], up: 20, spread: 18, r: 2, life: 1.1, rate: 5, glow: true } }, // Eternatus: energía
+    890: { back: 'ripple', c: '#ff5a6a', parts: { c: ['#ff5a6a', '#b04aff'], up: 20, spread: 18, r: 2, life: 1.1, rate: 5, glow: true } }, // Eternatus: energía
     // Tercera tanda.
     641: { parts: { c: ['#ffffff', '#c9f0d6'], up: 2, spread: 40, r: 2.2, life: 1, rate: 4, soft: true } },    // Tornadus: viento
     642: { parts: { c: ['#fffbe0', '#c9b5ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 6, glow: true, bolt: true } }, // Thundurus: rayos
@@ -812,7 +816,7 @@ G.Aura = (() => {
     // De noche (systems/night.js), los detalles brillan más.
     const night = G.Night ? G.Night.level(G.Game.st.time || 0) : 0;
     const d = pl.anim ? pl.anim.dex : pl.dex;       // el del sprite: megas y primigenios llevan otro
-    if (SPOTS[d] && !pl.dead) o.emit = { dex: d, level: emitLevel(d, t, seedOf(pl)) * (1 + 0.6 * night), color: spotColor(d) };
+    if (SPOTS[d] && !pl.dead) o.emit = { dex: d, level: emitLevel(d, t, seedOf(pl)) * (1 + 0.8 * night), color: spotColor(d) };
     if (pl.shiny) { const s = sweep(t, (pl.dex % 7) * 0.4); if (s >= 0) o.sweep = s; }
     if (pl.megaOn) o.glow = G.Mega.primal(pl.dex) ? '#ff9a3d' : '#ff8ad8';
     else if (pl === G.Game.player && G.Streak.mul() >= 1.25) o.glow = '#ffd23f';
