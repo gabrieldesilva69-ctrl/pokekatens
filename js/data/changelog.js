@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-24', title: ['PokeKatens: novedades más cortas', 'PokeKatens: shorter news'], new: [
+    ['Rachas: cada enemigo que cae sube tu racha y un golpe la corta. Con 50 seguidos las monedas que recoges valen ×1,1; con 150, ×1,25, y con 300, ×1,5. Se ve debajo de tu vida, la mejor sale en el resumen de la partida y hay dos logros nuevos.',
+     'Streaks: every enemy that falls raises your streak and a hit breaks it. With 50 in a row the coins you pick up are worth ×1.1; with 150, ×1.25, and with 300, ×1.5. It shows under your HP, the best one appears in the run summary and there are two new achievements.'],
     ['Pokédex de vistos y derrotados: el juego apunta cada Pokémon que ves y cada uno que derrotas en tus partidas (también en grupo). En la Colección se ven aunque no los tengas, con una marca los derrotados, y hay filtros nuevos y cinco logros nuevos.',
      'Pokédex of seen and defeated: the game records every Pokémon you see and every one you defeat in your runs (also in a group). In the Collection they show even if you do not have them, the defeated ones with a mark, and there are new filters and five new achievements.'],
     ['Tu compañero ya puede evolucionar en la partida: al llegar al nivel 12 (y al 24 si tiene otra fase), sale una carta dorada para evolucionar (Charmander a Charmeleon y luego a Charizard; Eevee te deja elegir). Cambian su aspecto, sus tipos y sus stats, y se quedan sus ataques, su objeto y sus mejoras. Es sólo en esa partida: tu colección no cambia. Nueva misión semanal y dos logros.',

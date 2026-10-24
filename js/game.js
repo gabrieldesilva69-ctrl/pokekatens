@@ -121,6 +121,7 @@ G.Game = (() => {
     G.Judgment.reset();
     G.Events.reset();
     G.Weather.reset();
+    G.Streak.reset();
     G.Path.clear();
     G.Hazards.clear();
     G.World.reset(coop ? coop.seed : Math.floor(Math.random() * 1e6));
@@ -337,6 +338,7 @@ G.Game = (() => {
     save.stats.bestTime = Math.max(save.stats.bestTime, Math.floor(time));
     if (coop) save.stats.bestGroupTime = Math.max(save.stats.bestGroupTime || 0, Math.floor(time));
     save.stats.bestLevel = Math.max(save.stats.bestLevel, pl.level);
+    G.Streak.save(save.stats);
     save.stats.coinsEarned += coins;
     const judge = G.Judgment.summary();
     if (judge) G.Progress.event('judgeEnd', judge);
@@ -360,6 +362,7 @@ G.Game = (() => {
 
     G.RunUI.showOver({
       dead, time, level: pl.level, kills: pl.kills, bosses: pl.bosses, coins, record, t1: pl.t1, t10: pl.t10, judge,
+      streak: G.Streak.best,
       moves: pl.moves, caught,
       breakdown: Object.entries(parts).filter(([, v]) => v).map(([k, v]) => `${k} ${v}`).join(' · ') +
                  (mul > 1 ? ` · ×${mul.toFixed(2)} Fortuna` : '')
@@ -509,8 +512,10 @@ G.Game = (() => {
       return;
     }
     if (p.kind === 'coin') {
-      pl.coins += p.value;
-      G.FX.dmgText(who.x, who.y - who.bodyH - 6, '+' + p.value, '#ffd23f');
+      // Con racha (systems/streak.js), valen más.
+      const v = Math.round(p.value * G.Streak.mul());
+      pl.coins += v;
+      G.FX.dmgText(who.x, who.y - who.bodyH - 6, '+' + v, '#ffd23f');
       return;
     }
     if (p.kind === 'item') {

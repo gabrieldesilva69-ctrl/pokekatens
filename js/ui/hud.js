@@ -81,6 +81,16 @@ G.HUD = (() => {
       bx += tw + 5;
     }
 
+    // racha (systems/streak.js), debajo de la vida (y de los buffs); crece un momento al subir de escalón
+    const sk = G.Streak.hud(1 / 60);
+    if (sk) {
+      ctx.textAlign = 'left';
+      ctx.font = F(800, Math.round(10 + 4 * sk.flash));
+      ctx.fillStyle = sk.mul > 1 ? '#ffd23f' : 'rgba(255,255,255,.8)';
+      ctx.fillText(G.I18n.f('RACHA {x}', sk.n) + (sk.mul > 1 ? '  ·  ' + G.I18n.f('MONEDAS ×{x}', sk.mul.toLocaleString(G.I18n.locale)) : ''),
+        px, py + (mb ? 42 : 34) + (bx > px ? 19 : 0) + 11);
+    }
+
     // ---------- reloj / bioma / kills ----------
     ctx.textAlign = 'center';
     ctx.font = F(800, 26);

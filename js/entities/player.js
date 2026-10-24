@@ -329,6 +329,7 @@ G.Player = class Player {
     this.hp -= d;
     this.invuln = 0.45;
     this.flash = 0.14;
+    G.Streak.onHurt(this);                   // se corta tu racha (systems/streak.js)
     G.Audio.sfx('hurt');
     G.Camera.kick(0.28);
     if (!this.remote) G.Pad.rumble(0.25 + Math.min(0.75, d / this.maxHp * 3), 140);

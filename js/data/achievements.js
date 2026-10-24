@@ -59,6 +59,8 @@ G.AchDefs = (() => {
     { id: 'beat100', cat: 'coleccion', tier: 1, name: 'Investigador de campo', desc: 'Derrota a 100 Pokémon distintos.', value: dexN('beat'), goal: 100, reward: { t1: 5 } },
     { id: 'beat300', cat: 'coleccion', tier: 2, name: 'Ayudante del profesor', desc: 'Derrota a 300 Pokémon distintos.', value: dexN('beat'), goal: 300, reward: { t10: 1 } },
     { id: 'beat600', cat: 'coleccion', tier: 3, name: 'Pokédex viviente', desc: 'Derrota a 600 Pokémon distintos.', value: dexN('beat'), goal: 600, reward: { t10: 3 }, title: 'Pokédex viviente' },
+    { id: 'streak100', cat: 'combate', tier: 1, name: 'En racha', desc: 'Haz una racha de 100 sin que te den.', value: st('bestStreak'), goal: 100, reward: { t1: 3 } },
+    { id: 'streak500', cat: 'combate', tier: 3, name: 'Intocable', desc: 'Haz una racha de 500 sin que te den.', value: st('bestStreak'), goal: 500, reward: { t10: 2 }, title: 'Intocable' },
     { id: 'pevo1', cat: 'combate', tier: 1, name: '¡Está evolucionando!', desc: 'Haz evolucionar a tu compañero en la partida.', value: st('pevolves'), goal: 1, reward: { t1: 3 } },
     { id: 'pevo25', cat: 'combate', tier: 2, name: 'Entrenador veterano', desc: 'Haz evolucionar a tu compañero 25 veces en la partida.', value: st('pevolves'), goal: 25, reward: { t10: 1 }, title: 'Entrenador veterano' },
     { id: 'evoAll', cat: 'combate', tier: 3, name: 'Maestro de movimientos', desc: 'Evoluciona los 47 movimientos distintos.', value: count('evoMoves'), goal: 47, reward: { t10: 3 }, title: 'Maestro de movimientos' },
