@@ -83,6 +83,13 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   con `--megas` (en el ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.
   Faltan Mega Golisopod, Mega Magearna y Mega Tatsugiri: Reloaded no trae sus sprites de mapa (de Magearna sólo un
   dibujo de combate, `data/pkmn/100992.gif`, sin animaciones), así que no tienen Megapiedra.
+- **Megas (25-10-2026)**: cada mega de la partida dura `STEP` (3 s) más que la anterior, de 45 a `MAX_DUR` (90 s)
+  (`G.Mega.durFor`). Al vencer a un legendario de una grieta, un 5 % (`STONE_CHANCE`) de la Megapiedra u Orbe de
+  una mega cualquiera que no tengas (`G.Shop.randomStone`). En la ficha, «Ver Mega» / «Ver Primigenio» enseña
+  la mega (sprite, tipos, habilidad y estadísticas con la diferencia; `G.Mega.monOf`).
+- **GS Ball** (25-10-2026): una cada 500 tiradas del gacha (`save.gsPulls`, `G.Gacha.GS_EVERY`), a la Mochila
+  (`bag.gsball`); al abrirla se elige un Pokémon que no tengas, legendarios incluidos, nunca shiny
+  (`G.Shop.openGs`); si ya los tienes todos, 5000 monedas.
 - **Megaevolución** (`js/systems/mega.js`): con la Megapiedra de tu compañero (Tienda Kecleon, 8000 monedas,
   sólo la de tu compañero actual; o un 3 % al ganar una grieta), una barra se llena con 150 enemigos (un jefe
   cuenta 25) y con F (X en el mando, botón en el móvil) megaevoluciona 45 s: sprite, tipos, estadísticas y

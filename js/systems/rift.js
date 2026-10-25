@@ -24,7 +24,7 @@ G.Rift = (() => {
   // Desde 2 min antes de la Sentencia de Arceus (minuto 30) ya no se abren.
   const CHECK = 30, CHANCE = 0.2, TTL = 45;
   const ARENA_R = 11, ARENA_TIME = 120, FROM = 75;
-  const STONE_CHANCE = 0.03;          // Megapiedra de tu compañero al ganar (systems/mega.js)
+  const STONE_CHANCE = 0.05;          // Megapiedra al azar de las que no tienes, al ganar (25-10-2026: era la de tu compañero, 3 %)
   let rift = null;          // { x, y, ttl, t }
   let arena = null;         // { tx, ty, r, dex, shiny, x, y, back, biome, t, phase, endT, bossId }
   let zone = null;          // dónde estaba la última arena { x, y, r } (ver leftBehind)
@@ -216,10 +216,12 @@ G.Rift = (() => {
       // A veces, un huevo de la región de este legendario (systems/eggs.js).
       const egg = G.Eggs.onRiftWin(arena.dex);
       if (egg && !egg.overflow) G.Spawner.say(G.T('¡El legendario ha dejado un huevo!'), 3.4, true);
-      // Muy de vez en cuando, la Megapiedra de tu compañero (cada jugador la suya).
-      if (Math.random() < STONE_CHANCE && G.Mega.exists(pl.dex) && G.Shop.giveStone(pl.dex)) {
-        G.Spawner.say(G.I18n.f(G.Mega.primal(pl.dex) ? '¡El legendario ha dejado el {x}!' : '¡El legendario ha dejado una {x}!',
-          G.Mega.stoneName(pl.dex)), 3.6, true);
+      // Muy de vez en cuando, la Megapiedra (u Orbe) de una mega cualquiera que aún no tengas: se
+      // queda en la Mochila para cuando lleves a ese Pokémon (cada jugador tira la suya).
+      const st = Math.random() < STONE_CHANCE ? G.Shop.randomStone() : null;
+      if (st && G.Shop.giveStone(st)) {
+        G.Spawner.say(G.I18n.f(G.Mega.primal(st) ? '¡El legendario ha dejado el {x}!' : '¡El legendario ha dejado una {x}!',
+          G.Mega.stoneName(st)), 3.6, true);
         G.Audio.sfx('shinyGet');
       }
     }

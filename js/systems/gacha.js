@@ -96,6 +96,7 @@ G.Gacha = (() => {
    *   { dex, rarity, shiny, isNew, refund }
    * (y en .iris la generación si estas tiradas te han dado su Amuleto Iris).
    */
+  const GS_EVERY = 500;          // tiradas por GS Ball (25-10-2026)
   function pull(save, n, gen = 1, use = 't1') {
     if (n === 100) {
       if (!costOf(save, 100, use)) return null;
@@ -149,11 +150,20 @@ G.Gacha = (() => {
       out.push({ dex: mon.dex, rarity, shiny, isNew, refund });
     }
     save.stats.pulls = (save.stats.pulls || 0) + n;
+    // GS Ball: una cada GS_EVERY tiradas (de cualquier banner), a la Mochila (data/shop.js).
+    save.gsPulls = (save.gsPulls || 0) + n;
+    out.gs = 0;
+    while (save.gsPulls >= GS_EVERY) {
+      save.gsPulls -= GS_EVERY;
+      save.bag = save.bag || {};
+      save.bag[G.Shop.GS] = Math.min(999, (save.bag[G.Shop.GS] || 0) + 1);
+      out.gs++;
+    }
     out.iris = !hadIris && hasIris(save, gen) ? gen : 0;
     return out;
   }
 
   return { debugForceShiny(n = 1) { forceShiny = n; },
            costOf, RATES, PITY_5, SHINY_RATE, SHINY_RATE_IRIS, REFUND, RARITY_NAME, RARITY_COLOR, BANNERS,
-           pool, featured, pull, dexOf, hasIris, shinyRate };
+           pool, featured, pull, dexOf, hasIris, shinyRate, GS_EVERY };
 })();

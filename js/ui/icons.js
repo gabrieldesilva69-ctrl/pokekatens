@@ -233,6 +233,10 @@ G.Icons = (() => {
       '...s....s...', '....s..s....', '...s..ws....', '..kkkkkkkk..', '.kppppppppk.', '.kpwppppppk.',
       '..kppppdpk..', '...kppddk...', '....kddk....', '...kppppk...', '..kkkkkkkk..', '............'] },
     // Huevo (Incubadora, recompensas): el genérico; los de cada familia son imágenes (assets/eggs/).
+    // GS Ball: dorada arriba, plateada abajo (como la de Oro y Plata), con su botón en medio.
+    gsball: { pal: { y: '#ffd23f', o: '#c9962a', s: '#e4e8f0', g: '#9aa2b4', w: '#ffffff' }, rows: [
+      '....kkkk....', '..kkyyyykk..', '.kyywyyyyok.', '.kywyyyyyok.', 'kyyyyyyyyook', 'kkkkkkwkkkkk',
+      'kkkkkwswkkkk', 'kssssswssggk', '.kssssssggk.', '.ksssssgggk.', '..kkggggkk..', '....kkkk....'] },
     egg: { pal: { w: '#fffaf0', s: '#e0d6c8', g: '#5fe08a', d: '#2f9a52' }, rows: [
       '....kkkk....', '...kwwwwk...', '..kwwggwwk..', '..kwwggwwsk.', '.kwwwwwwwsk.', '.kgwwwwwgsk.',
       '.kggwwwggsk.', '.kwwwwwwwsk.', '.kwwwggwssk.', '..kswggssk..', '...kkssskk..', '....kkkk....'] },

@@ -228,6 +228,9 @@ label { display: block; font-size: 14px; color: var(--muted); margin: 8px 0 4px;
 /* Naturaleza (20-10-2026): el stat que sube en verde y el que baja en rojo. */
 .stat.nat-up > span:first-child, .stat.nat-up > span:last-child { color: #7fe8a0; }
 .stat.nat-up .bar i { background: #5fe08a; }
+/* Ficha con la mega a la vista: lo que gana o pierde respecto a la forma normal. */
+.stat small.mega-up { color: #7fe8a0; font-weight: 700; } .stat small.mega-down { color: #ff9aa5; font-weight: 700; }
+#dex-mega { align-self: center; margin: 2px auto 4px; }
 .stat.nat-down > span:first-child, .stat.nat-down > span:last-child { color: #ff9aa5; }
 .stat.nat-down .bar i { background: #ff7a86; }
 /* Naturaleza, habilidad y MT en la ficha de la colección. */

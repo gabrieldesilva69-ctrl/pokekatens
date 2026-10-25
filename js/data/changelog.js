@@ -6,7 +6,17 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
-  { d: '2026-10-25', title: ["PokeKatens: Megapiedras sin aro blanco", "PokeKatens: Mega Stones without the white ring"], fix: [
+  { d: '2026-10-25', title: ['PokeKatens: GS Ball y megas', 'PokeKatens: GS Ball and Megas'], new: [
+    ["GS Ball: cada 500 tiradas del gacha (de cualquier banner) te dan una GS Ball. Ábrela en la Mochila y elige el Pokémon que quieras de los que aún no tienes, legendarios incluidos (nunca shiny). En el gacha ves cuánto te falta.",
+     "GS Ball: every 500 gacha pulls (on any banner) you get a GS Ball. Open it in the Bag and choose any Pokémon you don't have yet, legendaries included (never shiny). The gacha shows how many pulls are left."],
+    ["En la ficha de la colección, el botón «Ver Mega» (o «Ver Primigenio») enseña la mega de tu Pokémon: su sprite, sus tipos, su habilidad y sus estadísticas, con lo que gana o pierde respecto a la forma normal. No hace falta tener la Megapiedra.",
+     "On the collection page, the “View Mega” (or “View Primal”) button shows your Pokémon's Mega Evolution: its sprite, types, ability and stats, with what it gains or loses compared to the normal form. You don't need the Mega Stone."]
+  ], chg: [
+    ["Al vencer a un legendario en una grieta, un 5 % de que te deje la Megapiedra (o el Orbe) de una mega cualquiera que aún no tengas, al azar: se guarda en la Mochila para cuando lleves a ese Pokémon. Antes era sólo la de tu compañero, un 3 %.",
+     "When you beat a legendary in a rift, there's a 5% chance it leaves the Mega Stone (or Orb) of a random Mega Evolution you don't have yet: it stays in the Bag for when you take that Pokémon. Before, it was only your partner's, 3%."],
+    ["Cada vez que megaevolucionas en una partida, la mega dura 3 s más que la anterior (45, 48, 51... hasta 90 s): en las partidas largas duran más.",
+     "Each time you Mega Evolve in a run, it lasts 3 s longer than the previous one (45, 48, 51... up to 90 s): in long runs they last longer."]
+  ], fix: [
     ["Los iconos de las Megapiedras ya no llevan el aro blanco (y el trozo de fondo) que sobresalía por fuera de su borde negro. Por dentro siguen igual.",
      "Mega Stone icons no longer have the white ring (and bit of background) sticking out past their black outline. Inside they're the same."]
   ] },

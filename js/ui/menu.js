@@ -318,8 +318,8 @@ G.MenuUI = (() => {
     return cell;
   }
 
-  // Variante que se está viendo en la ficha (normal o shiny).
-  let viewShiny = false;
+  // Variante que se está viendo en la ficha (normal o shiny) y si se ve su mega (25-10-2026).
+  let viewShiny = false, viewMega = false;
 
   function showDetail(dex) {
     const s = G.DB.save;
@@ -329,7 +329,11 @@ G.MenuUI = (() => {
     const isPartner = dex === s.partner;
     if (!hasSh) viewShiny = false;
     else if (isPartner && dex !== showDetail.last) viewShiny = !!s.partnerShiny;
-    if (dex !== showDetail.last) extraOpen = '';
+    if (dex !== showDetail.last) { extraOpen = ''; viewMega = false; }
+    // Su mega (u forma primigenia), para verla y comparar sus estadísticas; no hace falta la piedra.
+    const hasMega = own && G.Mega.exists(dex);
+    if (!hasMega) viewMega = false;
+    const md = viewMega ? G.Mega.data(dex) : null;
     // Al redibujar el mismo Pokémon (abrir el selector de Menta, enseñar una MT...)
     // no se vuelve arriba: se quedaba fuera de la vista lo que acababas de abrir.
     const sameMon = dex === showDetail.last, d0 = $('dex-detail');
@@ -338,10 +342,19 @@ G.MenuUI = (() => {
 
     const max = { hp: 183, atk: 1.55, spd: 137, def: 160 };
     // Con su naturaleza (20-10-2026): el stat que sube, en verde; el que baja, en rojo.
-    const nat = own ? G.Mons.natureOf(dex) : null, q = own ? G.Mons.monFor(dex) : p;
+    const nat = own ? G.Mons.natureOf(dex) : null, q0 = own ? G.Mons.monFor(dex) : p;
+    const q = md ? G.Mega.monOf(dex, q0) : q0;
     const natCls = k => (!nat ? '' : nat.up === k ? ' nat-up' : nat.down === k ? ' nat-down' : '');
+    // Con la mega a la vista, al lado de cada número lo que cambia respecto a la forma normal.
+    const diff = k => {
+      if (!md || !k) return '';
+      const dv = k === 'pa' || k === 'sa' ? +(q[k] - q0[k]).toFixed(2) : Math.round(q[k] - q0[k]);
+      if (!dv) return '';
+      const t = (dv > 0 ? '+' : '') + (k === 'pa' || k === 'sa' ? dv.toFixed(2).replace('.', ',') : dv);
+      return ` <small class="${dv > 0 ? 'mega-up' : 'mega-down'}">${t}</small>`;
+    };
     const bar = (label, v, m, txt, k) =>
-      `<div class="stat${natCls(k)}"><span>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span>${txt}</span></div>`;
+      `<div class="stat${natCls(k)}"><span>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span>${txt}${diff(k)}</span></div>`;
     const usingThis = isPartner && (!hasSh || !!s.partnerShiny === viewShiny);
 
     // Sus efectos visuales (entities/aura.js): se le pueden quitar a uno solo.
@@ -352,13 +365,16 @@ G.MenuUI = (() => {
       ${hasSh ? `<div class="seg">
           <button class="${viewShiny ? '' : 'on'}" data-v="0">Normal</button>
           <button class="${viewShiny ? 'on' : ''}" data-v="1">${G.Icons.html('shiny', 12)} Shiny</button></div>` : ''}
+      ${hasMega ? `<button id="dex-mega" class="chip${viewMega ? ' on' : ''}" type="button">${G.Icons.html(G.Mega.stoneIcon(dex), 14)} ${G.T(viewMega ? 'Ver forma normal'
+        : G.Mega.primal(dex) ? 'Ver Primigenio' : 'Ver Mega')}</button>` : ''}
       <div class="center">
         <div style="color:var(--muted);font-size:13px">Nº ${String(p.dex).padStart(3, '0')} · ${GEN_NAMES[p.gen - 1]}</div>
-        <h3>${own ? p.name : '???'}</h3>
+        <h3>${own ? (md ? G.Mega.name(dex) : p.name) : '???'}</h3>
         ${own ? `<button id="dex-fav" class="chip${G.DB.isFav(dex) ? ' on' : ''}" type="button">${G.Icons.html(G.DB.isFav(dex) ? 'star' : 'starDim', 12)} ${G.DB.isFav(dex) ? 'Favorito' : 'Marcar como favorito'}</button>` : ''}
         ${own ? `<button id="dex-fx" class="chip${fxOn ? ' on' : ''}" type="button" title="${G.T('Brillos, partículas y auras de este Pokémon')}">${G.Icons.html('shiny', 12)} ${fxOn ? 'Efectos visuales: sí' : 'Efectos visuales: no'}</button>` : ''}
         <div style="color:${G.Gacha.RARITY_COLOR[p.rarity]}">${G.UI.stars(p.rarity, 24)} ${G.Gacha.RARITY_NAME[p.rarity]}</div>
-        <div style="margin:6px 0">${own ? G.UI.typeChips(p.types) : ''}</div>
+        <div style="margin:6px 0">${own ? G.UI.typeChips(md ? md.types : p.types) : ''}</div>
+        ${md && md.ab ? `<p class="sub center" style="margin:0">${G.T('Habilidad de la mega:')} <b class="gold">${G.Mons.abilityName(md.ab) || md.ab}</b></p>` : ''}
       </div>
       ${own ? `
         ${bar('Vida', q.hp, max.hp, q.hp)}
@@ -388,13 +404,15 @@ G.MenuUI = (() => {
     for (const [el, t] of scrolls) el.scrollTop = t;
     $('dex-big').style.setProperty('--stage-c', !own ? '#5b83d6' : viewShiny ? '#9ae6ff' : G.U.TYPE_COLOR[p.types[0]]);
     $('dex-big').classList.toggle('shiny', own && viewShiny);
-    G.UI.sprite($('dex-big'), dex, { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny, deluxe: own });
+    G.UI.sprite($('dex-big'), md ? G.Mega.ID + dex : dex, { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny, deluxe: own });
     // Tocar el sprite: su grito (sólo si ya lo tienes).
     $('dex-big').onclick = own ? () => G.Audio.cry(dex, { shiny: viewShiny }) : null;
     $('dex-big').style.cursor = own ? 'pointer' : '';
     box.querySelectorAll('.seg button').forEach(b => {
       b.onclick = () => { viewShiny = b.dataset.v === '1'; showDetail(dex); };
     });
+    const mb = $('dex-mega');
+    if (mb) mb.onclick = () => { viewMega = !viewMega; showDetail(dex); };
     const fav = $('dex-fav');
     if (fav) fav.onclick = () => { G.DB.setFav(dex, !G.DB.isFav(dex)); renderGrid(true); showDetail(dex); };
     const fxb = $('dex-fx');

@@ -40,12 +40,41 @@ G.Shop = (() => {
   const stoneId = dex => 'ms' + dex;
   /** ¿Es la Megapiedra de una mega que existe? ('ms6') */
   const isStone = id => /^ms\d{1,4}$/.test(id) && !!(G.MEGAS && G.MEGAS[id.slice(2)]);
-  const isItem = id => !!ITEMS[id] || isStone(id);
+  // GS Ball (25-10-2026): una cada GS_EVERY tiradas del gacha (systems/gacha.js); al abrirla eliges
+  // un Pokémon que no tengas (sin shiny). Va en la Mochila como los demás objetos.
+  const GS = 'gsball', GS_COINS = 5000;           // si ya los tienes todos, monedas
+  const isItem = id => !!ITEMS[id] || isStone(id) || id === GS;
   const hasStone = dex => count(stoneId(dex)) > 0;
   /** La que vende la tienda: la de tu compañero, si tiene mega y aún no la tienes. */
   function stoneForSale() {
     const s = save(), dex = s && s.partner;
     return dex && G.MEGAS && G.MEGAS[dex] && !hasStone(dex) ? dex : null;
+  }
+  /** Los que se pueden elegir con la GS Ball: todos los del juego que aún no tienes. */
+  function gsChoices() {
+    const s = save();
+    return s ? G.DEX.filter(p => !s.owned[p.dex]) : [];
+  }
+  /** Abre una GS Ball: te da ese Pokémon (normal, nunca shiny), o monedas si ya los tienes todos. */
+  function openGs(dex) {
+    const s = save();
+    if (!s || !count(GS)) return { ok: false };
+    if (dex == null) {
+      if (gsChoices().length) return { ok: false };
+      take(GS); s.coins += GS_COINS; G.DB.commit();
+      return { ok: true, coins: GS_COINS };
+    }
+    if (!G.DEX_BY[dex] || s.owned[dex]) return { ok: false };
+    take(GS);
+    s.owned[dex] = { at: Date.now(), from: 'gsball' };
+    G.DB.commit();
+    return { ok: true, dex };
+  }
+  /** Una mega al azar de las que aún no tienes su piedra (u Orbe), o null si ya las tienes todas. */
+  function randomStone() {
+    if (!save() || !G.MEGAS) return null;
+    const pool = Object.keys(G.MEGAS).map(Number).filter(d => G.Mega.exists(d) && !hasStone(d));
+    return pool.length ? G.U.pick(pool) : null;
   }
   /** Te da la Megapiedra de esa especie (premio de un legendario). → ¿era nueva? */
   function giveStone(dex) {
@@ -112,6 +141,6 @@ G.Shop = (() => {
     return { ok: true };
   }
 
-  return { ITEMS, ORDER, STONE_PRICE, count, take, tmCount, takeTm, dailyTms, tmPrice, buy, today,
-           stoneId, isStone, isItem, hasStone, stoneForSale, giveStone };
+  return { ITEMS, ORDER, STONE_PRICE, GS, GS_COINS, gsChoices, openGs, count, take, tmCount, takeTm, dailyTms, tmPrice, buy, today,
+           stoneId, isStone, isItem, hasStone, stoneForSale, randomStone, giveStone };
 })();

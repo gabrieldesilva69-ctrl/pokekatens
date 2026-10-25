@@ -101,6 +101,7 @@ G.DB = (() => {
       eggs: [],               // [{ id, dex, shiny, need, done, from }]
       eggsHatched: {},        // id -> fecha: los ya abiertos (que no vuelvan al juntar aparatos)
       eggGacha: {},           // generación del banner -> tiradas ×10 hacia el próximo huevo
+      gsPulls: 0,             // tiradas hacia la próxima GS Ball (25-10-2026, systems/gacha.js)
       // Pokédex (24-10-2026, systems/seen.js): mapas de bits en hexadecimal.
       seen: '',               // especies vistas en la partida
       beat: '',               // especies derrotadas
@@ -142,6 +143,7 @@ G.DB = (() => {
     s.coins = n(s.coins);
     s.tickets.t1 = n(s.tickets.t1);
     s.tickets.t10 = n(s.tickets.t10);
+    s.gsPulls = Math.min(499, n(s.gsPulls));
     // Avatar de entrenador (data/avatars.js): un número de 1 a G.AVATARS, o 0.
     if (isObj(s.profile)) { const a = n(s.profile.avatar); s.profile.avatar = a <= (G.AVATARS || 60) ? a : 0; }
     if (isObj(s.led)) {
@@ -437,6 +439,7 @@ G.DB = (() => {
     if (wch) r.wch = wch;
     // Pokédex: lo visto y lo derrotado en cualquiera de los dos.
     if (G.Seen) for (const k of ['seen', 'beat']) r[k] = G.Seen.union(a[k], b[k]);
+    r.gsPulls = Math.max(num(r.gsPulls), num(older.gsPulls));
     r.eggGacha = r.eggGacha || {};
     for (const g in older.eggGacha || {}) r.eggGacha[g] = Math.max(num(r.eggGacha[g]), num(older.eggGacha[g]));
     if (r.starter == null) r.starter = older.starter;

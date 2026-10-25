@@ -473,6 +473,51 @@ G.ShopUI = (() => {
     if (go) go.onclick = () => G.MenuUI.openDex();
     const shop = box.querySelector('[data-go-shop]');
     if (shop) shop.onclick = () => open();
+    const gs = box.querySelector('[data-gs-open]');
+    if (gs) gs.onclick = gsPick;
+  }
+
+  /** GS Ball: la lista de los que no tienes (con buscador) y, al tocar uno, se pide confirmar. */
+  function gsPick() {
+    const box = $('bag-body'), all = G.Shop.gsChoices();
+    if (!all.length) {
+      const r = G.Shop.openGs(null);
+      if (r.ok) { G.UI.toast(G.I18n.f('Ya tienes todos los Pokémon: +{x} monedas', r.coins)); G.Audio.sfx('coin'); G.UI.refreshCoins(); }
+      openBag();
+      return;
+    }
+    box.innerHTML = `<div class="row between"><h3>${G.Icons.html('gsball', 20)} ${G.T('Elige un Pokémon')}</h3>
+        <button class="btn small ghost" id="gs-back">${G.T('Volver')}</button></div>
+      <input class="field" id="gs-q" placeholder="${G.T('Buscar por nombre o número')}" autocomplete="off" style="max-width:320px;margin:6px 0 10px">
+      <div class="grid" id="gs-grid"></div>`;
+    $('gs-back').onclick = openBag;
+    const fill = q => {
+      const g = $('gs-grid');
+      g.innerHTML = '';
+      const list = all.filter(p => !q || String(p.dex) === q || p.name.toLowerCase().includes(q) || G.T(p.name).toLowerCase().includes(q));
+      for (const p of list.slice(0, 120)) {
+        const c = document.createElement('div');
+        c.className = 'cell';
+        c.dataset.pad = '1';
+        c.insertAdjacentHTML('beforeend', `<span class="no">${String(p.dex).padStart(3, '0')}</span>`);
+        c.appendChild(G.UI.spriteCanvas(p.dex, 92, 80, { scale: 2 }));
+        c.insertAdjacentHTML('beforeend', `<b>${p.name}</b>${G.UI.stars(p.rarity, 9)}`);
+        c.onclick = () => {
+          if (!confirm(G.I18n.f('¿Abrir la GS Ball y quedarte con {x}?', p.name))) return;
+          const r = G.Shop.openGs(p.dex);
+          if (!r.ok) return;
+          G.Audio.cry(p.dex);
+          G.Audio.sfx('shinyGet');
+          G.UI.toast(G.I18n.f('¡{x} es tuyo!', p.name));
+          G.Progress.checkAch();
+          openBag();
+        };
+        g.appendChild(c);
+      }
+      if (list.length > 120) g.insertAdjacentHTML('beforeend', `<p class="sub" style="grid-column:1/-1">${G.T('Escribe su nombre para ver más.')}</p>`);
+    };
+    $('gs-q').oninput = () => fill($('gs-q').value.trim().toLowerCase());
+    fill('');
   }
 
   /** Lo que dice el Kecleon morado en el bocadillo (se va solo a los 6 s). */
@@ -582,12 +627,18 @@ G.ShopUI = (() => {
     const items = G.Shop.ORDER.filter(id => G.Shop.count(id) > 0);
     const stones = Object.keys(s.bag || {}).filter(G.Shop.isStone).map(id => +id.slice(2)).sort((a, b) => a - b);
     const tms = Object.keys(s.tms || {}).filter(id => G.Moves.BY_ID[id] && s.tms[id] > 0).sort((a, b) => moveName(a).localeCompare(moveName(b)));
-    if (!items.length && !tms.length && !stones.length) {
+    const gs = G.Shop.count(G.Shop.GS);
+    if (!items.length && !tms.length && !stones.length && !gs) {
       return `<p class="sub center" style="margin:24px 0">${G.T('Tu Mochila está vacía.')}<br><br>
             <button class="btn gold" data-go-shop>${G.Icons.html('shop', 16)} ${G.T('Ir a la Tienda Kecleon')}</button></p>` + irisHtml();
     }
     let h = `<p class="sub" style="margin:10px 0">${G.T('Para usarlo, abre la colección, elige un Pokémon y pulsa Menta, Cápsula o Enseñar MT en su ficha.')}
       <button class="btn small" data-go-dex>${G.Icons.html('book', 14)} ${G.T('Ir a la colección')}</button></p><div class="upg">`;
+    if (gs) {
+      h += row(G.Icons.html('gsball', 32), `${G.T('GS Ball')} <b class="gold">×${gs}</b>`,
+        G.T('Ábrela y elige el Pokémon que quieras de los que aún no tienes (no sale shiny).'),
+        `<button class="btn small gold" data-gs-open>${G.T('Abrir')}</button>`);
+    }
     for (const id of items) {
       const it = G.Shop.ITEMS[id];
       h += row(G.Icons.html(it.icon, 32), G.T(it.name), G.T(it.desc), `<b class="gold">×${G.Shop.count(id)}</b>`);
