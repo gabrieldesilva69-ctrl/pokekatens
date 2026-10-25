@@ -6,7 +6,7 @@
  *     profiles/{uid}               { name, lower, at }   apodo público
  *     friendships/{uidA_uidB}      { users, from, to, status: 'pending'|'ok', names, at }
  *
- *     pres/{uid}                   { on, at, room, play } en línea (aproximado)
+ *     presence/<uid> (Realtime Database, 25-10-2026)  { s: on|play|group|off, at }  estado para los amigos
  *     inv/{para_de}                { to, from, room, name, at } invitaciones
  *
  *   Realtime Database: SÓLO mientras estás en una sala o partida en grupo
@@ -136,10 +136,9 @@ G.Social = (() => {
   function online() {
     if (beatT) return;                        // ya estaba en marcha
     beatT = 1;
-    if (fb.rtdb) fb.rtdb.goOffline();         // se conecta sólo al entrar en una sala
     let known = false;
     try { known = localStorage.getItem(hasFrKey()) === '1'; } catch (e) { /* nada */ }
-    if (known) listenInvites();
+    if (known) { listenInvites(); presenceOn(); }      // sin amigos, nadie lee tu estado: no se conecta
   }
 
   /** Carga la lista de amigos (y la sigue escuchando) la primera vez que hace falta. */
@@ -165,14 +164,90 @@ G.Social = (() => {
   let playing = false, lastBeat = 0;
   /** ¿Hay alguien que pueda leer tu "en línea"? (sólo los amigos confirmados) */
   const hasFriends = () => [...friends.values()].some(f => f.status === 'ok');
-  // El "en línea" de los amigos se quitó el 20-10-2026: era 1/4 de todas las
-  // escrituras de Firestore (unas 2 millones al día). Ya no se escribe ni se lee
-  // pres/{uid}; se puede invitar a cualquier amigo (la invitación caduca sola).
-  // writeStatus y refreshPresence se quedan vacías para no tocar a quien las llama.
+  // El "en línea" de Firestore (pres/{uid}) se quitó el 20-10-2026: era 1/4 de todas
+  // las escrituras (un latido por jugador cada poco). Desde el 25-10-2026 va en la
+  // Realtime Database: se escribe sólo cuando cambia (entrar, empezar o acabar una
+  // partida) y Firebase pone "off" solo al cerrar o perder la conexión (onDisconnect).
+  // Cada uno escucha sólo a sus amigos confirmados. writeStatus y refreshPresence se
+  // quedan vacías para no tocar a quien las llama.
   const presKey = () => 'ps.pres.' + uid;
   function writeStatus() {}
-  function setPlaying(p) {
+  let presOn = false, presState = '', presWant = 'on', unConn = null, hideT = 0;
+  // La Realtime Database del plan gratis aguanta 100 conexiones a la vez: con la pestaña
+  // (o el .exe) escondida unos minutos se desconecta (onDisconnect pone "off") y al volver
+  // se reconecta (el escuchador de .info/connected vuelve a poner el estado).
+  const HIDE_MS = 3 * 60 * 1000;
+  document.addEventListener('visibilitychange', () => {
+    clearTimeout(hideT);
+    if (!presOn || !fb || !fb.rtdb) return;
+    if (document.hidden) hideT = setTimeout(() => { if (presOn && !room && document.hidden) fb.rtdb.goOffline(); }, HIDE_MS);
+    else fb.rtdb.goOnline();
+  });
+  const presRef = who => fb.rtdb.ref('presence/' + who);
+  function presenceOn() {
+    if (presOn || !fb || !fb.rtdb) return;
+    presOn = true;
+    fb.rtdb.goOnline();
+    const conn = fb.rtdb.ref('.info/connected');
+    const cb = conn.on('value', s => {
+      if (s.val() !== true || !presOn) return;
+      // Cada vez que se (re)conecta: lo que se pone al irse y el estado de ahora.
+      presRef(uid).onDisconnect().set({ s: 'off', at: firebase.database.ServerValue.TIMESTAMP })
+        .then(() => { presState = ''; setStatus(presWant); }).catch(() => {});
+    });
+    unConn = () => conn.off('value', cb);
+    watchFriends();                           // los amigos que ya se conocían
+  }
+  /** Tu estado para los amigos: 'on' (en el menú), 'play' (en partida), 'group' (en grupo). */
+  function setStatus(s) {
+    presWant = s;
+    if (!presOn || presState === s) return;
+    presState = s;
+    presRef(uid).set({ s, at: firebase.database.ServerValue.TIMESTAMP }).catch(() => { presState = ''; });
+  }
+  async function presenceOff(why) {
+    if (!presOn) {
+      // Sin haberse conectado, al borrar la cuenta igual se quita (por si quedó de otra vez).
+      if (why === 'delete' && fb && fb.rtdb) { fb.rtdb.goOnline(); await within(presRef(uid).remove(), 5000).catch(() => {}); if (!room) fb.rtdb.goOffline(); }
+      return;
+    }
+    presOn = false;
+    clearTimeout(hideT);
+    if (unConn) { unConn(); unConn = null; }
+    for (const off of presSubs.values()) off();
+    presSubs.clear();
+    fb.rtdb.goOnline();
+    try {
+      await within(why === 'delete' ? presRef(uid).remove()
+        : presRef(uid).set({ s: 'off', at: firebase.database.ServerValue.TIMESTAMP }), 5000);
+    } catch (e) { /* nada */ }
+    try { await presRef(uid).onDisconnect().cancel(); } catch (e) { /* nada */ }
+    if (!room) fb.rtdb.goOffline();
+  }
+  // Lo que se lee de los amigos: un escuchador por amigo confirmado (sólo cambia cuando cambian).
+  const presSubs = new Map();
+  function watchFriends() {
+    if (!presOn || !fb || !fb.rtdb) return;
+    const want = new Set([...friends.values()].filter(f => f.status === 'ok').map(f => f.uid));
+    for (const [who, off] of presSubs) if (!want.has(who)) { off(); presSubs.delete(who); }
+    for (const who of want) {
+      if (presSubs.has(who)) continue;
+      const ref = presRef(who);
+      const cb = ref.on('value', s => {
+        const v = s.val() || {};
+        const st = ['on', 'play', 'group'].includes(v.s) ? v.s : 'off';
+        const at = Number.isFinite(+v.at) ? +v.at : 0;
+        pres.set(who, { online: st !== 'off', play: st === 'play' || st === 'group', group: st === 'group', seen: at });
+        const f = friends.get(who);
+        if (f) Object.assign(f, pres.get(who));
+        emit('friends');
+      }, () => {});
+      presSubs.set(who, () => ref.off('value', cb));
+    }
+  }
+  function setPlaying(p, group = !!room) {
     playing = !!p;
+    setStatus(playing ? (group ? 'group' : 'play') : 'on');
     // Al acabar la partida, la sala se vuelve a comprobar (los que se fueron, fuera).
     if (!playing && room) { if (room.lost) room.tries = 0; emit('room'); }
   }
@@ -183,6 +258,7 @@ G.Social = (() => {
     if (unFriends) { unFriends(); unFriends = null; }
     if (unInv) { unInv(); unInv = null; }
     clearInterval(beatT); beatT = 0; friendsReady = null;
+    await presenceOff(why);
     try { localStorage.removeItem(presKey()); } catch (e) { /* nada */ }
     if (why === 'delete') {
       try { localStorage.removeItem('ps.nick.' + uid); } catch (e) { /* nada */ }
@@ -227,10 +303,11 @@ G.Social = (() => {
         }, pres.get(other) || {}));
       });
       friends = next;
+      watchFriends();
       emit('friends');
       // Con amigos ya te pueden invitar (y este navegador lo recuerda para la próxima vez).
       try { if (hasFriends()) localStorage.setItem(hasFrKey(), '1'); else localStorage.removeItem(hasFrKey()); } catch (e) { /* nada */ }
-      if (hasFriends()) listenInvites();
+      if (hasFriends()) { listenInvites(); presenceOn(); }
       if (ready) { ready(); ready = null; }
     }, e => { console.warn('[Social] amigos:', e.code || e.message); if (ready) { ready(); ready = null; } });
   }
@@ -260,6 +337,7 @@ G.Social = (() => {
         names: { [uid]: me.name, [other]: otherName },
         at: firebase.firestore.FieldValue.serverTimestamp()
       });
+      ensureFriends(); presenceOn();            // ya vas a tener amigo: que vea tu estado
       return { ok: true, msg: 'Solicitud enviada a ' + otherName };
     } catch (e) { return { ok: false, error: 'No se pudo enviar (' + (e.code || 'error') + ').' }; }
   }
@@ -271,6 +349,7 @@ G.Social = (() => {
       await fb.fs.collection('friendships').doc(f.pid).update({
         status: 'ok', at: firebase.firestore.FieldValue.serverTimestamp(), ['names.' + uid]: me.name
       });
+      presenceOn();
       return { ok: true, msg: 'Ahora eres amigo de ' + f.name };
     } catch (e) { return { ok: false, error: 'No se pudo aceptar (' + (e.code || 'error') + ').' }; }
   }
@@ -326,7 +405,7 @@ G.Social = (() => {
    * conectada; se quitó por eso.)
    */
   function rtOn() { if (fb.rtdb) fb.rtdb.goOnline(); }
-  function rtOff() { if (fb && fb.rtdb && !room) fb.rtdb.goOffline(); }
+  function rtOff() { if (fb && fb.rtdb && !room && !presOn) fb.rtdb.goOffline(); }   // con el estado puesto, sigue conectada
 
   async function createRoom() {
     if (room) return room;

@@ -159,10 +159,8 @@ G.Game = (() => {
       pl.setActive(0);
     }
 
-    if (coop) {
-      G.Coop.begin(coop, pl, coopApi);
-      G.Social.setPlaying(true);
-    }
+    if (coop) G.Coop.begin(coop, pl, coopApi);
+    G.Social.setPlaying(true, !!coop);          // "En partida" para los amigos (en grupo o no)
     G.Camera.x = pl.x; G.Camera.y = pl.y; G.Camera.shake = 0;
     // Hojas de sprites locales: el compañero y los primeros enemigos.
     G.Sprites.preload([mon.dex], 8000, pl.shiny);
@@ -334,7 +332,7 @@ G.Game = (() => {
     const wasHost = !!pl.coopHost;
     const team = coop ? G.Coop.members.slice() : [];
     if (G.Coop.active) G.Coop.end();
-    if (coop) G.Social.setPlaying(false);
+    G.Social.setPlaying(false);
     state = 'over';
     G.Orbs.reset();
     G.Audio.music(null);

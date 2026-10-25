@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-25', title: ['PokeKatens: GS Ball y megas', 'PokeKatens: GS Ball and Megas'], new: [
+    ["Amigos: al lado de cada amigo sale si está en línea (verde), en partida (dorado, y si es en grupo lo dice) o desconectado (gris, con cuánto hace). Los que están conectados salen primero.",
+     "Friends: next to each friend you see whether they are online (green), in a run (gold, and it says if it's a group run) or offline (grey, with how long ago). Connected friends are listed first."],
     ["GS Ball: cada 500 tiradas del gacha (de cualquier banner) te dan una GS Ball. Ábrela en la Mochila y elige el Pokémon que quieras de los que aún no tienes, legendarios incluidos (nunca shiny). En el gacha ves cuánto te falta.",
      "GS Ball: every 500 gacha pulls (on any banner) you get a GS Ball. Open it in the Bag and choose any Pokémon you don't have yet, legendaries included (never shiny). The gacha shows how many pulls are left."],
     ["En la ficha de la colección, el botón «Ver Mega» (o «Ver Primigenio») enseña la mega de tu Pokémon: su sprite, sus tipos, su habilidad y sus estadísticas, con lo que gana o pierde respecto a la forma normal. No hace falta tener la Megapiedra.",

@@ -86,6 +86,13 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Aspecto de los ataques** (`js/entities/vfx.js`, `MOVE`): cada ataque tiene su forma y su paleta; desde el
   25-10-2026 casi ninguno repite la de otro de su tipo (formas nuevas: `spiral`, `eye`, `prism`, `mist`, `psiwave`,
   `comet`, `snowflake`, `fist`, `seed`, `feather`, `boulder`; paletas `psyviolet`, `mist`, `mind`).
+- **Estado de los amigos** (25-10-2026, `js/net/social.js`): `presence/<uid>` en la Realtime Database, `{ s: on|play|group|off, at }`.
+  Se escribe sólo al cambiar (entrar, empezar o acabar una partida) y Firebase pone `off` solo al cerrar o perder la
+  conexión (`onDisconnect`; la hora la pone siempre el servidor); cada uno escucha sólo a sus amigos confirmados.
+  Sólo se conecta quien tiene amigos (o acaba de pedir o aceptar uno), y con la pestaña escondida 3 min se desconecta
+  (el plan gratis deja 100 conexiones a la vez a la Realtime Database). Cualquiera con sesión puede leer el estado de
+  un uid (las reglas de la Realtime Database no pueden mirar las amistades de Firestore). Reglas en `database.rules.json`;
+  en el emulador se aplican en el espacio `demo-pokekatens-default-rtdb`.
 - **Megas (25-10-2026)**: cada mega de la partida dura `STEP` (3 s) más que la anterior, de 45 a `MAX_DUR` (90 s)
   (`G.Mega.durFor`). Al vencer a un legendario de una grieta, un 5 % (`STONE_CHANCE`) de la Megapiedra u Orbe de
   una mega cualquiera que no tengas (`G.Shop.randomStone`). En la ficha, «Ver Mega» / «Ver Primigenio» enseña
