@@ -31,7 +31,11 @@ G.VFX = (() => {
     steel:    ['#232d38', '#56667a', '#8c9caf', '#cad6e2', '#ffffff'],
     fairy:    ['#6a2050', '#b04a8a', '#ff8acb', '#ffc4e6', '#ffffff'],
     normal:   ['#3e3834', '#7a7068', '#c4bcb0', '#ece6dc', '#ffffff'],
-    aura:     ['#0c2460', '#1c4cb0', '#3a7cff', '#90d2ff', '#ffffff']
+    aura:     ['#0c2460', '#1c4cb0', '#3a7cff', '#90d2ff', '#ffffff'],
+    // Prueba (25-10-2026): tonos propios para algunos ataques psíquicos.
+    psyviolet: ['#2a0a4e', '#5a1fa0', '#9a5cff', '#d2b4ff', '#f6eeff'],
+    mist:     ['#3e3260', '#7a6aaa', '#bcaee8', '#eae2ff', '#ffffff'],
+    mind:     ['#1a0626', '#4a1266', '#8a2ab0', '#d070ff', '#fbe6ff']
   };
   const IDX = { o: 0, d: 1, m: 2, l: 3, w: 4 };
   const H = (a, b, c) => G.U.hash(a, b, c);
@@ -248,6 +252,105 @@ G.VFX = (() => {
       P.set(5, 5, 'w');
       P.outline();
     } },
+    // ---- prueba del 25-10-2026: formas propias de algunos ataques psíquicos ----
+    // Espiral que gira (Confusión).
+    spiral: { w: 13, h: 13, frames: 2, spin: true, gen(P, f) {
+      for (let t = 0; t < 5.6; t += 0.12) {
+        const a = t * 1.25 + f * 0.6, r = t;
+        P.set(6 + Math.cos(a) * r, 6 + Math.sin(a) * r, t > 3.8 ? 'm' : 'l');
+      }
+      P.set(6, 6, 'w');
+      P.outline();
+    } },
+    // Ojo que parpadea (Psíquico, Paranormal, Onda Mental).
+    eye: { w: 15, h: 9, frames: 2, gen(P, f) {
+      const open = f ? 2.6 : 3.8;
+      P.fill((x, y) => {
+        const k = 1 - Math.pow((x - 7) / 7, 2);
+        if (k <= 0 || Math.abs(y - 4) > open * k) return null;
+        const d = Math.hypot(x - 7, y - 4);
+        return d < 1.1 ? 'd' : d < 2.4 ? 'm' : 'w';
+      });
+      P.set(6, 3, 'w');
+      P.outline();
+    } },
+    // Cristal que gira (Psicocarga).
+    prism: { w: 11, h: 11, spin: true, gen(P) {
+      P.fill((x, y) => {
+        const d = Math.abs(x - 5) + Math.abs(y - 5);
+        if (d > 5) return null;
+        return x < 5 && y < 5 ? 'w' : x >= 5 && y >= 5 ? 'm' : 'l';
+      });
+      P.outline();
+    } },
+    // Nube de niebla (Bola Neblina).
+    mist: { w: 13, h: 11, frames: 2, gen(P, f) {
+      const puffs = [[4, 6, 3], [8, 6, 3.2], [6, 4 - f * 0.5, 3], [10, 4 + f * 0.5, 2]];
+      P.fill((x, y) => puffs.some(([a, b, r]) => Math.hypot(x - a, y - b) < r) ? 'l' : null);
+      for (const [a, b] of puffs) P.set(a - 1, b - 1, 'w');
+      P.outline();
+    } },
+    // Onda que viaja por el rayo (Psicorrayo).
+    psiwave: { w: 15, h: 7, dir: true, gen(P) {
+      for (let x = 0; x < 15; x++) {
+        const y = 3 + Math.sin(x * 0.9) * 2.4;
+        P.set(x, y, x % 4 < 2 ? 'w' : 'l');
+        P.set(x, y + 1, 'm');
+      }
+      P.outline();
+    } },
+    // ---- 25-10-2026: más formas, para que los ataques de un mismo tipo no se vean iguales ----
+    // Bola con cola (Nitrocarga, Placaje Eléctrico, Fuego Sagrado, Puño Meteoro...).
+    comet: { w: 15, h: 9, frames: 2, dir: true, gen(P, f) {
+      P.fill((x, y) => { const d = Math.hypot(x - 11, y - 4); return d < 1.4 ? 'w' : d < 2.6 ? 'l' : d < 3.6 ? 'm' : null; });
+      for (let x = 0; x < 9; x++) {
+        const w = (x / 9) * 2.4 + (f && x % 3 === 0 ? 0.6 : 0);
+        for (let y = -w; y <= w; y += 1) P.set(x, 4 + y, x < 3 ? 'd' : x < 6 ? 'm' : 'l');
+      }
+      P.outline();
+    } },
+    // Copo de nieve que gira (Nieve Polvo, Liofilización, Ventisca).
+    snowflake: { w: 11, h: 11, spin: true, gen(P) {
+      for (let k = 0; k < 6; k++) {
+        const a = k * Math.PI / 3, ca = Math.cos(a), sa = Math.sin(a);
+        P.line(5, 5, 5 + ca * 5, 5 + sa * 5, 'l');
+        P.set(5 + ca * 3 - sa, 5 + sa * 3 + ca, 'w'); P.set(5 + ca * 3 + sa, 5 + sa * 3 - ca, 'w');
+      }
+      P.set(5, 5, 'w');
+      P.outline();
+    } },
+    // Puño (Puño Fuego / Hielo / Trueno / Drenaje, Golpe Bajo).
+    fist: { w: 11, h: 10, dir: true, gen(P) {
+      ['..mmmmm....', '.mllllwm...', 'mlllllllm..', 'mllllllllm.', 'mlllllllllm', 'mlllllllllm',
+       'mllllllllm.', '.mmllllmm..', '...mmmm....', '...........']
+        .forEach((row, y) => [...row].forEach((c, x) => { if (c !== '.') P.set(x, y, c); }));
+      for (const y of [3, 5]) for (let x = 6; x < 9; x++) P.set(x, y, 'm');
+      P.outline();
+    } },
+    // Semilla (Bomba Germen).
+    seed: { w: 9, h: 11, spin: true, gen(P) {
+      P.fill((x, y) => { const d = Math.hypot((x - 4) * 1.35, y - 6); return d < 2 ? 'l' : d < 4.2 ? 'm' : null; });
+      P.set(3, 4, 'w'); P.set(4, 1, 'l'); P.set(5, 0, 'l'); P.set(4, 2, 'm');
+      P.outline();
+    } },
+    // Pluma (Tornado).
+    feather: { w: 13, h: 7, dir: true, spin: true, gen(P) {
+      for (let x = 0; x < 13; x++) {
+        const w = Math.sin(Math.PI * x / 12) * 2.6;
+        for (let y = -w; y <= w; y += 1) P.set(x, 3 + y, Math.abs(y) < 0.6 ? 'w' : 'l');
+      }
+      P.outline();
+    } },
+    // Roca grande con aristas (Avalancha, Tormenta Diamantes).
+    boulder: { w: 15, h: 14, frames: 2, spin: true, gen(P, f) {
+      P.fill((x, y) => {
+        const a = Math.atan2(y - 7, x - 7), r = 6 + Math.round(Math.sin(a * 5 + f) * 0.9);
+        const d = Math.hypot(x - 7, y - 7);
+        return d > r ? null : (x - 7) + (y - 7) < -3 ? 'l' : (x - 7) + (y - 7) > 4 ? 'd' : 'm';
+      });
+      P.set(4, 4, 'w'); P.set(5, 4, 'w');
+      P.outline();
+    } },
     heart: { w: 9, h: 8, gen(P) {
       ['.ll...ll.', 'lwll.llll', 'lllllllll', 'lllllllll', '.lllllll.', '..lllll..', '...lll...', '....l....']
         .forEach((row, y) => [...row].forEach((c, x) => { if (c !== '.') P.set(x, y, c === 'w' ? 'w' : 'l'); }));
@@ -318,8 +421,8 @@ G.VFX = (() => {
   const MOVE = {
     'quick-attack':  { proj: 'streak' },
     'ember':         { proj: 'fire', trail: 'ember' },
-    'heat-wave':     { proj: 'fire', trail: 'ember' },
-    'fire-spin':     { proj: 'fire', trail: 'ember' },
+    'heat-wave':     { proj: 'wind', trail: 'ember' },
+    'fire-spin':     { proj: 'ball', trail: 'ember' },
     'flamethrower':  { proj: 'fire', trail: 'ember', beam: 'fire' },
     'water-gun':     { proj: 'drop', trail: 'drip' },
     'bubble':        { proj: 'bubble' },
@@ -327,20 +430,23 @@ G.VFX = (() => {
     'aqua-ring':     { buff: 'bubble' },
     'vine-whip':     { melee: 'vine' },
     'razor-leaf':    { proj: 'leaf' },
-    'leaf-storm':    { proj: 'leaf' },
+    'leaf-storm':    { proj: 'spiral' },
     'giga-drain':    { aura: 'heart', inward: true },
     'thunder-shock': { proj: 'bolt', trail: 'spark' },
     'discharge':     { aura: 'bolt' },
     'thunderbolt':   { beam: 'lightning' },
-    'confusion':     { proj: 'ring' },
-    'psybeam':       { beam: 'ring' },
-    'psychic':       { proj: 'ring' },
+    // Psíquicos: cada uno con su forma (prueba del 25-10-2026; antes casi todos 'ring').
+    'confusion':     { proj: 'spiral' },
+    'psybeam':       { beam: 'psiwave' },
+    'psychic':       { proj: 'eye' },
+    'psyshock':      { proj: 'prism', pal: 'psyviolet', trail: 'spark' },
+    'psystrike':     { proj: 'eye', pal: 'mind' },
     'sludge':        { proj: 'blob', trail: 'bubbles' },
     'poison-sting':  { proj: 'needle' },
     'toxic':         { aura: 'bubble', rise: true },
     'mud-shot':      { proj: 'blob', trail: 'dirt' },
     'bulldoze':      { aura: 'rock', rise: true },
-    'gust':          { proj: 'wind' },
+    'gust':          { proj: 'feather' },
     'wing-attack':   { melee: 'feather' },
     'tackle':        { melee: 'impact' },
     'body-slam':     { melee: 'impact' },
@@ -349,9 +455,9 @@ G.VFX = (() => {
     'string-shot':   { proj: 'web' },
     'bug-buzz':      { aura: 'note' },
     'rock-throw':    { proj: 'rock', trail: 'dirt' },
-    'rock-slide':    { proj: 'rock', trail: 'dirt' },
+    'rock-slide':    { proj: 'boulder', trail: 'dirt' },
     'ice-beam':      { beam: 'shard' },
-    'powder-snow':   { aura: 'star' },
+    'powder-snow':   { aura: 'snowflake' },
     'karate-chop':   { melee: 'impact' },
     'aura-sphere':   { proj: 'ball', pal: 'aura', trail: 'spark' },
     'lick':          { melee: 'impact' },
@@ -363,62 +469,91 @@ G.VFX = (() => {
     'metal-claw':    { melee: 'claw' },
     'flash-cannon':  { beam: 'shard' },
     'bite':          { melee: 'jaws' },
-    'dark-pulse':    { proj: 'crescent' },
+    'dark-pulse':    { proj: 'ring' },
     'night-shade':   { aura: 'shadow', rise: true },
     'swords-dance':  { buff: 'arrow', pal: 'fighting' },
     'agility':       { buff: 'arrow', pal: 'flying' },
     'harden':        { buff: 'arrow', pal: 'steel' },
     'bonemerang':    { proj: 'crescent' },
-    'psycho-cut':    { proj: 'crescent' },
+    'psycho-cut':    { proj: 'crescent', pal: 'psyviolet' },
     'spikes':        { proj: 'star' },
     'toxic-spikes':  { proj: 'star' },
     'hail':          { proj: 'shard' },
     'meteor-mash':   { proj: 'rock', trail: 'spark' },
     'will-o-wisp':   { proj: 'ball', trail: 'ember' },
     'substitute':    { proj: 'star' },
-    'aerial-ace':    { proj: 'wind' },
+    'aerial-ace':    { proj: 'streak' },
     'flame-wheel':   { proj: 'fire', aura: 'fire' },
     'bubble-beam':   { proj: 'bubble' },
     'hex':           { beam: 'shadow', proj: 'shadow' },
     // nuevos del 19-10-2026 (mismas formas, cada uno con las suyas)
     'hyper-beam':    { beam: 'star', proj: 'star' },
     'rapid-spin':    { melee: 'impact' },
-    'flame-charge':  { proj: 'fire', trail: 'ember' },
-    'whirlpool':     { proj: 'drop', trail: 'drip' },
-    'seed-bomb':     { proj: 'leaf' },
+    'flame-charge':  { proj: 'comet', trail: 'ember' },
+    'whirlpool':     { proj: 'spiral', trail: 'drip' },
+    'seed-bomb':     { proj: 'seed' },
     'energy-ball':   { proj: 'ball', trail: 'spark' },
     'solar-beam':    { beam: 'star', proj: 'leaf' },
-    'thunder-wave':  { proj: 'bolt', trail: 'spark' },
-    'electro-ball':  { proj: 'bolt', trail: 'spark' },
-    'extrasensory':  { proj: 'ring' },
-    'mist-ball':     { proj: 'ring', trail: 'wisp' },
-    'acid-spray':    { proj: 'blob', trail: 'bubbles' },
-    'sand-tomb':     { proj: 'rock', trail: 'dirt' },
-    'magnitude':     { proj: 'rock', trail: 'dirt' },
-    'whirlwind':     { proj: 'wind' },
+    'thunder-wave':  { proj: 'ring', trail: 'spark' },
+    'electro-ball':  { proj: 'ball', trail: 'spark' },
+    'extrasensory':  { proj: 'eye', pal: 'psyviolet' },
+    'mist-ball':     { proj: 'mist', pal: 'mist', trail: 'wisp' },
+    'acid-spray':    { proj: 'drop', trail: 'bubbles' },
+    'sand-tomb':     { proj: 'mist', trail: 'dirt' },
+    'magnitude':     { proj: 'ring', trail: 'dirt' },
+    'whirlwind':     { proj: 'spiral' },
     'air-slash':     { proj: 'crescent' },
     'signal-beam':   { proj: 'star', trail: 'spark' },
-    'u-turn':        { proj: 'needle' },
+    'u-turn':        { proj: 'streak' },
     'rock-tomb':     { proj: 'rock', trail: 'dirt' },
-    'ancient-power': { proj: 'rock' },
+    'ancient-power':  { proj: 'ball', trail: 'spark' },
     'power-gem':     { proj: 'shard', trail: 'spark' },
     'ice-shard':     { proj: 'shard' },
-    'freeze-dry':    { proj: 'shard' },
+    'freeze-dry':    { proj: 'snowflake' },
     'rolling-kick':  { melee: 'impact' },
     'vacuum-wave':   { proj: 'ring', pal: 'aura' },
     'dynamic-punch': { proj: 'impact' },
-    'shadow-sneak':  { proj: 'shadow', trail: 'wisp' },
-    'ominous-wind':  { proj: 'shadow', trail: 'wisp' },
+    'shadow-sneak':  { proj: 'claw' },
+    'ominous-wind':  { proj: 'wind', trail: 'wisp' },
     'dragon-breath': { proj: 'fire', trail: 'ember' },
     'dragon-claw':   { melee: 'claw' },
     'outrage':       { melee: 'claw' },
     'draining-kiss': { proj: 'heart' },
     'play-rough':    { melee: 'impact' },
     'disarming-voice': { proj: 'note' },
-    'mirror-shot':   { proj: 'shard', trail: 'spark' },
+    'mirror-shot':   { proj: 'prism', trail: 'spark' },
     'gyro-ball':     { melee: 'impact' },
-    'sucker-punch':  { proj: 'crescent' },
-    'night-slash':   { melee: 'claw' }
+    'sucker-punch':  { proj: 'fist' },
+    'night-slash':   { melee: 'claw' },
+    'lava-plume':    { proj: 'blob', trail: 'ember' },
+    'sacred-fire':   { proj: 'comet', pal: 'electric', trail: 'ember' },
+    'fire-punch':    { proj: 'fist', trail: 'ember' },
+    'waterfall':     { proj: 'streak', trail: 'drip' },
+    'scald':         { proj: 'mist', trail: 'wisp' },
+    'water-pulse':   { proj: 'ring' },
+    'origin-pulse':  { proj: 'ring', pal: 'aura' },
+    'volt-tackle':   { proj: 'comet', trail: 'spark' },
+    'thunder-punch':  { proj: 'fist', trail: 'spark' },
+    'stone-edge':    { proj: 'shard', trail: 'dirt' },
+    'diamond-storm':  { proj: 'prism', pal: 'ice', trail: 'spark' },
+    'blizzard':      { proj: 'snowflake' },
+    'ice-punch':     { proj: 'fist' },
+    'acrobatics':    { proj: 'crescent' },
+    'dragon-ascent':  { proj: 'comet', pal: 'dragon' },
+    'x-scissor':     { proj: 'claw' },
+    'silver-wind':   { proj: 'wind' },
+    'attack-order':  { proj: 'star' },
+    'seed-flare':    { proj: 'star', trail: 'spark' },
+    'sludge-bomb':   { proj: 'bubble', trail: 'bubbles' },
+    'mortal-spin':   { proj: 'ring' },
+    'dark-void':     { proj: 'shadow' },
+    'dragon-pulse':  { proj: 'ring' },
+    'roar-of-time':  { proj: 'ball', trail: 'spark' },
+    'moonblast':     { proj: 'ball', trail: 'spark' },
+    'doom-desire':   { proj: 'star', trail: 'spark' },
+    'drain-punch':   { proj: 'fist' },
+    'secret-sword':  { proj: 'crescent' },
+    'extreme-speed':  { proj: 'streak' }
   };
 
   const TYPE_SHAPE = {

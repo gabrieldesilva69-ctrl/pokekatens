@@ -83,6 +83,9 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   con `--megas` (en el ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.
   Faltan Mega Golisopod, Mega Magearna y Mega Tatsugiri: Reloaded no trae sus sprites de mapa (de Magearna sólo un
   dibujo de combate, `data/pkmn/100992.gif`, sin animaciones), así que no tienen Megapiedra.
+- **Aspecto de los ataques** (`js/entities/vfx.js`, `MOVE`): cada ataque tiene su forma y su paleta; desde el
+  25-10-2026 casi ninguno repite la de otro de su tipo (formas nuevas: `spiral`, `eye`, `prism`, `mist`, `psiwave`,
+  `comet`, `snowflake`, `fist`, `seed`, `feather`, `boulder`; paletas `psyviolet`, `mist`, `mind`).
 - **Megas (25-10-2026)**: cada mega de la partida dura `STEP` (3 s) más que la anterior, de 45 a `MAX_DUR` (90 s)
   (`G.Mega.durFor`). Al vencer a un legendario de una grieta, un 5 % (`STONE_CHANCE`) de la Megapiedra u Orbe de
   una mega cualquiera que no tengas (`G.Shop.randomStone`). En la ficha, «Ver Mega» / «Ver Primigenio» enseña
