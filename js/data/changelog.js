@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-25', title: ['PokeKatens: GS Ball y megas', 'PokeKatens: GS Ball and Megas'], new: [
+    ["Cooperativo desde casas distintas: si vuestras conexiones no consiguen hablarse directamente (pasa con datos móviles y con algunas compañías de internet), la partida va por nuestro servidor y en la sala sale «Conectado (por servidor)». Va algo menos fluida que la conexión directa. Tiene un tope al mes para seguir siendo gratis; si se gasta, vuelve a salir «No se pudo conectar» hasta el mes siguiente.",
+     "Co-op from different homes: if your connections can't reach each other directly (it happens with mobile data and some internet providers), the run goes through our server and the lobby shows \"Connected (via server)\". It's a bit less smooth than a direct connection. It has a monthly cap so it stays free; if it runs out, \"Could not connect\" shows again until next month."],
     ["Amigos: al lado de cada amigo sale si está en línea (verde), en partida (dorado, y si es en grupo lo dice) o desconectado (gris, con cuánto hace). Los que están conectados salen primero.",
      "Friends: next to each friend you see whether they are online (green), in a run (gold, and it says if it's a group run) or offline (grey, with how long ago). Connected friends are listed first."],
     ["GS Ball: cada 500 tiradas del gacha (de cualquier banner) te dan una GS Ball. Ábrela en la Mochila y elige el Pokémon que quieras de los que aún no tienes, legendarios incluidos (nunca shiny). En el gacha ves cuánto te falta.",

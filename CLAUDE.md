@@ -84,7 +84,9 @@ el juego se apunta ahí, no aquí.
 - **Nube**: Firebase (Auth con nombre + contraseña, Firestore para partidas/perfil/amigos/ranking,
   Realtime Database sólo para la señalización de las salas). Lo que protege los datos son
   `firestore.rules` y `database.rules.json`, no el código del juego.
-- **Cooperativo**: WebRTC directo con STUN gratuito de Google (`js/net/net.js`). Sin TURN.
+- **Cooperativo**: WebRTC directo con STUN gratuito de Google (`js/net/net.js`). Sin TURN. Quien no consigue
+  el directo (CGNAT, datos móviles) juega por el relé de la Realtime Database, con un tope al mes
+  (`RELAY_CAP_MB`, contador en `relayUse/<AAAA-MM>`) para no pasar del plan gratis (decidido el 25-10-2026).
 - **Escritorio**: `desktop/main.js` abre la URL de `desktop/package.json` → `pokekatens.url`
   (o `PK_URL`). Sin `preload` ni Node en la página; los enlaces externos van al navegador.
   Tras la primera carga, el service worker (`sw.js`) guarda una copia: sin internet abre esa copia

@@ -1077,6 +1077,7 @@ G.I18n.add({
   'Hay una versión nueva del juego: actualizando en {x} s…': 'A new version of the game is out: updating in {x} s…',
   'Actualización obligatoria: tu partida se guarda y el juego se recarga en {x} s…': 'Required update: your run is saved and the game reloads in {x} s…',
   'No se pudo conectar (reintentando…)': 'Could not connect (retrying…)',
+  'No se pudo conectar (servidor de apoyo agotado este mes)': 'Could not connect (backup server used up this month)',
   'Red abierta': 'Open network', 'Red normal': 'Normal network', 'Red estricta': 'Strict network',
   'Red bloqueada': 'Blocked network', 'Comprobando la red…': 'Checking network…',
   'No se puede conectar: una red «estricta» o «bloqueada» (datos móviles, CGNAT, redes de empresa o un cortafuegos) no deja jugar en grupo con alguien de fuera. Probad con otra wifi; se reintenta solo.':

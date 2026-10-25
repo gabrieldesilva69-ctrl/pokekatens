@@ -75,5 +75,15 @@ const member = n => ({ name: n, dex: 25, shiny: false, at: TS });
   await ok(A, 'PUT', `rooms/${A}/open`, false, '(empieza la partida)');
   await ok(X, 'PUT', `rin/${A}/${X}`, true, '(X pone su rin)');
   await no(X, 'PUT', `rooms/${A}/m/${X}`, member('x'), 'entrar en una sala cerrada');
+  // ---- el contador del relé (relayUse/<AAAA-MM>, en MB; net.js) ----
+  await ok(A, 'PUT', 'relayUse/2026-10', 3, 'apuntar los primeros MB del mes');
+  await ok(B, 'PUT', 'relayUse/2026-10', 4, 'sumar 1 MB');
+  await ok(B, 'GET', 'relayUse/2026-10', undefined, 'leer cuánto queda');
+  await no(X, 'PUT', 'relayUse/2026-10', 0, 'ponerlo a cero');
+  await no(X, 'PUT', 'relayUse/2026-10', 2, 'bajarlo');
+  await no(X, 'PUT', 'relayUse/2026-10', 100, 'sumar más de 20 de golpe');
+  await no(X, 'DELETE', 'relayUse/2026-10', undefined, 'borrarlo');
+  await no(X, 'PUT', 'relayUse/2026-10', 'x', 'algo que no es un número');
+  await no(X, 'PUT', 'relayUse/basura', 1, 'un mes que no es un mes');
   console.log('reglas de la Realtime Database: todo bien');
 })().catch(e => { console.error(e.message); process.exit(1); });

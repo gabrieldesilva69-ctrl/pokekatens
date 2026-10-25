@@ -179,7 +179,7 @@ Se edita `dev.html` (pantallas y orden de carga); `index.html` y `js/app.min.js`
 | `js/world/` | tiles (terreno en pixel art por código, biomas y su clima), world (chunks, objetos del mapa, colisiones) |
 | `js/entities/` | player, enemy, projectile, pickup, fx, vfx |
 | `js/systems/` | combat, spawner, levelup, gacha, weather, hazards, rift (grietas/legendarios), events, interact, judgment, pathing, progress, stats, mons |
-| `js/net/` | social (apodo, amigos, salas), net (WebRTC sólo con STUN, sin relé), coop, ranking, codec |
+| `js/net/` | social (apodo, amigos, salas), net (WebRTC con STUN y, sin directo, relé por la Realtime Database con tope al mes), coop, ranking, codec |
 | `js/ui/` | pantallas: menu, login, test (personalidad), hud, run-ui, gacha-ui, shop-ui, goals-ui, settings-ui, social-ui, ranking-ui, news-ui, mod-ui (moderación) … |
 | `js/game.js`, `js/main.js` | Flujo y bucle principal; `main.js` tiene `MAINTENANCE` |
 | `tools/` | Scripts; los `.py` regeneran lo marcado con \* (Python 3 + Pillow + internet, una sola vez): `fetch_sprites.py` (~20 min, reanudable con `tools/cache/`), `fetch_pokedex.py`, `fetch_credits.py` → `CREDITS.md`. `import_reloaded.py` convierte sprites de mapa de Pokémon Reloaded (`--mega N`, `--megas`, `--dex N`, `--faltan`, `--out` para probar) y marca sus entradas con `rl`. `shiny_from_reloaded.py` hace el shiny de los que SpriteCollab no dibujó, con los colores de los retratos de Reloaded (`rs` en los metadatos; sin `--aplicar` sólo deja la hoja de revisión en `tools/cache/`). `reloaded_ids.py` dice qué número tiene cada Pokémon en Reloaded |

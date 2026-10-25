@@ -340,3 +340,37 @@ test('co-op orbs: the host applies a guest orb only if the guest really has it, 
   G.Orbs.add(guest, 'quick');
   assert.ok(!G.Orbs.canTake(guest, 'blowback'));     // y 4 huecos
 });
+
+test('without a direct connection the game goes through the database relay, until the month\'s cap is used up', async () => {
+  let used = 0;
+  const relay = [], timers = [];
+  const G = { NetCodec: codec(), DB: { fb: { uid: 'host', rtdb: {
+    ref: p => ({ on() {}, off() {}, set: s => { relay.push([p, s]); return Promise.resolve(); },
+      once: () => Promise.resolve({ val: () => used }),
+      transaction: fn => { used = fn(used); return Promise.resolve({ snapshot: { val: () => used } }); } })
+  } } } };
+  class PC {
+    createDataChannel() { return this.dc = { readyState: 'connecting', send() {}, close() {} }; }
+    createOffer() { return Promise.resolve({ type: 'offer' }); }
+    setLocalDescription() { this.localDescription = { toJSON: () => ({ type: 'offer' }) }; return Promise.resolve(); }
+    close() {}
+  }
+  new Function('G', 'RTCPeerConnection', 'setTimeout', 'clearTimeout', source('js/net/net.js'))(G, PC, fn => timers.push(fn), () => {});
+  const N = G.Net, big = { k: 'f', p: ['x'.repeat(10000)] };
+  N.open('room', true, 'host'); N.syncMembers(['host', 'a']); await settle();
+  const sig = relay.length;
+  N.send('a', big); assert.equal(relay.length, sig, 'mientras se conecta, nada de la partida va por la base de datos');
+  timers[0]();                                   // pasan los 15 s sin canal directo
+  await settle();
+  assert.equal(N.mode('a'), 'relay'); assert.equal(N.slow('a'), true);
+  const t = timers.length;
+  for (let i = 0; i < 100; i++) N.send('a', big);
+  assert.equal(relay.length, sig + 100);
+  timers[t](); await settle();                   // al minuto se apunta en relayUse/<mes>
+  assert.ok(used >= 1 && used <= 2, 'MB apuntados: ' + used);
+  used = 5999;
+  for (let i = 0; i < 100; i++) N.send('a', big);
+  timers.at(-1)(); await settle();
+  assert.equal(N.relayFull, true); assert.equal(N.mode('a'), 'failed');
+  const n = relay.length; N.send('a', big); assert.equal(relay.length, n, 'agotado: ya no va nada de la partida');
+});
