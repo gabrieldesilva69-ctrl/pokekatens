@@ -63,7 +63,7 @@ test('bounded deterministic random numeric payloads round-trip', () => {
 
 function network() {
   const pcs = [], relay = [], G = { NetCodec: codec(), DB: { fb: { uid: 'host', rtdb: {
-    ref: p => ({ on() {}, off() {}, push: s => { relay.push([p, s]); return Promise.resolve(); } })
+    ref: p => ({ on() {}, off() {}, push: s => { relay.push([p, s]); return Promise.resolve(); }, set: s => { relay.push([p, s]); return Promise.resolve(); } })
   } } } };
   class PC {
     constructor() { pcs.push(this); }
@@ -153,7 +153,7 @@ test('real Coop.tick frames pass through the codec without changing gameplay fie
 
 function stunNetwork() {
   const configs = [], calls = [], G = { NetCodec: codec(), DB: { fb: { uid: 'host', auth: { currentUser: { uid: 'host' } }, rtdb: {
-    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve() })
+    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve(), set: () => Promise.resolve() })
   } } } };
   class PC {
     constructor(cfg) { configs.push(cfg); }
@@ -179,7 +179,7 @@ test('STUN only: no request is made and every peer gets only the two Google STUN
 
 function signalNetwork(me, isHost) {
   const pcs = [], G = { NetCodec: codec(), DB: { fb: { uid: me, rtdb: {
-    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve() })
+    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve(), set: () => Promise.resolve() })
   } } } };
   // Como el navegador: remoteDescription sólo se rellena al acabar setRemoteDescription.
   class PC {
@@ -194,7 +194,7 @@ function signalNetwork(me, isHost) {
   }
   new Function('G', 'RTCPeerConnection', 'setTimeout', 'clearTimeout', source('js/net/net.js'))(G, PC, () => 1, () => {});
   let onChild = null;
-  G.DB.fb.rtdb.ref = () => ({ on: (ev, fn) => { onChild = fn; }, off() {}, push: () => Promise.resolve() });
+  G.DB.fb.rtdb.ref = () => ({ on: (ev, fn) => { onChild = fn; }, off() {}, push: () => Promise.resolve(), set: () => Promise.resolve() });
   G.Net.open('room', isHost, 'host');
   const deliver = (f, sig) => onChild({ val: () => JSON.stringify({ f, sig }), ref: { remove: () => Promise.resolve() } });
   return { N: G.Net, pcs, deliver };
