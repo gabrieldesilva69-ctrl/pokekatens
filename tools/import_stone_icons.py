@@ -9,7 +9,8 @@ dueños (con IA, 24-10-2026; no son oficiales) -> js/data/stones.js.
 - tools/art/megapiedras.jpg: hoja de 232x777 con tres columnas (XY, ORAS, Leyendas Z-A);
   cada fila, un icono redondo de ~15x15 y su nombre en inglés. SHEET dice qué mega es cada
   fila (el número nacional, y la forma si hay dos: Charizardita X, Mewtwonita Y). Cada icono
-  se recorta en círculo (fuera el fondo verde) y va como PNG en base64 (~0,5 KB).
+  son sus píxeles tal cual (pixel art), sin nada de lo que queda fuera de su borde negro: ni el
+  aro blanco que lleva alrededor ni el fondo verde (inside_outline). PNG en base64 (~0,5 KB).
 - tools/art/orbes.jpg: el Orbe Rojo y el Orbe Azul grandes: se recortan en círculo y se
   reducen a 48x48.
 
@@ -68,6 +69,46 @@ def circle(im, inset=0.0):
     return out
 
 
+def inside_outline(sheet, x, y):
+    """La piedra tal cual (sus píxeles de la hoja, en pixel art), sin lo de fuera de su borde
+    negro: el aro blanco que lleva alrededor y el fondo verde. Se recorta con un píxel de margen
+    para que el borde negro quepa entero, se borra lo claro que se alcanza desde fuera sin
+    cruzar el borde negro (el brillo blanco de dentro no se toca: el borde lo encierra) y se
+    queda sólo la pieza grande (fuera los trocitos de las piedras de arriba y abajo)."""
+    c = sheet.crop((x - 1, y - 1, x + SIZE + 1, y + SIZE + 1)).convert('RGBA')
+    w, h = c.size
+    px = c.load()
+    lum = lambda i, j: sum(px[i, j][:3]) / 3
+    out = set()
+    todo = [(i, j) for i in range(w) for j in (0, h - 1)] + [(i, j) for j in range(h) for i in (0, w - 1)]
+    while todo:
+        i, j = todo.pop()
+        if (i, j) in out or not (0 <= i < w and 0 <= j < h) or lum(i, j) <= 100:
+            continue
+        out.add((i, j))
+        todo += [(i + 1, j), (i - 1, j), (i, j + 1), (i, j - 1)]
+    keep = {(i, j) for j in range(h) for i in range(w) if (i, j) not in out}
+    best, seen = set(), set()
+    for p0 in keep:
+        if p0 in seen:
+            continue
+        part, todo = set(), [p0]
+        while todo:
+            q = todo.pop()
+            if q in seen or q not in keep:
+                continue
+            seen.add(q); part.add(q)
+            i, j = q
+            todo += [(i + 1, j), (i - 1, j), (i, j + 1), (i, j - 1)]
+        if len(part) > len(best):
+            best = part
+    for j in range(h):
+        for i in range(w):
+            if (i, j) not in best:
+                px[i, j] = (0, 0, 0, 0)
+    return c
+
+
 def game_megas():
     keys = set()
     for line in io.open(MEGAS, encoding='utf-8'):
@@ -86,7 +127,7 @@ def main():
             if dex not in have or form != WHICH.get(dex, ''):
                 continue
             x, y = COL_X[col], ROW_Y0 + i * ROW_DY
-            icons[dex] = uri(circle(sheet.crop((x, y, x + SIZE, y + SIZE))))
+            icons[dex] = uri(inside_outline(sheet, x, y))
     miss = sorted(have - set(icons))
     orbs_im = Image.open(os.path.join(ART, 'orbes.jpg')).convert('RGB')
     orbs = {}

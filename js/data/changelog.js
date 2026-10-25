@@ -6,6 +6,10 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-25', title: ["PokeKatens: Megapiedras sin aro blanco", "PokeKatens: Mega Stones without the white ring"], fix: [
+    ["Los iconos de las Megapiedras ya no llevan el aro blanco (y el trozo de fondo) que sobresalía por fuera de su borde negro. Por dentro siguen igual.",
+     "Mega Stone icons no longer have the white ring (and bit of background) sticking out past their black outline. Inside they're the same."]
+  ] },
   { d: '2026-10-24', title: ['PokeKatens: desafío semanal, evoluciones y noche', 'PokeKatens: weekly challenge, evolutions and night'], new: [
     ["Cada Megapiedra tiene su propio icono, con los colores de su Pokémon, y el Orbe Rojo y el Orbe Azul el suyo, con su Ω y su α. Salen en la barra y el botón de megaevolucionar, en la Tienda, en la Mochila y en la ficha de la colección.",
      "Every Mega Stone has its own icon, with the colours of its Pokémon, and the Red Orb and Blue Orb have theirs, with their Ω and α. They show on the Mega Evolution bar and button, in the Shop, in the Bag and on the collection page."],

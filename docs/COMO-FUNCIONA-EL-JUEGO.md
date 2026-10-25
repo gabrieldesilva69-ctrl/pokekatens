@@ -74,7 +74,8 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Icono de cada Megapiedra** (`G.Mega.stoneIcon`): `'ms:<dex>'` y `'porb:red'` / `'porb:blue'` (Orbe Rojo y
   Orbe Azul de las primigenias). Son las imágenes que hicieron los dueños (con IA, no oficiales): `tools/art/`
   `megapiedras.jpg` y `orbes.jpg`, recortadas con `tools/import_stone_icons.py` a `js/data/stones.js`
-  (`G.STONE_ICONS`, `G.ORB_ICONS`). Si una mega nueva no está en la hoja, se dibuja una esfera con los dos colores
+  (`G.STONE_ICONS`, `G.ORB_ICONS`). Las Megapiedras, con sus píxeles tal cual (pixel art) y sin lo que queda fuera
+  de su borde negro (el aro blanco y el fondo verde de la hoja). Si una mega nueva no está en la hoja, se dibuja una esfera con los dos colores
   de su sprite (`tools/make_stones.py`). Salen en la barra y el botón de megaevolucionar, la Tienda, la Mochila y
   la ficha (`js/ui/icons.js`).
 - **Tamaño de las megas** (`G.Mega.megaScale`): en pantalla, todas al menos un 40 % más altas que su forma normal
