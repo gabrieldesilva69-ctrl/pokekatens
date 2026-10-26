@@ -60,10 +60,10 @@ G.Ranking = (() => {
   // importe y eran muchas lecturas y escrituras para nada: los que empiezan
   // mueren a menudo en el primer minuto; era 1 min hasta el 14-10-2026).
   const MIN_T = 120;
-  // En el histórico de cada Pokémon, 5 min: con casi mil tablas, la mayoría no
-  // llega a 50 marcas y aceptaban cualquier partida (2 escrituras cada vez; el
-  // ranking era ~1/5 de las escrituras de Firestore el 20-10-2026).
-  const MIN_T_MON = 300;
+  // En el histórico de cada Pokémon, 10 min (5 hasta el 25-10-2026): con más de mil
+  // tablas, casi ninguna llega a 50 marcas y aceptaban cualquier partida (2
+  // escrituras cada vez; eran ~1/10 de todas las escrituras de Firestore).
+  const MIN_T_MON = 600;
   // Caché de lo leído: 2 h (era 30 min hasta el 20-10-2026). Tu marca nueva se
   // ve al momento igual (al subirla se guarda en la caché lo que se escribió).
   const TTL = 2 * 3600 * 1000;
@@ -218,7 +218,6 @@ G.Ranking = (() => {
    * y derrotados con sentido y el baneo (firestore.rules; el tope de 45 min se
    * quitó el 23-10-2026: en el minuto 35 Arceus rompe los objetos).
    */
-  let busy = Promise.resolve();
   /** Al empezar a jugar: sube las marcas del histórico que esperaban (ver DEFER). */
   function runStarted() { flushDeferred(); }
 
@@ -262,8 +261,6 @@ G.Ranking = (() => {
     const d = deferred(), k = b + ':' + id;
     if (d[k] && d[k].e) { d[k] = { up: Date.now() }; saveDeferred(d); }
   }
-  /** La subida de una marca (para que la partida siguiente espere a que acabe). */
-  function track(p) { busy = p.catch(() => {}); return p; }
 
   /** Guarda la entrada en cada tabla donde mejore (tiempo o daño). → periodos mejorados */
   async function store(boards, id, entry) {
@@ -369,7 +366,7 @@ G.Ranking = (() => {
     return { t, lv: Math.max(1, Math.min(r.lv | 0, 10 + Math.floor(t / 4))), kills: Math.max(0, Math.min(r.kills | 0, 100 + t * 12)) };
   }
 
-  function submitSolo(r) { return track(submitSoloNow(r)); }
+  function submitSolo(r) { return submitSoloNow(r); }
   async function submitSoloNow(r) {
     const fb = fbx();
     if (!fb || !G.Social.me || r.t < MIN_T) return [];
@@ -396,7 +393,7 @@ G.Ranking = (() => {
   }
 
   /** La sube el anfitrión, con todo el equipo. */
-  function submitGroup(r) { return track(submitGroupNow(r)); }
+  function submitGroup(r) { return submitGroupNow(r); }
   async function submitGroupNow(r) {
     const fb = fbx();
     if (!fb || r.t < MIN_T || !r.members || r.members.length < 2) return [];
@@ -430,8 +427,6 @@ G.Ranking = (() => {
     }
     return inflight.get(b);
   }
-  /** El top 50 de tiempo de una tabla. */
-  async function summary(b) { return (await sumOf(b)).top; }
 
   /*
    * Lo que se enseña de una tabla: su resumen y, encima, lo que este navegador
