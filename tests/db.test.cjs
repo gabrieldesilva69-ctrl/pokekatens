@@ -173,3 +173,21 @@ test('Guardar dos veces seguidas y salir del juego: la segunda se sube al salir'
   NOW += 17000; A.hide(); await settle();            // a los 22 s sales del juego
   assert.equal(cloud.save.tickets.t1, 5, 'se ha subido al salir');
 });
+
+test('una partida con lo de PokeKatens (huevos, GS Ball, avatar) se abre en otro aparato sin fallar', async () => {
+  // 26-10-2026: al juntar la actualización de JPTER78, la limpieza de los huevos usaba
+  // un ayudante que se había renombrado y nadie con huevos podía entrar («n is not defined»).
+  reset();
+  const A = await open(new Map());
+  await act(A, 'save');
+  Object.assign(cloud.save, {
+    eggs: [{ id: 'e1', dex: 25, shiny: false, need: '500', done: 120, from: 'gacha' }, { id: 'e2', dex: 7, need: -3, done: 'x' }],
+    gsPulls: 1234, profile: { avatar: 7 }, bag: { gsball: 1, candy: 40 }
+  });
+  const B = await open(new Map());
+  assert.equal(B.DB.syncState !== 'error', true);
+  const s = B.DB.save;
+  assert.deepEqual(s.eggs.map(e => [e.id, e.need, e.done]), [['e1', 500, 120], ['e2', 1, 0]]);
+  assert.equal(s.gsPulls, 499);
+  assert.equal(s.profile.avatar, 7);
+});

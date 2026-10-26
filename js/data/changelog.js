@@ -9,6 +9,9 @@ G.CHANGELOG = [
   { d: '2026-10-26', title: ['PokeKatens: Protección más justa', 'PokeKatens: fairer Protect'], chg: [
     ["Protección ya no te hace invencible: con mucha reducción de recarga se volvía a poner antes de que se acabara el escudo y no había quien te tocara. Ahora se recarga en 7 s y, por mucha reducción que lleves, nunca en menos de 5 s. El escudo sigue durando 1,5 s.",
      "Protect no longer makes you invincible: with a lot of cooldown reduction it came back before the shield ran out and nothing could touch you. Now it recharges in 7 s and, however much reduction you have, never in less than 5 s. The shield still lasts 1.5 s."]
+  ], fix: [
+    ["Con huevos en la Incubadora no se podía entrar en la cuenta: salía «Error: n is not defined». Ya se entra con normalidad y los huevos siguen donde estaban.",
+     "With eggs in the Incubator you couldn't log in: it said \"Error: n is not defined\". You can now log in normally and your eggs are still there."]
   ] },
   { d: '2026-10-25', title: ['PokeKatens: GS Ball y megas', 'PokeKatens: GS Ball and Megas'], new: [
     ["Cooperativo desde casas distintas: si vuestras conexiones no consiguen hablarse directamente (pasa con datos móviles y con algunas compañías de internet), la partida va por nuestro servidor y en la sala sale «Conectado (por servidor)». Va algo menos fluida que la conexión directa. Tiene un tope al mes para seguir siendo gratis; si se gasta, vuelve a salir «No se pudo conectar» hasta el mes siguiente.",

@@ -186,7 +186,7 @@ G.DB = (() => {
     // Huevos: los que tienen sentido (un Pokémon que existe, números válidos).
     s.eggs = (Array.isArray(s.eggs) ? s.eggs : []).filter(e => isObj(e) && typeof e.id === 'string' && e.id.length <= 24
       && (!G.DEX_BY || G.DEX_BY[e.dex])).slice(0, 12)
-      .map(e => ({ id: e.id, dex: +e.dex, shiny: !!e.shiny, need: Math.max(1, n(e.need)), done: n(e.done), from: String(e.from || '').slice(0, 10) }));
+      .map(e => ({ id: e.id, dex: +e.dex, shiny: !!e.shiny, need: Math.max(1, num(e.need)), done: num(e.done), from: String(e.from || '').slice(0, 10) }));
     for (const k of ['eggsHatched', 'eggGacha']) {
       if (!isObj(s[k])) s[k] = {};
       for (const id of Object.keys(s[k])) if (!Number.isFinite(+s[k][id])) delete s[k][id];
