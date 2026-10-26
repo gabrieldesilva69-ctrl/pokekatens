@@ -796,7 +796,7 @@ G.I18n.add({
   "Pantalla Luz": "Light Screen",
   "Explosión": "Explosion",
   "Autodestrucción": "Self-Destruct",
-  "No hace daño: un escudo te hace intocable un momento cada pocos segundos.": "No damage: a shield makes you untouchable for a moment every few seconds.",
+  "No hace daño: un escudo te hace intocable 1,5 s. Se recarga en 7 s y, por mucha reducción de recarga que lleves, nunca en menos de 5 s.": "No damage: a shield makes you untouchable for 1.5 s. It recharges in 7 s and, however much cooldown reduction you have, never in less than 5 s.",
   "No hace daño: te cura mucho, pero te quedas dormido un rato sin moverte ni atacar.": "No damage: it heals you a lot, but you fall asleep for a while without moving or attacking.",
   "No hace daño: una pared de luz te quita un 35 % del daño físico un rato.": "No damage: a wall of light takes away 35% of physical damage for a while.",
   "No hace daño: una pared de luz te quita un 35 % del daño especial un rato.": "No damage: a wall of light takes away 35% of special damage for a while.",

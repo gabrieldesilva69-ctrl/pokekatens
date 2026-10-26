@@ -6,6 +6,10 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-26', title: ['PokeKatens: Protección más justa', 'PokeKatens: fairer Protect'], chg: [
+    ["Protección ya no te hace invencible: con mucha reducción de recarga se volvía a poner antes de que se acabara el escudo y no había quien te tocara. Ahora se recarga en 7 s y, por mucha reducción que lleves, nunca en menos de 5 s. El escudo sigue durando 1,5 s.",
+     "Protect no longer makes you invincible: with a lot of cooldown reduction it came back before the shield ran out and nothing could touch you. Now it recharges in 7 s and, however much reduction you have, never in less than 5 s. The shield still lasts 1.5 s."]
+  ] },
   { d: '2026-10-25', title: ['PokeKatens: GS Ball y megas', 'PokeKatens: GS Ball and Megas'], new: [
     ["Cooperativo desde casas distintas: si vuestras conexiones no consiguen hablarse directamente (pasa con datos móviles y con algunas compañías de internet), la partida va por nuestro servidor y en la sala sale «Conectado (por servidor)». Va algo menos fluida que la conexión directa. Tiene un tope al mes para seguir siendo gratis; si se gasta, vuelve a salir «No se pudo conectar» hasta el mes siguiente.",
      "Co-op from different homes: if your connections can't reach each other directly (it happens with mobile data and some internet providers), the run goes through our server and the lobby shows \"Connected (via server)\". It's a bit less smooth than a direct connection. It has a monthly cap so it stays free; if it runs out, \"Could not connect\" shows again until next month."],

@@ -35,7 +35,8 @@ G.Combat = (() => {
       return;
     }
     // (Bromista: los potenciadores se recargan antes, ver data/ability-fx.js.)
-    m.t = Math.max(0.05, m.cd * pl.cdMul * (G.Moves.isStatus(m) && pl.abil && pl.abil.statusCd || 1));
+    // (minCd: la recarga mínima de algunos, como Protección, por mucha reducción que lleves.)
+    m.t = Math.max(m.minCd || 0.05, m.cd * pl.cdMul * (G.Moves.isStatus(m) && pl.abil && pl.abil.statusCd || 1));
     pl.cast(m);
     if (G.Coop.active) G.Coop.cast(pl, m);
     // Vínculo: su icono destella en el HUD al lanzarse (uno que explota pegado al
