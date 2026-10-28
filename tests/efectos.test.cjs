@@ -56,6 +56,7 @@ test('every glowing detail and legendary effect is well formed and has its sprit
       assert.ok(S.orbit.n > 0 && S.orbit.c.every(c => /^#[0-9a-f]{6}$/.test(c)), 'lo que gira alrededor de ' + dex);
       assert.ok(['gem', 'ring', 'cell', 'star'].includes(S.orbit.s), 'cómo es lo que gira alrededor de ' + dex);
     }
+    if (S.trail) assert.ok(A.TRAILS[S.trail.s] && S.trail.c.every(c => /^#[0-9a-f]{6}$/.test(c)), 'rastro de ' + dex);
   }
   for (const [dex, r] of Object.entries(A.SPOTS)) {
     if (r.pulse != null) assert.ok(r.pulse >= 2, 'despacio: ' + dex);
@@ -117,4 +118,19 @@ test('the colour aura behind a Pokémon only shows at night, except for mythical
   assert.ok(draw(448) > 0, 'Lucario: también de día');
   night = 1;
   assert.ok(draw(150) > 0, 'Mewtwo de noche: con aura');
+});
+
+test('Suicune leaves an aurora trail on the ground while it moves, now and then (28-10-2026)', () => {
+  const { A, G } = load();
+  G.U = { rand: (a, b) => (a + b) / 2, pick: l => l[0] };
+  G.Sprites = { PX: 2 };
+  const ctx = new Proxy({}, { get: (o, k) => (k in o ? o[k] : () => ({ addColorStop() {} })), set: (o, k, v) => { o[k] = v; return true; } });
+  const S = { x: 0, bodyH: 40, r: 14, _fxSeed: 0 };
+  // Quieto no deja nada; andando, sí (mientras dura la ola), y cada punto se apaga solo.
+  for (let i = 0; i < 20; i++) A.special(ctx, S, 245, 100, 1 + i * 0.05, 0.05);
+  assert.ok((S._trail || []).length <= 1, 'quieto, nada');
+  for (let i = 0; i < 40; i++) { S.x += 4; A.special(ctx, S, 245, 100, 2 + i * 0.05, 0.05); }
+  assert.ok(S._trail.length > 20, 'andando, el rastro');
+  for (let i = 0; i < 80; i++) A.special(ctx, S, 245, 100, 4 + i * 0.05, 0.05);
+  assert.equal(S._trail.length, 0, 'y se apaga solo');
 });

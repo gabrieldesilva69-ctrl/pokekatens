@@ -600,7 +600,8 @@ G.Aura = (() => {
   // cuatro puntas, notas, corazones, Zzz u hojas que giran).
   // (28-10-2026) pulse: el aura se apaga y se enciende despacio en esos segundos · rays: rayos de
   // luz que giran detrás (un color o 'hue') · aurora: cintas de luz por encima (un color por cinta) ·
-  // orbit: lo que gira alrededor (drawOrbit) · day: el aura también de día (si no, sólo de noche).
+  // orbit: lo que gira alrededor (drawOrbit) · day: el aura también de día (si no, sólo de noche) ·
+  // trail: el rastro que va dejando en el suelo al moverse ({ s: su estilo en TRAILS, c: colores }).
   const SPECIAL = {
     150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', parts: { c: ['#e08aff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.4, rate: 2, glow: true, star: true }, pulse: 7.5 }, // Mewtwo: aura psíquica
     151: { parts: { c: ['#ffc4ee', '#ffffff'], up: 10, spread: 14, r: 2.2, life: 1.4, rate: 2, ring: true } },   // Mew: burbujas
@@ -625,7 +626,7 @@ G.Aura = (() => {
     146: { parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 30, spread: 20, r: 1.5, life: 0.9, rate: 7, glow: true } }, // Moltres: ascuas
     243: { parts: { c: ['#fffbe0', '#c9b5ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 6, glow: true, bolt: true } }, // Raikou: rayos
     244: { back: 'ripple', c: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 16, r: 1.4, life: 0.8, rate: 5, glow: true } }, // Entei: volcán
-    245: { back: 'ripple', c: '#9fe8ff', parts: { c: ['#d6f0ff', '#b8a8ff', '#ffffff'], up: 6, spread: 24, r: 1.2, life: 1.4, rate: 5, glow: true, star: true }, aurora: ['#2fffb0', '#3fa8ff', '#b06aff'] }, // Suicune: aurora
+    245: { back: 'ripple', c: '#9fe8ff', parts: { c: ['#d6f0ff', '#b8a8ff', '#ffffff'], up: 6, spread: 24, r: 1.2, life: 1.4, rate: 5, glow: true, star: true }, trail: { s: 'aurora', c: ['#6affd0', '#5fd0ff', '#7f9fff', '#c07aff'] } }, // Suicune: rastro de aurora
     251: { parts: { c: ['#5fe08a', '#a5f07a'], up: -8, spread: 20, r: 1.6, life: 1.6, rate: 4, leaf: true } },  // Celebi: hojas
     385: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 22, r: 1.6, life: 1.1, rate: 4, glow: true, star: true } }, // Jirachi: estrellas
     386: { day: true, aura: '#ff6a4a', parts: { c: ['#7fd0ff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.2, rate: 2, glow: true }, pulse: 6 }, // Deoxys: aura
@@ -825,6 +826,7 @@ G.Aura = (() => {
     if (!S || ent.dead) return;
     const h = ent.bodyH || 24, r = ent.r || 12, x = ent.x, seed = seedOf(ent);
     if (S.rays) drawRays(ctx, S.rays, x, y - h * 0.55, Math.max(h * 1.25, r * 2.6), t, seed);
+    if (S.trail) drawTrail(ctx, ent, S.trail, y, t, dt);
     if (S.aurora) drawAurora(ctx, S.aurora, x, y - h * 1.05, Math.max(r * 2.4, h * 0.9), t, seed);
     // (28-10-2026) El aura de su color, sólo de noche (de día no quedaba bien), salvo los que la
     // llevan siempre (day: los singulares, Arceus y la línea de Lucario).
@@ -937,6 +939,52 @@ G.Aura = (() => {
         ctx.fillRect(X, yy - hh, px, Math.round(hh * 0.6));
       }
     });
+    ctx.restore();
+  }
+
+  // ---------------- rastros en el suelo (28-10-2026) ----------------
+  // Cómo es cada punto del rastro: life segundos que dura · gap píxeles entre uno y otro ·
+  // draw(ctx, p, fade, t, c) lo dibuja (fade 0..1: aparece rápido y se apaga despacio).
+  const TRAILS = {
+    // Cortinas de aurora de pie sobre el suelo (Suicune): el borde de abajo brillante y
+    // desvaneciéndose hacia arriba, en columnas de un píxel del sprite.
+    aurora: { life: 2.4, gap: 3, draw(ctx, p, fade, t, cs) {
+      const px = G.Sprites.PX, c = cs[(p.i >> 2) % cs.length], y0 = Math.round(p.y - 1 - p.age * 3);
+      for (let j = -1; j <= 1; j++) {
+        const x = Math.round(p.x + j * px), hh = Math.round(14 + 9 * Math.sin(p.i * 0.7 + j + t * 1.5));
+        const a = 0.9 * fade * (0.55 + 0.45 * Math.sin(p.i * 0.9 + j * 1.3 + t * 3));
+        ctx.fillStyle = rgba('#ffffff', a * 0.5); ctx.fillRect(x, y0, px, 1);
+        ctx.fillStyle = rgba(c, a); ctx.fillRect(x, y0 - px, px, px);
+        ctx.fillStyle = rgba(c, a * 0.5); ctx.fillRect(x, y0 - px - Math.round(hh * 0.4), px, Math.round(hh * 0.4));
+        ctx.fillStyle = rgba(c, a * 0.2); ctx.fillRect(x, y0 - hh - px, px, Math.round(hh * 0.6));
+      }
+    } }
+  };
+  const TRAIL_MAX = 90;
+  /** Va dejando un rastro por donde pasa: un punto cada `gap` píxeles mientras dura la ola (unos
+   *  7 s de cada 11) y se mueve; cada uno se apaga solo. Detrás del sprite (lo llama special). */
+  function drawTrail(ctx, ent, R, y, t, dt) {
+    const T = TRAILS[R.s];
+    if (!T) return;
+    const l = ent._trail || (ent._trail = []);
+    if (dt > 0) {
+      for (const p of l) p.age += dt;
+      while (l.length && l[0].age >= T.life) l.shift();
+      const at = ent._trailAt, d = at ? Math.hypot(ent.x - at.x, y - at.y) : 0;
+      if (at && d > 80) ent._trailAt = { x: ent.x, y };              // saltó (cambio de mapa...): sin raya
+      else if (wave(t, seedOf(ent) + 2, 11, 7) > 0.15 && l.length < TRAIL_MAX && (!at || d > T.gap)) {
+        const nx = at ? (at.y - y) / (d || 1) : 0, ny = at ? (ent.x - at.x) / (d || 1) : 1;
+        l.push({ x: ent.x + G.U.rand(-3, 3), y: y - 1, nx, ny, age: 0, i: ent._trailN = (ent._trailN || 0) + 1 });
+        ent._trailAt = { x: ent.x, y };
+      }
+    }
+    if (!l.length) return;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const p of l) {
+      const k = p.age / T.life;
+      T.draw(ctx, p, k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85, t, R.c);
+    }
     ctx.restore();
   }
 
@@ -1093,5 +1141,5 @@ G.Aura = (() => {
   /** ¿Lleva partículas? (los mismos que forEnemy, más los jugadores) */
   const fancy = e => !!(e.boss || e.shiny || e.legend);
 
-  return { SPOTS, PARTS, SPECIAL, emissive, emitLevel, spotColor, emit, spotEmit, special, front, enabled, setEnabled, update, draw, clear, sweep, drawSweep, forPlayer, forEnemy, fancy };
+  return { SPOTS, PARTS, SPECIAL, emissive, emitLevel, spotColor, emit, spotEmit, special, front, TRAILS, enabled, setEnabled, update, draw, clear, sweep, drawSweep, forPlayer, forEnemy, fancy };
 })();

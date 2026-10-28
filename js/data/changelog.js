@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-28', title: ["PokeKatens: legendarios con más efectos", "PokeKatens: legendaries with more effects"], new: [
+    ["Suicune va dejando, de vez en cuando, un rastro de aurora en el suelo por donde pasa: cortinas de luz que se apagan solas detrás de él.",
+     "Every now and then, Suicune leaves a trail of aurora on the ground wherever it goes: curtains of light that fade away behind it."],
     ["Los 21 legendarios y singulares que aún no tenían efecto ya lo tienen (Regice, Latias, Latios, Regigigas, Keldeo, Koraidon, Terapagos...), y también las megas de Darkrai, Zygarde y Zeraora.",
      "The 21 legendaries and mythicals that still had no effect now have one (Regice, Latias, Latios, Regigigas, Keldeo, Koraidon, Terapagos...), and so do the Megas of Darkrai, Zygarde and Zeraora."],
     ["Efectos nuevos, como en el anime: los puntos de Regirock, Regice, Registeel y Regigigas se encienden uno a uno; Arceus, Solgaleo, Ho-Oh, Necrozma, Koraidon y Terapagos tienen rayos de luz detrás; Suicune y Articuno, una aurora encima; y a Hoopa, al trío del lago, a Zygarde y a Cosmog les giran alrededor sus aros, gemas, células o estrellas.",
