@@ -83,6 +83,23 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   con `--megas` (en el ordenador de los dueños, que tiene la carpeta de Reloaded) salen a su tamaño y sin perder píxeles.
   Faltan Mega Golisopod, Mega Magearna y Mega Tatsugiri: Reloaded no trae sus sprites de mapa (de Magearna sólo un
   dibujo de combate, `data/pkmn/100992.gif`, sin animaciones), así que no tienen Megapiedra.
+- **Aspecto de los ataques** (`js/entities/vfx.js`, `MOVE`): cada ataque tiene su forma y su paleta; desde el
+  25-10-2026 casi ninguno repite la de otro de su tipo (formas nuevas: `spiral`, `eye`, `prism`, `mist`, `psiwave`,
+  `comet`, `snowflake`, `fist`, `seed`, `feather`, `boulder`; paletas `psyviolet`, `mist`, `mind`).
+- **Estado de los amigos** (25-10-2026, `js/net/social.js`): `presence/<uid>` en la Realtime Database, `{ s: on|play|group|off, at }`.
+  Se escribe sólo al cambiar (entrar, empezar o acabar una partida) y Firebase pone `off` solo al cerrar o perder la
+  conexión (`onDisconnect`; la hora la pone siempre el servidor); cada uno escucha sólo a sus amigos confirmados.
+  Sólo se conecta quien tiene amigos (o acaba de pedir o aceptar uno), y con la pestaña escondida 3 min se desconecta
+  (el plan gratis deja 100 conexiones a la vez a la Realtime Database). Cualquiera con sesión puede leer el estado de
+  un uid (las reglas de la Realtime Database no pueden mirar las amistades de Firestore). Reglas en `database.rules.json`;
+  en el emulador se aplican en el espacio `demo-pokekatens-default-rtdb`.
+- **Megas (25-10-2026)**: cada mega de la partida dura `STEP` (3 s) más que la anterior, de 45 a `MAX_DUR` (90 s)
+  (`G.Mega.durFor`). Al vencer a un legendario de una grieta, un 5 % (`STONE_CHANCE`) de la Megapiedra u Orbe de
+  una mega cualquiera que no tengas (`G.Shop.randomStone`). En la ficha, «Ver Mega» / «Ver Primigenio» enseña
+  la mega (sprite, tipos, habilidad y estadísticas con la diferencia; `G.Mega.monOf`).
+- **GS Ball** (25-10-2026): una cada 500 tiradas del gacha (`save.gsPulls`, `G.Gacha.GS_EVERY`), a la Mochila
+  (`bag.gsball`); al abrirla se elige un Pokémon que no tengas, legendarios incluidos, nunca shiny
+  (`G.Shop.openGs`); si ya los tienes todos, 5000 monedas.
 - **Megaevolución** (`js/systems/mega.js`): con la Megapiedra de tu compañero (Tienda Kecleon, 8000 monedas,
   sólo la de tu compañero actual; o un 3 % al ganar una grieta), una barra se llena con 150 enemigos (un jefe
   cuenta 25) y con F (X en el mando, botón en el móvil) megaevoluciona 45 s: sprite, tipos, estadísticas y
@@ -162,7 +179,7 @@ Se edita `dev.html` (pantallas y orden de carga); `index.html` y `js/app.min.js`
 | `js/world/` | tiles (terreno en pixel art por código, biomas y su clima), world (chunks, objetos del mapa, colisiones) |
 | `js/entities/` | player, enemy, projectile, pickup, fx, vfx |
 | `js/systems/` | combat, spawner, levelup, gacha, weather, hazards, rift (grietas/legendarios), events, interact, judgment, pathing, progress, stats, mons |
-| `js/net/` | social (apodo, amigos, salas), net (WebRTC sólo con STUN, sin relé), coop, ranking, codec |
+| `js/net/` | social (apodo, amigos, salas), net (WebRTC con STUN y, sin directo, relé por la Realtime Database con tope al mes), coop, ranking, codec |
 | `js/ui/` | pantallas: menu, login, test (personalidad), hud, run-ui, gacha-ui, shop-ui, goals-ui, settings-ui, social-ui, ranking-ui, news-ui, mod-ui (moderación) … |
 | `js/game.js`, `js/main.js` | Flujo y bucle principal; `main.js` tiene `MAINTENANCE` |
 | `tools/` | Scripts; los `.py` regeneran lo marcado con \* (Python 3 + Pillow + internet, una sola vez): `fetch_sprites.py` (~20 min, reanudable con `tools/cache/`), `fetch_pokedex.py`, `fetch_credits.py` → `CREDITS.md`. `import_reloaded.py` convierte sprites de mapa de Pokémon Reloaded (`--mega N`, `--megas`, `--dex N`, `--faltan`, `--out` para probar) y marca sus entradas con `rl`. `shiny_from_reloaded.py` hace el shiny de los que SpriteCollab no dibujó, con los colores de los retratos de Reloaded (`rs` en los metadatos; sin `--aplicar` sólo deja la hoja de revisión en `tools/cache/`). `reloaded_ids.py` dice qué número tiene cada Pokémon en Reloaded |

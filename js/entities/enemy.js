@@ -239,6 +239,11 @@
         if (Math.random() < 0.5) G.Pickups.drop('treat', this.x + 26, this.y - 10, G.Items.rollTreat());
       }
       G.Pickups.dropXp(this.x, this.y, this.xp, this.boss, !!this.legend, !!this.judge);
+      // Halloween: caramelos, con el ritmo que deja systems/halloween.js (los Fantasma
+      // en cuanto toca; los demás, sólo si se han ido acumulando).
+      if (G.Halloween.inRun && !this.judge && G.Halloween.takeCandy(G.Game.st.time, (this.types || []).includes('ghost') ? 1 : 3)) {
+        G.Pickups.drop('candy', this.x + G.U.rand(-8, 8), this.y - 6, 1);
+      }
       if (this.golden && Math.random() < 0.35) G.Pickups.drop('coin', this.x + 6, this.y - 4, 3);
       // Duende del tesoro: Meowth suelta monedas; Gholdengo, un ticket ×10.
       if (this.behavior === 'thief') {
@@ -989,11 +994,11 @@
       }
     }
 
-    /** El jugador vivo más cercano (los caídos no atraen a nadie). */
+    /** El jugador vivo más cercano (los caídos no atraen a nadie, ni el compañero sin conexión: coop.js). */
     function nearestPlayer(players, x, y) {
       let best = null, bd = Infinity;
       for (const p of players) {
-        if (p.dead) continue;
+        if (p.dead || p.silent) continue;
         const d = G.U.dist2(x, y, p.x, p.y);
         if (d < bd) { bd = d; best = p; }
       }

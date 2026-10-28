@@ -120,5 +120,21 @@ const read = (user, uid) => fetch(`${DOCS}/saves/${uid}`, { headers: { Authoriza
   expect('ni uno que no es un número', 403, (await prof(ava, 'avatarin', { stringValue: '<img>' }, true)).status);
   expect('perfil con el avatar 60', 200, (await prof(ava, 'avatarin', { integerValue: '60' }, true)).status);
 
+  // Estado para los amigos (presence/<uid> en la Realtime Database, 25-10-2026, database.rules.json).
+  // (El emulador aplica database.rules.json en el espacio <proyecto>-default-rtdb, como el de verdad.)
+  const RTDB = 'http://127.0.0.1:9000';
+  const putPres = (user, who, body) => fetch(`${RTDB}/presence/${who}.json?ns=demo-pokekatens-default-rtdb&auth=${user.token}`,
+    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const ts = { '.sv': 'timestamp' };
+  const est = await signUp('estado@jugadores.pokekatens.invalid');
+  expect('poner tu estado (en partida)', 200, (await putPres(est, est.uid, { s: 'play', at: ts })).status);
+  expect('el estado de otro no', 401, (await putPres(est, uno.uid, { s: 'off', at: ts })).status);
+  expect('un estado que no existe no', 401, (await putPres(est, est.uid, { s: 'admin', at: ts })).status);
+  expect('ni con campos de más', 401, (await putPres(est, est.uid, { s: 'on', at: ts, nombre: '<b>x</b>' })).status);
+  expect('ni con una hora del futuro', 401, (await putPres(est, est.uid, { s: 'on', at: Date.now() + 3600e3 })).status);
+  expect('ni con una hora del pasado', 401, (await putPres(est, est.uid, { s: 'on', at: 1 })).status);
+  expect('otro jugador lo lee', 200, (await fetch(`${RTDB}/presence/${est.uid}.json?ns=demo-pokekatens-default-rtdb&auth=${uno.token}`)).status);
+  expect('sin sesión no se lee', 401, (await fetch(`${RTDB}/presence/${est.uid}.json?ns=demo-pokekatens-default-rtdb`)).status);
+
   console.log('EMULATOR_SMOKE_OK');
 })().catch(e => fail('conexión con el emulador', 'respuesta', e && e.message));

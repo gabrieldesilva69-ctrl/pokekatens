@@ -63,7 +63,7 @@ test('bounded deterministic random numeric payloads round-trip', () => {
 
 function network() {
   const pcs = [], relay = [], G = { NetCodec: codec(), DB: { fb: { uid: 'host', rtdb: {
-    ref: p => ({ on() {}, off() {}, push: s => { relay.push([p, s]); return Promise.resolve(); } })
+    ref: p => ({ on() {}, off() {}, push: s => { relay.push([p, s]); return Promise.resolve(); }, set: s => { relay.push([p, s]); return Promise.resolve(); } })
   } } } };
   class PC {
     constructor() { pcs.push(this); }
@@ -153,7 +153,7 @@ test('real Coop.tick frames pass through the codec without changing gameplay fie
 
 function stunNetwork() {
   const configs = [], calls = [], G = { NetCodec: codec(), DB: { fb: { uid: 'host', auth: { currentUser: { uid: 'host' } }, rtdb: {
-    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve() })
+    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve(), set: () => Promise.resolve() })
   } } } };
   class PC {
     constructor(cfg) { configs.push(cfg); }
@@ -179,7 +179,7 @@ test('STUN only: no request is made and every peer gets only the two Google STUN
 
 function signalNetwork(me, isHost) {
   const pcs = [], G = { NetCodec: codec(), DB: { fb: { uid: me, rtdb: {
-    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve() })
+    ref: () => ({ on() {}, off() {}, push: () => Promise.resolve(), set: () => Promise.resolve() })
   } } } };
   // Como el navegador: remoteDescription sólo se rellena al acabar setRemoteDescription.
   class PC {
@@ -194,7 +194,7 @@ function signalNetwork(me, isHost) {
   }
   new Function('G', 'RTCPeerConnection', 'setTimeout', 'clearTimeout', source('js/net/net.js'))(G, PC, () => 1, () => {});
   let onChild = null;
-  G.DB.fb.rtdb.ref = () => ({ on: (ev, fn) => { onChild = fn; }, off() {}, push: () => Promise.resolve() });
+  G.DB.fb.rtdb.ref = () => ({ on: (ev, fn) => { onChild = fn; }, off() {}, push: () => Promise.resolve(), set: () => Promise.resolve() });
   G.Net.open('room', isHost, 'host');
   const deliver = (f, sig) => onChild({ val: () => JSON.stringify({ f, sig }), ref: { remove: () => Promise.resolve() } });
   return { N: G.Net, pcs, deliver };
@@ -339,4 +339,130 @@ test('co-op orbs: the host applies a guest orb only if the guest really has it, 
   assert.ok(G.Orbs.canTake(guest, 'blowback'));      // (las dos Rapidosferas ya se gastaron: queda 1 hueco)
   G.Orbs.add(guest, 'quick');
   assert.ok(!G.Orbs.canTake(guest, 'blowback'));     // y 4 huecos
+});
+
+test('without a direct connection the game goes through the database relay, until the month\'s cap is used up', async () => {
+  let used = 0;
+  const relay = [], timers = [];
+  const G = { NetCodec: codec(), DB: { fb: { uid: 'host', rtdb: {
+    ref: p => ({ on() {}, off() {}, set: s => { relay.push([p, s]); return Promise.resolve(); },
+      once: () => Promise.resolve({ val: () => used }),
+      transaction: fn => { used = fn(used); return Promise.resolve({ snapshot: { val: () => used } }); } })
+  } } } };
+  class PC {
+    createDataChannel() { return this.dc = { readyState: 'connecting', send() {}, close() {} }; }
+    createOffer() { return Promise.resolve({ type: 'offer' }); }
+    setLocalDescription() { this.localDescription = { toJSON: () => ({ type: 'offer' }) }; return Promise.resolve(); }
+    close() {}
+  }
+  new Function('G', 'RTCPeerConnection', 'setTimeout', 'clearTimeout', source('js/net/net.js'))(G, PC, fn => timers.push(fn), () => {});
+  const N = G.Net, big = { k: 'f', p: ['x'.repeat(10000)] };
+  N.open('room', true, 'host'); N.syncMembers(['host', 'a']); await settle();
+  const sig = relay.length;
+  N.send('a', big); assert.equal(relay.length, sig, 'mientras se conecta, nada de la partida va por la base de datos');
+  timers[0]();                                   // pasan los 15 s sin canal directo
+  await settle();
+  assert.equal(N.mode('a'), 'relay'); assert.equal(N.slow('a'), true);
+  const t = timers.length;
+  for (let i = 0; i < 100; i++) N.send('a', big);
+  assert.equal(relay.length, sig + 100);
+  timers[t](); await settle();                   // al minuto se apunta en relayUse/<mes>
+  assert.ok(used >= 1 && used <= 2, 'MB apuntados: ' + used);
+  used = 5999;
+  for (let i = 0; i < 100; i++) N.send('a', big);
+  timers.at(-1)(); await settle();
+  assert.equal(N.relayFull, true); assert.equal(N.mode('a'), 'failed');
+  const n = relay.length; N.send('a', big); assert.equal(relay.length, n, 'agotado: ya no va nada de la partida');
+});
+
+function coopSums(host, mySum) {
+  let msgFn = null; const got = {};
+  const G = {};
+  G.Net = { uid: host ? 'host' : 'guest', on(fn) { msgFn = fn; }, onPeer() {}, slow: () => false, send() {}, toHost() {}, mode: () => 'direct' };
+  G.Player = class { constructor() { this.maxHp = 300; } };
+  G.DEX_BY = { 25: { dex: 25 }, 7: { dex: 7 } }; G.baseStartOf = () => 'thundershock';
+  G.Moves = { BY_ID: { thundershock: {}, tackle: {} } }; G.Items = { BY: { leftovers: {} } };
+  G.Sprites = { preload() {} }; G.U = { dist2: () => 0 };
+  G.Projectiles = { clearOrbs() {} }; G.Spawner = { say() {} }; G.Social = { me: { name: 'yo' }, dropMember() {} };
+  new Function('G', 'document', 'setTimeout', 'clearTimeout', source('js/net/coop.js'))(G, { addEventListener() {} }, () => 0, () => {});
+  G.Coop.begin({ host: 'host', members: [{ uid: 'host', name: 'Ana', dex: 25 }, { uid: 'guest', name: 'Bea', dex: 7 }] }, { x: 0, y: 0 },
+    { mySum: () => mySum, over: d => { got.over = d; }, syncTeam() {}, hold() {}, away() {}, lost() {}, mateLeft() {}, waiting() {} });
+  return { G, got, from: (u, msg) => msgFn(u, msg) };
+}
+
+test('co-op run summary: each player sees everyone, and what arrives is cleaned', () => {
+  const mine = { dex: 25, sh: false, lv: 30, t: 900, it: null, mv: [['thundershock', 5, 12000, 0, 1]] };
+  // Anfitrión: el resumen del invitado llega con basura y se queda sólo lo válido.
+  const h = coopSums(true, mine);
+  h.from('guest', { k: 'f', ev: [['sm', { dex: 7, sh: true, lv: 1e9, t: 900, it: '<img onerror=x>',
+    mv: [['tackle', 3, 5000, 10, 0], ['<script>', 1, 1, 1, 0], 'x', ['thundershock', 2, -50, 0, 0]], extra: 'nope' }]] });
+  const s = h.G.Coop.sums();
+  assert.deepEqual(s.host, mine);
+  assert.deepEqual(s.guest, { dex: 7, sh: true, lv: 9999, t: 900, it: null, sk: '', mv: [['tackle', 3, 5000, 10, 0], ['thundershock', 2, 0, 0, 0]] });
+  // Invitado: al acabar le llegan los de todos (y sólo de quien está en la partida); el suyo, el de su juego.
+  const g = coopSums(false, { dex: 7, sh: false, lv: 30, t: 900, it: 'leftovers', mv: [] });
+  g.from('host', { k: 'f', ev: [['ov', { why: 'host', sums: { host: mine, guest: { dex: 25, lv: 1, t: 1, mv: [] }, intruso: mine } }]] });
+  assert.equal(g.got.over.why, 'host');
+  const all = g.G.Coop.sums();
+  assert.deepEqual(Object.keys(all).sort(), ['guest', 'host']);
+  assert.deepEqual(all.host, { ...mine, sk: '' });
+  assert.equal(all.guest.it, 'leftovers');
+});
+
+test('co-op: a lost "I have picked" or "I am done choosing" message no longer freezes the run for everyone', () => {
+  const calls = { resume: 0, hold: [] };
+  const r = coopSums(true, null);
+  r.G.Judgment = { netState: () => null }; r.G.EnemyMgr = { all: () => [] };
+  const local = { x: 0, y: 0, moveAngle: 0, walking: false, hp: 300, maxHp: 300, magnet: 78, aim: 0, xpMul: 1, activeGroup: () => [] };
+  r.G.Coop.begin({ host: 'host', members: [{ uid: 'host', name: 'Ana', dex: 25 }, { uid: 'guest', name: 'Bea', dex: 7 }] }, local,
+    { levelStart() {}, waiting() {}, resume: () => calls.resume++, hold: names => calls.hold.push(names.join(',')), mateLeft() {}, lost() {},
+      team: () => ({ time: 0, level: 1, xp: 0, xpNext: 10, kills: 0, bosses: 0, coins: 0, t1: 0, t10: 0 }), summary: () => ({}) });
+  // Ronda de cartas: el anfitrión elige; el aviso del invitado ('lp') se pierde.
+  r.G.Coop.levelStart(2);
+  r.G.Coop.localPicked();
+  assert.equal(calls.resume, 0, 'still waiting for the guest');
+  r.from('guest', { k: 'f', ev: [], w: 1, h: 0 });          // su siguiente mensaje normal: ya eligió la ronda 1
+  assert.equal(calls.resume, 1, 'the run goes on');
+  // Fusión: el aviso de "he terminado" ('he') se pierde; el estado del mensaje manda.
+  r.from('guest', { k: 'f', ev: [['hs']], w: 1, h: 1 });
+  assert.equal(calls.hold.at(-1), 'Bea');
+  r.from('guest', { k: 'f', ev: [], w: 1, h: 0 });
+  assert.equal(calls.hold.at(-1), '', 'nobody is choosing any more');
+  // Una versión vieja (sin h ni w) sigue igual que antes: sólo cuentan sus avisos.
+  r.from('guest', { k: 'f', ev: [['hs']] });
+  r.from('guest', { k: 'f', ev: [] });
+  assert.equal(calls.hold.at(-1), 'Bea');
+});
+
+test('connection candidates travel together in one database message, and both formats are understood', async () => {
+  const signals = [];
+  const G = { NetCodec: codec(), DB: { fb: { uid: 'host', rtdb: {
+    ref: () => ({ on() {}, off() {}, set: s => { signals.push(JSON.parse(s)); return Promise.resolve(); } })
+  } } } };
+  const pcs = [];
+  class PC {
+    constructor() { pcs.push(this); this.added = []; this.remoteDescription = null; }
+    createDataChannel() { return this.dc = { readyState: 'connecting', send() {}, close() {} }; }
+    createOffer() { return Promise.resolve({ type: 'offer' }); }
+    setLocalDescription(d) { this.localDescription = { toJSON: () => d }; return Promise.resolve(); }
+    setRemoteDescription(d) { this.remoteDescription = d; return Promise.resolve(); }
+    addIceCandidate(c) { this.added.push(c); return Promise.resolve(); }
+    close() {}
+  }
+  new Function('G', 'RTCPeerConnection', 'setTimeout', 'clearTimeout', source('js/net/net.js'))(G, PC, () => 1, () => {});
+  let onChild = null;
+  G.DB.fb.rtdb.ref = () => ({ on: (ev, fn) => { onChild = fn; }, off() {}, set: s => { signals.push(JSON.parse(s)); return Promise.resolve(); } });
+  G.Net.open('room', true, 'host'); G.Net.syncMembers(['host', 'a']); await settle();
+  const pc = pcs[0], before = signals.length;
+  for (const n of [1, 2, 3]) pc.onicecandidate({ candidate: { toJSON: () => ({ candidate: 'c' + n }) } });
+  assert.equal(signals.length, before, 'they wait to go together');
+  pc.onicecandidate({ candidate: null });
+  assert.equal(signals.length, before + 1, 'one message');
+  assert.deepEqual(signals.at(-1).sig.cs.map(c => c.candidate), ['c1', 'c2', 'c3']);
+  const deliver = sig => onChild({ val: () => JSON.stringify({ f: 'a', sig }), ref: { remove: () => Promise.resolve() } });
+  deliver({ sdp: { type: 'answer' } });
+  deliver({ cs: [{ candidate: 'h1' }, { candidate: 'h2' }] });   // de esta versión
+  deliver({ c: { candidate: 'h3' } });                          // de las de antes
+  await settle(); await settle();
+  assert.deepEqual(pc.added.map(c => c.candidate).sort(), ['h1', 'h2', 'h3']);
 });

@@ -19,7 +19,10 @@ G.Shop = (() => {
     cap:  { name: 'Cápsula Habilidad', icon: 'capsule', price: 1500,
             desc: 'Cambia la habilidad de un Pokémon por otra de las suyas (no la oculta).' },
     caph: { name: 'Cápsula Habilidad Oculta', icon: 'capsuleh', price: 5000, hidden: true,
-            desc: 'Cambia la habilidad de un Pokémon por cualquiera de las suyas, también la oculta.' }
+            desc: 'Cambia la habilidad de un Pokémon por cualquiera de las suyas, también la oculta.' },
+    // Halloween (25-10-2026): no se vende; se consigue jugando esos días y se gasta en las skins.
+    candy: { name: 'Caramelo de Halloween', icon: 'candy', price: 0, event: true,
+             desc: 'Lo sueltan los Pokémon Fantasma y las calabazas en Halloween. Con ellos se compran las skins de bruja en la Tienda Kecleon.' }
   };
   const ORDER = ['mint', 'cap', 'caph'];
   const DAILY = 8;
@@ -40,12 +43,41 @@ G.Shop = (() => {
   const stoneId = dex => 'ms' + dex;
   /** ¿Es la Megapiedra de una mega que existe? ('ms6') */
   const isStone = id => /^ms\d{1,4}$/.test(id) && !!(G.MEGAS && G.MEGAS[id.slice(2)]);
-  const isItem = id => !!ITEMS[id] || isStone(id);
+  // GS Ball (25-10-2026): una cada GS_EVERY tiradas del gacha (systems/gacha.js); al abrirla eliges
+  // un Pokémon que no tengas (sin shiny). Va en la Mochila como los demás objetos.
+  const GS = 'gsball', GS_COINS = 5000;           // si ya los tienes todos, monedas
+  const isItem = id => !!ITEMS[id] || isStone(id) || id === GS;
   const hasStone = dex => count(stoneId(dex)) > 0;
   /** La que vende la tienda: la de tu compañero, si tiene mega y aún no la tienes. */
   function stoneForSale() {
     const s = save(), dex = s && s.partner;
     return dex && G.MEGAS && G.MEGAS[dex] && !hasStone(dex) ? dex : null;
+  }
+  /** Los que se pueden elegir con la GS Ball: todos los del juego que aún no tienes. */
+  function gsChoices() {
+    const s = save();
+    return s ? G.DEX.filter(p => !s.owned[p.dex]) : [];
+  }
+  /** Abre una GS Ball: te da ese Pokémon (normal, nunca shiny), o monedas si ya los tienes todos. */
+  function openGs(dex) {
+    const s = save();
+    if (!s || !count(GS)) return { ok: false };
+    if (dex == null) {
+      if (gsChoices().length) return { ok: false };
+      take(GS); s.coins += GS_COINS; G.DB.commit();
+      return { ok: true, coins: GS_COINS };
+    }
+    if (!G.DEX_BY[dex] || s.owned[dex]) return { ok: false };
+    take(GS);
+    s.owned[dex] = { at: Date.now(), from: 'gsball' };
+    G.DB.commit();
+    return { ok: true, dex };
+  }
+  /** Una mega al azar de las que aún no tienes su piedra (u Orbe), o null si ya las tienes todas. */
+  function randomStone() {
+    if (!save() || !G.MEGAS) return null;
+    const pool = Object.keys(G.MEGAS).map(Number).filter(d => G.Mega.exists(d) && !hasStone(d));
+    return pool.length ? G.U.pick(pool) : null;
   }
   /** Te da la Megapiedra de esa especie (premio de un legendario). → ¿era nueva? */
   function giveStone(dex) {
@@ -102,7 +134,7 @@ G.Shop = (() => {
     if (tm && !dailyTms().includes(tm)) return { ok: false, error: 'Esa MT ya no está a la venta.' };
     const stone = isStone(key) ? +key.slice(2) : null;
     if (stone && stone !== stoneForSale()) return { ok: false, error: 'Esa Megapiedra ya no está a la venta.' };
-    if (!tm && !stone && !ITEMS[key]) return { ok: false };
+    if (!tm && !stone && (!ITEMS[key] || ITEMS[key].event)) return { ok: false };
     const price = tm ? tmPrice(tm) : stone ? STONE_PRICE : ITEMS[key].price;
     if (s.coins < price) return { ok: false, error: 'No tienes Pokémonedas suficientes.' };
     s.coins -= price;
@@ -112,6 +144,23 @@ G.Shop = (() => {
     return { ok: true };
   }
 
-  return { ITEMS, ORDER, STONE_PRICE, count, take, tmCount, takeTm, dailyTms, tmPrice, buy, today,
-           stoneId, isStone, isItem, hasStone, stoneForSale, giveStone };
+  /** Halloween: una skin de bruja por caramelos (sólo esos días; luego se queda para siempre). → { ok, error? } */
+  function buySkin(id) {
+    const s = save(), sk = G.Skins.SKINS[id], price = G.Halloween.SKIN_PRICE;
+    if (!s || !sk) return { ok: false };
+    if (!G.Halloween.on) return { ok: false, error: 'Las skins de bruja sólo se venden en Halloween.' };
+    if (G.Skins.owns(s, id)) return { ok: false, error: 'Ya tienes esta skin.' };
+    if (count('candy') < price) return { ok: false, error: 'No tienes caramelos suficientes.' };
+    s.bag.candy -= price;
+    if (s.bag.candy <= 0) delete s.bag.candy;
+    s.skins = s.skins || {};
+    s.skins[id] = Date.now();
+    // Si ya tienes ese Pokémon, se la pone.
+    if (G.DB.owns(sk.dex)) G.Skins.wear(s, sk.dex, id);
+    G.DB.commit(true);
+    return { ok: true };
+  }
+
+  return { ITEMS, ORDER, STONE_PRICE, GS, GS_COINS, gsChoices, openGs, count, take, tmCount, takeTm, dailyTms, tmPrice, buy, buySkin, today,
+           stoneId, isStone, isItem, hasStone, stoneForSale, randomStone, giveStone };
 })();

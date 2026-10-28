@@ -7,7 +7,7 @@
  */
 G.RankingUI = (() => {
   const $ = G.UI.$;
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc = G.U.esc;
   let mode = 's', period = 'w', scope = 'all', dex = null;
   let token = 0;
 
@@ -66,7 +66,7 @@ G.RankingUI = (() => {
     mk($('rk-scope'), [['all', 'Todos'], ['friends', 'Sólo amigos']], scope, k => { scope = k; }, 'chip');
   }
 
-  const fmt = t => t >= 3600 ? Math.floor(t / 3600) + ':' + G.U.mmss(t % 3600).padStart(5, '0') : G.U.mmss(t);
+  const fmt = G.U.hmmss;
 
   async function load() {
     const my = ++token;
@@ -88,7 +88,10 @@ G.RankingUI = (() => {
     if (my !== token) return;
     list.innerHTML = dlist.innerHTML = '';
     if (!rows.length) {
-      list.innerHTML = '<p class="sub">Todavía no hay marcas aquí. ¡Sé el primero!</p>';
+      // Sólo amigos en diario, semanal y mensual: ahí sólo se guarda el top 50 (ranking.js).
+      list.innerHTML = scope === 'friends' && period !== 'a' && !dex
+        ? '<p class="sub">Ninguno de tus amigos está en el top 50 de este periodo. En Histórico salen todos.</p>'
+        : '<p class="sub">Todavía no hay marcas aquí. ¡Sé el primero!</p>';
     }
     const uid = G.Social.uid;
     const b = G.Ranking.board(mode, period, dex), done = G.Ranking.reported();

@@ -25,6 +25,7 @@ paths:
 - Mantén los topes de escritura de las reglas (las llamadas a `every()`) y las cachés del juego: el plan gratuito tiene
   límites diarios de lecturas y escrituras.
 - Administradores: `function admin()` en `firestore.rules` y `G.FORK.admins` deben tener los mismos UID.
-- Cooperativo: WebRTC directo con los STUN de Google (`js/net/net.js`). No añadas TURN ni relé por la base
-  de datos: cuestan dinero.
+- Cooperativo: WebRTC directo con los STUN de Google (`js/net/net.js`). No añadas TURN. El relé por la
+  Realtime Database (sólo sin directo) lo decidieron los dueños el 25-10-2026: no quites su tope del mes
+  (`RELAY_CAP_MB`, `relayUse/<AAAA-MM>` en `database.rules.json`) ni subas su ritmo (3 mensajes/s, `coop.js`).
 - Las reglas se despliegan a mano (lista de lanzamiento / guía): `npx --yes firebase-tools@15.34.0 deploy --only firestore:rules,firestore:indexes,database`.

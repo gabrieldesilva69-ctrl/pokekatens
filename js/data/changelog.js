@@ -35,7 +35,30 @@ G.CHANGELOG = [
     ["Más megas con partículas propias (burbujas, ascuas, pétalos, nieve, arena, destellos de dragón...): las de Venusaur, Blastoise, Gyarados, Gengar, Tyranitar, Garchomp, Salamence y muchas más.",
      "More Megas with their own particles (bubbles, embers, petals, snow, sand, dragon sparkles...): those of Venusaur, Blastoise, Gyarados, Gengar, Tyranitar, Garchomp, Salamence and many more."]
   ] },
-  { d: '2026-10-25', title: ["PokeKatens: Megapiedras sin aro blanco", "PokeKatens: Mega Stones without the white ring"], fix: [
+  { d: '2026-10-26', title: ['PokeKatens: Protección más justa', 'PokeKatens: fairer Protect'], chg: [
+    ["Protección ya no te hace invencible: con mucha reducción de recarga se volvía a poner antes de que se acabara el escudo y no había quien te tocara. Ahora se recarga en 7 s y, por mucha reducción que lleves, nunca en menos de 5 s. El escudo sigue durando 1,5 s.",
+     "Protect no longer makes you invincible: with a lot of cooldown reduction it came back before the shield ran out and nothing could touch you. Now it recharges in 7 s and, however much reduction you have, never in less than 5 s. The shield still lasts 1.5 s."]
+  ], fix: [
+    ["Con huevos en la Incubadora no se podía entrar en la cuenta: salía «Error: n is not defined». Ya se entra con normalidad y los huevos siguen donde estaban.",
+     "With eggs in the Incubator you couldn't log in: it said \"Error: n is not defined\". You can now log in normally and your eggs are still there."]
+  ] },
+  { d: '2026-10-25', title: ['PokeKatens: GS Ball y megas', 'PokeKatens: GS Ball and Megas'], new: [
+    ["Cooperativo desde casas distintas: si vuestras conexiones no consiguen hablarse directamente (pasa con datos móviles y con algunas compañías de internet), la partida va por nuestro servidor y en la sala sale «Conectado (por servidor)». Va algo menos fluida que la conexión directa. Tiene un tope al mes para seguir siendo gratis; si se gasta, vuelve a salir «No se pudo conectar» hasta el mes siguiente.",
+     "Co-op from different homes: if your connections can't reach each other directly (it happens with mobile data and some internet providers), the run goes through our server and the lobby shows \"Connected (via server)\". It's a bit less smooth than a direct connection. It has a monthly cap so it stays free; if it runs out, \"Could not connect\" shows again until next month."],
+    ["Amigos: al lado de cada amigo sale si está en línea (verde), en partida (dorado, y si es en grupo lo dice) o desconectado (gris, con cuánto hace). Los que están conectados salen primero.",
+     "Friends: next to each friend you see whether they are online (green), in a run (gold, and it says if it's a group run) or offline (grey, with how long ago). Connected friends are listed first."],
+    ["GS Ball: cada 500 tiradas del gacha (de cualquier banner) te dan una GS Ball. Ábrela en la Mochila y elige el Pokémon que quieras de los que aún no tienes, legendarios incluidos (nunca shiny). En el gacha ves cuánto te falta.",
+     "GS Ball: every 500 gacha pulls (on any banner) you get a GS Ball. Open it in the Bag and choose any Pokémon you don't have yet, legendaries included (never shiny). The gacha shows how many pulls are left."],
+    ["En la ficha de la colección, el botón «Ver Mega» (o «Ver Primigenio») enseña la mega de tu Pokémon: su sprite, sus tipos, su habilidad y sus estadísticas, con lo que gana o pierde respecto a la forma normal. No hace falta tener la Megapiedra.",
+     "On the collection page, the “View Mega” (or “View Primal”) button shows your Pokémon's Mega Evolution: its sprite, types, ability and stats, with what it gains or loses compared to the normal form. You don't need the Mega Stone."]
+  ], chg: [
+    ["Unos 60 ataques que se veían igual que otros de su tipo tienen ahora su propio aspecto: espiral en Confusión, ojo en Psíquico, nube en Bola Neblina, cristal en Psicocarga, cometa en Nitrocarga y Placaje Eléctrico, puño en los Puño Fuego / Hielo / Trueno, copo de nieve en Ventisca, semilla en Bomba Germen, pluma en Tornado, roca grande en Avalancha...",
+     "About 60 moves that looked the same as others of their type now have their own look: a spiral for Confusion, an eye for Psychic, a cloud for Mist Ball, a crystal for Psyshock, a comet for Flame Charge and Volt Tackle, a fist for Fire / Ice / Thunder Punch, a snowflake for Blizzard, a seed for Seed Bomb, a feather for Gust, a big rock for Rock Slide..."],
+    ["Al vencer a un legendario en una grieta, un 5 % de que te deje la Megapiedra (o el Orbe) de una mega cualquiera que aún no tengas, al azar: se guarda en la Mochila para cuando lleves a ese Pokémon. Antes era sólo la de tu compañero, un 3 %.",
+     "When you beat a legendary in a rift, there's a 5% chance it leaves the Mega Stone (or Orb) of a random Mega Evolution you don't have yet: it stays in the Bag for when you take that Pokémon. Before, it was only your partner's, 3%."],
+    ["Cada vez que megaevolucionas en una partida, la mega dura 3 s más que la anterior (45, 48, 51... hasta 90 s): en las partidas largas duran más.",
+     "Each time you Mega Evolve in a run, it lasts 3 s longer than the previous one (45, 48, 51... up to 90 s): in long runs they last longer."]
+  ], fix: [
     ["Los iconos de las Megapiedras ya no llevan el aro blanco (y el trozo de fondo) que sobresalía por fuera de su borde negro. Por dentro siguen igual.",
      "Mega Stone icons no longer have the white ring (and bit of background) sticking out past their black outline. Inside they're the same."]
   ] },
@@ -135,6 +158,88 @@ G.CHANGELOG = [
      'The game is now called PokeKatens: an unofficial, free and non-profit version based on PokéSurvivor by JPTER78.'],
     ['Se entra sólo con nombre y contraseña (ya no hay botón de Google). Si olvidas la contraseña, pídele al administrador que te cree otra cuenta.',
      'You sign in with name and password only (the Google button is gone). If you forget your password, ask the admin to create a new account for you.']
+  ] },
+  { d: '2026-10-26', title: ["Halloween se acerca", "Halloween is coming"], new: [
+    ["Evento de Halloween del 30 de octubre al 1 de noviembre (hora de España). Lo que trae, lo descubrirás jugando.",
+     "Halloween event from October 30 to November 1 (Spain time). What it brings, you will find out by playing."],
+    ["En la pantalla principal, una cuenta atrás: desde dos semanas antes, cuánto falta para Halloween; durante el evento, cuánto queda.",
+     "On the main screen, a countdown: from two weeks before, how long until Halloween; during the event, how long is left."]
+  ], fix: [
+    ["Móvil: al entrar con tu usuario, el teclado ya no lo corrige ni le pone mayúsculas por su cuenta (con un nombre poco común, el autocorrector lo cambiaba y salía «Usuario o contraseña incorrectos»).",
+     "Mobile: when you log in with your username, the keyboard no longer autocorrects it or adds capitals on its own (with an unusual name, autocorrect changed it and you got \"Wrong username or password\")."],
+    ["Móvil: el joystick ya no se atasca al subir de nivel. Si tocabas una carta con un dedo mientras sujetabas el joystick con el otro, la carta no se elegía y todo se quedaba parado con las cartas abiertas. Ahora se elige al levantar el dedo sobre ella, haya otro dedo en la pantalla o no (también las de objeto y vínculo). Y si el móvil no se entera de que has soltado el dedo, el joystick se suelta solo en cuanto no queda ningún dedo en la pantalla.",
+     "Mobile: the joystick no longer gets stuck when you level up. If you tapped a card with one finger while holding the joystick with the other, the card was not chosen and everything stayed frozen with the cards open. Now it is chosen when you lift your finger on it, whether or not another finger is on the screen (item and bond cards too). And if the phone misses that you lifted your finger, the joystick lets go by itself as soon as no finger is left on the screen."],
+    ["La barra de arriba (monedas, tickets, caramelos, tu nombre y los botones) cabe en cualquier pantalla. Antes, con todo puesto, en muchas pantallas (también tabletas) las monedas y los tickets se salían por la izquierda y los botones se partían en dos líneas. Ahora, si no hay sitio, los botones se quedan sólo con su icono, tu nombre se recorta y las cantidades muy grandes salen en corto (10 M).",
+     "The top bar (coins, tickets, candy, your name and the buttons) fits on any screen. Before, with everything showing, on many screens (tablets too) the coins and tickets went off the left edge and the buttons split into two lines. Now, when space is short, the buttons keep only their icon, your name is shortened and very large amounts are shown short (10M)."],
+    ["Móvil: el botón «atrás» (o el gesto de volver) ya no te saca del juego. En plena partida la pausa, en una pantalla del menú vuelve al menú y sólo en el menú principal sale de la web. Y si bajas la cortina de avisos u otra app se pone por encima, la partida también se pausa (jugando solo).",
+     "Mobile: the \"back\" button (or the back gesture) no longer takes you out of the game. During a run it pauses, on a menu screen it goes back to the menu, and only on the main menu does it leave the site. And if you pull down the notification shade or another app opens on top, the run also pauses (when playing solo)."],
+    ["Móvil: los avisos del centro de la pantalla (los de las esferas, por ejemplo) se salían por los dos lados y no se podían leer. Ahora se parten en líneas y caben.",
+     "Mobile: the messages in the middle of the screen (the orb ones, for example) went off both sides and could not be read. Now they wrap and fit."],
+    ["Móvil: los avisos de abajo (logros y mensajes) ya no se quedan con los toques. Mientras se veían, tapaban los ataques y no se podía cambiar de ataque.",
+     "Mobile: the notices at the bottom (achievements and messages) no longer catch your taps. While they were showing, they covered your moves and you could not switch moves."],
+    ["En la pausa, la Defensa y la Defensa Especial de los Pokémon con naturaleza salían con decimales de más (55.00000000000001).",
+     "In the pause screen, Defense and Special Defense of Pokémon with a nature showed extra decimals (55.00000000000001)."],
+    ["Móvil: en las cartas de nivel y de objeto ya no queda un «·» suelto al final (era el de las teclas, que en el móvil no salen). En horizontal, la frase del título ya no tapa el botón Jugar, y en la ficha de la colección los botones de Menta, Cápsula y MT vuelven a su tamaño.",
+     "Mobile: the level-up and item cards no longer end with a stray \"·\" (it belonged to the keyboard keys, which are not shown on mobile). In landscape, the title tagline no longer covers the Play button, and in the collection page the Mint, Capsule and TM buttons are back to their size."]
+  ]},
+  { d: '2026-10-25', title: ['Tickets y Pokémon iguales en todos tus aparatos', 'The same tickets and Pokémon on all your devices'], new: [
+    ['Al acabar la partida, sola o en grupo, sale el resumen: cada ataque con el daño que ha hecho y su daño por segundo, el daño total y tu objeto. En grupo, también el de cada compañero, con una pestaña por jugador.',
+     'When a run ends, solo or in a group, you get the summary: each move with the damage it dealt and its damage per second, your total damage and your item. In a group, also each teammate’s, with one tab per player.'],
+    ['Móvil: vuelve «Apuntar a mano» (Ajustes → Accesibilidad), ahora con un segundo joystick: el dedo en la mitad derecha de la pantalla apunta tus ataques y el de la izquierda te mueve. Al soltarlo, vuelven a apuntar solos.',
+     'Mobile: "Manual aim" is back (Settings → Accessibility), now with a second joystick: your finger on the right half of the screen aims your moves and the one on the left moves you. When you lift it, they aim on their own again.']
+  ], chg: [
+    ['Ranking por Pokémon: ahora cuentan las partidas de 10 minutos o más (antes 5). Los demás rankings siguen desde 2 minutos.',
+     'Per-Pokémon ranking: runs now count from 10 minutes (it was 5). The other rankings still count from 2 minutes.'],
+    ['Perfil público: tus récords y medallas les llegan a los demás como mucho cada 6 horas (antes cada 2). Tú los ves siempre al momento.',
+     'Public profile: your records and medals reach other players at most every 6 hours (it was every 2). You always see them right away.']
+  ], fix: [
+    ['Móvil: con las cartas de nivel, de objeto o de vínculo abiertas ya puedes coger el joystick tocando fuera del recuadro, y al cerrarse sales andando sin tener que levantar el dedo, como con el teclado o el mando.',
+     'Mobile: with the level-up, item or bond cards open you can now grab the joystick by touching outside the box, and when they close you walk off without lifting your finger, like with a keyboard or controller.'],
+    ['Móvil en vertical: en la barra de arriba no se veían las monedas, los tickets ni tu nombre (con tantos botones no cabía y se salía por la izquierda). Ahora va en dos líneas y se ve todo.',
+     'Mobile in portrait: the top bar did not show your coins, tickets or name (with so many buttons it did not fit and went off the left edge). Now it uses two lines and everything is visible.'],
+    ['Gacha con mando: al pasar las animaciones pulsando A seguido, se volvía a tirar sin querer (tras «Continuar» quedaba elegido el botón de tirar) y se gastaban tickets a montones. Ahora los botones de tirar nunca se eligen solos: hay que ir a ellos.',
+     'Gacha with a controller: skipping the animations by pressing A repeatedly pulled again by accident (after "Continue" the pull button was selected) and tickets were spent in bulk. Now the pull buttons are never selected on their own: you have to move to them.'],
+    ['Gacha con mando: ya se pueden elegir «Saltar» y «Continuar» en la tirada (B también continúa).',
+     'Gacha with a controller: you can now select "Skip" and "Continue" during a pull (B also continues).'],
+    ['Esferas con mando: en cada casilla pone X (usar la elegida) o Y (pasar a otra) en vez de las teclas 5-8 del teclado.',
+     'Orbs with a controller: each slot now shows X (use the selected one) or Y (switch) instead of the keyboard keys 5-8.'],
+    ['Cooperativo: los Pokémon con Sequía, Llovizna, Chorro Arena o Nevada ponen su clima también si no son el anfitrión (antes sólo funcionaba el del creador de la sala).',
+     'Co-op: Pokémon with Drought, Drizzle, Sand Stream or Snow Warning now set their weather even if they are not the host (before, only the room creator’s worked).'],
+    ['Cooperativo: la partida ya no se queda parada para todos si se pierde el aviso de que alguien ha terminado de elegir carta, objeto o vínculo (pasaba con un corte momentáneo de la conexión): ahora se comprueba en cada mensaje.',
+     'Co-op: the run no longer freezes for everyone if the message that someone finished choosing a card, item or bond gets lost (it happened with a momentary connection drop): it is now checked in every message.'],
+    ['Guardado en la nube: si pulsabas Guardar poco después de otro Guardar, el juego decía «Se guarda en la nube en X s» y, si salías antes de ese tiempo, no se subía nunca (en el otro aparato no estaban los tickets). Ahora la espera es mucho más corta y, si sales del juego con un Guardar pendiente, se sube al salir.',
+     'Cloud save: if you pressed Save shortly after another Save, the game said "Saving to the cloud in X s" and, if you left before that, it was never uploaded (your tickets were missing on the other device). Now the wait is much shorter and, if you leave the game with a pending Save, it is uploaded as you leave.'],
+    ['Móvil: al minimizar el juego, la música seguía sonando, y distorsionada. Ahora se para y vuelve al volver al juego.',
+     'Mobile: when you minimized the game, the music kept playing, and distorted. Now it stops and comes back when you return to the game.'],
+    ['Guardado en la nube: si conseguías tickets, monedas o Pokémon en un aparato y mientras tanto guardabas en otro, al volver al primero el juego creía que ya estaba todo guardado («Ya está todo guardado en la nube») y no lo subía: en el otro aparato no aparecían. Ahora se mira lo que falta de verdad y Guardar lo sube.',
+     'Cloud save: if you got tickets, coins or Pokémon on one device and saved on another one in the meantime, back on the first one the game thought everything was already saved ("Everything is already saved in the cloud") and did not upload it, so it never showed up on the other device. Now it checks what is really missing and Save uploads it.'],
+    ['Guardado en la nube: después de gastar en un aparato tickets o monedas que ya se habían gastado en otro, los tickets podían ir creciendo solos cada vez que guardabas, y luego bajar de golpe en el otro aparato. Ahora el saldo es el mismo en todos, y lo que ganes después no se descuenta.',
+     'Cloud save: after spending on one device tickets or coins that had already been spent on another, your tickets could keep growing on their own every time you saved, and then suddenly drop on the other device. Now the balance is the same everywhere, and nothing you earn afterwards is taken away.'],
+    ['Guardado en la nube: si al abrir el juego aún no había conexión (pasa a veces en el móvil), se jugaba con la copia guardada en ese aparato, que podía ser vieja, hasta pulsar Guardar: faltaba lo conseguido en otros aparatos. Ahora, en cuanto vuelve la conexión, se trae lo de la nube y se junta con lo tuyo.',
+     'Cloud save: if there was no connection yet when the game opened (it sometimes happens on phones), you played with the copy stored on that device, which could be old, until you pressed Save: what you got on other devices was missing. Now, as soon as the connection is back, the cloud copy is brought in and merged with yours.'],
+    ['Sentencia de Arceus: yendo muy rápido se podía salir de la arena, y ahí ni Arceus ni los legendarios te alcanzaban: se aguantaba para siempre. Ahora nadie sale de la arena.',
+     'Arceus\'s Judgment: going very fast you could get out of the arena, where neither Arceus nor the legendaries could reach you, so you survived forever. Now nobody leaves the arena.'],
+    ['Cooperativo: si a un compañero se le cortaba la conexión o se le apagaba el móvil, su Pokémon se quedaba quieto en el mapa y los enemigos y Arceus le seguían persiguiendo sin hacerle nada, así que los demás no recibían golpes. Ahora, a los 3 segundos sin noticias suyas, van a por los que siguen jugando.',
+     'Co-op: if a teammate lost connection or their phone switched off, their Pokémon stood still on the map and enemies and Arceus kept chasing it without hurting it, so nobody else got hit. Now, after 3 seconds without hearing from them, they go after the players still in the game.'],
+    ['Ranking: las mejores partidas (las de más de 12 derrotados por segundo) no se subían nunca, sin ningún aviso: el servidor las rechazaba enteras. Ahora siempre se suben.',
+     'Ranking: the best runs (more than 12 defeated per second) were never uploaded, without any warning: the server rejected them entirely. Now they are always uploaded.'],
+    ['Ranking: el semanal, el mensual y el histórico ya cuadran entre sí. Cada uno se cargaba por su cuenta y el histórico podía no tener todavía una marca que ya salía en el semanal.',
+     'Ranking: weekly, monthly and all-time now match each other. Each one was loaded separately and all-time could still be missing a time already shown in weekly.'],
+    ['Ranking de amigos: en diario, semanal y mensual sólo salen los amigos que están en el top 50; ahora lo dice en vez de «Todavía no hay marcas aquí». En Histórico salen todos.',
+     'Friends ranking: daily, weekly and monthly only show friends who are in the top 50; it now says so instead of "No records here yet". All-time shows everyone.'],
+    ['Ranking histórico: si tu marca no entraba en el top 50, el ranking seguía enseñando la vieja durante horas, y al mirar tu puesto una partida peor podía sustituir a la mejor que aún no se había subido. Ahora sale tu mejor marca al momento y no se pierde.',
+     'All-time ranking: if your time did not make the top 50, the ranking kept showing your old one for hours, and checking your rank could let a worse run replace the better one that had not been uploaded yet. Now your best time shows up right away and is never lost.'],
+    ['Con el juego abierto en dos pestañas del mismo navegador, lo conseguido o gastado en una ya no se pierde al usar la otra: las dos se pasan los cambios al momento.',
+     'With the game open in two tabs of the same browser, what you get or spend in one is no longer lost when you use the other: both share their changes right away.']
+  ]},
+  { d: '2026-10-24', title: ['Ataques en la colección y ventanas del menú', 'Moves in the collection and menu windows'], chg: [
+    ['Colección: los iconos de los ataques que puede aprender cada Pokémon son el doble de grandes y, al pasar el ratón (o al tocarlos en el móvil), dicen su tipo, si es físico o especial y lo que hace.',
+     'Collection: the icons of the moves each Pokémon can learn are twice as big and, when you hover over them (or tap them on mobile), they show their type, whether they are physical or special, and what they do.'],
+    ['Las ventanas del menú, Ajustes, Novedades y Apoyar se pueden cerrar pulsando fuera de ellas, además de con Volver o Cerrar.',
+     "The menu windows, Settings, What's new and Support can be closed by clicking outside them, as well as with Back or Close."]
+  ], fix: [
+    ['Las ventanas de la Tienda Kecleon y de Novedades ya no se meten por debajo de la barra de arriba: ahora empiezan debajo de ella, como las demás.',
+     "The Kecleon Shop and What's new windows no longer slide under the top bar: they now start below it, like the other windows."]
   ] },
   { d: '2026-10-23', title: ['Ranking de daño a Arceus y Tablas', 'Arceus damage ranking and Plates'], new: [
     ["Ranking partido en dos: a la izquierda, el daño que le has hecho a Arceus; a la derecha, el tiempo aguantado, como siempre. Las dos mitades se cargan a la vez. Todas las tablas empiezan de cero.",

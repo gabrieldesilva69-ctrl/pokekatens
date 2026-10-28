@@ -47,7 +47,8 @@ G.MenuUI = (() => {
     G.UI.chrome(true);
     G.UI.show('scr-menu');
     bagLine();
-    G.UI.sprite($('menu-partner'), mon.dex, { lively: true, scale: 4, hero: true, shiny, deluxe: true });
+    hwLine();
+    G.UI.sprite($('menu-partner'), mon.dex, { lively: true, scale: 4, hero: true, shiny, deluxe: true, skin: G.Skins.worn(s, mon.dex) });
     $('menu-partner').style.setProperty('--stage-c', shiny ? '#9ae6ff' : G.U.TYPE_COLOR[mon.types[0]]);
     $('menu-partner').classList.toggle('shiny', shiny);
     $('menu-partner-name').innerHTML = mon.name + (shiny ? ' ' + G.Icons.html('shiny', 24) : '');
@@ -94,12 +95,31 @@ G.MenuUI = (() => {
   }
 
   /** Texto bajo "Mochila": cuántos objetos y MT llevas (y los Amuletos Iris, si hay). */
+  /*
+   * Halloween: cuenta atrás bajo el título (systems/halloween.js): 14 días antes,
+   * cuánto falta; durante el evento, cuánto queda. Se pone al día cada segundo
+   * mientras se ve el menú.
+   */
+  const hms = ms => { const t = Math.floor(ms / 1000); return [Math.floor(t / 3600) % 24, Math.floor(t / 60) % 60, t % 60].map(v => String(v).padStart(2, '0')).join(':'); };
+  const left = ms => { const d = Math.floor(ms / 864e5); return d ? G.I18n.f('{x} d {x}', d, hms(ms)) : hms(ms); };
+  let hwT = 0;
+  function hwLine() {
+    const el = $('menu-hw'), c = G.Halloween.countdown();
+    const txt = G.Halloween.on ? (c && c.on ? G.I18n.f('¡Halloween! Termina en {x}', left(c.ms)) : G.T('¡Halloween!'))
+      : c && !c.on ? G.I18n.f('Halloween empieza en {x}', left(c.ms)) : '';
+    el.classList.toggle('hidden', !txt);
+    if (txt) el.innerHTML = `${G.Icons.html('pumpkin', 18)} <span>${txt}</span>`;
+    if (!hwT && txt) hwT = setInterval(() => { if (G.UI.isOpen('scr-menu')) hwLine(); }, 1000);
+  }
+
   function bagLine() {
     const s = G.DB.save, sum = o => Object.values(o || {}).reduce((a, b) => a + (+b || 0), 0);
-    const items = sum(s.bag), tms = sum(s.tms), iris = G.Gacha.BANNERS.filter(b => G.Gacha.hasIris(s, b.gen)).length;
+    const candy = (s.bag && s.bag.candy) || 0;
+    const items = sum(s.bag) - candy, tms = sum(s.tms), iris = G.Gacha.BANNERS.filter(b => G.Gacha.hasIris(s, b.gen)).length;
     const eggs = (s.eggs || []).length, ready = G.Eggs.anyReady();
     const parts = [];
     if (items || tms) parts.push(G.I18n.f('Objetos: {x} · MT: {x}', items, tms));
+    if (candy) parts.push(G.I18n.f('Caramelos: {x}', candy));
     if (eggs) parts.push(G.I18n.f('Huevos: {x}', eggs));
     if (iris) parts.push(G.I18n.f('Amuletos Iris: {x}', iris));
     $('menu-bag-sub').textContent = ready ? G.T('¡Un huevo está listo para abrirse!') : parts.join(' · ') || G.T('Vacía');
@@ -341,7 +361,7 @@ G.MenuUI = (() => {
       rolling = false;
       s.partner = p.dex;
       s.partnerShiny = !!dexF.shiny && G.DB.ownsShiny(p.dex);
-      viewShiny = s.partnerShiny;
+      viewShiny = s.partnerShiny; viewMega = false;
       dexSel = p.dex;
       G.DB.commit();
       G.Audio.cry(p.dex, { shiny: s.partnerShiny });
@@ -357,8 +377,8 @@ G.MenuUI = (() => {
     roll();
   }
 
-  // Variante que se está viendo en la ficha (normal o shiny).
-  let viewShiny = false;
+  // Variante que se está viendo en la ficha (normal o shiny) y si se ve su mega (25-10-2026).
+  let viewShiny = false, viewMega = false;
 
   function showDetail(dex) {
     const s = G.DB.save;
@@ -368,7 +388,11 @@ G.MenuUI = (() => {
     const isPartner = dex === s.partner;
     if (!hasSh) viewShiny = false;
     else if (isPartner && dex !== showDetail.last) viewShiny = !!s.partnerShiny;
-    if (dex !== showDetail.last) extraOpen = '';
+    if (dex !== showDetail.last) { extraOpen = ''; viewMega = false; }
+    // Su mega (u forma primigenia), para verla y comparar sus estadísticas; no hace falta la piedra.
+    const hasMega = own && G.Mega.exists(dex);
+    if (!hasMega) viewMega = false;
+    const md = viewMega ? G.Mega.data(dex) : null;
     // Al redibujar el mismo Pokémon (abrir el selector de Menta, enseñar una MT...)
     // no se vuelve arriba: se quedaba fuera de la vista lo que acababas de abrir.
     const sameMon = dex === showDetail.last, d0 = $('dex-detail');
@@ -377,10 +401,19 @@ G.MenuUI = (() => {
 
     const max = { hp: 183, atk: 1.55, spd: 137, def: 160 };
     // Con su naturaleza (20-10-2026): el stat que sube, en verde; el que baja, en rojo.
-    const nat = own ? G.Mons.natureOf(dex) : null, q = own ? G.Mons.monFor(dex) : p;
+    const nat = own ? G.Mons.natureOf(dex) : null, q0 = own ? G.Mons.monFor(dex) : p;
+    const q = md ? G.Mega.monOf(dex, q0) : q0;
     const natCls = k => (!nat ? '' : nat.up === k ? ' nat-up' : nat.down === k ? ' nat-down' : '');
+    // Con la mega a la vista, al lado de cada número lo que cambia respecto a la forma normal.
+    const diff = k => {
+      if (!md || !k) return '';
+      const dv = k === 'pa' || k === 'sa' ? +(q[k] - q0[k]).toFixed(2) : Math.round(q[k] - q0[k]);
+      if (!dv) return '';
+      const t = (dv > 0 ? '+' : '') + (k === 'pa' || k === 'sa' ? dv.toFixed(2).replace('.', ',') : dv);
+      return ` <small class="${dv > 0 ? 'mega-up' : 'mega-down'}">${t}</small>`;
+    };
     const bar = (label, v, m, txt, k) =>
-      `<div class="stat${natCls(k)}"><span>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span>${txt}</span></div>`;
+      `<div class="stat${natCls(k)}"><span>${label}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span>${txt}${diff(k)}</span></div>`;
     const usingThis = isPartner && (!hasSh || !!s.partnerShiny === viewShiny);
 
     // Sus efectos visuales (entities/aura.js): se le pueden quitar a uno solo.
@@ -393,14 +426,17 @@ G.MenuUI = (() => {
       ${hasSh ? `<div class="seg">
           <button class="${viewShiny ? '' : 'on'}" data-v="0">Normal</button>
           <button class="${viewShiny ? 'on' : ''}" data-v="1">${G.Icons.html('shiny', 12)} Shiny</button></div>` : ''}
+      ${hasMega ? `<button id="dex-mega" class="chip${viewMega ? ' on' : ''}" type="button">${G.Icons.html(G.Mega.stoneIcon(dex), 14)} ${G.T(viewMega ? 'Ver forma normal'
+        : G.Mega.primal(dex) ? 'Ver Primigenio' : 'Ver Mega')}</button>` : ''}
       <div class="center">
         <div style="color:var(--muted);font-size:13px">Nº ${String(p.dex).padStart(3, '0')} · ${GEN_NAMES[p.gen - 1]}</div>
-        <h3>${own ? p.name : '???'}</h3>
+        <h3>${own ? (md ? G.Mega.name(dex) : p.name) : '???'}</h3>
         ${own ? `<button id="dex-fav" class="chip${G.DB.isFav(dex) ? ' on' : ''}" type="button">${G.Icons.html(G.DB.isFav(dex) ? 'star' : 'starDim', 12)} ${G.DB.isFav(dex) ? 'Favorito' : 'Marcar como favorito'}</button>` : ''}
         ${own ? `<button id="dex-fx" class="chip${fxOn ? ' on' : ''}" type="button" title="${G.T('Brillos, partículas y auras de este Pokémon')}">${G.Icons.html('shiny', 12)} ${fxOn ? 'Efectos visuales: sí' : 'Efectos visuales: no'}</button>` : ''}
         ${own && G.Aura.hasTrail(dex) ? `<button id="dex-trail" class="chip${trOn ? ' on' : ''}" type="button" title="${G.T('El rastro que deja este Pokémon al moverse')}">${G.Icons.html('shiny', 12)} ${trOn ? 'Rastro: sí' : 'Rastro: no'}</button>` : ''}
         <div style="color:${G.Gacha.RARITY_COLOR[p.rarity]}">${G.UI.stars(p.rarity, 24)} ${G.Gacha.RARITY_NAME[p.rarity]}</div>
-        <div style="margin:6px 0">${own ? G.UI.typeChips(p.types) : ''}</div>
+        <div style="margin:6px 0">${own ? G.UI.typeChips(md ? md.types : p.types) : ''}</div>
+        ${md && md.ab ? `<p class="sub center" style="margin:0">${G.T('Habilidad de la mega:')} <b class="gold">${G.Mons.abilityName(md.ab) || md.ab}</b></p>` : ''}
       </div>
       ${own ? `
         ${bar('Vida', q.hp, max.hp, q.hp)}
@@ -416,8 +452,8 @@ G.MenuUI = (() => {
             : G.T(G.Mega.primal(dex) ? 'sin Orbe (Tienda Kecleon)' : 'sin Megapiedra (Tienda Kecleon)')}</p>` : ''}
         ${p.types.length === 1 ? `<p class="sub center" style="margin:2px 0 0">Monotipo: +20 % de daño con sus ataques de tipo ${G.U.TYPE_NAME[p.types[0]]}</p>` : ''}
         <p style="font-size:14px;margin:10px 0 4px">Empieza con <b class="gold">${G.T(G.Moves.BY_ID[G.startMoveOf(dex)].name, 'move')}</b></p>
-        <p class="move-icons" title="Movimientos que puede aprender">
-          ${G.Moves.poolFor(p).map(id => `<span title="${G.T(G.Moves.BY_ID[id].name, 'move')}">${G.Icons.html('move:' + id, 16)}</span>`).join('')}</p>
+        <p class="move-icons" id="dex-moves">
+          ${G.Moves.poolFor(p).map(id => `<span data-move="${id}">${G.Icons.html('move:' + id, 32)}</span>`).join('')}</p>
         ${G.Moves.exclusiveFor(dex).map(id => `<p class="sub center" style="margin:2px 0 6px">${G.Icons.html('move:' + id, 14)}
           ${G.T('Ataque exclusivo:')} <b class="gold">${G.T(G.Moves.BY_ID[id].name, 'move')}</b>
           · ${G.I18n.f('sale al subir de nivel desde el nivel {x}', G.Moves.ONLY_LVL)}</p>`).join('')}
@@ -428,15 +464,19 @@ G.MenuUI = (() => {
             o derrotándolo cuando salga shiny.</p>`}
     `;
     for (const [el, t] of scrolls) el.scrollTop = t;
+    moveTips($('dex-moves'));
     $('dex-big').style.setProperty('--stage-c', !own ? '#5b83d6' : viewShiny ? '#9ae6ff' : G.U.TYPE_COLOR[p.types[0]]);
     $('dex-big').classList.toggle('shiny', own && viewShiny);
-    G.UI.sprite($('dex-big'), dex, { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny, deluxe: own });
+    G.UI.sprite($('dex-big'), md ? G.Mega.ID + dex : dex, { lively: own, spin: own, silhouette: !own, scale: 3, hero: true, shiny: own && viewShiny, deluxe: own,
+                                     skin: own && !md ? G.Skins.worn(s, dex) : '' });
     // Tocar el sprite: su grito (sólo si ya lo tienes).
     $('dex-big').onclick = own ? () => G.Audio.cry(dex, { shiny: viewShiny }) : null;
     $('dex-big').style.cursor = own ? 'pointer' : '';
     box.querySelectorAll('.seg button').forEach(b => {
       b.onclick = () => { viewShiny = b.dataset.v === '1'; showDetail(dex); };
     });
+    const mb = $('dex-mega');
+    if (mb) mb.onclick = () => { viewMega = !viewMega; showDetail(dex); };
     const fav = $('dex-fav');
     if (fav) fav.onclick = () => { G.DB.setFav(dex, !G.DB.isFav(dex)); renderGrid(true); showDetail(dex); };
     const fxb = $('dex-fx');
@@ -453,6 +493,57 @@ G.MenuUI = (() => {
       renderGrid(true); showDetail(dex);
     };
     if (own) wireExtras(dex, box);
+  }
+
+  // ---------------- ficha: lo que hace cada ataque (24-10-2026) ----------------
+  /* Los iconos de los ataques que puede aprender: al pasar el ratón (o al
+   * tocarlos en el móvil) sale un recuadro con su nombre, su tipo, si es físico
+   * o especial y lo que hace (lo mismo que enseña la Tienda Kecleon). El
+   * recuadro va en #scr-dex: se va con la pantalla. */
+  let tipOn = null;
+  function moveTipHtml(id) {
+    const m = G.Moves.BY_ID[id];
+    const cat = G.Stats.NAME[m.cat || (m.stat === 'patk' ? 'physical' : m.stat === 'satk' ? 'special' : '')];
+    return `<b>${G.T(m.name, 'move')}</b>
+      <div class="move-tip-tags"><span class="tag-chip" style="background:${G.U.TYPE_COLOR[m.type]}">${G.U.TYPE_NAME[m.type]}</span>${cat ? `<span class="tag-chip cat">${cat}</span>` : ''}</div>
+      <div class="sub">${G.T(m.desc)}</div>`;
+  }
+  function hideMoveTip() { tipOn = null; const t = $('move-tip'); if (t) t.classList.add('hidden'); }
+  function showMoveTip(ic) {
+    let tip = $('move-tip');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.id = 'move-tip'; tip.className = 'move-tip hidden';
+      const scr = $('scr-dex');
+      scr.appendChild(tip);
+      // Tocar fuera de los iconos o desplazar la lista lo quita (en el móvil no hay "salir con el ratón").
+      scr.addEventListener('pointerdown', e => { if (!e.target.closest('#dex-moves')) hideMoveTip(); }, true);
+      scr.addEventListener('scroll', hideMoveTip, true);
+    }
+    tipOn = ic;
+    tip.innerHTML = moveTipHtml(ic.dataset.move);
+    tip.classList.remove('hidden');
+    // Encima del icono (si no cabe, debajo), sin salirse por los lados.
+    const r = ic.getBoundingClientRect(), t = tip.getBoundingClientRect(), M = 8;
+    tip.style.left = G.U.clamp(r.left + r.width / 2 - t.width / 2, M, innerWidth - t.width - M) + 'px';
+    tip.style.top = (r.top - t.height - M >= M ? r.top - t.height - M : r.bottom + M) + 'px';
+  }
+  function moveTips(row) {
+    hideMoveTip();
+    if (!row) return;
+    let touch = false;
+    row.onpointerdown = e => { touch = e.pointerType === 'touch'; };
+    row.onpointerover = e => {
+      const ic = e.target.closest('[data-move]');
+      if (ic && e.pointerType !== 'touch' && ic !== tipOn) showMoveTip(ic);
+    };
+    row.onpointerleave = e => { if (e.pointerType !== 'touch') hideMoveTip(); };
+    // En el móvil: tocar un icono lo enseña; tocarlo otra vez, lo quita.
+    row.onclick = e => {
+      const ic = e.target.closest('[data-move]');
+      if (!ic || !touch) return;
+      if (ic === tipOn) hideMoveTip(); else showMoveTip(ic);
+    };
   }
 
   // ---------------- naturaleza, habilidad y MT (Tienda Kecleon, 20-10-2026) ----------------
@@ -479,17 +570,36 @@ G.MenuUI = (() => {
         ? `<span class="move-icons">${taught.map(id => `<span title="${G.T(G.Moves.BY_ID[id].name, 'move')}">${G.Icons.html('move:' + id, 16)}</span>`).join('')}</span>`
         : `<small>${G.T('Aún no ha aprendido ninguna')}</small>`}
         ${btn('tm', 'tm', 'Enseñar MT', tmsHere.length)}</div>
+      ${skinRow(dex)}
       <div id="mx-picker"></div>
     </div>`;
   }
 
+  /** Skins (Halloween 2026): las compradas de este Pokémon, para ponerlas o quitarlas. */
+  function skinRow(dex) {
+    const s = G.DB.save, mine = G.Skins.LIST.filter(id => G.Skins.SKINS[id].dex === +dex && G.Skins.owns(s, id));
+    if (!mine.length) return '';
+    const on = G.Skins.worn(s, dex);
+    return `<div class="mx-row"><span>${G.T('Skin')}</span><b>${on ? G.T(G.Skins.SKINS[on].name) : G.T('Sin skin')}</b>
+      ${mine.map(id => `<button class="btn small${on === id ? '' : ' gold'}" data-skin="${on === id ? '' : id}">${G.Icons.html('witch', 14)}
+        <span>${G.T(on === id ? 'Quitársela' : 'Ponérsela')}</span></button>`).join('')}</div>`;
+  }
+
   function wireExtras(dex, box) {
+    box.querySelectorAll('[data-skin]').forEach(b => {
+      b.onclick = () => {
+        G.Skins.wear(G.DB.save, dex, b.dataset.skin);
+        G.DB.commit();
+        G.Audio.sfx(b.dataset.skin ? 'buy' : 'select');
+        showDetail(dex);
+      };
+    });
     box.querySelectorAll('[data-extra]').forEach(b => {
       b.onclick = () => { extraOpen = extraOpen === b.dataset.extra ? '' : b.dataset.extra; G.Audio.sfx('select'); showDetail(dex); };
     });
     const host = box.querySelector('#mx-picker');
     if (!host || !extraOpen) return;
-    const s = G.DB.save, mon = G.DEX_BY[dex];
+    const mon = G.DEX_BY[dex];
     const chips = (list, label, onPick) => {
       host.innerHTML = `<div class="panel ban-picker"><div class="ban-moves">${list.map(x => `<button class="chip" data-v="${x.v}">${x.html}</button>`).join('')}</div></div>`;
       host.querySelectorAll('[data-v]').forEach(c => { c.onclick = () => onPick(c.dataset.v); });

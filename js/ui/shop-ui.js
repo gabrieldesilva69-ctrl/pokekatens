@@ -406,6 +406,7 @@ G.ShopUI = (() => {
       kcx.setTransform(1, 0, 0, 1, 0, 0);
       kcx.clearRect(0, 0, KS, KS);
       kcx.imageSmoothingEnabled = false;
+      k.a.skin = G.Halloween.on ? 'hat' : null;      // Halloween: con gorro de bruja
       k.a.draw(kcx, KS / 2, KS - 12);
       if (k.purple) G.UI.hueSwap(kcx, kc, PURPLE);
       const ox = x - KS / 2, oy = y - KS + 12;
@@ -473,6 +474,51 @@ G.ShopUI = (() => {
     if (go) go.onclick = () => G.MenuUI.openDex();
     const shop = box.querySelector('[data-go-shop]');
     if (shop) shop.onclick = () => open();
+    const gs = box.querySelector('[data-gs-open]');
+    if (gs) gs.onclick = gsPick;
+  }
+
+  /** GS Ball: la lista de los que no tienes (con buscador) y, al tocar uno, se pide confirmar. */
+  function gsPick() {
+    const box = $('bag-body'), all = G.Shop.gsChoices();
+    if (!all.length) {
+      const r = G.Shop.openGs(null);
+      if (r.ok) { G.UI.toast(G.I18n.f('Ya tienes todos los Pokémon: +{x} monedas', r.coins)); G.Audio.sfx('coin'); G.UI.refreshCoins(); }
+      openBag();
+      return;
+    }
+    box.innerHTML = `<div class="row between"><h3>${G.Icons.html('gsball', 20)} ${G.T('Elige un Pokémon')}</h3>
+        <button class="btn small ghost" id="gs-back">${G.T('Volver')}</button></div>
+      <input class="field" id="gs-q" placeholder="${G.T('Buscar por nombre o número')}" autocomplete="off" style="max-width:320px;margin:6px 0 10px">
+      <div class="grid" id="gs-grid"></div>`;
+    $('gs-back').onclick = openBag;
+    const fill = q => {
+      const g = $('gs-grid');
+      g.innerHTML = '';
+      const list = all.filter(p => !q || String(p.dex) === q || p.name.toLowerCase().includes(q) || G.T(p.name).toLowerCase().includes(q));
+      for (const p of list.slice(0, 120)) {
+        const c = document.createElement('div');
+        c.className = 'cell';
+        c.dataset.pad = '1';
+        c.insertAdjacentHTML('beforeend', `<span class="no">${String(p.dex).padStart(3, '0')}</span>`);
+        c.appendChild(G.UI.spriteCanvas(p.dex, 92, 80, { scale: 2 }));
+        c.insertAdjacentHTML('beforeend', `<b>${p.name}</b>${G.UI.stars(p.rarity, 9)}`);
+        c.onclick = () => {
+          if (!confirm(G.I18n.f('¿Abrir la GS Ball y quedarte con {x}?', p.name))) return;
+          const r = G.Shop.openGs(p.dex);
+          if (!r.ok) return;
+          G.Audio.cry(p.dex);
+          G.Audio.sfx('shinyGet');
+          G.UI.toast(G.I18n.f('¡{x} es tuyo!', p.name));
+          G.Progress.checkAch();
+          openBag();
+        };
+        g.appendChild(c);
+      }
+      if (list.length > 120) g.insertAdjacentHTML('beforeend', `<p class="sub" style="grid-column:1/-1">${G.T('Escribe su nombre para ver más.')}</p>`);
+    };
+    $('gs-q').oninput = () => fill($('gs-q').value.trim().toLowerCase());
+    fill('');
   }
 
   /** Lo que dice el Kecleon morado en el bocadillo (se va solo a los 6 s). */
@@ -541,6 +587,21 @@ G.ShopUI = (() => {
         flyToBag(icon, from, key);
       };
     });
+    box.querySelectorAll('[data-skin]').forEach(b => {
+      b.onclick = () => {
+        const r = G.Shop.buySkin(b.dataset.skin);
+        if (!r.ok) { if (r.error) G.UI.toast(G.T(r.error)); G.Audio.sfx('error'); return; }
+        G.Audio.sfx('buy');
+        G.UI.refreshCoins();
+        Scene.cheer();
+        say(G.T('¡Feliz Halloween! Póntela en la ficha del Pokémon.'));
+        render();
+      };
+    });
+    box.querySelectorAll('canvas[data-skin-pv]').forEach(cv => {
+      const id = cv.dataset.skinPv;
+      G.UI.sprite(cv, G.Skins.SKINS[id].dex, { skin: id, scale: 2 });
+    });
     // Pasar por algo de la tienda: el Kecleon más cercano va a señalarlo.
     box.querySelectorAll('.upg-item').forEach(it => {
       it.addEventListener('pointerenter', () => { const r = it.getBoundingClientRect(); Scene.point(r.left + r.width / 2); });
@@ -550,7 +611,8 @@ G.ShopUI = (() => {
   function buyHtml() {
     const s = G.DB.save, partner = s.partner, mine = n => (n ? ` <small class="gold">· ${G.I18n.f('tienes {x}', n)}</small>` : '');
     const buyBtn = (key, price) => `<button class="btn small gold" data-buy="${key}" data-sfx="none" ${s.coins < price ? 'disabled' : ''}>${coin(price)}</button>`;
-    let h = `<h3 style="margin:10px 0 6px">${G.T('Objetos')}</h3><div class="upg">`;
+    let h = G.Halloween.on ? skinsHtml() : '';
+    h += `<h3 style="margin:10px 0 6px">${G.T('Objetos')}</h3><div class="upg">`;
     for (const id of G.Shop.ORDER) {
       const it = G.Shop.ITEMS[id];
       h += row(G.Icons.html(it.icon, 32), G.T(it.name) + mine(G.Shop.count(id)), G.T(it.desc), buyBtn(id, it.price));
@@ -577,17 +639,41 @@ G.ShopUI = (() => {
     return h + '</div>';
   }
 
+  /** Halloween: las skins de bruja, por caramelos. */
+  function skinsHtml() {
+    const s = G.DB.save, have = (s.bag && s.bag.candy) || 0, P = G.Halloween.SKIN_PRICE;
+    let h = `<h3 style="margin:10px 0 6px">${G.Icons.html('witch', 18)} ${G.T('Halloween: skins de bruja')}</h3>
+      <p class="sub" style="margin:0 0 8px">${G.T('Sólo hasta el 1 de noviembre. Los caramelos salen en las partidas (sobre todo de los Fantasma y las calabazas) y ante el gran Gengar. La skin es para siempre; se pone y se quita en la ficha del Pokémon.')}
+      <b class="gold">${G.Icons.html('candy', 14)} ${G.I18n.f('Tienes {x} caramelos', have.toLocaleString(G.I18n.locale))}</b></p><div class="upg">`;
+    for (const id of G.Skins.LIST) {
+      const sk = G.Skins.SKINS[id], got = G.Skins.owns(s, id), name = G.DEX_BY[sk.dex].name;
+      const desc = !got ? G.I18n.f(sk.dex === 94 ? 'Sombrero y capa de bruja para {x}.' : 'Sombrero de bruja para {x}.', name)
+        : G.DB.owns(sk.dex) ? G.T('Comprada. Póntela o quítatela en la ficha del Pokémon.') : G.I18n.f('Comprada. Se pone cuando tengas a {x}.', name);
+      const btn = got ? `<b class="gold">${G.T('Comprada')}</b>`
+        : `<button class="btn small gold" data-skin="${id}" data-sfx="none" ${have < P ? 'disabled' : ''}>${G.Icons.html('candy', 14)} ${P}</button>`;
+      h += row(`<canvas data-skin-pv="${id}" width="64" height="72"></canvas>`, G.T(sk.name), desc, btn);
+    }
+    return h + '</div>';
+  }
+
   function bagHtml() {
     const s = G.DB.save;
     const items = G.Shop.ORDER.filter(id => G.Shop.count(id) > 0);
     const stones = Object.keys(s.bag || {}).filter(G.Shop.isStone).map(id => +id.slice(2)).sort((a, b) => a - b);
+    if (G.Shop.count('candy') > 0) items.push('candy');
     const tms = Object.keys(s.tms || {}).filter(id => G.Moves.BY_ID[id] && s.tms[id] > 0).sort((a, b) => moveName(a).localeCompare(moveName(b)));
-    if (!items.length && !tms.length && !stones.length) {
+    const gs = G.Shop.count(G.Shop.GS);
+    if (!items.length && !tms.length && !stones.length && !gs) {
       return `<p class="sub center" style="margin:24px 0">${G.T('Tu Mochila está vacía.')}<br><br>
             <button class="btn gold" data-go-shop>${G.Icons.html('shop', 16)} ${G.T('Ir a la Tienda Kecleon')}</button></p>` + irisHtml();
     }
     let h = `<p class="sub" style="margin:10px 0">${G.T('Para usarlo, abre la colección, elige un Pokémon y pulsa Menta, Cápsula o Enseñar MT en su ficha.')}
       <button class="btn small" data-go-dex>${G.Icons.html('book', 14)} ${G.T('Ir a la colección')}</button></p><div class="upg">`;
+    if (gs) {
+      h += row(G.Icons.html('gsball', 32), `${G.T('GS Ball')} <b class="gold">×${gs}</b>`,
+        G.T('Ábrela y elige el Pokémon que quieras de los que aún no tienes (no sale shiny).'),
+        `<button class="btn small gold" data-gs-open>${G.T('Abrir')}</button>`);
+    }
     for (const id of items) {
       const it = G.Shop.ITEMS[id];
       h += row(G.Icons.html(it.icon, 32), G.T(it.name), G.T(it.desc), `<b class="gold">×${G.Shop.count(id)}</b>`);

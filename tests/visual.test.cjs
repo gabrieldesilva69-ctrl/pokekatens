@@ -78,3 +78,17 @@ test('cada mega tiene su Megapiedra (dos colores) y las primigenias su Orbe', ()
   assert.ok(/'porb:' \+ \(d\.orb === 'Orbe Azul' \? 'blue' : 'red'\)/.test(src) && /'ms:' \+ dex/.test(src));
   assert.ok(/js\/data\/stones\.js/.test(read('dev.html')));
 });
+
+test('cada ataque se dibuja con formas y paletas que existen (js/entities/vfx.js)', () => {
+  const ctx = vm.createContext({ G: { Sprites: { PX: 2 }, U: { hash: () => 0.5 } } });
+  vm.runInContext(read('js/data/moves.js'), ctx);
+  vm.runInContext(read('js/entities/vfx.js'), ctx);
+  const G = ctx.G, bad = [];
+  for (const m of Object.values(G.Moves.BY_ID)) {
+    const v = G.VFX.forMove(m);
+    // ('lightning' no es una forma: es el zigzag del Rayo, que dibuja fx.js)
+    for (const k of ['proj', 'beam', 'aura', 'buff']) if (v[k] && v[k] !== 'lightning' && !G.VFX.SHAPES[v[k]]) bad.push(m.id + ' ' + k + ':' + v[k]);
+    if (!G.VFX.PAL[v.pal]) bad.push(m.id + ' pal:' + v.pal);
+  }
+  assert.strictEqual(bad.join(', '), '');
+});

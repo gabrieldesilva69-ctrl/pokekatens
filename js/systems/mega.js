@@ -6,7 +6,8 @@
  *   - La barra se llena derrotando enemigos (los del grupo también): KILLS para
  *     llenarla, un jefe cuenta BOSS.
  *   - Llena: tecla "Megaevolucionar" (F; X en el mando; botón en el móvil) y
- *     megaevoluciona DUR segundos. Después la barra vuelve a cero.
+ *     megaevoluciona DUR segundos, y cada vez que vuelvas a megaevolucionar en la
+ *     partida, STEP más (25-10-2026), hasta MAX_DUR. Después la barra vuelve a cero.
  *   - Cambian el sprite, los stats, los tipos y la habilidad (sólo sus efectos
  *     durante la partida: lo que la habilidad hace "al empezar" no se aplica).
  *     No cambian el tamaño con el que choca, la vida ni los ataques.
@@ -17,7 +18,9 @@
  *     sol (wx), que en grupo manda el anfitrión.
  */
 G.Mega = (() => {
-  const KILLS = 150, BOSS = 25, DUR = 45;
+  const KILLS = 150, BOSS = 25, DUR = 45, STEP = 3, MAX_DUR = 90;
+  /** Lo que dura la mega número times + 1 de la partida (45, 48, 51... hasta 90 s). */
+  const durFor = times => Math.min(MAX_DUR, DUR + STEP * (times | 0));
   const ID = 100000;                     // sprites y grito: 100000 + dex
 
   const data = dex => (G.MEGAS && G.MEGAS[dex]) || null;
@@ -41,14 +44,15 @@ G.Mega = (() => {
   // La de esa mega (sus dos colores, data/stones.js), o su Orbe Rojo / Azul (ui/icons.js).
   function stoneIcon(dex) { const d = data(dex); return !d ? 'megastone' : d.primal ? 'porb:' + (d.orb === 'Orbe Azul' ? 'blue' : 'red') : 'ms:' + dex; }
 
-  /** Los stats de la mega con la naturaleza de tu Pokémon (la misma proporción). */
-  function megaMon(pl) {
-    const d = data(pl.dex), mon = pl.mon, base = G.DEX_BY[pl.dex];
+  /** Los stats de la mega de dex con la naturaleza de mon (la misma proporción); la vida no cambia. */
+  function monOf(dex, mon) {
+    const d = data(dex), base = G.DEX_BY[dex];
     const m = Object.assign({}, mon, { types: d.types.slice() });
     for (const k of ['spd', 'pa', 'sa', 'df', 'sd']) m[k] = d[k] * (base[k] ? mon[k] / base[k] : 1);
     m.atk = Math.max(m.pa, m.sa);
     return m;
   }
+  const megaMon = pl => monOf(pl.dex, pl.mon);
 
   // ---------------- tu Pokémon en la run ----------------
 
@@ -72,14 +76,14 @@ G.Mega = (() => {
   /** La tecla: megaevoluciona si la barra está llena. */
   function press(pl) {
     if (!ready(pl) || pl.dead) return false;
-    pl.mega.t = DUR; pl.mega.times++;
+    pl.mega.dur = durFor(pl.mega.times); pl.mega.t = pl.mega.dur; pl.mega.times++;
     apply(pl, true);
     G.Coop.mega(pl, true);
     G.Progress.event('mega', {});
     return true;
   }
 
-  /** Cada fotograma (game.js): cuenta los 45 s y vuelve a la normalidad. */
+  /** Cada fotograma (game.js): cuenta lo que dura y vuelve a la normalidad. */
   function update(pl, dt) {
     if (!pl || !pl.mega || !pl.megaOn) return;
     pl.mega.t -= dt;
@@ -164,7 +168,7 @@ G.Mega = (() => {
           G.DEX_BY[pl.dex].name) + ' → ' + name(pl.dex), 2.6, true);
       }
       // Su clima, lo que dure (el anfitrión lo pone para todos: G.Weather.cast).
-      if (d.wx && (pl === G.Game.player || G.Coop.isHost)) G.Weather.cast(d.wx, DUR);
+      if (d.wx && (pl === G.Game.player || G.Coop.isHost)) G.Weather.cast(d.wx, (pl.mega && pl.mega.dur) || DUR);
       G.Audio.cry(pl.dex, { shiny: pl.shiny, mega: !d.primal });     // las primigenias, con el de siempre
     } else {
       const o = pl._noMega;
@@ -184,10 +188,10 @@ G.Mega = (() => {
   /** Para el HUD: 0..1 de la barra (o lo que queda de la mega) y si está lista. */
   function bar(pl) {
     if (!pl || !pl.mega) return null;
-    return pl.megaOn ? { k: pl.mega.t / DUR, on: true, ready: false }
+    return pl.megaOn ? { k: pl.mega.t / (pl.mega.dur || DUR), on: true, ready: false }
       : { k: pl.mega.fill / KILLS, on: false, ready: pl.mega.fill >= KILLS };
   }
 
-  return { KILLS, BOSS, DUR, ID, data, exists, can, primal, name, stoneName, stoneIcon, setup, ready, onKill, press, update, apply, bar,
+  return { KILLS, BOSS, DUR, STEP, MAX_DUR, durFor, ID, monOf, data, exists, can, primal, name, stoneName, stoneIcon, setup, ready, onKill, press, update, apply, bar,
            megaScale, height };
 })();

@@ -6,9 +6,10 @@
  *   directo  WebRTC (canal de datos entre navegadores). La negociación
  *            (señalización) va por la base de datos, con el STUN gratuito de
  *            Google. Sin TURN, algunas redes (datos móviles, CGNAT) no pueden
- *            conectar directamente y esa pareja no juega junta.
- *   relé     (APAGADO) los mensajes irían por la Realtime Database:
- *            rooms/{sala}/q/{destinatario}/{id}, a 1 $ el GB.
+ *            conectar directamente.
+ *   relé     sólo con quien no consigue el directo: los mensajes van por la
+ *            Realtime Database (rooms/{sala}/q/{destinatario}/{id}), con un tope
+ *            al mes para no pasarse del plan gratis (ver RELAY_CAP_MB).
  *
  * Se envía por el canal directo si está abierto; si no, por el relé. El que
  * recibe escucha los dos, así que no hace falta ponerse de acuerdo.
@@ -21,11 +22,17 @@
 G.Net = (() => {
   const ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
   const DIRECT_TIMEOUT = 15000;    // ms para conseguir canal
-  // Relé por la Realtime Database APAGADO (12-10-2026): a 1 $ el GB era lo que más
-  // costaba del cooperativo. Sin conexión directa, esa pareja no puede jugar
-  // junta ('failed') y el anfitrión lo reintenta cada RETRY_MS. Por la base de datos
-  // sólo pasa la señalización (unos pocos mensajes pequeños para conectarse).
-  const ALLOW_RELAY = false, RETRY_MS = 15000;
+  // Relé por la Realtime Database (25-10-2026, decidido por los dueños): JPTER78 lo
+  // apagó porque en su plan de pago costaba 1 $ el GB. En el plan gratis (Spark) no se
+  // paga nada, pero lo descargado de la base de datos al mes tiene un tope (10 GB) y, si
+  // se pasa, se para toda la base de datos (salas, estado de los amigos) hasta el mes
+  // siguiente. Por eso cada jugador apunta lo que manda por el relé en
+  // relayUse/<AAAA-MM> (en MB) y, al llegar a RELAY_CAP_MB, el relé se apaga ese mes
+  // para todos: esa pareja vuelve a no poder jugar junta ('failed') y el anfitrión lo
+  // reintenta cada RETRY_MS, como antes.
+  const RETRY_MS = 15000;
+  const RELAY_CAP_MB = 6000, RELAY_NOTE_MS = 60000, RELAY_OVERHEAD = 1.3;   // (1,3: lo que añade Firebase a cada mensaje)
+  let relayFull = false, relayBytes = 0, relayNoteT = 0;
   // Ping: lo mide el propio navegador en la conexión WebRTC (getStats), así que no
   // manda ni un byte más por la red. Se lee como mucho cada PING_MS y sólo si alguien
   // lo pide (el HUD, con "Mostrar ping" activado).
@@ -41,6 +48,7 @@ G.Net = (() => {
   //   block no llega a los STUN (cortafuegos o red que corta UDP)
   const NAT_ICE = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }];
   const NAT_MS = 5000, NAT_KINDS = ['open', 'nat', 'sym', 'block'];
+  const ICE_BATCH = 250, ICE_MAX = 40;    // candidatos: se juntan 250 ms (o 40) en un mensaje (ver newPeer)
 
 
   let rtdb = null, uid = null, roomId = null, isHost = false, hostUid = null;
@@ -139,13 +147,15 @@ G.Net = (() => {
     // oferta). Así, si no llega nunca, se sigue por el relé y se sabe cuándo se va.
     if (!isHost) {
       const p = { pc: null, dc: null, mode: 'connecting', timer: 0 };
-      p.timer = setTimeout(() => { if (p.mode === 'connecting') { p.mode = ALLOW_RELAY ? 'relay' : 'failed'; emitPeer(hostId); } }, DIRECT_TIMEOUT + 3000);
+      p.timer = setTimeout(() => { if (p.mode === 'connecting') useRelay(hostId); }, DIRECT_TIMEOUT + 3000);
       peers.set(hostId, p);
     }
   }
 
   function close() {
     for (const u of [...peers.keys()]) drop(u);
+    clearTimeout(relayNoteT);
+    noteRelay(true);
     if (qref) { qref.off(); qref = null; }
     roomId = null; isHost = false; hostUid = null;
     natOf.clear();
@@ -171,7 +181,22 @@ G.Net = (() => {
     let pc;
     try { pc = p.pc = new RTCPeerConnection({ iceServers: ICE }); }
     catch (e) { p.mode = 'relay'; emitPeer(u); return p; }
-    pc.onicecandidate = e => { if (e.candidate) signal(u, { c: e.candidate.toJSON() }); };
+    /*
+     * Los candidatos de conexión se juntan ICE_BATCH ms y van en un solo mensaje
+     * ({ cs: [...] }), y en cuanto no hay más (candidate null), al momento.
+     * Antes iba uno por mensaje: unos 4.000 por minuto por la base de datos
+     * (25-10-2026), lo que más se descargaba de ella. Quien recibe entiende los
+     * dos (las versiones de antes mandan { c }).
+     */
+    const iceOut = [];
+    let iceT = 0;
+    const flushIce = () => { clearTimeout(iceT); iceT = 0; if (iceOut.length && peers.get(u) === p) signal(u, { cs: iceOut.splice(0) }); };
+    pc.onicecandidate = e => {
+      if (!e.candidate) { flushIce(); return; }
+      iceOut.push(e.candidate.toJSON());
+      if (iceOut.length >= ICE_MAX) flushIce();
+      else if (!iceT) iceT = setTimeout(flushIce, ICE_BATCH);
+    };
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed' && p.mode !== 'closed') useRelay(u);
     };
@@ -214,11 +239,36 @@ G.Net = (() => {
     };
   }
 
+  // ---------------- relé y su tope del mes ----------------
+
+  const useRef = () => rtdb.ref('relayUse/' + new Date().toISOString().slice(0, 7));
+  /** Al pasar al relé: ¿queda este mes? */
+  function checkRelay() {
+    if (!rtdb || relayFull) return;
+    useRef().once('value').then(s => { if ((+s.val() || 0) >= RELAY_CAP_MB) relayOff(); }).catch(() => {});
+  }
+  function relayOff() {
+    if (relayFull) return;
+    relayFull = true;
+    console.warn('[Net] relé agotado este mes');
+    for (const [u, p] of peers) if (p.mode === 'relay') { p.mode = 'connecting'; useRelay(u); }
+  }
+  /** Suma al contador del mes los MB enteros mandados por el relé (al cerrar, también lo que sobra). */
+  function noteRelay(all) {
+    relayNoteT = 0;
+    const mb = Math.min(20, (all ? Math.ceil : Math.floor)(relayBytes * RELAY_OVERHEAD / 1e6));
+    if (!rtdb || mb < 1) return;
+    relayBytes = Math.max(0, relayBytes - mb * 1e6 / RELAY_OVERHEAD);
+    useRef().transaction(v => (+v || 0) + mb)
+      .then(r => { if (r && r.snapshot && (+r.snapshot.val() || 0) >= RELAY_CAP_MB) relayOff(); })
+      .catch(e => console.warn('[Net] relé (contador):', e.code || e.message));
+  }
+
   function useRelay(u) {
     const p = peers.get(u);
     if (!p || p.mode === 'direct' || p.mode === 'closed' || p.mode === 'failed') return;
-    if (ALLOW_RELAY) { p.mode = 'relay'; emitPeer(u); return; }
-    // Sin relé: no se puede jugar con esa persona por ahora. El anfitrión reintenta.
+    if (!relayFull) { clearTimeout(p.timer); p.mode = 'relay'; emitPeer(u); checkRelay(); return; }
+    // Relé agotado este mes: no se puede jugar con esa persona por ahora. El anfitrión reintenta.
     clearTimeout(p.timer);
     p.mode = 'failed';
     try { if (p.pc) p.pc.close(); } catch (e) { /* nada */ }
@@ -275,9 +325,11 @@ G.Net = (() => {
         await flushIce(from, p);
       } else if (sig.sdp && sig.sdp.type === 'answer') {
         if (p && p.pc) { await p.pc.setRemoteDescription(sig.sdp); await flushIce(from, p); }
-      } else if (sig.c) {
-        if (p && p.pc && p.pc.remoteDescription) await p.pc.addIceCandidate(sig.c).catch(() => {});
-        else { if (!pendingIce.has(from)) pendingIce.set(from, []); pendingIce.get(from).push(sig.c); }
+      } else if (sig.c || Array.isArray(sig.cs)) {
+        for (const c of sig.cs || [sig.c]) {
+          if (p && p.pc && p.pc.remoteDescription) await p.pc.addIceCandidate(c).catch(() => {});
+          else { if (!pendingIce.has(from)) pendingIce.set(from, []); pendingIce.get(from).push(c); }
+        }
       }
     } catch (e) {
       console.warn('[Net] señalización:', e.message);
@@ -319,9 +371,19 @@ G.Net = (() => {
 
   // ---------------- envío / recepción ----------------
 
+  /*
+   * Cada remitente tiene 100 huecos por destinatario (tuUid_00 ... tuUid_99) y
+   * los va usando en orden; quien recibe borra cada mensaje al leerlo. Antes cada
+   * mensaje era nuevo (push) y sin tope de tamaño, y el 23-10-2026 se llenó la
+   * base de datos de basura (ver social.js, createRoom). Las reglas
+   * (database.rules.json) sólo admiten estos huecos y mensajes de hasta 16.000.
+   */
+  let slot = 0;
   function relayPush(to, env) {
-    if (!rtdb || !roomId) return;
-    rtdb.ref('rooms/' + roomId + '/q/' + to).push(JSON.stringify(env)).catch(e => console.warn('[Net] relé:', e.code || e.message));
+    if (!rtdb || !roomId) return 0;
+    const key = uid + '_' + String(slot++ % 100).padStart(2, '0'), s = JSON.stringify(env);
+    rtdb.ref('rooms/' + roomId + '/q/' + to + '/' + key).set(s).catch(e => console.warn('[Net] relé:', e.code || e.message));
+    return s.length;
   }
 
   function send(to, msg) {
@@ -341,11 +403,12 @@ G.Net = (() => {
         return;
       } catch (e) { /* cae al relé */ }
     }
-    // Sin relé, los datos de la partida no van por la base de datos (se pierden: esa
-    // pareja no está conectada). Sólo pasa el aviso de empezar.
-    if (!ALLOW_RELAY && !(msg && msg.k === 'start')) return;
+    // Los datos de la partida sólo van por la base de datos con quien está en el relé
+    // (mientras se conecta, o con el relé agotado, se pierden). El aviso de empezar, siempre.
+    if (!(msg && msg.k === 'start') && (relayFull || !p || p.mode !== 'relay')) return;
     stats.relaySent++;
-    relayPush(to, { f: uid, d: msg });
+    relayBytes += relayPush(to, { f: uid, d: msg });
+    if (!relayNoteT) relayNoteT = setTimeout(noteRelay, RELAY_NOTE_MS);
   }
 
   function toHost(msg) { if (!isHost && hostUid) send(hostUid, msg); }
@@ -377,6 +440,8 @@ G.Net = (() => {
       return worst;
     },
     get open_() { return !!roomId; },
+    /** ¿Se ha gastado el relé de este mes? */
+    get relayFull() { return relayFull; },
     get isHost() { return isHost; },
     get uid() { return uid; },
     get hostUid() { return hostUid; },

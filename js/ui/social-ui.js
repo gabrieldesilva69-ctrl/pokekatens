@@ -1,7 +1,7 @@
 /* ============ social-ui.js — apodo, amigos, sala e invitaciones ============ */
 (() => {
   const $ = G.UI.$;
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc = G.U.esc;
 
   /** ¿Se puede usar lo online? Si no, explica por qué. */
   function needOnline() {
@@ -84,7 +84,18 @@
     function stateText(f) {
       if (f.status === 'in') return 'Quiere ser tu amigo';
       if (f.status === 'out') return 'Solicitud enviada';
-      return '';
+      // Su estado (G.Social: presence/<uid> en la Realtime Database, 25-10-2026).
+      if (f.play) return G.T(f.group ? 'En partida en grupo' : 'En partida');
+      if (f.online) return G.T('En línea');
+      return f.seen ? G.I18n.f('Desconectado · {x}', ago(f.seen)) : G.T('Desconectado');
+    }
+    /** "hace 5 min", "hace 2 h", "hace 3 días" (con la hora del servidor). */
+    function ago(at) {
+      const s = Math.max(0, (G.Social.now() - at) / 1000);
+      if (s < 90) return G.T('hace un momento');
+      if (s < 3600) return G.I18n.f('hace {x} min', Math.round(s / 60));
+      if (s < 86400) return G.I18n.f('hace {x} h', Math.round(s / 3600));
+      return G.I18n.f('hace {x} días', Math.round(s / 86400));
     }
 
     function render() {
@@ -92,7 +103,8 @@
       $('fr-me').innerHTML = 'Tu apodo: <b class="gold" translate="no">' + esc(G.Social.me ? G.Social.me.name : '') + '</b> · dáselo a tus amigos para que te añadan.';
       $('fr-room').classList.toggle('hidden', !room);
       const list = G.Social.friends.sort((a, b) => {
-        const rank = f => f.status === 'in' ? 0 : f.status === 'ok' ? 1 : 2;
+        // Primero las solicitudes, luego los que están conectados (en partida o en el menú), luego el resto.
+        const rank = f => f.status === 'in' ? 0 : f.status !== 'ok' ? 4 : f.play ? 1 : f.online ? 2 : 3;
         return rank(a) - rank(b) || a.name.localeCompare(b.name);
       });
       const box = $('fr-list');
@@ -104,9 +116,9 @@
       for (const f of list) {
         const el = document.createElement('div');
         el.className = 'fr-row';
-        const dot = f.status !== 'ok' ? 'pend' : 'on';
+        const dot = f.status !== 'ok' ? 'pend' : f.play ? 'play' : f.online ? 'on' : 'off';
         const inRoom = room && room.members.some(m => m.uid === f.uid);
-        el.innerHTML = `<i class="dot ${dot}"></i><span class="fr-ava"></span><b translate="no"><a href="#" class="plink" title="Ver su perfil">${esc(f.name)}</a></b><span class="st">${inRoom ? 'En tu sala' : stateText(f)}</span><span class="grow"></span>`;
+        el.innerHTML = `<i class="dot ${dot}" title="${esc(stateText(f))}"></i><span class="fr-ava"></span><b translate="no"><a href="#" class="plink" title="Ver su perfil">${esc(f.name)}</a></b><span class="st">${inRoom ? 'En tu sala' : stateText(f)}</span><span class="grow"></span>`;
         if (f.status === 'ok') {
           el.querySelector('.plink').onclick = e => { e.preventDefault(); G.ProfileUI.show(f.uid); };
           // Su avatar, del perfil público (G.Social.getProfile lo guarda 10 min: no se lee cada vez).
@@ -201,7 +213,7 @@
       if (m.uid === room.host) return 'Anfitrión';
       if (!room.isHost) return m.uid === G.Social.uid ? 'Tú' : 'En la sala';
       const mode = G.Net.mode(m.uid);
-      return mode === 'direct' ? 'Conectado' : mode === 'relay' ? 'Conectado (por servidor)' : mode === 'failed' ? 'No se pudo conectar (reintentando…)' : 'Conectando…';
+      return mode === 'direct' ? 'Conectado' : mode === 'relay' ? 'Conectado (por servidor)' : mode === 'failed' ? (G.Net.relayFull ? 'No se pudo conectar (servidor de apoyo agotado este mes)' : 'No se pudo conectar (reintentando…)') : 'Conectando…';
     }
 
     function render() {
@@ -285,7 +297,7 @@
       const room = G.Social.room;
       if (!room || !room.isHost || room.members.length < 2) return;
       const cfg = {
-        k: 'start', seed: Math.floor(Math.random() * 1e6), host: room.host,
+        k: 'start', seed: Math.floor(Math.random() * 1e6), host: room.host, hw: G.Halloween.on,   // hw: ¿partida de Halloween?
         members: room.members.map(m => ({ uid: m.uid, name: m.name, dex: m.dex, shiny: !!m.shiny }))
       };
       G.Social.setOpen(false);

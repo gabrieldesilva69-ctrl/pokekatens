@@ -796,8 +796,11 @@
 
     // ---------------- MT de Pokémon Edición Reloaded, tanda D: apoyo (23-10-2026) ----------------
     { id: 'protect', name: 'Protección', type: 'normal', kind: 'guard',
-      desc: 'No hace daño: un escudo te hace intocable un momento cada pocos segundos.',
-      cd: 7, dur: 1.5 },
+      desc: 'No hace daño: un escudo te hace intocable 1,5 s. Se recarga en 7 s y, por mucha reducción de recarga que lleves, nunca en menos de 5 s.',
+      // minCd: la recarga nunca baja de aquí (26-10-2026). Con mucha reducción de recarga
+      // (cartas, mejoras, objeto, santuario Prisa) bajaba a ~1 s, menos que el escudo:
+      // se encadenaba y eras invencible toda la partida.
+      cd: 7, dur: 1.5, minCd: 5 },
     { id: 'rest', name: 'Descanso', type: 'psychic', kind: 'rest',
       desc: 'No hace daño: te cura mucho, pero te quedas dormido un rato sin moverte ni atacar.',
       cd: 18, amount: 0.6, dur: 2.0 },
