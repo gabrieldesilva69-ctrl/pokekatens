@@ -10,7 +10,7 @@ function load() {
   const store = { fx: 'all', fxOff: [] };
   const G = { Settings: { get: k => store[k], set: (k, v) => { store[k] = v; } } };
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/entities/aura.js'), 'utf8'), vm.createContext({ G, performance: { now: () => 0 } }));
-  return { A: G.Aura, store };
+  return { A: G.Aura, store, G };
 }
 
 test('visual effects can be turned off for all, for everyone but your partner, or for one Pokémon (entities/aura.js)', () => {
@@ -78,6 +78,8 @@ test('some glows fade out and come back slowly (pulse), and the Regi dots light 
   const v = []; for (let t = 0; t < 10; t += 0.05) v.push(A.emitLevel(890, t, 0));
   assert.ok(Math.min(...v) < 0.1 && Math.max(...v) > 0.95, 'de apagado a encendido');
   for (let i = 1; i < v.length; i++) assert.ok(Math.abs(v[i] - v[i - 1]) < 0.08, 'despacio: más de un segundo para encenderse');
+  const off = v.filter(x => x < 0.1).length;
+  assert.ok(off > v.length * 0.45, 'pasa más tiempo apagado que encendido');
   // Los Regi no encienden la hoja entera: sus puntos los dibuja front, uno detrás de otro.
   for (const d of [377, 378, 379, 486]) assert.equal(A.emitLevel(d, 3, 0), 0, 'puntos de ' + d);
   assert.equal(typeof A.front, 'function');
@@ -96,4 +98,23 @@ test('effects come and go slowly: a calm level most of the time and a spark now 
   const eye = []; for (let t = 0; t < 10; t += 0.1) eye.push(A.emitLevel(94, t, 3));
   assert.ok(Math.min(...eye) >= 0.5 && Math.max(...eye) > Math.min(...eye) + 0.3, 'suben y bajan');
   for (let i = 1; i < eye.length; i++) assert.ok(Math.abs(eye[i] - eye[i - 1]) < 0.05, 'y despacio');
+});
+
+test('the colour aura behind a Pokémon only shows at night, except for mythicals, Arceus and Lucario (28-10-2026)', () => {
+  const { A, G } = load();
+  let auras = 0, night = 0;
+  G.Game = { state: 'playing', st: { time: 0 } };
+  G.Night = { level: () => night };
+  // Un lienzo de mentira que cuenta las auras (degradados radiales).
+  const ctx = new Proxy({}, {
+    get: (o, k) => (k === 'createRadialGradient' ? () => { auras++; return { addColorStop() {} }; } : k in o ? o[k] : () => {}),
+    set: (o, k, v) => { o[k] = v; return true; }
+  });
+  const draw = dex => { auras = 0; A.special(ctx, { x: 0, bodyH: 30, r: 10, _fxSeed: 0 }, dex, 0, 1, 0); return auras; };
+  assert.equal(draw(150), 0, 'Mewtwo de día: sin aura');
+  assert.ok(draw(493) > 0, 'Arceus: también de día');
+  assert.ok(draw(386) > 0, 'Deoxys (singular): también de día');
+  assert.ok(draw(448) > 0, 'Lucario: también de día');
+  night = 1;
+  assert.ok(draw(150) > 0, 'Mewtwo de noche: con aura');
 });

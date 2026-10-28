@@ -19,7 +19,8 @@
  *   - En píxeles (24-10-2026): las partículas son cuadraditos en píxeles enteros, como los
  *     sprites, y dejan un rastro pixelado al moverse (las redondas y borrosas no pegaban).
  *   - Partículas suaves según su tipo (PARTS): ascuas, burbujas, hojas, chispas...
- *   - Contorno que brilla (glow): megaevolución, racha alta, jefes y legendarios.
+ *   - Contorno que brilla (glow): racha alta, jefes y legendarios (al megaevolucionar ya no, 28-10-2026).
+ *   - El aura de color de detrás, sólo de noche, salvo los singulares, Arceus y Lucario (28-10-2026).
  *   - Destello shiny: una franja de luz cruza el sprite de vez en cuando.
  * Lo usan entities/player.js, entities/enemy.js, core/sprites.js (Animator.draw:
  * opts.glow / opts.emit / opts.sweep) y ui/ui.js (vista de lujo de la colección).
@@ -211,18 +212,18 @@ G.Aura = (() => {
     100310: { on: ['fffecc', 'fffec1', '9fe7ff'], color: '#ffe14d', kind: 'spark' },                         // Mega Manectric
     100380: { on: ['f9f400', 'e5e100'], color: '#ffe14d', kind: 'eye' },                                     // Mega Latias
     100381: { on: ['cf3703', '970100'], color: '#ff4a4a', kind: 'eye' },                                     // Mega Latios
-    100384: { on: ['fbe361', 'f89c30'], color: '#ffd23f', kind: 'glow', pulse: 6 },                                    // Mega Rayquaza: las líneas
+    100384: { on: ['fbe361', 'f89c30'], color: '#ffd23f', kind: 'glow', pulse: 9 },                                    // Mega Rayquaza: las líneas
     100485: { on: ['e78f27', 'ffc439'], color: '#ffb347', kind: 'flame' },                                   // Mega Heatran
     100719: { on: ['f2a8c8', 'e371ad'], keep: true, color: '#ffb5de', kind: 'glow' },             // Mega Diancie: los diamantes
     // Legendarios (y los primigenios: su sprite es otro número).
     250: { on: ['5fb727', '9fcf6f', '879fff'], keep: true, color: '#9fffd0', kind: 'glow' },                   // Ho-Oh: las puntas de las alas
-    382: { on: ['d73f00', 'ff875f'], color: '#ff6a6a', kind: 'glow', pulse: 6 },                                       // Kyogre: las líneas
-    384: { on: ['fff700', 'dfb700'], color: '#ffe14d', kind: 'glow', pulse: 7 },                                        // Rayquaza: los anillos
-    483: { on: ['97e7f7', 'c7ffff', '67bfe7'], color: '#9fe8ff', kind: 'glow', pulse: 6 },                              // Dialga: el diamante
-    484: { on: ['e77fe7', 'b74fb7'], color: '#ff9ff0', kind: 'glow', pulse: 6 },                                       // Palkia: las perlas
+    382: { on: ['d73f00', 'ff875f'], color: '#ff6a6a', kind: 'glow', pulse: 9 },                                       // Kyogre: las líneas
+    384: { on: ['fff700', 'dfb700'], color: '#ffe14d', kind: 'glow', pulse: 10.5 },                                        // Rayquaza: los anillos
+    483: { on: ['97e7f7', 'c7ffff', '67bfe7'], color: '#9fe8ff', kind: 'glow', pulse: 9 },                              // Dialga: el diamante
+    484: { on: ['e77fe7', 'b74fb7'], color: '#ff9ff0', kind: 'glow', pulse: 9 },                                       // Palkia: las perlas
     487: { on: ['d73f00', '9f0000'], color: '#ff3a3a', kind: 'eye' },                                         // Giratina: las rayas rojas
     491: { on: ['67b7b7', '4f8f8f', 'd73f00'], color: '#7ff0ff', kind: 'eye' },                               // Darkrai: el collar y el ojo
-    493: { on: ['0db54f', '1a8e38', 'fff700'], keep: true, color: '#ffe680', kind: 'glow', pulse: 7 },                  // Arceus: la rueda y los ojos
+    493: { on: ['0db54f', '1a8e38', 'fff700'], keep: true, color: '#ffe680', kind: 'glow', pulse: 10.5 },                  // Arceus: la rueda y los ojos
     643: { on: ['10a8a8', '186878'], color: '#6affff', kind: 'eye' },                                         // Reshiram: los ojos
     644: { on: ['209090', '207078', 'e03858'], color: '#7fd8ff', kind: 'spark', parts: { c: ['#bfefff', '#7fd8ff'] } },                           // Zekrom: el generador y los ojos
     646: { on: ['d5f2f0', 'afd5e4'], color: '#c8f4ff', kind: 'ice' },                                         // Kyurem: el hielo
@@ -230,66 +231,66 @@ G.Aura = (() => {
     717: { on: ['f74125', 'ff8442'], color: '#ff4a3a', kind: 'glow' },                                       // Yveltal: las alas
     243: { on: ['b797df', '8f67bf'], above: 0.6, color: '#c9b5ff', kind: 'spark' },                          // Raikou: la nube
     244: { on: ['ff570f', 'd7a700'], color: '#ffb347', kind: 'flame' },                                       // Entei: la crin
-    249: { on: ['373f8f', '5767b7'], color: '#9fd0ff', kind: 'glow', pulse: 7 },                                        // Lugia: las placas
+    249: { on: ['373f8f', '5767b7'], color: '#9fd0ff', kind: 'glow', pulse: 10.5 },                                        // Lugia: las placas
     251: { on: ['b7cfff', '5767b7', '879fff'], color: '#9fe8ff', kind: 'glow' },                              // Celebi: los ojos y las alas
     377: { on: ['ff875f'], color: '#ffb347', kind: 'glow', seq: 7 },                                                  // Regirock: los puntos
     379: { on: ['ff875f'], color: '#ff8a5a', kind: 'glow', seq: 7 },                                                  // Registeel: los puntos
-    385: { on: ['5fc737', '8fff67', '278700'], color: '#7fffa0', kind: 'glow', pulse: 5 },                              // Jirachi: las cintas
-    386: { on: ['879fff', '5767b7', 'b7cfff'], color: '#7fd0ff', kind: 'glow', pulse: 4 },                              // Deoxys: el cristal
-    480: { on: ['cf3f00', 'ff3f00'], color: '#ff4a4a', kind: 'eye', pulse: 5 },                                         // Uxie: la gema
-    481: { on: ['cf3f00', 'ff3f00'], color: '#ff4a4a', kind: 'eye', pulse: 5 },                                         // Mesprit: la gema
-    482: { on: ['cf3f00', 'ff3f00'], color: '#ff4a4a', kind: 'eye', pulse: 5 },                                         // Azelf: la gema
+    385: { on: ['5fc737', '8fff67', '278700'], color: '#7fffa0', kind: 'glow', pulse: 7.5 },                              // Jirachi: las cintas
+    386: { on: ['879fff', '5767b7', 'b7cfff'], color: '#7fd0ff', kind: 'glow', pulse: 6 },                              // Deoxys: el cristal
+    480: { on: ['cf3f00', 'ff3f00'], color: '#ff4a4a', kind: 'eye', pulse: 7.5 },                                         // Uxie: la gema
+    481: { on: ['cf3f00', 'ff3f00'], color: '#ff4a4a', kind: 'eye', pulse: 7.5 },                                         // Mesprit: la gema
+    482: { on: ['cf3f00', 'ff3f00'], color: '#ff4a4a', kind: 'eye', pulse: 7.5 },                                         // Azelf: la gema
     485: { on: ['e78f27', 'f7b71f'], color: '#ffb347', kind: 'flame' },                                       // Heatran: la lava
-    488: { on: ['ffe78f'], color: '#ffe680', kind: 'glow', pulse: 6 },                                                  // Cresselia: la luna
+    488: { on: ['ffe78f'], color: '#ffe680', kind: 'glow', pulse: 9 },                                                  // Cresselia: la luna
     649: { on: ['f48673', 'd36450'], color: '#ff6a5a', kind: 'eye' },                                         // Genesect: los ojos
-    718: { on: ['93bc3e', '52813b'], color: '#7fff6a', kind: 'glow', pulse: 5 },                                        // Zygarde: las células
-    720: { on: ['d3a717', 'f9c51a'], color: '#ffe14d', kind: 'glow', pulse: 6 },                                        // Hoopa: los aros
+    718: { on: ['93bc3e', '52813b'], color: '#7fff6a', kind: 'glow', pulse: 7.5 },                                        // Zygarde: las células
+    720: { on: ['d3a717', 'f9c51a'], color: '#ffe14d', kind: 'glow', pulse: 9 },                                        // Hoopa: los aros
     721: { on: ['52b2ff', '73ceff'], color: '#7fd0ff', kind: 'glow' },                                        // Volcanion: el aro del brazo
     785: { on: ['f3901e', 'd66531'], color: '#ffe14d', kind: 'spark' },                                       // Tapu Koko: la cresta
-    791: { on: ['ffab28', 'fede70'], color: '#ffd27f', kind: 'glow', pulse: 6 },                                        // Solgaleo: el sol
-    792: { on: ['7cd8ed', '3b8bd8', 'ff268f'], color: '#c9b5ff', kind: 'glow', pulse: 6 },                              // Lunala: el pecho
-    800: { on: ['f47b42', 'dc5343', '70bf4c', '6967af'], keep: true, color: '#ffffff', kind: 'eye', pulse: 5 },         // Necrozma: el prisma
+    791: { on: ['ffab28', 'fede70'], color: '#ffd27f', kind: 'glow', pulse: 9 },                                        // Solgaleo: el sol
+    792: { on: ['7cd8ed', '3b8bd8', 'ff268f'], color: '#c9b5ff', kind: 'glow', pulse: 9 },                              // Lunala: el pecho
+    800: { on: ['f47b42', 'dc5343', '70bf4c', '6967af'], keep: true, color: '#ffffff', kind: 'eye', pulse: 7.5 },         // Necrozma: el prisma
     802: { on: ['ffef7b', 'ff8a66', 'ff6543'], color: '#ff8a5a', kind: 'eye' },                               // Marshadow: los ojos
     807: { on: ['38c0e5', '77faff', '3cdfe2'], color: '#7fd8ff', kind: 'spark', parts: { c: ['#d6f0ff', '#7fd8ff'] } }, // Zeraora
     849: { on: ['d793ff', '9b5bc1'], color: '#d793ff', kind: 'spark', parts: { c: ['#f0d6ff', '#d793ff'] } }, // Toxtricity
-    890: { on: ['ff5858', 'cf2934'], color: '#ff5a6a', kind: 'glow', pulse: 3.5 },                                        // Eternatus: el núcleo
-    789: { on: ['d8b000', 'eeed83', '28afea', '8dd5f3'], keep: true, color: '#9fe8ff', kind: 'glow', pulse: 5 },         // Cosmog: la nube de estrellas
+    890: { on: ['ff5858', 'cf2934'], color: '#ff5a6a', kind: 'glow', pulse: 6 },                                        // Eternatus: el núcleo
+    789: { on: ['d8b000', 'eeed83', '28afea', '8dd5f3'], keep: true, color: '#9fe8ff', kind: 'glow', pulse: 7.5 },         // Cosmog: la nube de estrellas
     793: { on: ['6abde0', '8fdfff', '227da4'], color: '#9fe8ff', kind: 'glow' },                              // Nihilego
-    801: { on: ['d3676d', 'ffd5d6', 'e6d05a'], keep: true, color: '#ff9fb0', kind: 'glow', pulse: 2.6 },                  // Magearna: el corazón
+    801: { on: ['d3676d', 'ffd5d6', 'e6d05a'], keep: true, color: '#ff9fb0', kind: 'glow', pulse: 3.9 },                  // Magearna: el corazón
     809: { on: ['f6be13', 'd68414'], soft: true, color: '#ffd23f', kind: 'glow' },                                        // Melmetal: la tuerca
     894: { on: ['fef9b4'], soft: true, color: '#ffe14d', kind: 'spark' },                                                  // Regieleki
     897: { on: ['f7d1fc', 'af97d9'], color: '#c9b5ff', kind: 'glow' },                                        // Spectrier: la crin
-    100382: { on: ['fff3ad', 'f5c26b', 'bc708c'], color: '#7fe8ff', kind: 'glow', pulse: 5 },                          // Kyogre primigenio: las líneas
+    100382: { on: ['fff3ad', 'f5c26b', 'bc708c'], color: '#7fe8ff', kind: 'glow', pulse: 7.5 },                          // Kyogre primigenio: las líneas
     100383: { on: ['fef9bb'], color: '#ffd27f', kind: 'flame' },                                              // Groudon primigenio: la lava
     // Quinta tanda (28-10-2026): más legendarios, como se ven en el anime y los juegos.
     144: { on: ['d73f00'], color: '#ff4a4a', kind: 'eye' },                                                  // Articuno: los ojos
-    245: { on: ['d797df', 'af6fb7'], color: '#e8c8ff', kind: 'glow', pulse: 6 },                              // Suicune: la crin de aurora
+    245: { on: ['d797df', 'af6fb7'], color: '#e8c8ff', kind: 'glow', pulse: 9 },                              // Suicune: la crin de aurora
     383: { on: ['ffe79f', 'bf7727'], color: '#ffd23f', kind: 'eye' },                                         // Groudon: los ojos
-    490: { on: ['ffcf77', 'efb700', 'cf3f67'], color: '#ffe680', kind: 'glow', pulse: 5 },                    // Manaphy: las antenas y la gema
-    492: { on: ['ff87bf', 'ffafe7'], color: '#ffb3e6', kind: 'glow', pulse: 6 },                              // Shaymin: las flores
-    719: { on: ['ffb5de', 'fae7f7'], keep: true, color: '#ffb5de', kind: 'glow', pulse: 5 },                  // Diancie: el diamante
+    490: { on: ['ffcf77', 'efb700', 'cf3f67'], color: '#ffe680', kind: 'glow', pulse: 7.5 },                    // Manaphy: las antenas y la gema
+    492: { on: ['ff87bf', 'ffafe7'], color: '#ffb3e6', kind: 'glow', pulse: 9 },                              // Shaymin: las flores
+    719: { on: ['ffb5de', 'fae7f7'], keep: true, color: '#ffb5de', kind: 'glow', pulse: 7.5 },                  // Diancie: el diamante
     889: { on: ['ffd74e'], color: '#ffe14d', kind: 'eye' },                                                  // Zamazenta: los ojos
     641: { on: ['ffc500'], color: '#ffe14d', kind: 'eye' },                                                  // Tornadus: los ojos
     642: { on: ['ffc500'], color: '#ffe14d', kind: 'eye' },                                                  // Thundurus: los ojos
     645: { on: ['ffc500'], color: '#ffe14d', kind: 'eye' },                                                  // Landorus: los ojos
-    786: { on: ['f94587', 'ffb5de'], color: '#ff8ad8', kind: 'glow', pulse: 6 },                              // Tapu Lele: el caparazón
-    787: { on: ['eedd27', 'd3c318'], color: '#ffe14d', kind: 'glow', pulse: 6 },                              // Tapu Bulu: los cuernos
-    788: { on: ['c1dafe'], color: '#c9e0ff', kind: 'glow', pulse: 7 },                                       // Tapu Fini: el caparazón
+    786: { on: ['f94587', 'ffb5de'], color: '#ff8ad8', kind: 'glow', pulse: 9 },                              // Tapu Lele: el caparazón
+    787: { on: ['eedd27', 'd3c318'], color: '#ffe14d', kind: 'glow', pulse: 9 },                              // Tapu Bulu: los cuernos
+    788: { on: ['c1dafe'], color: '#c9e0ff', kind: 'glow', pulse: 10.5 },                                       // Tapu Fini: el caparazón
     378: { on: ['ffe79f', 'dfaf67'], color: '#ffc21a', kind: 'glow', seq: 7 },                                // Regice: los puntos
     486: { on: ['cf0000', '1f9fe7'], color: '#ffc21a', kind: 'glow', seq: 8 },                                // Regigigas: los puntos
-    895: { on: ['ff285a', 'ff5d83', 'cf2e4a'], color: '#ff4a7a', kind: 'glow', pulse: 5 },                    // Regidrago: la cabeza de dragón
+    895: { on: ['ff285a', 'ff5d83', 'cf2e4a'], color: '#ff4a7a', kind: 'glow', pulse: 7.5 },                    // Regidrago: la cabeza de dragón
     489: { on: ['c7171f', 'ef3f57'], color: '#ff4a6a', kind: 'eye' },                                         // Phione: la gema
-    638: { on: ['e6cd7b', 'c49f61'], color: '#ffe680', kind: 'glow', pulse: 6 },                              // Cobalion: los cuernos (Espada Santa)
-    639: { on: ['f18c3c', 'ab4924'], color: '#ffb347', kind: 'glow', pulse: 6 },                              // Terrakion: las marcas
+    638: { on: ['e6cd7b', 'c49f61'], color: '#ffe680', kind: 'glow', pulse: 9 },                              // Cobalion: los cuernos (Espada Santa)
+    639: { on: ['f18c3c', 'ab4924'], color: '#ffb347', kind: 'glow', pulse: 9 },                              // Terrakion: las marcas
     640: { on: ['e06b88'], color: '#ff7aa0', kind: 'eye' },                                                  // Virizion: los ojos
     773: { on: ['c03045'], color: '#ff4a5a', kind: 'eye' },                                                  // Silvally: los ojos
-    808: { on: ['f6be13', 'd68414'], soft: true, color: '#ffd23f', kind: 'glow', pulse: 5 },                  // Meltan: la tuerca
-    905: { on: ['f9005e', 'e5678d'], color: '#ff5a9a', kind: 'glow', pulse: 6 },                              // Enamorus: los corazones
-    1007: { on: ['ff71df', '983df8', '1e78ff'], keep: true, color: '#ffb0f0', kind: 'glow', pulse: 5 },       // Koraidon: el plumaje
-    1015: { on: ['f711e4'], color: '#ff6ad8', kind: 'glow', pulse: 5 },                                      // Munkidori: el pelo tóxico
-    1016: { on: ['e8bb05', 'c48509'], color: '#ffd23f', kind: 'glow', pulse: 6 },                              // Fezandipiti: la cresta
+    808: { on: ['f6be13', 'd68414'], soft: true, color: '#ffd23f', kind: 'glow', pulse: 7.5 },                  // Meltan: la tuerca
+    905: { on: ['f9005e', 'e5678d'], color: '#ff5a9a', kind: 'glow', pulse: 9 },                              // Enamorus: los corazones
+    1007: { on: ['ff71df', '983df8', '1e78ff'], keep: true, color: '#ffb0f0', kind: 'glow', pulse: 7.5 },       // Koraidon: el plumaje
+    1015: { on: ['f711e4'], color: '#ff6ad8', kind: 'glow', pulse: 7.5 },                                      // Munkidori: el pelo tóxico
+    1016: { on: ['e8bb05', 'c48509'], color: '#ffd23f', kind: 'glow', pulse: 9 },                              // Fezandipiti: la cresta
     1017: { on: ['fff700', 'dfb700'], color: '#ffe680', kind: 'eye' },                                        // Ogerpon: la máscara
-    1024: { on: ['7fe7a7', '5fbfdf'], keep: true, color: '#9fe8ff', kind: 'glow', pulse: 5 }                  // Terapagos: el caparazón de cristal
+    1024: { on: ['7fe7a7', '5fbfdf'], keep: true, color: '#9fe8ff', kind: 'glow', pulse: 7.5 }                  // Terapagos: el caparazón de cristal
   };
   const hex = c => [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)];
   const masks = new WeakMap();              // hoja -> { dex -> { c: canvas, pts: Map(celda -> [x, y, ...]) } o null }
@@ -385,12 +386,15 @@ G.Aura = (() => {
   }
   const seedOf = ent => (ent._fxSeed == null ? (ent._fxSeed = Math.random() * 20) : ent._fxSeed);
 
-  /** 0..1: se enciende y se apaga del todo, despacio, en `s` segundos (se queda un rato encendido
-   *  y un rato apagado, no sube y baja sin parar). */
+  /** 0..1: se enciende y se apaga del todo, despacio, en `s` segundos. (28-10-2026) Pasa la mitad
+   *  apagado, se enciende poco a poco, brilla un rato y se apaga: no está en todo momento. */
   function breathe(t, seed, s) {
-    const k = ((((t + seed) % s) + s) % s) / s, v = 0.5 - 0.5 * Math.cos(k * 6.2832);
+    const k = ((((t + seed) % s) + s) % s) / s;
+    const v = k < 0.5 ? 0 : k < 0.65 ? (k - 0.5) / 0.15 : k < 0.85 ? 1 : 1 - (k - 0.85) / 0.15;
     return v * v * (3 - 2 * v);
   }
+  /** 0..1: cuánto es de noche ahora en la partida (systems/night.js); en los menús, nada. */
+  const nightNow = () => (G.Night && G.Game && G.Game.state !== 'ui' ? G.Night.level(G.Game.st.time || 0) : 0);
 
   /** Cuánto brilla ahora (según el tipo de detalle). `seed` desfasa a cada Pokémon. */
   function emitLevel(dex, t, seed = 0) {
@@ -596,9 +600,9 @@ G.Aura = (() => {
   // cuatro puntas, notas, corazones, Zzz u hojas que giran).
   // (28-10-2026) pulse: el aura se apaga y se enciende despacio en esos segundos · rays: rayos de
   // luz que giran detrás (un color o 'hue') · aurora: cintas de luz por encima (un color por cinta) ·
-  // orbit: lo que gira alrededor (drawOrbit).
+  // orbit: lo que gira alrededor (drawOrbit) · day: el aura también de día (si no, sólo de noche).
   const SPECIAL = {
-    150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', parts: { c: ['#e08aff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.4, rate: 2, glow: true, star: true }, pulse: 5 }, // Mewtwo: aura psíquica
+    150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', parts: { c: ['#e08aff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.4, rate: 2, glow: true, star: true }, pulse: 7.5 }, // Mewtwo: aura psíquica
     151: { parts: { c: ['#ffc4ee', '#ffffff'], up: 10, spread: 14, r: 2.2, life: 1.4, rate: 2, ring: true } },   // Mew: burbujas
     249: { back: 'ripple', c: '#b8d8ff', parts: { c: ['#ffffff', '#d6e8ff'], up: 4, spread: 26, r: 1.4, life: 1, rate: 4, soft: true } }, // Lugia: viento
     250: { aura: '#ffb347', parts: { hue: true, up: 14, spread: 16, r: 1.3, life: 1.3, rate: 6, glow: true, star: true }, rays: '#ffb347' }, // Ho-Oh: arcoíris
@@ -606,10 +610,10 @@ G.Aura = (() => {
     383: { parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 18, r: 1.4, life: 0.8, rate: 5, glow: true } }, // Groudon: ascuas
     384: { parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 40, r: 1.2, life: 0.5, rate: 8, glow: true } },  // Rayquaza: estelas
     483: { back: 'clock', c: '#9fe8ff' },                                                                      // Dialga: el reloj del tiempo
-    484: { aura: '#ff8ad8', back: 'ripple', c: '#ff9ff0', pulse: 6 },                                                    // Palkia: el espacio que se ondula
+    484: { aura: '#ff8ad8', back: 'ripple', c: '#ff9ff0', pulse: 9 },                                                    // Palkia: el espacio que se ondula
     487: { parts: { c: ['#2a1830', '#5a1a2a'], up: 8, spread: 18, r: 3, life: 1.6, rate: 4, soft: true, low: true } }, // Giratina: sombras
     491: { parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 20, r: 3.2, life: 1.8, rate: 5, soft: true, low: true } }, // Darkrai: humo oscuro
-    493: { aura: '#ffd23f', parts: { c: ['#ffe680', '#ffffff'], up: 10, spread: 22, r: 1.4, life: 1.4, rate: 3, glow: true, star: true }, rays: '#ffd23f', pulse: 7 }, // Arceus: luz dorada
+    493: { day: true, aura: '#ffd23f', parts: { c: ['#ffe680', '#ffffff'], up: 10, spread: 22, r: 1.4, life: 1.4, rate: 3, glow: true, star: true }, rays: '#ffd23f', pulse: 10.5 }, // Arceus: luz dorada
     643: { parts: { c: ['#ffffff', '#ffd9a0', '#9fe8ff'], up: 30, spread: 14, r: 1.5, life: 0.8, rate: 6, glow: true } }, // Reshiram: fuego blanco
     644: { parts: { c: ['#bfefff', '#7fd8ff'], up: 0, spread: 30, r: 1, life: 0.2, rate: 7, glow: true, bolt: true } },   // Zekrom: rayos
     646: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 18, r: 1.4, life: 1.6, rate: 4 } },            // Kyurem: nieve
@@ -624,21 +628,21 @@ G.Aura = (() => {
     245: { back: 'ripple', c: '#9fe8ff', parts: { c: ['#d6f0ff', '#b8a8ff', '#ffffff'], up: 6, spread: 24, r: 1.2, life: 1.4, rate: 5, glow: true, star: true }, aurora: ['#2fffb0', '#3fa8ff', '#b06aff'] }, // Suicune: aurora
     251: { parts: { c: ['#5fe08a', '#a5f07a'], up: -8, spread: 20, r: 1.6, life: 1.6, rate: 4, leaf: true } },  // Celebi: hojas
     385: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 22, r: 1.6, life: 1.1, rate: 4, glow: true, star: true } }, // Jirachi: estrellas
-    386: { aura: '#ff6a4a', parts: { c: ['#7fd0ff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.2, rate: 2, glow: true }, pulse: 4 }, // Deoxys: aura
+    386: { day: true, aura: '#ff6a4a', parts: { c: ['#7fd0ff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.2, rate: 2, glow: true }, pulse: 6 }, // Deoxys: aura
     480: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffe680', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Uxie
     481: { parts: { c: ['#ffb3e6', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffb3e6', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Mesprit
     482: { parts: { c: ['#9fd8ff', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#9fd8ff', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Azelf
     485: { parts: { c: ['#ff7a3d', '#ffb347'], up: 24, spread: 20, r: 1.6, life: 0.9, rate: 6, glow: true } },  // Heatran: ascuas
-    488: { aura: '#ffb3e6', parts: { c: ['#ffe680', '#ffb3e6'], up: 6, spread: 18, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, pulse: 6 }, // Cresselia: luz de luna
+    488: { aura: '#ffb3e6', parts: { c: ['#ffe680', '#ffb3e6'], up: 6, spread: 18, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, pulse: 9 }, // Cresselia: luz de luna
     490: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 18, spread: 12, r: 1.8, life: 1.3, rate: 3, ring: true } }, // Manaphy: burbujas
     494: { parts: { c: ['#ff7a3d', '#ffe14d'], up: 22, spread: 14, r: 1.3, life: 0.8, rate: 5, glow: true } },  // Victini: llamitas
     648: { parts: { c: ['#7fffa0', '#ffffff', '#ffe680'], up: 16, spread: 20, r: 1, life: 1.4, rate: 2, note: true } }, // Meloetta: notas
     718: { parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 5, glow: true }, orbit: { n: 5, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 } },  // Zygarde: células
     719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 18, r: 1.6, life: 1, rate: 4, glow: true, star: true } }, // Diancie: destellos
-    720: { aura: '#ffd23f', parts: { c: ['#ffd23f', '#ffe680'], up: 8, spread: 20, r: 2.4, life: 1.6, rate: 1.5, ring: true, glow: true }, pulse: 6, orbit: { n: 3, c: ['#ffd23f', '#ffe680'], s: 'ring', sp: 0.3 } }, // Hoopa: aros dorados
+    720: { day: true, aura: '#ffd23f', parts: { c: ['#ffd23f', '#ffe680'], up: 8, spread: 20, r: 2.4, life: 1.6, rate: 1.5, ring: true, glow: true }, pulse: 9, orbit: { n: 3, c: ['#ffd23f', '#ffe680'], s: 'ring', sp: 0.3 } }, // Hoopa: aros dorados
     721: { parts: { c: ['#ffffff', '#e6eef5'], up: 30, spread: 12, r: 2.6, life: 1.2, rate: 4, soft: true } },  // Volcanion: vapor
-    791: { aura: '#ffab28', parts: { c: ['#ffd27f', '#ffffff'], up: 14, spread: 20, r: 1.3, life: 1, rate: 4, glow: true }, rays: '#ffab28', pulse: 6 }, // Solgaleo: sol
-    792: { aura: '#8f6bff', parts: { c: ['#c9b5ff', '#ffffff', '#7cd8ed'], up: 4, spread: 26, r: 1.4, life: 1.4, rate: 5, glow: true, star: true }, pulse: 6 }, // Lunala: estrellas
+    791: { aura: '#ffab28', parts: { c: ['#ffd27f', '#ffffff'], up: 14, spread: 20, r: 1.3, life: 1, rate: 4, glow: true }, rays: '#ffab28', pulse: 9 }, // Solgaleo: sol
+    792: { aura: '#8f6bff', parts: { c: ['#c9b5ff', '#ffffff', '#7cd8ed'], up: 4, spread: 26, r: 1.4, life: 1.4, rate: 5, glow: true, star: true }, pulse: 9 }, // Lunala: estrellas
     800: { parts: { hue: true, up: 10, spread: 22, r: 1.4, life: 1, rate: 6, glow: true, star: true }, rays: 'hue' },        // Necrozma: luz del prisma
     802: { parts: { c: ['#1a1428', '#2f3a2f'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 4, soft: true, low: true } }, // Marshadow: sombra
     807: { parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 7, glow: true, bolt: true } }, // Zeraora: rayos
@@ -651,54 +655,54 @@ G.Aura = (() => {
     787: { parts: { c: ['#5fe08a', '#ffe14d'], up: -6, spread: 20, r: 1.6, life: 1.6, rate: 3, leaf: true } }, // Tapu Bulu: hojas
     788: { aura: '#9fd8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 4, spread: 26, r: 2.6, life: 1.6, rate: 3, soft: true } }, // Tapu Fini: niebla
     789: { parts: { c: ['#ffe680', '#9fe8ff', '#ffffff'], up: 6, spread: 18, r: 1.2, life: 1.3, rate: 3, glow: true, star: true }, orbit: { n: 3, c: ['#ffe680', '#9fe8ff'], s: 'star', sp: 0.3 } }, // Cosmog: estrellitas
-    790: { aura: '#ffe680', parts: { c: ['#ffe680', '#ffffff'], up: 4, spread: 16, r: 1.2, life: 1.3, rate: 2, glow: true, star: true }, pulse: 5 }, // Cosmoem
+    790: { aura: '#ffe680', parts: { c: ['#ffe680', '#ffffff'], up: 4, spread: 16, r: 1.2, life: 1.3, rate: 2, glow: true, star: true }, pulse: 7.5 }, // Cosmoem
     793: { aura: '#6abde0' },                                                                                   // Nihilego
-    801: { aura: '#ff9fb0', parts: { c: ['#ffd5d6', '#ffffff'], up: 8, spread: 14, r: 1.2, life: 1.2, rate: 2, glow: true, star: true }, pulse: 2.6 }, // Magearna
-    888: { aura: '#5fb8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 5 }, // Zacian: espada de luz
-    889: { aura: '#ff6a5a', parts: { c: ['#ffd0c0', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 5 }, // Zamazenta: escudo de luz
+    801: { day: true, aura: '#ff9fb0', parts: { c: ['#ffd5d6', '#ffffff'], up: 8, spread: 14, r: 1.2, life: 1.2, rate: 2, glow: true, star: true }, pulse: 3.9 }, // Magearna
+    888: { aura: '#5fb8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5 }, // Zacian: espada de luz
+    889: { aura: '#ff6a5a', parts: { c: ['#ffd0c0', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5 }, // Zamazenta: escudo de luz
     894: { parts: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 44, r: 1, life: 0.2, rate: 8, glow: true, bolt: true } }, // Regieleki: rayos
     896: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 20, r: 1.4, life: 1.6, rate: 4 } },            // Glastrier: nieve
     897: { aura: '#8f6bff', parts: { c: ['#1a1428', '#3a2c50'], up: 6, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true } }, // Spectrier: sombra
-    898: { aura: '#7fe8a0', parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 20, r: 1.5, life: 1.6, rate: 3, leaf: true }, pulse: 5 }, // Calyrex: hojas
+    898: { aura: '#7fe8a0', parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 20, r: 1.5, life: 1.6, rate: 3, leaf: true }, pulse: 7.5 }, // Calyrex: hojas
     // Cuarta tanda: auras de los que en el anime y los juegos la tienen.
-    447: { aura: '#3f8fff' },                                                                                   // Riolu: aura
-    448: { aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 3, glow: true } }, // Lucario: aura
+    447: { day: true, aura: '#3f8fff' },                                                                                   // Riolu: aura
+    448: { day: true, aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 3, glow: true } }, // Lucario: aura
     282: { aura: '#ff8ad8', parts: { c: ['#ff8ad8', '#ffc4ee'], up: 6, spread: 12, r: 2, life: 1.3, rate: 1.5, ring: true } }, // Gardevoir
-    100448: { aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 4, glow: true } }, // Mega Lucario
+    100448: { day: true, aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 4, glow: true } }, // Mega Lucario
     100282: { aura: '#ff8ad8' },                                                                                // Mega Gardevoir
     100006: { parts: { c: ['#a4ddf9', '#5fc8ff'], up: 30, spread: 16, r: 1.5, life: 0.8, rate: 6, glow: true } }, // Mega Charizard X: llamas azules
-    100150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', pulse: 5 },                                                  // Mega Mewtwo Y
-    100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true }, pulse: 6 }, // Mega Rayquaza
+    100150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', pulse: 7.5 },                                                  // Mega Mewtwo Y
+    100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true }, pulse: 9 }, // Mega Rayquaza
     100719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 22, r: 1.8, life: 1.1, rate: 6, glow: true, star: true } }, // Mega Diancie
     100382: { aura: '#3fa8ff', back: 'ripple', c: '#7fe8ff', parts: { c: ['#9fd8ff', '#d6f0ff'], up: 26, spread: 16, r: 1.8, life: 1.2, rate: 5, ring: true } }, // Kyogre primigenio
     100383: { aura: '#ff6a1a', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 34, spread: 20, r: 1.6, life: 0.9, rate: 8, glow: true } }, // Groudon primigenio
     // Quinta tanda (28-10-2026): los legendarios que faltaban (y megas de legendarios).
     378: { parts: { c: ['#d8f1ff', '#ffffff'], up: -8, spread: 20, r: 1.3, life: 1.6, rate: 4, glow: true, star: true } }, // Regice: frío
-    486: { aura: '#fff2b0', pulse: 8, parts: { c: ['#ffffff', '#fff2b0'], up: 6, spread: 24, r: 1.4, life: 1.4, rate: 2, glow: true, star: true } }, // Regigigas
-    895: { aura: '#ff4a7a', pulse: 5, parts: { c: ['#ff5d83', '#ffffff'], up: 10, spread: 18, r: 1.3, life: 1.2, rate: 3, glow: true, star: true } }, // Regidrago
-    380: { aura: '#ff6a8a', pulse: 5, parts: { c: ['#ffb3c8', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true } }, // Latias: Bola Neblina
-    381: { aura: '#4a8aff', pulse: 5, parts: { c: ['#9fd0ff', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true } }, // Latios: Resplandor
-    100380: { aura: '#c08aff', pulse: 5, parts: { c: ['#e0c0ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Mega Latias
-    100381: { aura: '#8a8aff', pulse: 5, parts: { c: ['#c0c8ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Mega Latios
+    486: { aura: '#fff2b0', pulse: 12, parts: { c: ['#ffffff', '#fff2b0'], up: 6, spread: 24, r: 1.4, life: 1.4, rate: 2, glow: true, star: true } }, // Regigigas
+    895: { aura: '#ff4a7a', pulse: 7.5, parts: { c: ['#ff5d83', '#ffffff'], up: 10, spread: 18, r: 1.3, life: 1.2, rate: 3, glow: true, star: true } }, // Regidrago
+    380: { aura: '#ff6a8a', pulse: 7.5, parts: { c: ['#ffb3c8', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true } }, // Latias: Bola Neblina
+    381: { aura: '#4a8aff', pulse: 7.5, parts: { c: ['#9fd0ff', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true } }, // Latios: Resplandor
+    100380: { aura: '#c08aff', pulse: 7.5, parts: { c: ['#e0c0ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Mega Latias
+    100381: { aura: '#8a8aff', pulse: 7.5, parts: { c: ['#c0c8ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Mega Latios
     489: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true } }, // Phione: burbujas
     638: { parts: { c: ['#e6eef5', '#9fe8ff'], up: 4, spread: 24, r: 1.2, life: 0.9, rate: 3, glow: true, star: true } }, // Cobalion: brillos de acero
     639: { parts: { c: ['#c8a875', '#8f939c'], up: 4, spread: 26, r: 1.8, life: 1, rate: 4, soft: true, low: true } }, // Terrakion: polvo de roca
     640: { parts: { c: ['#8bd72f', '#c9f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true } }, // Virizion: hojas
-    647: { aura: '#5fb8ff', pulse: 6, parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true } }, // Keldeo: agua
+    647: { aura: '#5fb8ff', pulse: 9, parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true } }, // Keldeo: agua
     772: { parts: { c: ['#3a3f4a', '#2c7d5f'], up: 4, spread: 18, r: 2.6, life: 1.4, rate: 3, soft: true, low: true } }, // Código Cero: humo del casco
     773: { parts: { hue: true, up: 8, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true } }, // Silvally: el Sistema Alfa (todos los tipos)
     808: { parts: { c: ['#ffd23f', '#d0d8e0'], up: 8, spread: 14, r: 1.2, life: 1.1, rate: 2, glow: true, star: true } }, // Meltan: metal
     891: { parts: { c: ['#ffffff', '#d0dfe3'], up: 2, spread: 30, r: 2, life: 0.8, rate: 3, soft: true } }, // Kubfu: viento de sus golpes
-    892: { aura: '#4a4a8a', pulse: 5, parts: { c: ['#1a1428', '#3a2c50'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true } }, // Urshifu
-    905: { aura: '#ff6aa8', pulse: 6, parts: { c: ['#ff6aa8', '#ff9fc8'], up: 12, spread: 16, r: 2.6, life: 1.6, rate: 2.5, heart: true } }, // Enamorus: corazones
-    1007: { aura: '#ff7a3d', pulse: 6, rays: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 24, spread: 16, r: 1.3, life: 0.9, rate: 4, glow: true } }, // Koraidon: el sol
+    892: { aura: '#4a4a8a', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true } }, // Urshifu
+    905: { aura: '#ff6aa8', pulse: 9, parts: { c: ['#ff6aa8', '#ff9fc8'], up: 12, spread: 16, r: 2.6, life: 1.6, rate: 2.5, heart: true } }, // Enamorus: corazones
+    1007: { aura: '#ff7a3d', pulse: 9, rays: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 24, spread: 16, r: 1.3, life: 0.9, rate: 4, glow: true } }, // Koraidon: el sol
     1015: { parts: { c: ['#f711e4', '#97007b'], up: 6, spread: 20, r: 3, life: 1.6, rate: 2.5, soft: true } }, // Munkidori: gas tóxico
     1016: { parts: { c: ['#ff9fcf', '#ffd23f', '#ffffff'], up: -6, spread: 24, r: 2, life: 2, rate: 3, leaf: true, petal: true } }, // Fezandipiti: pétalos
     1017: { parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true } }, // Ogerpon: hojas
-    1024: { aura: '#9fe8ff', pulse: 5, rays: 'hue', parts: { hue: true, up: 8, spread: 20, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Terapagos: Teracristal
-    100491: { aura: '#6a3aa8', pulse: 5, parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 22, r: 3.2, life: 1.8, rate: 5, soft: true, low: true } }, // Mega Darkrai
-    100718: { aura: '#5fe08a', pulse: 5, orbit: { n: 6, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 4, glow: true } }, // Mega Zygarde
-    100807: { aura: '#7fd8ff', pulse: 4, parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 40, r: 1, life: 0.2, rate: 8, glow: true, bolt: true } } // Mega Zeraora
+    1024: { aura: '#9fe8ff', pulse: 7.5, rays: 'hue', parts: { hue: true, up: 8, spread: 20, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Terapagos: Teracristal
+    100491: { aura: '#6a3aa8', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 22, r: 3.2, life: 1.8, rate: 5, soft: true, low: true } }, // Mega Darkrai
+    100718: { aura: '#5fe08a', pulse: 7.5, orbit: { n: 6, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 4, glow: true } }, // Mega Zygarde
+    100807: { aura: '#7fd8ff', pulse: 6, parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 40, r: 1, life: 0.2, rate: 8, glow: true, bolt: true } } // Mega Zeraora
   };
 
   // Efectos con firma (24-10-2026): partículas según lo que es cada Pokémon conocido (los
@@ -822,10 +826,13 @@ G.Aura = (() => {
     const h = ent.bodyH || 24, r = ent.r || 12, x = ent.x, seed = seedOf(ent);
     if (S.rays) drawRays(ctx, S.rays, x, y - h * 0.55, Math.max(h * 1.25, r * 2.6), t, seed);
     if (S.aurora) drawAurora(ctx, S.aurora, x, y - h * 1.05, Math.max(r * 2.4, h * 0.9), t, seed);
-    if (S.aura) {
+    // (28-10-2026) El aura de su color, sólo de noche (de día no quedaba bien), salvo los que la
+    // llevan siempre (day: los singulares, Arceus y la línea de Lucario).
+    const night = nightNow(), dayK = S.day ? 1 : night;
+    if (S.aura && dayK > 0) {
       // Luz suave detrás del cuerpo que respira (con pulse, se apaga y se enciende despacio).
       const cy = y - h * 0.5, R = Math.max(h * 0.8, r * 1.9), c = rgb(S.aura);
-      const a = 0.38 * (S.pulse ? 0.1 + 0.9 * breathe(t, seed, S.pulse) : 0.7 + 0.3 * Math.sin(t * 1.2 + seed));
+      const a = 0.38 * dayK * (S.pulse ? 0.1 + 0.9 * breathe(t, seed, S.pulse) : 0.7 + 0.3 * Math.sin(t * 1.2 + seed));
       const g = ctx.createRadialGradient(x, cy, 0, x, cy, R);
       g.addColorStop(0, `rgba(${c},${a})`);
       g.addColorStop(0.5, `rgba(${c},${a * 0.45})`);
@@ -871,7 +878,8 @@ G.Aura = (() => {
     if (S.parts && dt > 0 && parts.length < MAX && G.Settings.get('quality') !== 'low') {
       const P = S.parts, w = wave(t, seed + 3, 8, 4.5);
       if (w <= 0) return;
-      ent._specAcc = (ent._specAcc || 0) + dt * P.rate * 0.8 * w;
+      // De noche, algo más (sus efectos lucen más a oscuras).
+      ent._specAcc = (ent._specAcc || 0) + dt * P.rate * 0.8 * w * (1 + 0.6 * night);
       while (ent._specAcc >= 1 && parts.length < MAX) {
         ent._specAcc -= 1;
         const c = P.hue ? 'hsl(' + Math.floor(Math.random() * 360) + ',100%,72%)' : G.U.pick(P.c);
@@ -1062,12 +1070,12 @@ G.Aura = (() => {
     if (!enabled(pl.dex, pl === G.Game.player)) return null;
     const o = {};
     // De noche (systems/night.js), los detalles brillan más.
-    const night = G.Night ? G.Night.level(G.Game.st.time || 0) : 0;
+    const night = nightNow();
     const d = pl.anim ? pl.anim.dex : pl.dex;       // el del sprite: megas y primigenios llevan otro
     if (SPOTS[d] && !pl.dead) o.emit = { dex: d, level: emitLevel(d, t, seedOf(pl)) * (1 + 0.8 * night), color: spotColor(d) };
     if (pl.shiny) { const s = sweep(t, (pl.dex % 7) * 0.4); if (s >= 0) o.sweep = s; }
-    if (pl.megaOn) o.glow = G.Mega.primal(pl.dex) ? '#ff9a3d' : '#ff8ad8';
-    else if (pl === G.Game.player && G.Streak.mul() >= 1.25) o.glow = '#ffd23f';
+    // (28-10-2026) Sin contorno de color al megaevolucionar: no quedaba bien.
+    if (!pl.megaOn && pl === G.Game.player && G.Streak.mul() >= 1.25) o.glow = '#ffd23f';
     return o;
   }
   /** Para un enemigo: sólo jefes, legendarios y shiny (los demás, nada). */
@@ -1076,7 +1084,7 @@ G.Aura = (() => {
     if (!(e.boss || e.shiny || legend) || e.dead || !enabled(e.dex, false)) return null;
     const o = {};
     const d = e.anim ? e.anim.dex : e.dex;
-    if (SPOTS[d]) o.emit = { dex: d, level: emitLevel(d, t, e.id), color: spotColor(d) };
+    if (SPOTS[d]) o.emit = { dex: d, level: emitLevel(d, t, e.id) * (1 + 0.8 * nightNow()), color: spotColor(d) };
     if (e.shiny) { const s = sweep(t, (e.id % 9) * 0.37); if (s >= 0) o.sweep = s; }
     if (legend) o.glow = '#ffd23f';
     else if (e.boss) o.glow = 'rgba(255,90,90,.9)';
