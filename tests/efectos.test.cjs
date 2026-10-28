@@ -48,7 +48,8 @@ test('every glowing detail and legendary effect is well formed and has its sprit
   }
   for (const [dex, S] of Object.entries(A.SPECIAL)) {
     assert.ok(fs.existsSync(path.join(ROOT, 'assets/pokemon', dex)), 'sprite de ' + dex);
-    assert.ok(S.aura || S.back || S.parts || S.trail, 'algo que dibujar en ' + dex);
+    assert.ok(S.aura || S.back || S.parts || S.trail || S.glint, 'algo que dibujar en ' + dex);
+    if (S.glint) assert.match(S.glint, /^#[0-9a-f]{6}$/, 'franja de ' + dex);
     if (S.aura) assert.match(S.aura, /^#[0-9a-f]{6}$/, 'aura de ' + dex);
     if (S.back) { assert.ok(['ripple', 'clock'].includes(S.back), 'fondo de ' + dex); assert.ok(S.c, 'color del fondo de ' + dex); }
     if (S.parts) assert.ok(S.parts.rate > 0 && S.parts.life > 0 && (S.parts.hue || S.parts.c), 'partículas de ' + dex);
@@ -156,4 +157,10 @@ test('trails have their own setting, apart from effects: all, only your partner 
   assert.equal(A.hasTrail(245), true);
   assert.equal(A.hasTrail(10), false, 'Caterpie no tiene');
   assert.equal(A.hasTrail(380), true);
+});
+
+test('a few normal Pokémon that gleam get the shiny light sweep in their own colour (28-10-2026)', () => {
+  const { A } = load();
+  for (const d of [483, 719, 208, 379, 681]) assert.match(A.glint(d) || '', /^#[0-9a-f]{6}$/, 'franja de ' + d);
+  assert.equal(A.glint(25), null, 'los demás, no');
 });

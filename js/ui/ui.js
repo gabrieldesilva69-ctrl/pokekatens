@@ -293,12 +293,14 @@ G.UI = (() => {
         // Sus efectos (entities/aura.js), salvo que se los hayas quitado.
         const fxOn = G.Aura.enabled(s.dex, true);
         const fxo = { emit: fxOn && G.Aura.SPOTS[s.dex] ? { dex: s.dex, level: G.Aura.emitLevel(s.dex, now), color: G.Aura.spotColor(s.dex) } : null };
-        const sw = fxOn && s.opts.shiny ? G.Aura.sweep(now, 0) : -1;
+        // La franja de luz: blanca en los shiny; de su color en los normales que relucen (Dialga...).
+        const gl = !s.opts.shiny && G.Aura.glint(s.dex);
+        const sw = fxOn && (s.opts.shiny || gl) ? G.Aura.sweep(now, 0) : -1;
         // Lo de detrás de algunos legendarios (su aura, el reloj de Dialga...), sin partículas.
         const fe = s.fxEnt || (s.fxEnt = { _fxSeed: 0 });
         Object.assign(fe, { x: fx, bodyH: ay * k, r: 6 * k });
         if (fxOn) G.Aura.special(ctx, fe, s.dex, fy, now, 0);
-        if (sw >= 0) fxo.sweep = sw;
+        if (sw >= 0) { fxo.sweep = sw; if (gl) fxo.sweepColor = gl; }
         // Reflejo en el suelo (boca abajo y muy suave).
         ctx.save();
         ctx.translate(0, fy * 2); ctx.scale(1, -1);

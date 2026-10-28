@@ -324,7 +324,7 @@ G.Sprites = (() => {
         // Dónde se ha dibujado (para soltar partículas desde el detalle: aura.js spotEmit).
         this.lastDraw = { img: s.img, m, sx, sy, dx, dy, k };
       }
-      if (opts.sweep != null && opts.sweep >= 0 && G.Aura) G.Aura.drawSweep(ctx, s.img, sx, sy, m.w, m.h, dx, dy, k, opts.sweep, alpha);
+      if (opts.sweep != null && opts.sweep >= 0 && G.Aura) G.Aura.drawSweep(ctx, s.img, sx, sy, m.w, m.h, dx, dy, k, opts.sweep, alpha, opts.sweepColor);
       if (opts.flash) {
         if (opts.softFlash) ctx.globalAlpha = prev * alpha * 0.55;
         ctx.drawImage(white(s.img), sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);

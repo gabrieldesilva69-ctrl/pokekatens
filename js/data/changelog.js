@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-28', title: ["PokeKatens: legendarios con más efectos", "PokeKatens: legendaries with more effects"], new: [
+    ["Dialga, Diancie, Steelix, Registeel y Aegislash relucen sin ser shiny: de vez en cuando les cruza una franja de luz de su color (azul, rosa, plateada, azul acero y dorada), como la blanca de los shiny.",
+     "Dialga, Diancie, Steelix, Registeel and Aegislash gleam without being shiny: every now and then a band of light in their own colour (blue, pink, silver, steel blue and gold) crosses them, like the white one on shiny Pokémon."],
     ["Botón «Al azar» en la Colección, con un dado: si no sabes con quién jugar, elige tu compañero al azar entre los Pokémon que tienes, con los filtros que hayas puesto (generación, tipo, rareza, favoritos...; con Shiny, su shiny).",
      "“Random” button in the Collection, with a die: if you don't know who to play with, it picks your partner at random from the Pokémon you have, with the filters you've set (generation, type, rarity, favourites...; with Shiny, its shiny)."],
     ["Muchos más Pokémon dejan su rastro: los legendarios que faltaban (Mewtwo y Mew con aros psíquicos, Rayquaza y Latios con ráfagas de viento, Registeel y Zacian con destellos de metal, Diancie con gemas, Magearna con corazones...), los pseudolegendarios (Tyranitar, Metagross, Garchomp, Hydreigon, Dragapult...), los iniciales, los más conocidos (Pikachu, Gengar, Lucario con llamas de aura azul, Sylveon y Gardevoir con corazones, las Eeveelución...) y sus megas.",

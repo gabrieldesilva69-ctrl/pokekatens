@@ -565,8 +565,9 @@ G.Aura = (() => {
 
   // Lienzo pequeño de trabajo para la franja (uno para todos).
   let work = null;
-  /** Dibuja la franja de luz sobre el fotograma (lo llama Animator.draw). */
-  function drawSweep(ctx, img, sx, sy, w, h, dx, dy, k, phase, alpha) {
+  /** Dibuja la franja de luz sobre el fotograma (lo llama Animator.draw). color: blanca en los
+   *  shiny; de su color en los normales que relucen (glint). */
+  function drawSweep(ctx, img, sx, sy, w, h, dx, dy, k, phase, alpha, color) {
     if (!work) work = document.createElement('canvas');
     if (work.width < w) work.width = w;
     if (work.height < h) work.height = h;
@@ -578,14 +579,15 @@ G.Aura = (() => {
     // Una franja estrecha e inclinada que cruza de izquierda a derecha.
     const c = -w * 0.3 + phase * w * 1.6;
     const g = x.createLinearGradient(c - w * 0.12, h * 0.1, c + w * 0.12, -h * 0.1);
-    g.addColorStop(0, 'rgba(255,255,255,0)');
-    g.addColorStop(0.5, 'rgba(255,255,255,1)');
-    g.addColorStop(1, 'rgba(255,255,255,0)');
+    const c3 = color ? rgb(color) : '255,255,255';
+    g.addColorStop(0, `rgba(${c3},0)`);
+    g.addColorStop(0.5, `rgba(${c3},1)`);
+    g.addColorStop(1, `rgba(${c3},0)`);
     x.fillStyle = g;
     x.fillRect(0, 0, w, h);
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = 0.5 * alpha;
+    ctx.globalAlpha = (color ? 0.6 : 0.5) * alpha;
     ctx.drawImage(work, 0, 0, w, h, dx, dy, w * k, h * k);
     ctx.restore();
   }
@@ -599,6 +601,7 @@ G.Aura = (() => {
   // (28-10-2026) pulse: el aura se apaga y se enciende despacio en esos segundos · rays: rayos de
   // luz que giran detrás (un color o 'hue') · aurora: cintas de luz por encima (un color por cinta) ·
   // orbit: lo que gira alrededor (drawOrbit) · day: el aura también de día (si no, sólo de noche) ·
+  // glint: la franja de luz de los shiny también sin serlo, de ese color (Dialga, Steelix...) ·
   // trail: el rastro que va dejando en el suelo al moverse ({ s: su estilo en TRAILS, c: colores }).
   const SPECIAL = {
     150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', parts: { c: ['#e08aff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.4, rate: 2, glow: true, star: true }, pulse: 7.5, trail: { s: 'psy', c: ['#e08aff', '#ffffff'] } }, // Mewtwo: aura psíquica
@@ -608,7 +611,7 @@ G.Aura = (() => {
     382: { back: 'ripple', c: '#5fb8ff', trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                                                     // Kyogre: ondas
     383: { parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 18, r: 1.4, life: 0.8, rate: 5, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }, // Groudon: ascuas
     384: { parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 40, r: 1.2, life: 0.5, rate: 8, glow: true }, trail: { s: 'wind', c: ['#ffffff', '#a5f07a'] } },  // Rayquaza: estelas
-    483: { back: 'clock', c: '#9fe8ff', trail: { s: 'star', c: ['#9fe8ff', '#ffffff'] } },                                                                      // Dialga: el reloj del tiempo
+    483: { back: 'clock', c: '#9fe8ff', trail: { s: 'star', c: ['#9fe8ff', '#ffffff'] }, glint: '#9fe8ff' },                                                                      // Dialga: el reloj del tiempo
     484: { aura: '#ff8ad8', back: 'ripple', c: '#ff9ff0', pulse: 9, trail: { s: 'gem', c: ['#ff9ff0', '#ffffff'] } },                                                    // Palkia: el espacio que se ondula
     487: { parts: { c: ['#2a1830', '#5a1a2a'], up: 8, spread: 18, r: 3, life: 1.6, rate: 4, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1020', '#ff4a4a'] } }, // Giratina: sombras
     491: { parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 20, r: 3.2, life: 1.8, rate: 5, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#b58aff'] } }, // Darkrai: humo oscuro
@@ -637,7 +640,7 @@ G.Aura = (() => {
     494: { parts: { c: ['#ff7a3d', '#ffe14d'], up: 22, spread: 14, r: 1.3, life: 0.8, rate: 5, glow: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff5a2a'] } },  // Victini: llamitas
     648: { parts: { c: ['#7fffa0', '#ffffff', '#ffe680'], up: 16, spread: 20, r: 1, life: 1.4, rate: 2, note: true }, trail: { s: 'note', c: ['#7fffa0', '#ffffff', '#ffe680'] } }, // Meloetta: notas
     718: { parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 5, glow: true }, orbit: { n: 5, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, trail: { s: 'cell', c: ['#7fff6a', '#ff5a5a'] } },  // Zygarde: células
-    719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 18, r: 1.6, life: 1, rate: 4, glow: true, star: true }, trail: { s: 'gem', c: ['#ffb5de', '#ffffff'] } }, // Diancie: destellos
+    719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 18, r: 1.6, life: 1, rate: 4, glow: true, star: true }, trail: { s: 'gem', c: ['#ffb5de', '#ffffff'] }, glint: '#ffb5de' }, // Diancie: destellos
     720: { day: true, aura: '#ffd23f', parts: { c: ['#ffd23f', '#ffe680'], up: 8, spread: 20, r: 2.4, life: 1.6, rate: 1.5, ring: true, glow: true }, pulse: 9, orbit: { n: 3, c: ['#ffd23f', '#ffe680'], s: 'ring', sp: 0.3 }, trail: { s: 'psy', c: ['#ffd23f', '#ff9fd8'] } }, // Hoopa: aros dorados
     721: { parts: { c: ['#ffffff', '#e6eef5'], up: 30, spread: 12, r: 2.6, life: 1.2, rate: 4, soft: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },  // Volcanion: vapor
     791: { aura: '#ffab28', parts: { c: ['#ffd27f', '#ffffff'], up: 14, spread: 20, r: 1.3, life: 1, rate: 4, glow: true }, rays: '#ffab28', pulse: 9, trail: { s: 'flame', c: ['#ffffff', '#ffe14d', '#ff9a3d'] } }, // Solgaleo: sol
@@ -672,7 +675,7 @@ G.Aura = (() => {
     100006: { parts: { c: ['#a4ddf9', '#5fc8ff'], up: 30, spread: 16, r: 1.5, life: 0.8, rate: 6, glow: true }, trail: { s: 'flame', c: ['#ffffff', '#a4ddf9', '#5fc8ff'] } }, // Mega Charizard X: llamas azules
     100150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', pulse: 7.5, trail: { s: 'psy', c: ['#e08aff', '#ffffff'] } },                                                  // Mega Mewtwo Y
     100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true }, pulse: 9, trail: { s: 'wind', c: ['#ffffff', '#a5f07a'] } }, // Mega Rayquaza
-    100719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 22, r: 1.8, life: 1.1, rate: 6, glow: true, star: true }, trail: { s: 'gem', c: ['#ffb5de', '#ffffff'] } }, // Mega Diancie
+    100719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 22, r: 1.8, life: 1.1, rate: 6, glow: true, star: true }, trail: { s: 'gem', c: ['#ffb5de', '#ffffff'] }, glint: '#ffb5de' }, // Mega Diancie
     100382: { aura: '#3fa8ff', back: 'ripple', c: '#7fe8ff', parts: { c: ['#9fd8ff', '#d6f0ff'], up: 26, spread: 16, r: 1.8, life: 1.2, rate: 5, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Kyogre primigenio
     100383: { aura: '#ff6a1a', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 34, spread: 20, r: 1.6, life: 0.9, rate: 8, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }, // Groudon primigenio
     // Quinta tanda (28-10-2026): los legendarios que faltaban (y megas de legendarios).
@@ -710,7 +713,7 @@ G.Aura = (() => {
     // Más rastros (28-10-2026): los legendarios que no tenían entrada y Pokémon conocidos (pseudolegendarios,
     // iniciales, los más usados y sus megas).
     377: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                    // Regirock
-    379: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] } },                                              // Registeel
+    379: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] }, glint: '#bfe8ff' },                                              // Registeel
     649: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } },                                              // Genesect
     809: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] } },                                              // Melmetal
     149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                               // Dragonite
@@ -772,7 +775,7 @@ G.Aura = (() => {
     468: { trail: { s: 'star', c: ['#ffe680', '#ffb3e6', '#ffffff'] } },                                    // Togekiss
     350: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Milotic
     212: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } },                                              // Scizor
-    681: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] } },                                              // Aegislash
+    681: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] }, glint: '#ffe680' },                                              // Aegislash
     778: { trail: { s: 'shadow', c: ['#1a1408', '#ffe14d'] } },                                             // Mimikyu
     479: { trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } },                                   // Rotom
     571: { trail: { s: 'shadow', c: ['#1a1030', '#ff4a6a'] } },                                             // Zoroark
@@ -796,7 +799,10 @@ G.Aura = (() => {
     100310: { trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } },                                // Mega Manectric
     100229: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                // Mega Houndoom
     100254: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                               // Mega Sceptile
-    100149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } }                                             // Mega Dragonite
+    100149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                             // Mega Dragonite
+    // La franja de luz de los shiny, de su color, en algunos normales que relucen (28-10-2026).
+    208: { glint: '#e6eef5' },                                                                               // Steelix
+    100208: { glint: '#e6eef5' }                                                                             // Mega Steelix
   };
 
   // Efectos con firma (24-10-2026): partículas según lo que es cada Pokémon conocido (los
@@ -909,7 +915,7 @@ G.Aura = (() => {
     ],   // monedas
   };
   // Los que sólo tienen su rastro arriba, también sus partículas de aquí.
-  for (const [k, list] of Object.entries(SIG)) for (const d of list) if (!SPECIAL[d] || !SPECIAL[d].parts && SPECIAL[d].trail && Object.keys(SPECIAL[d]).length === 1) SPECIAL[d] = Object.assign({ parts: SIG_PARTS[k] }, SPECIAL[d]);
+  for (const [k, list] of Object.entries(SIG)) for (const d of list) if (!SPECIAL[d] || !SPECIAL[d].parts && Object.keys(SPECIAL[d]).every(k => k === 'trail' || k === 'glint')) SPECIAL[d] = Object.assign({ parts: SIG_PARTS[k] }, SPECIAL[d]);
 
   const rgb = c => hex(c.slice(1)).join(',');
 
@@ -1459,6 +1465,7 @@ G.Aura = (() => {
     const d = pl.anim ? pl.anim.dex : pl.dex;       // el del sprite: megas y primigenios llevan otro
     if (SPOTS[d] && !pl.dead) o.emit = { dex: d, level: emitLevel(d, t, seedOf(pl)) * (1 + 0.8 * night), color: spotColor(d) };
     if (pl.shiny) { const s = sweep(t, (pl.dex % 7) * 0.4); if (s >= 0) o.sweep = s; }
+    else if (glint(d)) { const s = sweep(t, (pl.dex % 7) * 0.4); if (s >= 0) { o.sweep = s; o.sweepColor = glint(d); } }
     // (28-10-2026) Sin contorno de color al megaevolucionar: no quedaba bien.
     if (!pl.megaOn && pl === G.Game.player && G.Streak.mul() >= 1.25) o.glow = '#ffd23f';
     return o;
@@ -1471,12 +1478,15 @@ G.Aura = (() => {
     const d = e.anim ? e.anim.dex : e.dex;
     if (SPOTS[d]) o.emit = { dex: d, level: emitLevel(d, t, e.id) * (1 + 0.8 * nightNow()), color: spotColor(d) };
     if (e.shiny) { const s = sweep(t, (e.id % 9) * 0.37); if (s >= 0) o.sweep = s; }
+    else if (glint(d)) { const s = sweep(t, (e.id % 9) * 0.37); if (s >= 0) { o.sweep = s; o.sweepColor = glint(d); } }
     if (legend) o.glow = '#ffd23f';
     else if (e.boss) o.glow = 'rgba(255,90,90,.9)';
     return o;
   }
+  /** Color de su franja de luz sin ser shiny (o null). dex: el del sprite. */
+  const glint = dex => (SPECIAL[dex] && SPECIAL[dex].glint) || null;
   /** ¿Lleva partículas? (los mismos que forEnemy, más los jugadores) */
   const fancy = e => !!(e.boss || e.shiny || e.legend);
 
-  return { SPOTS, PARTS, SPECIAL, emissive, emitLevel, spotColor, emit, spotEmit, special, front, trail, hasTrail, trailEnabled, setTrailEnabled, TRAILS, enabled, setEnabled, update, draw, clear, sweep, drawSweep, forPlayer, forEnemy, fancy };
+  return { SPOTS, PARTS, SPECIAL, emissive, emitLevel, spotColor, emit, spotEmit, special, front, trail, hasTrail, trailEnabled, setTrailEnabled, TRAILS, enabled, setEnabled, update, draw, clear, sweep, drawSweep, glint, forPlayer, forEnemy, fancy };
 })();
