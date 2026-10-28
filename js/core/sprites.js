@@ -40,6 +40,27 @@ G.Sprites = (() => {
     return c;
   }
 
+  /** Silueta de un color (contorno y halo de los efectos, en píxeles: 28-10-2026). Una vez por
+   *  hoja y color. */
+  const tints = new WeakMap();
+  function tinted(img, color) {
+    let per = tints.get(img);
+    if (!per) tints.set(img, per = new Map());
+    let c = per.get(color);
+    if (c) return c;
+    c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    const x = c.getContext('2d');
+    x.drawImage(img, 0, 0);
+    x.globalCompositeOperation = 'source-in';
+    x.fillStyle = color;
+    x.fillRect(0, 0, c.width, c.height);
+    per.set(color, c);
+    return c;
+  }
+  // Un píxel del arte hacia cada lado: el contorno y el halo, como en los juegos en pixel art.
+  const AROUND = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
   /** ¿Tiene versión shiny? (assets/pokemon/{dex}/s/) */
   function hasShiny(dex) { const m = meta(dex); return !!(m && m.sh); }
 
@@ -275,13 +296,13 @@ G.Sprites = (() => {
       const dx = Math.round(x - m.ax * k), dy = Math.round(y - m.ay * k);
       const prev = ctx.globalAlpha;
       if (alpha < 1) ctx.globalAlpha = prev * alpha;
-      // Contorno que brilla (aura.js): la silueta blanca con su resplandor, debajo del sprite.
+      // Contorno que brilla (aura.js): su silueta de ese color, un píxel del arte hacia cada lado y
+      // debajo del sprite, que respira despacio. En píxeles (antes era un resplandor borroso).
       if (opts.glow) {
+        const tc = tinted(s.img, opts.glow);
         ctx.save();
-        ctx.shadowColor = opts.glow;
-        ctx.shadowBlur = 5 * k + Math.sin(performance.now() / 450) * 1.5 * k;   // respira despacio
-        ctx.globalAlpha = prev * alpha * 0.9;
-        ctx.drawImage(white(s.img), sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
+        ctx.globalAlpha = prev * alpha * (0.75 + 0.25 * Math.sin(performance.now() / 450));
+        for (const [ox, oy] of AROUND) ctx.drawImage(tc, sx, sy, m.w, m.h, dx + ox * k, dy + oy * k, m.w * k, m.h * k);
         ctx.restore();
       }
       // Destello: blanco entero (enemigos) o medio blanco encima (tu Pokémon).
@@ -290,11 +311,13 @@ G.Sprites = (() => {
       if (opts.emit && G.Aura) {
         const em = G.Aura.emissive(s.img, opts.emit.dex, m);
         if (em && opts.emit.level > 0) {
+          const lv = Math.min(1, opts.emit.level), halo = tinted(em, opts.emit.color);
           ctx.save();
           ctx.globalCompositeOperation = 'lighter';
-          ctx.globalAlpha = prev * alpha * Math.min(1, opts.emit.level);
-          ctx.shadowColor = opts.emit.color;
-          ctx.shadowBlur = 9 * k;
+          // El halo, en píxeles: los mismos puntos de su color, un píxel del arte hacia cada lado.
+          ctx.globalAlpha = prev * alpha * lv * 0.45;
+          for (const [ox, oy] of AROUND) ctx.drawImage(halo, sx, sy, m.w, m.h, dx + ox * k, dy + oy * k, m.w * k, m.h * k);
+          ctx.globalAlpha = prev * alpha * lv;
           ctx.drawImage(em, sx, sy, m.w, m.h, dx, dy, m.w * k, m.h * k);
           ctx.restore();
         }

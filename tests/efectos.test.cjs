@@ -9,7 +9,10 @@ const ROOT = path.join(__dirname, '..');
 function load() {
   const store = { fx: 'all', fxOff: [] };
   const G = { Settings: { get: k => store[k], set: (k, v) => { store[k] = v; } } };
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/entities/aura.js'), 'utf8'), vm.createContext({ G, performance: { now: () => 0 } }));
+  // Un lienzo de mentira para lo que se pinta a cuadritos (aura.js chunky).
+  const any = () => new Proxy(function () {}, { get: (o, k) => (k === 'width' || k === 'height' ? 0 : any()), set: () => true, apply: () => any() });
+  const document = { createElement: () => any() };
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/entities/aura.js'), 'utf8'), vm.createContext({ G, document, performance: { now: () => 0 } }));
   return { A: G.Aura, store, G };
 }
 
@@ -45,7 +48,7 @@ test('every glowing detail and legendary effect is well formed and has its sprit
   }
   for (const [dex, S] of Object.entries(A.SPECIAL)) {
     assert.ok(fs.existsSync(path.join(ROOT, 'assets/pokemon', dex)), 'sprite de ' + dex);
-    assert.ok(S.aura || S.back || S.parts, 'algo que dibujar en ' + dex);
+    assert.ok(S.aura || S.back || S.parts || S.trail, 'algo que dibujar en ' + dex);
     if (S.aura) assert.match(S.aura, /^#[0-9a-f]{6}$/, 'aura de ' + dex);
     if (S.back) { assert.ok(['ripple', 'clock'].includes(S.back), 'fondo de ' + dex); assert.ok(S.c, 'color del fondo de ' + dex); }
     if (S.parts) assert.ok(S.parts.rate > 0 && S.parts.life > 0 && (S.parts.hue || S.parts.c), 'partículas de ' + dex);
@@ -106,9 +109,10 @@ test('the colour aura behind a Pokémon only shows at night, except for mythical
   let auras = 0, night = 0;
   G.Game = { state: 'playing', st: { time: 0 } };
   G.Night = { level: () => night };
-  // Un lienzo de mentira que cuenta las auras (degradados radiales).
+  G.Sprites = { PX: 2 };
+  // Un lienzo de mentira que cuenta las auras (se pintan a cuadritos y se pegan con drawImage).
   const ctx = new Proxy({}, {
-    get: (o, k) => (k === 'createRadialGradient' ? () => { auras++; return { addColorStop() {} }; } : k in o ? o[k] : () => {}),
+    get: (o, k) => (k === 'drawImage' ? () => { auras++; } : k in o ? o[k] : () => {}),
     set: (o, k, v) => { o[k] = v; return true; }
   });
   const draw = dex => { auras = 0; A.special(ctx, { x: 0, bodyH: 30, r: 10, _fxSeed: 0 }, dex, 0, 1, 0); return auras; };

@@ -510,15 +510,16 @@ G.Aura = (() => {
       if (p.P.bolt) {
         // Chispa: un rayito en zigzag que sale del detalle, con borde oscuro para que se vea
         // también encima de un cuerpo amarillo.
-        const s = p.vx < 0 ? -1 : 1, zig = () => {
-          ctx.beginPath(); ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x + s * 4, p.y - 3); ctx.lineTo(p.x + s * 2, p.y - 6); ctx.lineTo(p.x + s * 7, p.y - 10);
-          ctx.stroke();
+        // (En píxeles, 28-10-2026.)
+        const s = p.vx < 0 ? -1 : 1, zig = d => {
+          pixLine(ctx, p.x, p.y + d, p.x + s * 5, p.y - 4 + d);
+          pixLine(ctx, p.x + s * 5, p.y - 4 + d, p.x + s * 2, p.y - 7 + d);
+          pixLine(ctx, p.x + s * 2, p.y - 7 + d, p.x + s * 8, p.y - 12 + d);
         };
         ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = 'rgba(60,40,0,.55)'; ctx.lineWidth = 3; zig();
+        ctx.fillStyle = 'rgba(60,40,0,.5)'; zig(G.Sprites.PX);
         ctx.globalCompositeOperation = 'lighter';
-        ctx.strokeStyle = p.c; ctx.lineWidth = 1.5; zig();
+        ctx.fillStyle = p.c; zig(0);
       } else if (p.P.star) {
         // Destello de cuatro puntas, en píxeles, que titila.
         const s = Math.max(1, Math.round(p.r * (0.8 + 0.6 * Math.abs(Math.sin(p.t * 5)))));
@@ -530,23 +531,22 @@ G.Aura = (() => {
         const u = Math.max(1, Math.round(p.r / 2.5));
         HEART.forEach((row, ry) => { for (let rx = 0; rx < row.length; rx++) if (row[rx] === 'x') ctx.fillRect(x + (rx - 3) * u, y + (ry - 3) * u, u, u); });
       } else if (p.P.zzz) {
-        // Zzz de los dormilones: crece al subir (con borde, para que se lea sobre cualquier fondo).
-        ctx.font = 'bold ' + Math.round(8 + 8 * (p.t / p.life)) + 'px sans-serif'; ctx.textAlign = 'center';
-        ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,24,48,.6)'; ctx.strokeText('z', x, y);
-        ctx.fillText('z', x, y);
+        // Z de los dormilones, en píxeles: crece al subir (con borde, para que se lea en cualquier fondo).
+        const u = p.t / p.life > 0.5 ? 2 : 1;
+        ctx.fillStyle = 'rgba(20,24,48,.55)'; glyph(ctx, ZED, x + u, y + u, u);
+        ctx.fillStyle = p.c; glyph(ctx, ZED, x, y, u);
       } else if (p.P.petal) {
         // Hoja o pétalo de píxeles que da vueltas mientras cae (ancho y estrecho por turnos).
         const s = Math.max(1, Math.round(p.r)), w = Math.abs(Math.cos(p.t * 3)) > 0.5;
         ctx.fillRect(x - (w ? s : 0), y, w ? s * 2 : Math.max(1, s >> 1), w ? Math.max(1, s >> 1) : s * 2);
       } else if (p.P.note) {
-        // Nota musical (Meloetta, Jigglypuff...), con borde.
-        ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
-        const n = p.r > 2.2 ? '\u266B' : '\u266A';
-        ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,24,48,.55)'; ctx.strokeText(n, x, y);
-        ctx.fillText(n, x, y);
+        // Nota musical (Meloetta, Jigglypuff...), en píxeles y con borde.
+        const n = p.r > 2.2 ? NOTE2 : NOTE1;
+        ctx.fillStyle = 'rgba(20,24,48,.55)'; glyph(ctx, n, x + 2, y + 2, 2);
+        ctx.fillStyle = p.c; glyph(ctx, n, x, y, 2);
       } else if (p.P.ring) {
-        ctx.strokeStyle = p.c; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(x, y, Math.max(1, Math.round(p.r)), 0, 6.2832); ctx.stroke();
+        // Burbuja de píxeles.
+        glyph(ctx, ['.xx.', 'x..x', 'x..x', '.xx.'], x, y, Math.max(1, Math.round(p.r / 2.5)));
       } else {
         // Lo normal: un cuadradito, como un píxel del sprite (deja un rastro pixelado al moverse).
         const s = Math.max(1, Math.round(p.r));
@@ -605,66 +605,66 @@ G.Aura = (() => {
   const SPECIAL = {
     150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', parts: { c: ['#e08aff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.4, rate: 2, glow: true, star: true }, pulse: 7.5 }, // Mewtwo: aura psíquica
     151: { parts: { c: ['#ffc4ee', '#ffffff'], up: 10, spread: 14, r: 2.2, life: 1.4, rate: 2, ring: true } },   // Mew: burbujas
-    249: { back: 'ripple', c: '#b8d8ff', parts: { c: ['#ffffff', '#d6e8ff'], up: 4, spread: 26, r: 1.4, life: 1, rate: 4, soft: true } }, // Lugia: viento
-    250: { aura: '#ffb347', parts: { hue: true, up: 14, spread: 16, r: 1.3, life: 1.3, rate: 6, glow: true, star: true }, rays: '#ffb347' }, // Ho-Oh: arcoíris
-    382: { back: 'ripple', c: '#5fb8ff' },                                                                     // Kyogre: ondas
-    383: { parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 18, r: 1.4, life: 0.8, rate: 5, glow: true } }, // Groudon: ascuas
+    249: { back: 'ripple', c: '#b8d8ff', parts: { c: ['#ffffff', '#d6e8ff'], up: 4, spread: 26, r: 1.4, life: 1, rate: 4, soft: true }, trail: { s: 'feather', c: ['#ffffff', '#d6e8ff', '#8f9fb7'] } }, // Lugia: viento
+    250: { aura: '#ffb347', parts: { hue: true, up: 14, spread: 16, r: 1.3, life: 1.3, rate: 6, glow: true, star: true }, rays: '#ffb347', trail: { s: 'rainbow', c: ['#ffffff'] } }, // Ho-Oh: arcoíris
+    382: { back: 'ripple', c: '#5fb8ff', trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                                                     // Kyogre: ondas
+    383: { parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 18, r: 1.4, life: 0.8, rate: 5, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }, // Groudon: ascuas
     384: { parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 40, r: 1.2, life: 0.5, rate: 8, glow: true } },  // Rayquaza: estelas
     483: { back: 'clock', c: '#9fe8ff' },                                                                      // Dialga: el reloj del tiempo
     484: { aura: '#ff8ad8', back: 'ripple', c: '#ff9ff0', pulse: 9 },                                                    // Palkia: el espacio que se ondula
-    487: { parts: { c: ['#2a1830', '#5a1a2a'], up: 8, spread: 18, r: 3, life: 1.6, rate: 4, soft: true, low: true } }, // Giratina: sombras
-    491: { parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 20, r: 3.2, life: 1.8, rate: 5, soft: true, low: true } }, // Darkrai: humo oscuro
-    493: { day: true, aura: '#ffd23f', parts: { c: ['#ffe680', '#ffffff'], up: 10, spread: 22, r: 1.4, life: 1.4, rate: 3, glow: true, star: true }, rays: '#ffd23f', pulse: 10.5 }, // Arceus: luz dorada
-    643: { parts: { c: ['#ffffff', '#ffd9a0', '#9fe8ff'], up: 30, spread: 14, r: 1.5, life: 0.8, rate: 6, glow: true } }, // Reshiram: fuego blanco
-    644: { parts: { c: ['#bfefff', '#7fd8ff'], up: 0, spread: 30, r: 1, life: 0.2, rate: 7, glow: true, bolt: true } },   // Zekrom: rayos
-    646: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 18, r: 1.4, life: 1.6, rate: 4 } },            // Kyurem: nieve
-    716: { parts: { hue: true, up: 12, spread: 20, r: 1.2, life: 1.2, rate: 5, glow: true } },                 // Xerneas: luces de colores
-    717: { parts: { c: ['#ff4a3a', '#5a1a1a'], up: -12, spread: 22, r: 1.6, life: 1.4, rate: 4, leaf: true } }, // Yveltal: plumas que caen
+    487: { parts: { c: ['#2a1830', '#5a1a2a'], up: 8, spread: 18, r: 3, life: 1.6, rate: 4, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1020', '#ff4a4a'] } }, // Giratina: sombras
+    491: { parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 20, r: 3.2, life: 1.8, rate: 5, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#b58aff'] } }, // Darkrai: humo oscuro
+    493: { day: true, aura: '#ffd23f', parts: { c: ['#ffe680', '#ffffff'], up: 10, spread: 22, r: 1.4, life: 1.4, rate: 3, glow: true, star: true }, rays: '#ffd23f', pulse: 10.5, trail: { s: 'gold', c: ['#ffd23f', '#ffffff'] } }, // Arceus: luz dorada
+    643: { parts: { c: ['#ffffff', '#ffd9a0', '#9fe8ff'], up: 30, spread: 14, r: 1.5, life: 0.8, rate: 6, glow: true }, trail: { s: 'flame', c: ['#ffffff', '#d6f0ff', '#7fd8ff'] } }, // Reshiram: fuego blanco
+    644: { parts: { c: ['#bfefff', '#7fd8ff'], up: 0, spread: 30, r: 1, life: 0.2, rate: 7, glow: true, bolt: true }, trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } },   // Zekrom: rayos
+    646: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 18, r: 1.4, life: 1.6, rate: 4 }, trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },            // Kyurem: nieve
+    716: { parts: { hue: true, up: 12, spread: 20, r: 1.2, life: 1.2, rate: 5, glow: true }, trail: { s: 'flower', c: ['#ff6a8a', '#ffd23f', '#5fb8ff', '#b06aff', '#ffffff'] } },                 // Xerneas: luces de colores
+    717: { parts: { c: ['#ff4a3a', '#5a1a1a'], up: -12, spread: 22, r: 1.6, life: 1.4, rate: 4, leaf: true }, trail: { s: 'feather', c: ['#c8283a', '#3a2a30', '#ff5a5a'] } }, // Yveltal: plumas que caen
     // Segunda tanda.
-    144: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 18, r: 1.4, life: 1.6, rate: 4 }, aurora: ['#3fd8ff', '#8f6bff'] },            // Articuno: nieve
-    145: { parts: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 40, r: 1, life: 0.2, rate: 7, glow: true, bolt: true } }, // Zapdos: rayos
-    146: { parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 30, spread: 20, r: 1.5, life: 0.9, rate: 7, glow: true } }, // Moltres: ascuas
-    243: { parts: { c: ['#fffbe0', '#c9b5ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 6, glow: true, bolt: true } }, // Raikou: rayos
-    244: { back: 'ripple', c: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 16, r: 1.4, life: 0.8, rate: 5, glow: true } }, // Entei: volcán
+    144: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 18, r: 1.4, life: 1.6, rate: 4 }, aurora: ['#3fd8ff', '#8f6bff'], trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },            // Articuno: nieve
+    145: { parts: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 40, r: 1, life: 0.2, rate: 7, glow: true, bolt: true }, trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } }, // Zapdos: rayos
+    146: { parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 30, spread: 20, r: 1.5, life: 0.9, rate: 7, glow: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } }, // Moltres: ascuas
+    243: { parts: { c: ['#fffbe0', '#c9b5ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 6, glow: true, bolt: true }, trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#c9b5ff'] } }, // Raikou: rayos
+    244: { back: 'ripple', c: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 16, r: 1.4, life: 0.8, rate: 5, glow: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } }, // Entei: volcán
     245: { back: 'ripple', c: '#9fe8ff', parts: { c: ['#d6f0ff', '#b8a8ff', '#ffffff'], up: 6, spread: 24, r: 1.2, life: 1.4, rate: 5, glow: true, star: true }, trail: { s: 'aurora', c: ['#6affd0', '#5fd0ff', '#7f9fff', '#c07aff'] } }, // Suicune: rastro de aurora
-    251: { parts: { c: ['#5fe08a', '#a5f07a'], up: -8, spread: 20, r: 1.6, life: 1.6, rate: 4, leaf: true } },  // Celebi: hojas
-    385: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 22, r: 1.6, life: 1.1, rate: 4, glow: true, star: true } }, // Jirachi: estrellas
+    251: { parts: { c: ['#5fe08a', '#a5f07a'], up: -8, spread: 20, r: 1.6, life: 1.6, rate: 4, leaf: true }, trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },  // Celebi: hojas
+    385: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 22, r: 1.6, life: 1.1, rate: 4, glow: true, star: true }, trail: { s: 'star', c: ['#ffe680', '#fff7c0'] } }, // Jirachi: estrellas
     386: { day: true, aura: '#ff6a4a', parts: { c: ['#7fd0ff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.2, rate: 2, glow: true }, pulse: 6 }, // Deoxys: aura
     480: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffe680', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Uxie
     481: { parts: { c: ['#ffb3e6', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffb3e6', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Mesprit
     482: { parts: { c: ['#9fd8ff', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#9fd8ff', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Azelf
-    485: { parts: { c: ['#ff7a3d', '#ffb347'], up: 24, spread: 20, r: 1.6, life: 0.9, rate: 6, glow: true } },  // Heatran: ascuas
+    485: { parts: { c: ['#ff7a3d', '#ffb347'], up: 24, spread: 20, r: 1.6, life: 0.9, rate: 6, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } },  // Heatran: ascuas
     488: { aura: '#ffb3e6', parts: { c: ['#ffe680', '#ffb3e6'], up: 6, spread: 18, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, pulse: 9 }, // Cresselia: luz de luna
-    490: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 18, spread: 12, r: 1.8, life: 1.3, rate: 3, ring: true } }, // Manaphy: burbujas
-    494: { parts: { c: ['#ff7a3d', '#ffe14d'], up: 22, spread: 14, r: 1.3, life: 0.8, rate: 5, glow: true } },  // Victini: llamitas
-    648: { parts: { c: ['#7fffa0', '#ffffff', '#ffe680'], up: 16, spread: 20, r: 1, life: 1.4, rate: 2, note: true } }, // Meloetta: notas
-    718: { parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 5, glow: true }, orbit: { n: 5, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 } },  // Zygarde: células
+    490: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 18, spread: 12, r: 1.8, life: 1.3, rate: 3, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Manaphy: burbujas
+    494: { parts: { c: ['#ff7a3d', '#ffe14d'], up: 22, spread: 14, r: 1.3, life: 0.8, rate: 5, glow: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff5a2a'] } },  // Victini: llamitas
+    648: { parts: { c: ['#7fffa0', '#ffffff', '#ffe680'], up: 16, spread: 20, r: 1, life: 1.4, rate: 2, note: true }, trail: { s: 'note', c: ['#7fffa0', '#ffffff', '#ffe680'] } }, // Meloetta: notas
+    718: { parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 5, glow: true }, orbit: { n: 5, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, trail: { s: 'cell', c: ['#7fff6a', '#ff5a5a'] } },  // Zygarde: células
     719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 18, r: 1.6, life: 1, rate: 4, glow: true, star: true } }, // Diancie: destellos
     720: { day: true, aura: '#ffd23f', parts: { c: ['#ffd23f', '#ffe680'], up: 8, spread: 20, r: 2.4, life: 1.6, rate: 1.5, ring: true, glow: true }, pulse: 9, orbit: { n: 3, c: ['#ffd23f', '#ffe680'], s: 'ring', sp: 0.3 } }, // Hoopa: aros dorados
-    721: { parts: { c: ['#ffffff', '#e6eef5'], up: 30, spread: 12, r: 2.6, life: 1.2, rate: 4, soft: true } },  // Volcanion: vapor
+    721: { parts: { c: ['#ffffff', '#e6eef5'], up: 30, spread: 12, r: 2.6, life: 1.2, rate: 4, soft: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },  // Volcanion: vapor
     791: { aura: '#ffab28', parts: { c: ['#ffd27f', '#ffffff'], up: 14, spread: 20, r: 1.3, life: 1, rate: 4, glow: true }, rays: '#ffab28', pulse: 9 }, // Solgaleo: sol
     792: { aura: '#8f6bff', parts: { c: ['#c9b5ff', '#ffffff', '#7cd8ed'], up: 4, spread: 26, r: 1.4, life: 1.4, rate: 5, glow: true, star: true }, pulse: 9 }, // Lunala: estrellas
-    800: { parts: { hue: true, up: 10, spread: 22, r: 1.4, life: 1, rate: 6, glow: true, star: true }, rays: 'hue' },        // Necrozma: luz del prisma
-    802: { parts: { c: ['#1a1428', '#2f3a2f'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 4, soft: true, low: true } }, // Marshadow: sombra
-    807: { parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 7, glow: true, bolt: true } }, // Zeraora: rayos
-    890: { back: 'ripple', c: '#ff5a6a', parts: { c: ['#ff5a6a', '#b04aff'], up: 20, spread: 18, r: 2, life: 1.1, rate: 5, glow: true } }, // Eternatus: energía
+    800: { parts: { hue: true, up: 10, spread: 22, r: 1.4, life: 1, rate: 6, glow: true, star: true }, rays: 'hue', trail: { s: 'rainbow', c: ['#ffffff'] } },        // Necrozma: luz del prisma
+    802: { parts: { c: ['#1a1428', '#2f3a2f'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 4, soft: true, low: true }, trail: { s: 'shadow', c: ['#14201a', '#7fff9f'] } }, // Marshadow: sombra
+    807: { parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 7, glow: true, bolt: true }, trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } }, // Zeraora: rayos
+    890: { back: 'ripple', c: '#ff5a6a', parts: { c: ['#ff5a6a', '#b04aff'], up: 20, spread: 18, r: 2, life: 1.1, rate: 5, glow: true }, trail: { s: 'miasma', c: ['#ff3a5a', '#b04aff', '#ff8a9a'] } }, // Eternatus: energía
     // Tercera tanda.
     641: { parts: { c: ['#ffffff', '#c9f0d6'], up: 2, spread: 40, r: 2.2, life: 1, rate: 4, soft: true } },    // Tornadus: viento
-    642: { parts: { c: ['#fffbe0', '#c9b5ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 6, glow: true, bolt: true } }, // Thundurus: rayos
+    642: { parts: { c: ['#fffbe0', '#c9b5ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 6, glow: true, bolt: true }, trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#c9b5ff'] } }, // Thundurus: rayos
     645: { parts: { c: ['#d8b878', '#b89458'], up: 6, spread: 26, r: 2, life: 1, rate: 5, soft: true, low: true } }, // Landorus: arena
     786: { aura: '#ff8ad8', parts: { c: ['#ffb3e6', '#ffffff'], up: 6, spread: 20, r: 1.3, life: 1.3, rate: 3, glow: true, star: true } }, // Tapu Lele: escamas
-    787: { parts: { c: ['#5fe08a', '#ffe14d'], up: -6, spread: 20, r: 1.6, life: 1.6, rate: 3, leaf: true } }, // Tapu Bulu: hojas
-    788: { aura: '#9fd8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 4, spread: 26, r: 2.6, life: 1.6, rate: 3, soft: true } }, // Tapu Fini: niebla
-    789: { parts: { c: ['#ffe680', '#9fe8ff', '#ffffff'], up: 6, spread: 18, r: 1.2, life: 1.3, rate: 3, glow: true, star: true }, orbit: { n: 3, c: ['#ffe680', '#9fe8ff'], s: 'star', sp: 0.3 } }, // Cosmog: estrellitas
-    790: { aura: '#ffe680', parts: { c: ['#ffe680', '#ffffff'], up: 4, spread: 16, r: 1.2, life: 1.3, rate: 2, glow: true, star: true }, pulse: 7.5 }, // Cosmoem
+    787: { parts: { c: ['#5fe08a', '#ffe14d'], up: -6, spread: 20, r: 1.6, life: 1.6, rate: 3, leaf: true }, trail: { s: 'flower', c: ['#ffe14d', '#ffffff', '#ff9a3d'] } }, // Tapu Bulu: hojas
+    788: { aura: '#9fd8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 4, spread: 26, r: 2.6, life: 1.6, rate: 3, soft: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Tapu Fini: niebla
+    789: { parts: { c: ['#ffe680', '#9fe8ff', '#ffffff'], up: 6, spread: 18, r: 1.2, life: 1.3, rate: 3, glow: true, star: true }, orbit: { n: 3, c: ['#ffe680', '#9fe8ff'], s: 'star', sp: 0.3 }, trail: { s: 'star', c: ['#9fe8ff', '#ffe680'] } }, // Cosmog: estrellitas
+    790: { aura: '#ffe680', parts: { c: ['#ffe680', '#ffffff'], up: 4, spread: 16, r: 1.2, life: 1.3, rate: 2, glow: true, star: true }, pulse: 7.5, trail: { s: 'star', c: ['#ffe680', '#ffffff'] } }, // Cosmoem
     793: { aura: '#6abde0' },                                                                                   // Nihilego
     801: { day: true, aura: '#ff9fb0', parts: { c: ['#ffd5d6', '#ffffff'], up: 8, spread: 14, r: 1.2, life: 1.2, rate: 2, glow: true, star: true }, pulse: 3.9 }, // Magearna
     888: { aura: '#5fb8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5 }, // Zacian: espada de luz
     889: { aura: '#ff6a5a', parts: { c: ['#ffd0c0', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5 }, // Zamazenta: escudo de luz
-    894: { parts: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 44, r: 1, life: 0.2, rate: 8, glow: true, bolt: true } }, // Regieleki: rayos
-    896: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 20, r: 1.4, life: 1.6, rate: 4 } },            // Glastrier: nieve
-    897: { aura: '#8f6bff', parts: { c: ['#1a1428', '#3a2c50'], up: 6, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true } }, // Spectrier: sombra
-    898: { aura: '#7fe8a0', parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 20, r: 1.5, life: 1.6, rate: 3, leaf: true }, pulse: 7.5 }, // Calyrex: hojas
+    894: { parts: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 44, r: 1, life: 0.2, rate: 8, glow: true, bolt: true }, trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } }, // Regieleki: rayos
+    896: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 20, r: 1.4, life: 1.6, rate: 4 }, trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },            // Glastrier: nieve
+    897: { aura: '#8f6bff', parts: { c: ['#1a1428', '#3a2c50'], up: 6, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#b58aff'] } }, // Spectrier: sombra
+    898: { aura: '#7fe8a0', parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 20, r: 1.5, life: 1.6, rate: 3, leaf: true }, pulse: 7.5, trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } }, // Calyrex: hojas
     // Cuarta tanda: auras de los que en el anime y los juegos la tienen.
     447: { day: true, aura: '#3f8fff' },                                                                                   // Riolu: aura
     448: { day: true, aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 3, glow: true } }, // Lucario: aura
@@ -675,35 +675,40 @@ G.Aura = (() => {
     100150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', pulse: 7.5 },                                                  // Mega Mewtwo Y
     100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true }, pulse: 9 }, // Mega Rayquaza
     100719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 22, r: 1.8, life: 1.1, rate: 6, glow: true, star: true } }, // Mega Diancie
-    100382: { aura: '#3fa8ff', back: 'ripple', c: '#7fe8ff', parts: { c: ['#9fd8ff', '#d6f0ff'], up: 26, spread: 16, r: 1.8, life: 1.2, rate: 5, ring: true } }, // Kyogre primigenio
-    100383: { aura: '#ff6a1a', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 34, spread: 20, r: 1.6, life: 0.9, rate: 8, glow: true } }, // Groudon primigenio
+    100382: { aura: '#3fa8ff', back: 'ripple', c: '#7fe8ff', parts: { c: ['#9fd8ff', '#d6f0ff'], up: 26, spread: 16, r: 1.8, life: 1.2, rate: 5, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Kyogre primigenio
+    100383: { aura: '#ff6a1a', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 34, spread: 20, r: 1.6, life: 0.9, rate: 8, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }, // Groudon primigenio
     // Quinta tanda (28-10-2026): los legendarios que faltaban (y megas de legendarios).
-    378: { parts: { c: ['#d8f1ff', '#ffffff'], up: -8, spread: 20, r: 1.3, life: 1.6, rate: 4, glow: true, star: true } }, // Regice: frío
+    378: { parts: { c: ['#d8f1ff', '#ffffff'], up: -8, spread: 20, r: 1.3, life: 1.6, rate: 4, glow: true, star: true }, trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } }, // Regice: frío
     486: { aura: '#fff2b0', pulse: 12, parts: { c: ['#ffffff', '#fff2b0'], up: 6, spread: 24, r: 1.4, life: 1.4, rate: 2, glow: true, star: true } }, // Regigigas
     895: { aura: '#ff4a7a', pulse: 7.5, parts: { c: ['#ff5d83', '#ffffff'], up: 10, spread: 18, r: 1.3, life: 1.2, rate: 3, glow: true, star: true } }, // Regidrago
     380: { aura: '#ff6a8a', pulse: 7.5, parts: { c: ['#ffb3c8', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true } }, // Latias: Bola Neblina
     381: { aura: '#4a8aff', pulse: 7.5, parts: { c: ['#9fd0ff', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true } }, // Latios: Resplandor
     100380: { aura: '#c08aff', pulse: 7.5, parts: { c: ['#e0c0ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Mega Latias
     100381: { aura: '#8a8aff', pulse: 7.5, parts: { c: ['#c0c8ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Mega Latios
-    489: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true } }, // Phione: burbujas
+    489: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Phione: burbujas
     638: { parts: { c: ['#e6eef5', '#9fe8ff'], up: 4, spread: 24, r: 1.2, life: 0.9, rate: 3, glow: true, star: true } }, // Cobalion: brillos de acero
     639: { parts: { c: ['#c8a875', '#8f939c'], up: 4, spread: 26, r: 1.8, life: 1, rate: 4, soft: true, low: true } }, // Terrakion: polvo de roca
-    640: { parts: { c: ['#8bd72f', '#c9f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true } }, // Virizion: hojas
-    647: { aura: '#5fb8ff', pulse: 9, parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true } }, // Keldeo: agua
+    640: { parts: { c: ['#8bd72f', '#c9f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true }, trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffe14d'] } }, // Virizion: hojas
+    647: { aura: '#5fb8ff', pulse: 9, parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Keldeo: agua
     772: { parts: { c: ['#3a3f4a', '#2c7d5f'], up: 4, spread: 18, r: 2.6, life: 1.4, rate: 3, soft: true, low: true } }, // Código Cero: humo del casco
     773: { parts: { hue: true, up: 8, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true } }, // Silvally: el Sistema Alfa (todos los tipos)
     808: { parts: { c: ['#ffd23f', '#d0d8e0'], up: 8, spread: 14, r: 1.2, life: 1.1, rate: 2, glow: true, star: true } }, // Meltan: metal
     891: { parts: { c: ['#ffffff', '#d0dfe3'], up: 2, spread: 30, r: 2, life: 0.8, rate: 3, soft: true } }, // Kubfu: viento de sus golpes
     892: { aura: '#4a4a8a', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true } }, // Urshifu
     905: { aura: '#ff6aa8', pulse: 9, parts: { c: ['#ff6aa8', '#ff9fc8'], up: 12, spread: 16, r: 2.6, life: 1.6, rate: 2.5, heart: true } }, // Enamorus: corazones
-    1007: { aura: '#ff7a3d', pulse: 9, rays: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 24, spread: 16, r: 1.3, life: 0.9, rate: 4, glow: true } }, // Koraidon: el sol
+    1007: { aura: '#ff7a3d', pulse: 9, rays: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 24, spread: 16, r: 1.3, life: 0.9, rate: 4, glow: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } }, // Koraidon: el sol
     1015: { parts: { c: ['#f711e4', '#97007b'], up: 6, spread: 20, r: 3, life: 1.6, rate: 2.5, soft: true } }, // Munkidori: gas tóxico
     1016: { parts: { c: ['#ff9fcf', '#ffd23f', '#ffffff'], up: -6, spread: 24, r: 2, life: 2, rate: 3, leaf: true, petal: true } }, // Fezandipiti: pétalos
-    1017: { parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true } }, // Ogerpon: hojas
-    1024: { aura: '#9fe8ff', pulse: 7.5, rays: 'hue', parts: { hue: true, up: 8, spread: 20, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Terapagos: Teracristal
-    100491: { aura: '#6a3aa8', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 22, r: 3.2, life: 1.8, rate: 5, soft: true, low: true } }, // Mega Darkrai
-    100718: { aura: '#5fe08a', pulse: 7.5, orbit: { n: 6, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 4, glow: true } }, // Mega Zygarde
-    100807: { aura: '#7fd8ff', pulse: 6, parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 40, r: 1, life: 0.2, rate: 8, glow: true, bolt: true } } // Mega Zeraora
+    1017: { parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true }, trail: { s: 'flower', c: ['#ffffff', '#9fe8ff', '#ffe14d'] } }, // Ogerpon: hojas
+    1024: { aura: '#9fe8ff', pulse: 7.5, rays: 'hue', parts: { hue: true, up: 8, spread: 20, r: 1.3, life: 1.2, rate: 4, glow: true, star: true }, trail: { s: 'tera', c: ['#ffffff'] } }, // Terapagos: Teracristal
+    100491: { aura: '#6a3aa8', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 22, r: 3.2, life: 1.8, rate: 5, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#b58aff'] } }, // Mega Darkrai
+    100718: { aura: '#5fe08a', pulse: 7.5, orbit: { n: 6, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 4, glow: true }, trail: { s: 'cell', c: ['#7fff6a', '#ff5a5a'] } }, // Mega Zygarde
+    100807: { aura: '#7fd8ff', pulse: 6, parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 40, r: 1, life: 0.2, rate: 8, glow: true, bolt: true }, trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } }, // Mega Zeraora
+    // Sólo su rastro (28-10-2026): sus partículas siguen saliendo de SIG (abajo).
+    1004: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                    // Chi-Yu
+    785: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffb347'] } },                                     // Tapu Koko
+    492: { trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffc4e2', '#ffe14d'] } },                         // Shaymin
+    100485: { trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }                                   // Mega Heatran
   };
 
   // Efectos con firma (24-10-2026): partículas según lo que es cada Pokémon conocido (los
@@ -815,7 +820,8 @@ G.Aura = (() => {
       52, 53, 863, 1000
     ],   // monedas
   };
-  for (const [k, list] of Object.entries(SIG)) for (const d of list) if (!SPECIAL[d]) SPECIAL[d] = { parts: SIG_PARTS[k] };
+  // Los que sólo tienen su rastro arriba, también sus partículas de aquí.
+  for (const [k, list] of Object.entries(SIG)) for (const d of list) if (!SPECIAL[d] || !SPECIAL[d].parts && SPECIAL[d].trail && Object.keys(SPECIAL[d]).length === 1) SPECIAL[d] = Object.assign({ parts: SIG_PARTS[k] }, SPECIAL[d]);
 
   const rgb = c => hex(c.slice(1)).join(',');
 
@@ -835,43 +841,45 @@ G.Aura = (() => {
       // Luz suave detrás del cuerpo que respira (con pulse, se apaga y se enciende despacio).
       const cy = y - h * 0.5, R = Math.max(h * 0.8, r * 1.9), c = rgb(S.aura);
       const a = 0.38 * dayK * (S.pulse ? 0.1 + 0.9 * breathe(t, seed, S.pulse) : 0.7 + 0.3 * Math.sin(t * 1.2 + seed));
-      const g = ctx.createRadialGradient(x, cy, 0, x, cy, R);
-      g.addColorStop(0, `rgba(${c},${a})`);
-      g.addColorStop(0.5, `rgba(${c},${a * 0.45})`);
-      g.addColorStop(1, `rgba(${c},0)`);
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = g;
-      ctx.fillRect(x - R, cy - R, R * 2, R * 2);
+      chunky(ctx, x - R, cy - R, R * 2, R * 2, c2 => {
+        const g = c2.createRadialGradient(x, cy, 0, x, cy, R);
+        g.addColorStop(0, `rgba(${c},${a})`);
+        g.addColorStop(0.5, `rgba(${c},${a * 0.45})`);
+        g.addColorStop(1, `rgba(${c},0)`);
+        c2.fillStyle = g;
+        c2.fillRect(x - R, cy - R, R * 2, R * 2);
+      });
       ctx.restore();
     }
     if (S.back) {
       ctx.save();
-      ctx.strokeStyle = S.c;
+      ctx.fillStyle = S.c;
       ctx.globalCompositeOperation = 'lighter';
-      ctx.lineWidth = 1.2;
       if (S.back === 'clock') {
-        // Esfera de reloj en el suelo que aparece de vez en cuando: doce marcas y una aguja.
+        // Esfera de reloj en el suelo que aparece de vez en cuando: doce marcas y una aguja (en píxeles).
         const w = wave(t, seed, 10, 5);
         if (w > 0) {
           const rx = r * 2.2 + h * 0.2, ry = rx * 0.38;
-          ctx.globalAlpha = 0.5 * w;
-          ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 6.2832); ctx.stroke();
+          ctx.globalAlpha = 0.55 * w;
+          pixEllipse(ctx, x, y, rx, ry);
           for (let i = 0; i < 12; i++) {
             const a = i * 0.5236, cx = Math.cos(a), cy = Math.sin(a);
-            ctx.beginPath(); ctx.moveTo(x + cx * rx * 0.82, y + cy * ry * 0.82); ctx.lineTo(x + cx * rx, y + cy * ry); ctx.stroke();
+            pixLine(ctx, x + cx * rx * 0.8, y + cy * ry * 0.8, x + cx * rx * 0.9, y + cy * ry * 0.9);
           }
           const a = t * 0.5;
-          ctx.globalAlpha = 0.75 * w; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * rx * 0.75, y + Math.sin(a) * ry * 0.75); ctx.stroke();
+          ctx.globalAlpha = 0.8 * w;
+          pixLine(ctx, x, y, x + Math.cos(a) * rx * 0.7, y + Math.sin(a) * ry * 0.7);
+          dot(ctx, x, y);
         }
       } else if (S.back === 'ripple') {
-        // Un par de ondas que salen despacio de los pies, a ratos.
+        // Un par de ondas de píxeles que salen despacio de los pies, a ratos.
         const w = wave(t, seed, 6, 3.5);
         for (let i = 0; i < 2 && w > 0; i++) {
           const k = (t * 0.45 + i / 2) % 1, rx = r * (1 + 2.2 * k) + h * 0.1;
-          ctx.globalAlpha = 0.4 * w * (1 - k);
-          ctx.beginPath(); ctx.ellipse(x, y, rx, rx * 0.36, 0, 0, 6.2832); ctx.stroke();
+          ctx.globalAlpha = 0.5 * w * (1 - k);
+          pixEllipse(ctx, x, y, rx, rx * 0.36);
         }
       }
       ctx.restore();
@@ -893,6 +901,66 @@ G.Aura = (() => {
 
   // ---------------- lo nuevo de los legendarios (28-10-2026) ----------------
   const rgba = (c, a) => (c[0] === 'h' ? c.replace('%)', '%,' + a + ')').replace('hsl(', 'hsla(') : 'rgba(' + rgb(c) + ',' + a + ')');
+  // Un número "al azar" fijo para cada n (el mismo en cada fotograma).
+  const hash = n => { const v = Math.sin(n * 127.1) * 43758.5; return v - Math.floor(v); };
+
+  // ---------------- en píxeles (28-10-2026) ----------------
+  // Todo en píxeles del arte (PX × PX), como los sprites: nada de líneas finas, círculos lisos ni
+  // degradados suaves.
+  const snap = v => { const u = G.Sprites.PX; return Math.round(v / u) * u; };
+  /** Un píxel del arte en (x, y) (s: de cuántos píxeles de lado). */
+  function dot(ctx, x, y, s = 1) { const u = G.Sprites.PX * s; ctx.fillRect(snap(x), snap(y), u, u); }
+  /** Elipse de píxeles (las ondas, el reloj, los aros). */
+  function pixEllipse(ctx, x, y, rx, ry) {
+    const u = G.Sprites.PX, n = Math.max(8, Math.round(6.2832 * Math.sqrt((rx * rx + ry * ry) / 2) / u)), seen = new Set();
+    for (let i = 0; i < n; i++) {
+      const a = i * 6.2832 / n, px = snap(x + Math.cos(a) * rx), py = snap(y + Math.sin(a) * ry), k = px + ',' + py;
+      if (!seen.has(k)) { seen.add(k); ctx.fillRect(px, py, u, u); }
+    }
+  }
+  /** Línea de píxeles. */
+  function pixLine(ctx, x0, y0, x1, y1) {
+    const n = Math.max(1, Math.round(Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) / G.Sprites.PX));
+    for (let i = 0; i <= n; i++) dot(ctx, x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n);
+  }
+  /** Dibujito de píxeles: filas con 'x' (y 'o', del segundo color), centrado en (x, y); u: tamaño del píxel. */
+  function glyph(ctx, rows, x, y, u, c2) {
+    const c1 = ctx.fillStyle, ox = Math.round(x) - Math.floor(rows[0].length / 2) * u, oy = Math.round(y) - Math.floor(rows.length / 2) * u;
+    rows.forEach((row, j) => {
+      for (let i = 0; i < row.length; i++) {
+        if (row[i] === '.') continue;
+        ctx.fillStyle = row[i] === 'o' && c2 ? c2 : c1;
+        ctx.fillRect(ox + i * u, oy + j * u, u, u);
+      }
+    });
+    ctx.fillStyle = c1;
+  }
+  /** Degradados (auras, rayos) a cuadritos: se pintan en un lienzo pequeño a 1/PX y se pegan sin
+   *  suavizar. fn(c) dibuja con las mismas coordenadas que ctx. */
+  let low = null;
+  function chunky(ctx, x, y, w, h, fn) {
+    const u = G.Sprites.PX, X = Math.floor(x / u) * u, Y = Math.floor(y / u) * u;
+    const W = Math.ceil((w + x - X) / u) + 1, H = Math.ceil((h + y - Y) / u) + 1;
+    if (!low) low = document.createElement('canvas');
+    if (low.width < W) low.width = W;
+    if (low.height < H) low.height = H;
+    const c = low.getContext('2d');
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.globalCompositeOperation = 'source-over';
+    c.clearRect(0, 0, W, H);
+    c.setTransform(1 / u, 0, 0, 1 / u, -X / u, -Y / u);
+    fn(c);
+    const sm = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(low, 0, 0, W, H, X, Y, W * u, H * u);
+    ctx.imageSmoothingEnabled = sm;
+  }
+  // Notas (♪ y ♫) y la Z de los dormilones, en píxeles.
+  const NOTE1 = ['..xx', '..x.', '..x.', 'xxx.', 'xxx.'];
+  const NOTE2 = ['.xxxx', '.x..x', '.x..x', 'xx.xx', 'xx.xx'];
+  const ZED = ['xxxx', '..x.', '.x..', 'xxxx'];
+  const DIAMOND = ['..x..', '.xxx.', 'xxxxx', '.xxx.', '..x..'];
+  const AROUND = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
   /** Rayos de luz que giran despacio detrás (el sol de Solgaleo, la luz de Arceus), a ratos.
    *  c: su color, o 'hue' para uno de cada color. */
@@ -901,16 +969,19 @@ G.Aura = (() => {
     if (w <= 0) return;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    for (let i = 0, n = 10; i < n; i++) {
-      const a = t * 0.15 + i * 6.2832 / n, da = 0.09 + 0.03 * Math.sin(t * 1.3 + i * 1.7);
-      const len = R * (0.75 + 0.25 * Math.sin(t * 0.9 + i * 2.3));
-      const col = c === 'hue' ? 'hsl(' + ((i * 36 + t * 40) % 360 | 0) + ',100%,72%)' : c;
-      const g = ctx.createRadialGradient(x, cy, 0, x, cy, len);
-      g.addColorStop(0, rgba(col, 0.3 * w));
-      g.addColorStop(1, rgba(col, 0));
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.moveTo(x, cy); ctx.arc(x, cy, len, a - da, a + da); ctx.closePath(); ctx.fill();
-    }
+    chunky(ctx, x - R, cy - R, R * 2, R * 2, c2 => {
+      c2.globalCompositeOperation = 'lighter';
+      for (let i = 0, n = 10; i < n; i++) {
+        const a = t * 0.15 + i * 6.2832 / n, da = 0.09 + 0.03 * Math.sin(t * 1.3 + i * 1.7);
+        const len = R * (0.75 + 0.25 * Math.sin(t * 0.9 + i * 2.3));
+        const col = c === 'hue' ? 'hsl(' + ((i * 36 + t * 40) % 360 | 0) + ',100%,72%)' : c;
+        const g = c2.createRadialGradient(x, cy, 0, x, cy, len);
+        g.addColorStop(0, rgba(col, 0.3 * w));
+        g.addColorStop(1, rgba(col, 0));
+        c2.fillStyle = g;
+        c2.beginPath(); c2.moveTo(x, cy); c2.arc(x, cy, len, a - da, a + da); c2.closePath(); c2.fill();
+      }
+    });
     ctx.restore();
   }
 
@@ -943,8 +1014,9 @@ G.Aura = (() => {
   }
 
   // ---------------- rastros en el suelo (28-10-2026) ----------------
-  // Cómo es cada punto del rastro: life segundos que dura · gap píxeles entre uno y otro ·
-  // draw(ctx, p, fade, t, c) lo dibuja (fade 0..1: aparece rápido y se apaga despacio).
+  // Cómo es cada punto del rastro: life segundos que dura · gap píxeles entre uno y otro · solid:
+  // se pinta tapando (flores, plumas, sombras), no sumando luz · draw(ctx, p, fade, t, c) lo dibuja
+  // (fade 0..1: aparece rápido y se apaga despacio). Todo en píxeles del arte.
   const TRAILS = {
     // Cortinas de aurora de pie sobre el suelo (Suicune): el borde de abajo brillante y
     // desvaneciéndose hacia arriba, en columnas de un píxel del sprite.
@@ -957,6 +1029,120 @@ G.Aura = (() => {
         ctx.fillStyle = rgba(c, a); ctx.fillRect(x, y0 - px, px, px);
         ctx.fillStyle = rgba(c, a * 0.5); ctx.fillRect(x, y0 - px - Math.round(hh * 0.4), px, Math.round(hh * 0.4));
         ctx.fillStyle = rgba(c, a * 0.2); ctx.fillRect(x, y0 - hh - px, px, Math.round(hh * 0.6));
+      }
+    } },
+    // Llamas que arden donde pisa (tres lenguas de fuego que bailan) y se apagan (Entei, Moltres...).
+    flame: { life: 1.5, gap: 5, draw(ctx, p, f, t, cs) {
+      const u = G.Sprites.PX, y = snap(p.y);
+      ctx.fillStyle = rgba(cs[2], 0.22 * f); glyph(ctx, ['.xxx.', 'xxxxx', '.xxx.'], p.x, y - u, u);
+      for (let j = -1; j <= 1; j++) {
+        const x = snap(p.x + j * u), fl = 0.65 + 0.35 * Math.sin(t * 15 + p.i * 2 + j * 2.1);
+        const n = Math.max(1, Math.round((3 + 3 * hash(p.i * 3 + j)) * fl * (0.35 + 0.65 * f) * (j ? 0.7 : 1)));
+        const m = Math.max(1, Math.round(n * 0.65)), q = Math.max(1, Math.round(n * 0.3));
+        ctx.fillStyle = rgba(cs[2], 0.9 * f); ctx.fillRect(x, y - n * u, u, n * u);
+        ctx.fillStyle = rgba(cs[1], 0.95 * f); ctx.fillRect(x, y - m * u, u, m * u);
+        ctx.fillStyle = rgba(cs[0], f); ctx.fillRect(x, y - q * u, u, q * u);
+      }
+    } },
+    // Chispas que crepitan en el suelo (Raikou, Zekrom...).
+    spark: { life: 1.2, gap: 5, draw(ctx, p, f, t, cs) {
+      if (hash(p.i * 7 + Math.floor(t * 14)) < 0.3) return;
+      const s = hash(p.i + Math.floor(t * 5)) < 0.5 ? -1 : 1, x = p.x, y = p.y;
+      ctx.fillStyle = rgba(cs[(p.i + Math.floor(t * 8)) % cs.length], f);
+      pixLine(ctx, x - 8 * s, y + 1, x - 2 * s, y - 5); pixLine(ctx, x - 2 * s, y - 5, x + s, y); pixLine(ctx, x + s, y, x + 8 * s, y - 6);
+      ctx.fillStyle = rgba('#ffffff', f); dot(ctx, x, y - 2);
+    } },
+    // Flores que se abren donde pisa y luego se marchitan (Shaymin hace florecer la tierra).
+    flower: { life: 3.2, gap: 6, solid: true, draw(ctx, p, f, t, cs) {
+      const u = G.Sprites.PX, x = p.x + (hash(p.i) - 0.5) * 12, y = p.y + (hash(p.i + 3) - 0.5) * 6;
+      ctx.globalAlpha = Math.min(1, f * 1.5);
+      ctx.fillStyle = '#2f7a2a'; dot(ctx, x, y + u);
+      ctx.fillStyle = cs[p.i % (cs.length - 1)];
+      glyph(ctx, p.age > 0.25 ? ['.x.', 'xox', '.x.'] : ['o'], snap(x), snap(y), u, cs[cs.length - 1]);
+      ctx.globalAlpha = 1;
+    } },
+    // Escarcha: copos de hielo pegados al suelo que brillan y se derriten.
+    frost: { life: 2.8, gap: 5, draw(ctx, p, f, t, cs) {
+      const u = G.Sprites.PX, x = snap(p.x + (hash(p.i) - 0.5) * 8), y = snap(p.y), tw = 0.6 + 0.4 * Math.sin(t * 4 + p.i);
+      ctx.fillStyle = rgba(cs[1], 0.3 * f); glyph(ctx, ['.xxx.', 'xxxxx', '.xxx.'], x, y, u);
+      ctx.fillStyle = rgba(cs[0], f * tw); glyph(ctx, ['x.x', '.o.', 'x.x'], x, y, u, rgba('#ffffff', f));
+    } },
+    // Charcos de sombra que se quedan un momento, con alguna chispa que sube (Darkrai, Giratina...).
+    shadow: { life: 2.4, gap: 5, solid: true, draw(ctx, p, f, t, cs) {
+      const u = G.Sprites.PX, x = snap(p.x), y = snap(p.y), w = 3 + Math.round(1.5 * Math.sin(t * 2 + p.i));
+      ctx.fillStyle = rgba(cs[0], 0.5 * f);
+      ctx.fillRect(x - w * u, y, w * 2 * u, u); ctx.fillRect(x - (w - 1) * u, y - u, (w * 2 - 2) * u, 3 * u);
+      if (hash(p.i * 3 + Math.floor(t * 3)) > 0.5) {
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = rgba(cs[1], f); dot(ctx, x + (hash(p.i) - 0.5) * 10, y - 3 - p.age * 8);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+    } },
+    // Ondas de agua que se abren en el suelo (Kyogre, Manaphy...).
+    puddle: { life: 1.8, gap: 10, draw(ctx, p, f, t, cs) {
+      const k = p.age / 1.8, rx = 4 + 16 * k;
+      ctx.fillStyle = rgba(cs[0], 0.9 * f); pixEllipse(ctx, p.x, p.y, rx, rx * 0.38);
+      if (k > 0.25) { ctx.fillStyle = rgba(cs[1], 0.55 * f); pixEllipse(ctx, p.x, p.y, rx * 0.5, rx * 0.19); }
+    } },
+    // Destellos de arcoíris que caen detrás (Ho-Oh: en el anime deja un arcoíris al volar).
+    rainbow: { life: 2, gap: 3, draw(ctx, p, f, t) {
+      const u = G.Sprites.PX, c = 'hsl(' + ((p.i * 23) % 360) + ',100%,68%)';
+      const x = snap(p.x + (hash(p.i) - 0.5) * 22), y = snap(p.y - 6 + p.age * 4);
+      ctx.fillStyle = rgba(c, 0.2 * f); glyph(ctx, DIAMOND, x, y, u);
+      ctx.fillStyle = rgba(c, f);
+      glyph(ctx, Math.sin(t * 6 + p.i) > 0 ? ['..x..', '..x..', 'xxoxx', '..x..', '..x..'] : ['.x.', 'xox', '.x.'], x, y, u, rgba('#ffffff', f));
+    } },
+    // Grietas de magma que brillan y se enfrían (Groudon, Heatran): de amarillo a rojo oscuro.
+    magma: { life: 2.2, gap: 6, draw(ctx, p, f, t, cs) {
+      const k = p.age / 2.2, x = p.x, y = p.y, s = hash(p.i) < 0.5 ? -1 : 1, a = (hash(p.i + 1) - 0.5) * 4;
+      ctx.fillStyle = rgba(k < 0.3 ? cs[0] : k < 0.6 ? cs[1] : cs[2], f * (0.75 + 0.25 * Math.sin(t * 5 + p.i)));
+      pixLine(ctx, x - 7 * s, y + a, x - 2 * s, y - 1); pixLine(ctx, x - 2 * s, y - 1, x + 2 * s, y + 2); pixLine(ctx, x + 2 * s, y + 2, x + 7 * s, y - a);
+      if (hash(p.i + 5) > 0.6) pixLine(ctx, x - 2 * s, y - 1, x - 3 * s, y - 5);
+    } },
+    // Plumas que caen de su cuerpo meciéndose, se posan y se apagan (Lugia plateadas, Yveltal rojas).
+    feather: { life: 3, gap: 9, solid: true, draw(ctx, p, f, t, cs) {
+      const k = Math.min(1, p.age / 1.1), sw = Math.sin(p.age * 5 + p.i);
+      const x = p.x + (1 - k) * sw * 6 + (hash(p.i) - 0.5) * 14, y = p.y - (1 - k) * p.h;
+      ctx.globalAlpha = Math.min(1, f * 1.4);
+      ctx.fillStyle = cs[p.i % 2];
+      glyph(ctx, k >= 1 || sw > 0 ? ['.x', 'xo', 'xo', 'o.'] : ['x.', 'ox', 'ox', '.o'], snap(x), snap(y), G.Sprites.PX, cs[2]);
+      ctx.globalAlpha = 1;
+    } },
+    // Células de Zygarde que parpadean en el suelo.
+    cell: { life: 2.6, gap: 7, draw(ctx, p, f, t, cs) {
+      const on = hash(p.i * 3 + Math.floor(t * 2)) > 0.35 ? 1 : 0.45;
+      ctx.fillStyle = rgba(cs[0], f * on);
+      glyph(ctx, ['.x.', 'xox', '.x.'], snap(p.x + (hash(p.i) - 0.5) * 10), snap(p.y), G.Sprites.PX, rgba(cs[1], f));
+    } },
+    // Estrellitas que se quedan titilando (Jirachi, Cosmog).
+    star: { life: 2.4, gap: 6, draw(ctx, p, f, t, cs) {
+      ctx.fillStyle = rgba(cs[p.i % cs.length], f);
+      glyph(ctx, Math.sin(t * 5 + p.i * 1.7) > 0.2 ? ['..x..', '.xxx.', 'xxoxx', '.x.x.'] : ['.x.', 'xox', '.x.'],
+        snap(p.x + (hash(p.i) - 0.5) * 12), snap(p.y - 1), G.Sprites.PX, rgba('#ffffff', f));
+    } },
+    // Cristales de Teracristal que brotan del suelo, cada uno de un color, y se deshacen (Terapagos).
+    tera: { life: 2.4, gap: 6, draw(ctx, p, f, t) {
+      const c = 'hsl(' + ((p.i * 47 + t * 30) % 360 | 0) + ',100%,70%)', grown = p.age > 0.3;
+      ctx.fillStyle = rgba(c, f);
+      glyph(ctx, grown ? ['.x.', 'xox', 'xxx', '.x.'] : ['x', 'x'], snap(p.x + (hash(p.i) - 0.5) * 12), snap(p.y - (grown ? 4 : 1)), G.Sprites.PX, rgba('#ffffff', f));
+    } },
+    // Notas que rebotan en el suelo (Meloetta).
+    note: { life: 2.2, gap: 9, solid: true, draw(ctx, p, f, t, cs) {
+      const x = snap(p.x + (hash(p.i) - 0.5) * 10), y = snap(p.y - 6 - Math.abs(Math.sin(p.age * 4 + p.i)) * 5), n = p.i % 2 ? NOTE1 : NOTE2;
+      ctx.fillStyle = rgba('#141830', 0.5 * f); glyph(ctx, n, x + 2, y + 2, 2);
+      ctx.fillStyle = rgba(cs[p.i % cs.length], f); glyph(ctx, n, x, y, 2);
+    } },
+    // Aros dorados de la Sentencia que se abren en el suelo (Arceus).
+    gold: { life: 2.2, gap: 10, draw(ctx, p, f, t, cs) {
+      const rx = 5 + 4 * p.age / 2.2;
+      ctx.fillStyle = rgba(cs[0], f * (0.7 + 0.3 * Math.sin(t * 4 + p.i))); pixEllipse(ctx, p.x, p.y, rx, rx * 0.4);
+      ctx.fillStyle = rgba(cs[1], f); dot(ctx, p.x, p.y);
+    } },
+    // Nubes de energía roja que suben del suelo (Eternatus, como el Dinamax).
+    miasma: { life: 2.4, gap: 6, draw(ctx, p, f, t, cs) {
+      for (let j = 0; j < 3; j++) {
+        ctx.fillStyle = rgba(cs[j % cs.length], 0.6 * f * (0.7 + 0.3 * Math.sin(t * 3 + j + p.i)));
+        dot(ctx, p.x + (hash(p.i * 3 + j) - 0.5) * 12, p.y - p.age * 5 - j * 3, hash(p.i + j * 7) > 0.6 ? 2 : 1);
       }
     } }
   };
@@ -974,13 +1160,13 @@ G.Aura = (() => {
       if (at && d > 80) ent._trailAt = { x: ent.x, y };              // saltó (cambio de mapa...): sin raya
       else if (wave(t, seedOf(ent) + 2, 11, 7) > 0.15 && l.length < TRAIL_MAX && (!at || d > T.gap)) {
         const nx = at ? (at.y - y) / (d || 1) : 0, ny = at ? (ent.x - at.x) / (d || 1) : 1;
-        l.push({ x: ent.x + G.U.rand(-3, 3), y: y - 1, nx, ny, age: 0, i: ent._trailN = (ent._trailN || 0) + 1 });
+        l.push({ x: ent.x + G.U.rand(-3, 3), y: y - 1, nx, ny, h: (ent.bodyH || 24) * 0.6, age: 0, i: ent._trailN = (ent._trailN || 0) + 1 });
         ent._trailAt = { x: ent.x, y };
       }
     }
     if (!l.length) return;
     ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = T.solid ? 'source-over' : 'lighter';
     for (const p of l) {
       const k = p.age / T.life;
       T.draw(ctx, p, k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85, t, R.c);
@@ -999,22 +1185,20 @@ G.Aura = (() => {
     for (let i = 0; i < O.n; i++) {
       const a = t * (O.sp || 0.5) * 6.2832 + seed + i * 6.2832 / O.n, z = Math.sin(a);
       if ((z >= 0) !== inFront) continue;
-      const ox = Math.round(ent.x + Math.cos(a) * R), oy = Math.round(cy + z * R * 0.32 + Math.sin(t * 2 + i) * 2);
+      const ox = snap(ent.x + Math.cos(a) * R), oy = snap(cy + z * R * 0.32 + Math.sin(t * 2 + i) * 2);
       const c = O.c[i % O.c.length], k = inFront ? 1 : 0.55;           // los de detrás, más apagados
-      // Halo suave y la pieza en píxeles.
-      const g = ctx.createRadialGradient(ox, oy, 0, ox, oy, 5 * u);
-      g.addColorStop(0, rgba(c, 0.45 * k)); g.addColorStop(1, rgba(c, 0));
-      ctx.fillStyle = g; ctx.fillRect(ox - 5 * u, oy - 5 * u, 10 * u, 10 * u);
+      // Halo en píxeles (un rombo tenue) y la pieza.
+      ctx.fillStyle = rgba(c, 0.22 * k);
+      glyph(ctx, DIAMOND, ox, oy, u);
       ctx.globalAlpha = 0.9 * k;
-      ctx.fillStyle = c; ctx.strokeStyle = c;
+      ctx.fillStyle = c;
       if (O.s === 'ring') {
-        ctx.lineWidth = u; ctx.beginPath(); ctx.ellipse(ox, oy, 3.5 * u, 2.5 * u, 0, 0, 6.2832); ctx.stroke();
+        pixEllipse(ctx, ox, oy, 3.5 * u, 2.5 * u);
       } else if (O.s === 'cell') {
         ctx.fillRect(ox - u, oy - u, 2 * u, 2 * u);
         ctx.fillStyle = '#ffffff'; ctx.fillRect(ox - u, oy - u, u, u);
       } else if (O.s === 'star') {
-        const s = Math.round(u * (1.5 + Math.abs(Math.sin(t * 4 + i))));
-        ctx.fillRect(ox - s, oy, s * 2 + 1, 1); ctx.fillRect(ox, oy - s, 1, s * 2 + 1); ctx.fillRect(ox - 1, oy - 1, 2, 2);
+        glyph(ctx, Math.sin(t * 4 + i) > 0 ? ['..x..', '..x..', 'xxoxx', '..x..', '..x..'] : ['.x.', 'xox', '.x.'], ox, oy, u, '#ffffff');
       } else {
         // Gema: un rombo con el centro blanco.
         ctx.fillRect(ox - u, oy - 2 * u, 2 * u, 4 * u); ctx.fillRect(ox - 2 * u, oy - u, 4 * u, 2 * u);
@@ -1085,11 +1269,9 @@ G.Aura = (() => {
     gs.forEach((g, i) => {
       const lv = seqLevel(i, gs.length, t, seed, rule.seq);
       if (lv <= 0) return;
-      const gx = ld.dx + (g.cx + 0.5) * k, gy = ld.dy + (g.cy + 0.5) * k;
-      // Un halo pequeño (los puntos están muy juntos: uno grande los junta en una mancha).
-      const hl = ctx.createRadialGradient(gx, gy, 0, gx, gy, 2.2 * k);
-      hl.addColorStop(0, 'rgba(' + c + ',' + 0.4 * lv + ')'); hl.addColorStop(1, 'rgba(' + c + ',0)');
-      ctx.fillStyle = hl; ctx.fillRect(gx - 2.2 * k, gy - 2.2 * k, 4.4 * k, 4.4 * k);
+      // Halo en píxeles: el punto, un píxel del arte hacia cada lado y más tenue.
+      ctx.fillStyle = 'rgba(' + c + ',' + 0.35 * lv + ')';
+      for (let j = 0; j < g.length; j += 2) for (const [ox, oy] of AROUND) ctx.fillRect(ld.dx + (g[j] + ox) * k, ld.dy + (g[j + 1] + oy) * k, k, k);
       ctx.fillStyle = 'rgba(' + c + ',' + lv + ')';            // de su color, sin aclarar: se ve sobre un cuerpo claro
       for (let j = 0; j < g.length; j += 2) ctx.fillRect(ld.dx + g[j] * k, ld.dy + g[j + 1] * k, k, k);
     });
