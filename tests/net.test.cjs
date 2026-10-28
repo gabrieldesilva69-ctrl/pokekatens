@@ -342,13 +342,13 @@ test('co-op orbs: the host applies a guest orb only if the guest really has it, 
 });
 
 test('without a direct connection the game goes through the database relay, until the month\'s cap is used up', async () => {
-  let used = 0;
+  let used = 0, mine = 0;        // relay/<mes>/t y relay/<mes>/u/host/mb (el contador de antes, relayUse, a 0)
   const relay = [], timers = [];
-  const G = { NetCodec: codec(), DB: { fb: { uid: 'host', rtdb: {
-    ref: p => ({ on() {}, off() {}, set: s => { relay.push([p, s]); return Promise.resolve(); },
-      once: () => Promise.resolve({ val: () => used }),
-      transaction: fn => { used = fn(used); return Promise.resolve({ snapshot: { val: () => used } }); } })
-  } } } };
+  const ref = p => ({ on() {}, off() {}, set: s => { relay.push([p, s]); return Promise.resolve(); },
+    child: c => ref(p + '/' + c),
+    once: () => Promise.resolve({ val: () => (/^relay\/[^/]+\/t$/.test(p) ? used : /\/u\/host\/mb$/.test(p) ? mine : null) }),
+    update: o => { used = o.t; mine = o['u/host'].mb; return Promise.resolve(); } });
+  const G = { NetCodec: codec(), DB: { fb: { uid: 'host', rtdb: { ref } } } };
   class PC {
     createDataChannel() { return this.dc = { readyState: 'connecting', send() {}, close() {} }; }
     createOffer() { return Promise.resolve({ type: 'offer' }); }
@@ -366,8 +366,8 @@ test('without a direct connection the game goes through the database relay, unti
   const t = timers.length;
   for (let i = 0; i < 100; i++) N.send('a', big);
   assert.equal(relay.length, sig + 100);
-  timers[t](); await settle();                   // al minuto se apunta en relayUse/<mes>
-  assert.ok(used >= 1 && used <= 2, 'MB apuntados: ' + used);
+  timers[t](); await settle();                   // al minuto se apunta en relay/<mes>
+  assert.ok(used >= 1 && used <= 2 && mine === used, 'MB apuntados: ' + used);
   used = 5999;
   for (let i = 0; i < 100; i++) N.send('a', big);
   timers.at(-1)(); await settle();

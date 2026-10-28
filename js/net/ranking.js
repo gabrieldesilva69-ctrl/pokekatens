@@ -705,15 +705,32 @@ G.Ranking = (() => {
     return { rows, boards };
   }
 
-  /** Admin: banea o desbanea una cuenta del ranking (baneada = no puede subir marcas). */
-  function setMarked(uid, on) { return fbx().fs.collection('saves').doc(uid).update({ ban: !!on }); }
+  /**
+   * Admin: banea o desbanea una cuenta del ranking (baneada = no puede subir marcas).
+   * Va en bans/{uid} (28-10-2026): antes sólo se marcaba saves/{uid}.ban y, con quien
+   * nunca había guardado en la nube, el servidor lo rechazaba y no se baneaba a nadie.
+   * La marca vieja de la partida también se pone o se quita, si hay partida.
+   */
+  async function setMarked(uid, on, name = '') {
+    const fs = fbx().fs, ban = fs.collection('bans').doc(uid);
+    if (on) await ban.set({ at: now(), name: G.U.str(String(name || ''), 24) });
+    else await ban.delete();
+    await fs.collection('saves').doc(uid).update({ ban: !!on }).catch(e => { if (e.code !== 'not-found') throw e; });
+  }
   /** Admin: borra reportes ya vistos. */
   function dismiss(ids) { return Promise.all(ids.map(id => fbx().fs.collection('reports').doc(id).delete().catch(() => {}))); }
-  /** Admin: cuentas baneadas del ranking. */
+  /** Admin: cuentas baneadas del ranking (bans/ y las de antes, con saves/{uid}.ban). */
   async function markedAccounts() {
-    const s = await fbx().fs.collection('saves').where('ban', '==', true).limit(100).get();
-    return s.docs.map(d => { const v = d.data().save || {}; return { uid: d.id, name: v.name || '?', coins: v.coins || 0,
-      t1: (v.tickets || {}).t1 || 0, t10: (v.tickets || {}).t10 || 0, owned: Object.keys(v.owned || {}).length }; });
+    const fs = fbx().fs;
+    const [bans, olds] = await Promise.all([fs.collection('bans').limit(100).get(), fs.collection('saves').where('ban', '==', true).limit(100).get()]);
+    const out = new Map();
+    for (const d of olds.docs) {
+      const v = d.data().save || {};
+      out.set(d.id, { uid: d.id, name: v.name || '?', coins: v.coins || 0, t1: (v.tickets || {}).t1 || 0, t10: (v.tickets || {}).t10 || 0,
+                      owned: Object.keys(v.owned || {}).length });
+    }
+    for (const d of bans.docs) if (!out.has(d.id)) out.set(d.id, { uid: d.id, name: G.U.str(d.data().name || '?', 24), coins: 0, t1: 0, t10: 0, owned: 0 });
+    return [...out.values()];
   }
 
   /**

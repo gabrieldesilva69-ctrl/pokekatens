@@ -140,6 +140,9 @@ G.Coop = (() => {
 
   /** Número que llega por la red: si no es un número de verdad vale `def`, y si se pasa se queda en el tope. */
   const num = (v, def, lo, hi) => typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : def;
+  // Topes de lo que manda un invitado (28-10-2026), con margen de sobra: un golpe, el empuje
+  // (los ataques llegan a ~360) y los avisos de cada envío (por el relé van 3 por segundo).
+  const MAX_HIT = 1e6, MAX_KNOCK = 1000, MAX_EV = 2000;
 
   /*
    * Resumen de cada uno para el final de la partida (25-10-2026): su Pokémon, sus
@@ -367,29 +370,39 @@ G.Coop = (() => {
     else if (msg.h === 1 && !holds.has(from)) holdOn(from);
     if (typeof msg.w === 'number' && msg.w >= levelSeq && waiting.has(from)) picked(from);
     if (msg.p) { m.state = msg.p; m.pl.net = readState(msg.p); m.xpMul = m.pl.net.xpMul || 1; reconcile(from, m.pl.net); }
-    for (const ev of msg.ev || []) {
+    // (Como mucho MAX_EV avisos por envío: un juego trucado podía mandar millones.)
+    for (const ev of Array.isArray(msg.ev) ? msg.ev.slice(0, MAX_EV) : []) {
+      if (!Array.isArray(ev)) continue;
       switch (ev[0]) {
         case 'h': {
+          // El golpe lo calcula el invitado; aquí sólo se le ponen topes (28-10-2026: un
+          // daño de 1e12 mataba al momento a jefes y legendarios, y un empuje enorme
+          // mandaba al enemigo al infinito).
           const e = G.EnemyMgr.get(ev[1]);
           if (!e || e.dead || e.remote) break;
+          const d = num(ev[2], 0, 0, MAX_HIT);
+          if (!d) break;
           hitFrom = from;
-          e.hurt(ev[2], ev[3], ev[4], ev[5], ev[6]);
+          e.hurt(d, typeof ev[3] === 'string' ? ev[3].slice(0, 24) : '#fff', num(ev[4], 0, -1e5, 1e5), num(ev[5], 0, -1e5, 1e5), num(ev[6], 0, 0, MAX_KNOCK));
           hitFrom = null;
           break;
         }
         case 's': {
           const e = G.EnemyMgr.get(ev[1]);
           if (!e || e.dead) break;
-          if (ev[2] === 'b') e.applyBurn(ev[3]);
-          else if (ev[2] === 'p') e.applyPoison(ev[3]);
-          else if (ev[2] === 's') e.applySlow(ev[3]);
-          else if (ev[2] === 't') e.applyStun(ev[3]);
+          if (ev[2] === 'b') e.applyBurn(num(ev[3], 1, 0, 8));
+          else if (ev[2] === 'p') e.applyPoison(num(ev[3], 1, 0, 8));
+          else if (ev[2] === 's') e.applySlow(num(ev[3], 0, 0, 0.9));
+          else if (ev[2] === 't') e.applyStun(num(ev[3], 0, 0, 10));
           break;
         }
-        case 'c':
-          G.Combat.ghostCast(m.pl, ev[1], ev[2], ev[3], ev[4]);
-          emit(['c', from, ev[1], ev[2], ev[3], ev[4]], from);
+        case 'c': {
+          // Sólo se ve, pero con un nivel enorme se dibujaba un ataque gigante en todos.
+          const lv = Math.floor(num(ev[2], 1, 1, 99)), aim = num(ev[3], 0, -10, 10), evo = ev[4] ? 1 : 0;
+          G.Combat.ghostCast(m.pl, ev[1], lv, aim, evo);
+          emit(['c', from, ev[1], lv, aim, evo], from);
           break;
+        }
         case 'pb':
           G.World.breakAt(ev[1], ev[2]);
           emit(['pb', ev[1], ev[2]], from);
@@ -445,6 +458,23 @@ G.Coop = (() => {
     flushAll();
   });
 
+  /*
+   * Lo del equipo que manda el anfitrión (reloj, nivel, derrotados, monedas, tickets): con
+   * topes según lo que dura la partida (28-10-2026). Antes se copiaba tal cual y un
+   * anfitrión con el juego trucado podía dar a sus invitados los tickets que quisiera
+   * (se guardan en la partida de cada uno). Los mismos márgenes que el ranking
+   * (firestore.rules, validEntry) y, para monedas y tickets, muchos más de los que salen.
+   */
+  function teamOf(m) {
+    const t = num(m.t, 0, 0, 86400);
+    return { time: t, level: Math.floor(num(m.lv, 1, 1, 10 + t / 4)), xp: num(m.xp, 0, 0, 1e9), xpNext: num(m.xn, 1, 1, 1e9),
+             kills: Math.floor(num(m.ki, 0, 0, 100 + t * 12)), bosses: Math.floor(num(m.bo, 0, 0, 10 + t / 20)),
+             coins: Math.floor(num(m.co, 0, 0, 1000 + t * 200)), t1: Math.floor(num(m.t1, 0, 0, 30 + t / 6)),
+             t10: Math.floor(num(m.t10, 0, 0, 10 + t / 20)), cn: Math.floor(num(m.cn, 0, 0, 1e6)) };
+  }
+  /** Al acabar ('ov') van con sus nombres cortos. */
+  const teamOut = c => ({ t: c.time, lv: c.level, ki: c.kills, bo: c.bosses, co: c.coins, t1: c.t1, t10: c.t10, cn: c.cn });
+
   function onHostFrame(msg) {
     lastHostAt = performance.now();
     if (stalled) { stalled = false; updateAway(); }
@@ -462,8 +492,8 @@ G.Coop = (() => {
       if (msg.lu && msg.lu[0] > doneSeq && (msg.lu[0] > seenSeq || !showing)) { seenSeq = msg.lu[0]; api.levelStart(msg.lu[1]); }
       else if (!msg.lu && showing) api.resume();
     }
-    api.syncTeam({ time: msg.t, level: msg.lv, xp: msg.xp, xpNext: msg.xn, kills: msg.ki, bosses: msg.bo, coins: msg.co,
-                   t1: (msg.tk || [])[0], t10: (msg.tk || [])[1], cn: num((msg.tk || [])[2], 0, 0, 1e6) });
+    const tk = Array.isArray(msg.tk) ? msg.tk : [];
+    api.syncTeam(teamOf({ t: msg.t, lv: msg.lv, xp: msg.xp, xn: msg.xn, ki: msg.ki, bo: msg.bo, co: msg.co, t1: tk[0], t10: tk[1], cn: tk[2] }));
     for (const u in msg.p || {}) {
       const m = mates.get(u);
       if (m) m.pl.net = readState(msg.p[u]);
@@ -520,7 +550,13 @@ G.Coop = (() => {
       case 'sh': api.shiny(ev[1]); break;
       case 'mg': { const m = mates.get(ev[1]); if (m) G.Mega.apply(m.pl, !!ev[2]); break; }
       case 'pe': { const m = mates.get(ev[1]); if (m && G.DEX_BY[ev[2]]) G.Evolve.apply(m.pl, +ev[2]); break; }
-      case 'ov': { const cb = api.over; const d = ev[1]; if (d) takeSums(d.sums); end(); cb(d); break; }
+      case 'ov': {
+        const cb = api.over, d = ev[1] && typeof ev[1] === 'object' ? ev[1] : null;
+        if (d) takeSums(d.sums);
+        end();
+        cb(d && Object.assign({}, d, teamOut(teamOf(d))));
+        break;
+      }
       case 'sms': takeSums(ev[1]); break;
       case 'rift': case 'riftx': case 'arena': case 'aw': case 'al': G.Rift.onEvent(ev); break;
       case 'jd': case 'jk': case 'jb': G.Judgment.onEvent(ev); break;

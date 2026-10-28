@@ -54,9 +54,27 @@
     },
     "relayUse": {
       "$month": {
+        ".read": "auth != null"
+      }
+    },
+    "relay": {
+      "$month": {
         ".read": "auth != null",
-        ".write": "auth != null && newData.exists()",
-        ".validate": "$month.matches(/^20[0-9][0-9]-[01][0-9]$/) && newData.isNumber() && ((!data.exists() && newData.val() >= 1 && newData.val() <= 20) || (data.exists() && newData.val() > data.val() && newData.val() <= data.val() + 20))"
+        ".validate": "$month.matches(/^20[0-9][0-9]-[01][0-9]$/)",
+        "t": {
+          ".write": "auth != null",
+          ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + newData.parent().child('u').child(auth.uid).child('mb').val() - (data.parent().child('u').child(auth.uid).child('mb').exists() ? data.parent().child('u').child(auth.uid).child('mb').val() : 0)"
+        },
+        "u": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && newData.exists()",
+            ".validate": "newData.hasChildren(['mb', 'at']) && newData.child('at').val() === now && newData.child('mb').isNumber() && newData.child('mb').val() >= (data.exists() ? data.child('mb').val() : 0) + 1 && newData.child('mb').val() <= (data.exists() ? data.child('mb').val() : 0) + 20 && newData.child('mb').val() <= 2000 && (!data.exists() || data.child('at').val() < now - 50000) && newData.parent().parent().child('t').val() === (data.parent().parent().child('t').exists() ? data.parent().parent().child('t').val() : 0) + newData.child('mb').val() - (data.exists() ? data.child('mb').val() : 0)",
+            "mb": { ".validate": true },
+            "at": { ".validate": true },
+            "$other": { ".validate": false }
+          }
+        },
+        "$other": { ".validate": false }
       }
     },
     "rin": {

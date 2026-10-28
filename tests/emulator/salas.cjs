@@ -75,15 +75,29 @@ const member = n => ({ name: n, dex: 25, shiny: false, at: TS });
   await ok(A, 'PUT', `rooms/${A}/open`, false, '(empieza la partida)');
   await ok(X, 'PUT', `rin/${A}/${X}`, true, '(X pone su rin)');
   await no(X, 'PUT', `rooms/${A}/m/${X}`, member('x'), 'entrar en una sala cerrada');
-  // ---- el contador del relé (relayUse/<AAAA-MM>, en MB; net.js) ----
-  await ok(A, 'PUT', 'relayUse/2026-10', 3, 'apuntar los primeros MB del mes');
-  await ok(B, 'PUT', 'relayUse/2026-10', 4, 'sumar 1 MB');
-  await ok(B, 'GET', 'relayUse/2026-10', undefined, 'leer cuánto queda');
-  await no(X, 'PUT', 'relayUse/2026-10', 0, 'ponerlo a cero');
-  await no(X, 'PUT', 'relayUse/2026-10', 2, 'bajarlo');
-  await no(X, 'PUT', 'relayUse/2026-10', 100, 'sumar más de 20 de golpe');
-  await no(X, 'DELETE', 'relayUse/2026-10', undefined, 'borrarlo');
-  await no(X, 'PUT', 'relayUse/2026-10', 'x', 'algo que no es un número');
-  await no(X, 'PUT', 'relayUse/basura', 1, 'un mes que no es un mes');
+  // ---- el contador del relé (relay/<AAAA-MM> = { t, u: { uid: { mb, at } } }, en MB; net.js) ----
+  // (28-10-2026: antes era un número que cualquiera subía de 20 en 20 hasta el tope.)
+  const M = 'relay/2026-10';
+  await ok(A, 'PATCH', M, { t: 3, ['u/' + A]: { mb: 3, at: TS } }, 'apuntar los primeros MB del mes');
+  await ok(B, 'PATCH', M, { t: 4, ['u/' + B]: { mb: 1, at: TS } }, 'otro suma 1 MB');
+  await ok(B, 'GET', M + '/t', undefined, 'leer cuánto queda');
+  await no(B, 'PATCH', M, { t: 5, ['u/' + B]: { mb: 2, at: TS } }, 'volver a apuntar antes de 50 s');
+  await no(X, 'PATCH', M, { t: 24, ['u/' + X]: { mb: 21, at: TS } }, 'sumar más de 20 de golpe');
+  await no(X, 'PATCH', M, { t: 100, ['u/' + X]: { mb: 1, at: TS } }, 'subir el total más que lo suyo');
+  await no(X, 'PUT', M + '/t', 100, 'subir el total sin apuntar lo suyo');
+  await no(X, 'PATCH', M, { ['u/' + X]: { mb: 1, at: TS } }, 'apuntar lo suyo sin subir el total');
+  await no(X, 'PATCH', M, { t: 5, ['u/' + A]: { mb: 4, at: TS } }, 'apuntar a nombre de otro');
+  await no(X, 'PATCH', M, { t: 5, ['u/' + X]: { mb: 1, at: 1 } }, 'con una hora inventada');
+  await no(X, 'PUT', M + '/t', 0, 'ponerlo a cero');
+  await no(X, 'DELETE', M, undefined, 'borrarlo');
+  await no(X, 'PATCH', 'relay/basura', { t: 1, ['u/' + X]: { mb: 1, at: TS } }, 'un mes que no es un mes');
+  await no(X, 'PUT', M + '/junk', 1, 'datos de más');
+  await no(X, 'PUT', 'relayUse/2026-10', 6000, 'el contador viejo ya no se escribe');
+  await ok(B, 'GET', 'relayUse/2026-10', undefined, 'el contador viejo se sigue leyendo');
+  // Tope del mes por cuenta: 2000 MB (así una sola no puede gastarlo para todos).
+  await ok(null, 'PUT', M, { t: 2003, u: { [A]: { mb: 3, at: 1 }, [X]: { mb: 1999, at: 1 } } }, '(preparar: X lleva 1999)');
+  await ok(X, 'PATCH', M, { t: 2004, ['u/' + X]: { mb: 2000, at: TS } }, 'llegar a su tope');
+  await ok(null, 'PATCH', M + '/u/' + X, { at: 1 }, '(preparar: hace mucho)');
+  await no(X, 'PATCH', M, { t: 2005, ['u/' + X]: { mb: 2001, at: TS } }, 'pasar de su tope');
   console.log('reglas de la Realtime Database: todo bien');
 })().catch(e => { console.error(e.message); process.exit(1); });

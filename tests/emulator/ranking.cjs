@@ -28,11 +28,11 @@ async function signUp(email) {
   return { token: j.idToken, uid: j.localId };
 }
 
-/** Marca de una persona en la tabla de prueba s_test, con `t` segundos aguantados y `dmg` a Arceus. */
-function entry(user, t, dmg, board = 's_test', name = 'Tres') {
+/** Marca de una persona en la tabla de prueba s_d20261028t, con `t` segundos aguantados y `dmg` a Arceus. */
+function entry(user, t, dmg, board = 's_d20261028t', name = 'Tres') {
   return { writes: [entryWrite(user, t, dmg, board, name)] };
 }
-function entryWrite(user, t, dmg, board = 's_test', name = 'Tres') {
+function entryWrite(user, t, dmg, board = 's_d20261028t', name = 'Tres') {
   return {
     update: {
       name: `projects/demo-pokekatens/databases/(default)/documents/lb/${board}/e/${user.uid}`,
@@ -59,10 +59,10 @@ function rows(user, t, d) {
     drow: { mapValue: { fields: { d: { integerValue: String(d) }, ...who } } }
   };
 }
-/** Escritura del resumen lbs/s_test: top y dtop (mapas uid -> fila), me, ev y dev. */
+/** Escritura del resumen lbs/s_d20261028t: top y dtop (mapas uid -> fila), me, ev y dev. */
 function summaryWrite(top, dtop, me, ev = '', dev = '') {
   return { update: {
-    name: 'projects/demo-pokekatens/databases/(default)/documents/lbs/s_test',
+    name: 'projects/demo-pokekatens/databases/(default)/documents/lbs/s_d20261028t',
     fields: { top: { mapValue: { fields: top } }, dtop: { mapValue: { fields: dtop } },
               me: { stringValue: me }, ev: { stringValue: ev }, dev: { stringValue: dev } } } };
 }
@@ -91,8 +91,8 @@ const commit = (user, body) => fetch(`${DOCS}:commit`, {
   expect('marca imposible (t = 10801, más de 3 h)', 403, (await commit(tres, entry(tres, 10801))).status);
   expect('marca válida (t = 600)', 200, (await commit(tres, entry(tres, 600))).status);
   expect('otra marca antes de 30 s', 403, (await commit(tres, entry(tres, 700))).status);
-  expect('nombre de 25 letras', 403, (await commit(tres, entry(tres, 700, undefined, 's_test2', 'x'.repeat(25)))).status);
-  expect('nombre de 24 letras', 200, (await commit(tres, entry(tres, 700, undefined, 's_test2', 'x'.repeat(24)))).status);
+  expect('nombre de 25 letras', 403, (await commit(tres, entry(tres, 700, undefined, 's_d20261029t', 'x'.repeat(25)))).status);
+  expect('nombre de 24 letras', 200, (await commit(tres, entry(tres, 700, undefined, 's_d20261029t', 'x'.repeat(24)))).status);
 
   // ---- daño a Arceus (dmg): sólo tras el minuto 30 y como mucho 3000 por segundo desde entonces ----
   const ana = await signUp('ana@jugadores.pokekatens.invalid');
@@ -107,7 +107,7 @@ const commit = (user, body) => fetch(`${DOCS}:commit`, {
   expect('lo mismo otra vez (no mejora nada)', 403, (await commit(ana, entry(ana, 1900, 200000))).status);
   expect('mismo tiempo y más daño (al tope: 100 s × 3000)', 200, (await commit(ana, entry(ana, 1900, 300000))).status);
 
-  // ---- resumen lbs/s_test: copias exactas, sólo con una marca nueva y sin echar a nadie sin motivo ----
+  // ---- resumen lbs/s_d20261028t: copias exactas, sólo con una marca nueva y sin echar a nadie sin motivo ----
   const [bea, ces, dan] = [await signUp('bea@jugadores.pokekatens.invalid'), await signUp('ces@jugadores.pokekatens.invalid'),
     await signUp('dan@jugadores.pokekatens.invalid')];
   const B = rows(bea, 2000, 5000), C = rows(ces, 2100, 6000);

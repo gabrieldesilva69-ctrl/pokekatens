@@ -241,11 +241,24 @@ G.Net = (() => {
 
   // ---------------- relé y su tope del mes ----------------
 
-  const useRef = () => rtdb.ref('relayUse/' + new Date().toISOString().slice(0, 7));
+  /*
+   * Contador del mes (28-10-2026): relay/<AAAA-MM> = { t: total, u: { uid: { mb, at } } }.
+   * Antes era un solo número (relayUse/<AAAA-MM>) que cualquiera podía subir de 20 en 20
+   * hasta el tope y dejar a todos sin relé. Ahora cada uno apunta lo suyo (+20 como mucho,
+   * una vez cada 50 s y 2000 al mes por cuenta) y las reglas obligan a que el total suba lo
+   * mismo. Lo apuntado en relayUse antes del cambio sigue contando (ya no se escribe).
+   */
+  const month = () => new Date().toISOString().slice(0, 7);
+  const useRef = () => rtdb.ref('relay/' + month());
+  /** MB gastados este mes (lo nuevo más lo de antes del cambio). */
+  async function usedMB() {
+    const [t, old] = await Promise.all([useRef().child('t').once('value'), rtdb.ref('relayUse/' + month()).once('value')]);
+    return (+t.val() || 0) + (+old.val() || 0);
+  }
   /** Al pasar al relé: ¿queda este mes? */
   function checkRelay() {
     if (!rtdb || relayFull) return;
-    useRef().once('value').then(s => { if ((+s.val() || 0) >= RELAY_CAP_MB) relayOff(); }).catch(() => {});
+    usedMB().then(n => { if (n >= RELAY_CAP_MB) relayOff(); }).catch(() => {});
   }
   function relayOff() {
     if (relayFull) return;
@@ -254,14 +267,24 @@ G.Net = (() => {
     for (const [u, p] of peers) if (p.mode === 'relay') { p.mode = 'connecting'; useRelay(u); }
   }
   /** Suma al contador del mes los MB enteros mandados por el relé (al cerrar, también lo que sobra). */
-  function noteRelay(all) {
+  // (Si otro apunta a la vez, el total ha cambiado y las reglas lo rechazan: se vuelve a leer.)
+  async function noteRelay(all, tries = 3) {
     relayNoteT = 0;
     const mb = Math.min(20, (all ? Math.ceil : Math.floor)(relayBytes * RELAY_OVERHEAD / 1e6));
-    if (!rtdb || mb < 1) return;
-    relayBytes = Math.max(0, relayBytes - mb * 1e6 / RELAY_OVERHEAD);
-    useRef().transaction(v => (+v || 0) + mb)
-      .then(r => { if (r && r.snapshot && (+r.snapshot.val() || 0) >= RELAY_CAP_MB) relayOff(); })
-      .catch(e => console.warn('[Net] relé (contador):', e.code || e.message));
+    const me = uid;
+    if (!rtdb || !me || mb < 1) return;
+    const ref = useRef();
+    try {
+      const [t, mine] = await Promise.all([ref.child('t').once('value'), ref.child('u/' + me + '/mb').once('value')]);
+      const total = (+t.val() || 0) + mb;
+      await ref.update({ t: total, ['u/' + me]: { mb: (+mine.val() || 0) + mb, at: { '.sv': 'timestamp' } } });   // (la hora del servidor: ServerValue.TIMESTAMP)
+      relayBytes = Math.max(0, relayBytes - mb * 1e6 / RELAY_OVERHEAD);
+      if (total >= RELAY_CAP_MB) relayOff(); else checkRelay();
+    } catch (e) {
+      // Lo no apuntado se queda en relayBytes para la próxima vez.
+      if (tries > 1 && !all) { relayNoteT = setTimeout(() => noteRelay(false, tries - 1), 2000 + Math.random() * 3000); return; }
+      console.warn('[Net] relé (contador):', e.code || e.message);
+    }
   }
 
   function useRelay(u) {

@@ -56,7 +56,7 @@ G.ModUI = (() => {
 
   /** "s_w2026-42" -> "Solo · Semana" */
   function boardName(b) {
-    const [m, p] = b.split('_');
+    const [m, p = ''] = String(b || '').split('_');
     const mode = m === 'g' ? 'Grupo' : 'Solo';
     const per = p.startsWith('d') ? 'Hoy' : p.startsWith('w') ? 'Semana' : p.startsWith('m') ? 'Mes' : 'Histórico';
     const dex = (b.match(/_p(\d+)$/) || [])[1];
@@ -76,12 +76,15 @@ G.ModUI = (() => {
       const info = await G.Ranking.entryInfo(g.board, g.e).catch(() => null);
       const t = info ? info.t : g.t;
       const sus = t > SUSPECT_T;
+      // Los nombres, de la marca (28-10-2026): los del reporte los escribe quien reporta y
+      // podían ser de otro. Sin marca, el nombre del reporte sólo se enseña, entre comillas.
+      const names = info ? info.names : g.names.map(n => '«' + n + '»');
       const mons = document.createElement('span');
       mons.className = 'mons';
       if (info) info.dex.forEach((d, i) => { if (G.DEX_BY[d]) mons.appendChild(G.UI.spriteCanvas(d, 44, 40, { scale: 1, shiny: !!(info.shiny || [])[i] })); });
       row.innerHTML = `<span class="pos" title="veces reportada">${g.n}×</span>`;
       row.appendChild(mons);
-      row.insertAdjacentHTML('beforeend', `<span class="who"><b translate="no">${g.names.map(esc).join(' · ')}</b>
+      row.insertAdjacentHTML('beforeend', `<span class="who"><b translate="no">${names.map(esc).join(' · ')}</b>
           <small>${esc(boardName(g.board))}${info ? ' · Nv. ' + (info.lv || 1) + ' · ' + (info.kills || 0).toLocaleString(G.I18n.locale) + ' derrotados' : ' · ya no está en el top 50'}</small>
           ${sus ? '<small class="mod-warn">Más de 33 min: casi imposible con la Sentencia de Arceus</small>' : ''}</span>
         <span class="time${sus ? ' mod-warn' : ''}">${fmt(t)}</span>`);
@@ -92,22 +95,23 @@ G.ModUI = (() => {
         try { await fn(); G.UI.toast(msg); row.remove(); }
         catch (e) { G.UI.toast('No se pudo: ' + (e.code || e.message)); acts.querySelectorAll('button').forEach(b => { b.disabled = false; }); }
       };
-      acts.append(
+      acts.append(...[
         btn('Borrar marca', 'ghost', () => busy(async () => {
           await G.Ranking.removeEverywhere(g.e, mode, [], g.board);
           await G.Ranking.dismiss(g.ids);
         }, 'Marca borrada')),
-        btn('Banear', 'danger', () => {
-          if (!confirm('¿Banear a ' + g.names.join(', ') + '? No podrán volver a salir en el ranking y se borra su marca.')) return;
+        // Banear sólo si la marca sigue en su top 50: así se ve de quién es (sus uids y nombres).
+        info && btn('Banear', 'danger', () => {
+          if (!confirm('¿Banear a ' + info.names.join(', ') + '? No podrán volver a salir en el ranking y se borra su marca.')) return;
           busy(async () => {
-            const uids = g.e.split('_');
-            for (const u of uids) await G.Ranking.setMarked(u, true).catch(() => {});
+            // (Si falla uno, se avisa: antes el error se perdía y salía «Baneado» igual.)
+            for (let i = 0; i < info.uids.length; i++) await G.Ranking.setMarked(info.uids[i], true, info.names[i]);
             await G.Ranking.removeEverywhere(g.e, mode, [], g.board);
             await G.Ranking.dismiss(g.ids);
           }, 'Baneado');
         }),
         btn('Descartar', 'ghost', () => busy(() => G.Ranking.dismiss(g.ids), 'Reporte descartado'))
-      );
+      ].filter(Boolean));
       row.appendChild(acts);
       list.appendChild(row);
     }

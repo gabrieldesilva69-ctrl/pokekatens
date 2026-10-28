@@ -36,6 +36,11 @@ G.CHANGELOG = [
      "Many glows now fade out and slowly light up again instead of flickering: Eternatus's core, Magearna's heart, Deoxys's crystal, Kyogre's lines, Dialga's diamond, Palkia's pearls... And more legendaries glow: Suicune's mane, Shaymin's flowers, the Tapus' shells and many more."],
     ["Más megas con partículas propias (burbujas, ascuas, pétalos, nieve, arena, destellos de dragón...): las de Venusaur, Blastoise, Gyarados, Gengar, Tyranitar, Garchomp, Salamence y muchas más.",
      "More Megas with their own particles (bubbles, embers, petals, snow, sand, dragon sparkles...): those of Venusaur, Blastoise, Gyarados, Gengar, Tyranitar, Garchomp, Salamence and many more."]
+  ], fix: [
+    ["En grupo, lo que llega de los demás tiene topes: el daño, el empuje y los estados de los golpes de un compañero, y los tickets y monedas del equipo (según lo que dura la partida). Un juego trucado ya no mata a un legendario de un golpe ni reparte tickets sin fin.",
+     "In co-op, what arrives from other players now has limits: the damage, knockback and status effects of a teammate's hits, and the team's tickets and coins (based on how long the run has lasted). A modified game can no longer kill a legendary in one hit or hand out endless tickets."],
+    ["En el móvil, los campos de búsqueda de la Colección y del ranking ya no acercan la página al tocarlos (en el iPhone se quedaba ampliada).",
+     "On mobile, the search fields in the Collection and the ranking no longer zoom the page in when you tap them (on iPhone it stayed zoomed in)."]
   ] },
   { d: '2026-10-26', title: ['PokeKatens: Protección más justa', 'PokeKatens: fairer Protect'], chg: [
     ["Protección ya no te hace invencible: con mucha reducción de recarga se volvía a poner antes de que se acabara el escudo y no había quien te tocara. Ahora se recarga en 7 s y, por mucha reducción que lleves, nunca en menos de 5 s. El escudo sigue durando 1,5 s.",
