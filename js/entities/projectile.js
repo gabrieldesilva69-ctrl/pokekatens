@@ -50,6 +50,7 @@ G.Projectiles = (() => {
         p.oa += p.ospeed * dt;
         p.x = o.x + Math.cos(p.oa) * p.orad;
         p.y = o.y + Math.sin(p.oa) * p.orad * 0.7;
+        if (p.vis && p.vis.plus) plusTrail(p, dt, 0.12);
         continue;
       }
 
@@ -84,12 +85,21 @@ G.Projectiles = (() => {
         p.trailT = (p.trailT || 0) - dt;
         if (p.trailT <= 0) { p.trailT = 0.04; G.FX.trail(p.vis.trail, p.vis.pal, p.x, p.y - G.LIFT, p.vx, p.vy); }
       }
+      if (p.vis && p.vis.plus) plusTrail(p, dt, 0.07);
       p.x += p.vx * dt;
       p.y += p.vy * dt;
 
       // Fuera de la vista con margen generoso -> se descarta.
       if (!G.Camera.sees(p.x, p.y, 260)) { list.splice(i, 1); continue; }
     }
+  }
+
+  // Ataques «+»: chispas claras que se quedan atrás, una cada `every` s (y sólo si se ve).
+  function plusTrail(p, dt, every) {
+    p.glintT = (p.glintT == null ? Math.random() * every : p.glintT) - dt;
+    if (p.glintT > 0) return;
+    p.glintT = every;
+    if (G.Camera.sees(p.x, p.y, 20)) G.FX.glint(p.vis.pal, p.x, p.y - G.LIFT);
   }
 
   function nearest(enemies, x, y, maxDist) {
@@ -130,7 +140,7 @@ G.Projectiles = (() => {
       else if (G.VFX.spins(shape)) angle = p.t * 9;
       G.VFX.draw(ctx, shape, v.pal, p.x, p.y - L, {
         angle, alpha: a, scale: p.r >= 8 ? 1.5 : 1,
-        frame: Math.floor(p.t * 12)
+        frame: Math.floor(p.t * 12), plus: v.plus
       });
     }
   }

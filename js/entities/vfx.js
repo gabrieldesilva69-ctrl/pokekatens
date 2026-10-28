@@ -4,7 +4,7 @@
  * Así una misma burbuja sale azul de agua o morada de veneno, y todo comparte
  * píxel y contorno oscuro con los sprites de Mundo Misterioso.
  *
- *   G.VFX.draw(ctx, shape, pal, x, y, { angle, scale, frame, alpha })
+ *   G.VFX.draw(ctx, shape, pal, x, y, { angle, scale, frame, alpha, plus })
  *   G.VFX.forMove(m)  -> cómo se ve ese movimiento (proyectil, rayo, golpe...)
  *   G.VFX.forType(t)  -> forma por defecto de un tipo (disparos enemigos)
  */
@@ -389,7 +389,41 @@ G.VFX = (() => {
     return cv;
   }
 
-  /** Dibuja centrado en (x, y). opts: angle, scale (1 = píxel de juego), frame, alpha. */
+  // Ataques «+» (evolucionados): borde de luz de 2 píxeles de arte alrededor de la
+  // forma, el de dentro del tono más claro de su paleta y el de fuera más tenue.
+  // Se hace una vez por forma, paleta y fotograma (un drawImage más al dibujar).
+  const HALO = 2;
+  const halos = new Map();
+  function halo(shape, pal, frame = 0) {
+    const S = SHAPES[shape] || SHAPES.ball;
+    const f = (frame | 0) % (S.frames || 1);
+    const k = shape + '|' + pal + '|' + f;
+    let cv = halos.get(k);
+    if (cv) return cv;
+    const P = grid(S.w, S.h);
+    S.gen(P, f);
+    const W = S.w + HALO * 2, Hh = S.h + HALO * 2;
+    cv = document.createElement('canvas');
+    cv.width = W; cv.height = Hh;
+    const c = cv.getContext('2d');
+    const colors = PAL[pal] || PAL.normal;
+    const solid = (x, y) => !!P.get(x - HALO, y - HALO);
+    for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
+      if (solid(x, y)) continue;
+      let d = 9;
+      for (let b = -HALO; b <= HALO; b++) for (let a = -HALO; a <= HALO; a++) {
+        if (solid(x + a, y + b)) d = Math.min(d, Math.max(Math.abs(a), Math.abs(b)));
+      }
+      if (d === 1) c.fillStyle = rgba(colors[4], 0.85);
+      else if (d === 2) c.fillStyle = rgba(colors[3], 0.35);
+      else continue;
+      c.fillRect(x, y, 1, 1);
+    }
+    halos.set(k, cv);
+    return cv;
+  }
+
+  /** Dibuja centrado en (x, y). opts: angle, scale (1 = píxel de juego), frame, alpha, plus (borde de luz). */
   function draw(ctx, shape, pal, x, y, o = {}) {
     const S = SHAPES[shape] || SHAPES.ball;
     const cv = sprite(shape, pal, o.frame || 0);
@@ -402,6 +436,10 @@ G.VFX = (() => {
     if (a) {
       a = Math.round(a / (Math.PI / 8)) * (Math.PI / 8);          // 16 direcciones: menos parpadeo
       ctx.rotate(a);
+    }
+    if (o.plus) {
+      const W = S.w + HALO * 2, Hh = S.h + HALO * 2;
+      ctx.drawImage(halo(shape, pal, o.frame || 0), -W * k / 2, -Hh * k / 2, W * k, Hh * k);
     }
     ctx.drawImage(cv, -S.w * k / 2, -S.h * k / 2, S.w * k, S.h * k);
     ctx.restore();
@@ -562,9 +600,11 @@ G.VFX = (() => {
     ghost: 'shadow', dragon: 'fire', dark: 'crescent', steel: 'shard', fairy: 'star', normal: 'star'
   };
 
+  // plus: el ataque ha evolucionado («… +»). Lo pintan projectile.js, fx.js y combat.js
+  // con el mismo lenguaje: borde de luz, destello al lanzar, chispas y anillo doble.
   function forMove(m) {
     const v = MOVE[m.id] || {};
-    return Object.assign({ pal: m.type, proj: TYPE_SHAPE[m.type] || 'ball' }, v, { pal: v.pal || m.type });
+    return Object.assign({ pal: m.type, proj: TYPE_SHAPE[m.type] || 'ball' }, v, { pal: v.pal || m.type, plus: !!m.evolved });
   }
   function forType(type) { return { proj: TYPE_SHAPE[type] || 'ball', pal: PAL[type] ? type : 'normal' }; }
 

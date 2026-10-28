@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-28', title: ["PokeKatens: legendarios con más efectos", "PokeKatens: legendaries with more effects"], new: [
+    ["Los ataques evolucionados («… +») ya se ven distintos de los normales: llevan un borde de luz de su color, un destello en cruz al lanzarlos, chispas que se quedan atrás, un aro doble en las ondas y un eco en los golpes. Sólo cambia cómo se ven, y en grupo tus amigos también lo ven. Con la calidad en «Baja», sólo el borde.",
+     "Evolved moves («… +») now look different from normal ones: they have a border of light in their colour, a cross-shaped flash when cast, sparkles that trail behind, a double ring on shockwaves and an echo on strikes. Only the look changes, and in a group your friends see it too. With quality set to “Low”, just the border."],
     ["También relucen con su franja de color Scizor (roja), Metagross (azul plateada), Gholdengo (dorada), Carbink (rosa), Glaceon (azul hielo) y Magearna (rosa dorada), y las megas de Scizor y Metagross.",
      "Scizor (red), Metagross (silver blue), Gholdengo (gold), Carbink (pink), Glaceon (ice blue) and Magearna (rose gold) also gleam with their coloured band, as do the Megas of Scizor and Metagross."],
     ["Dialga, Diancie, Steelix, Registeel y Aegislash relucen sin ser shiny: de vez en cuando les cruza una franja de luz de su color (azul, rosa, plateada, azul acero y dorada), como la blanca de los shiny.",

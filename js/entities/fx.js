@@ -43,12 +43,33 @@ G.FX = (() => {
     }
   }
 
-  /** Sprite de efecto suelto. o: { vx, vy, life, scale, angle, spin, grav, frameRate, fade } */
+  /** Sprite de efecto suelto. o: { vx, vy, life, scale, angle, spin, grav, frameRate, fade, plus } */
   function sp(shape, pal, x, y, o = {}) {
     if (sprites.length >= CAP_SPRITES[q()]) return;
     sprites.push({ shape, pal, x, y, vx: o.vx || 0, vy: o.vy || 0, t: 0, life: o.life || 0.4,
                    scale: o.scale || 1, angle: o.angle || 0, spin: o.spin || 0, grav: o.grav || 0,
-                   fr: o.frameRate || 10, fade: o.fade !== false });
+                   fr: o.frameRate || 10, fade: o.fade !== false, plus: !!o.plus });
+  }
+
+  // ---------------- ataques «+» (evolucionados) ----------------
+  // Un mismo lenguaje para todas las formas: borde de luz (G.VFX.draw con plus),
+  // un destello en cruz al lanzar, chispas claras que se quedan atrás y un
+  // anillo doble. En calidad baja sólo queda el borde (lo demás no sale).
+
+  /** Chispa clara de su paleta que se queda atrás y se apaga (estela de los «+»). */
+  function glint(pal, x, y) {
+    if (!q() || parts.length >= CAP_PARTS[q()] * 0.85) return;      // no le quita sitio a lo demás
+    const P = G.VFX.PAL[pal] || G.VFX.PAL.normal;
+    px(x + G.U.rand(-3, 3), y + G.U.rand(-3, 3), Math.random() < 0.6 ? P[4] : P[3],
+       { vx: G.U.rand(-12, 12), vy: G.U.rand(-26, -8), life: G.U.rand(0.2, 0.32), drag: 0.86 });
+  }
+
+  /** Destello al lanzar un «+»: una cruz de luz breve y un aro que sale rápido y frena. */
+  function plusFlash(x, y, pal, r = 14) {
+    if (!q()) return;
+    const P = G.VFX.PAL[pal] || G.VFX.PAL.normal;
+    sp('star', pal, x, y, { life: 0.16, scale: 1, plus: true });
+    rings.push({ x, y, r0: r * 0.6, r1: r * 2, color: P[4], life: 0.22, t: 0, width: 2, ease: true });
   }
 
   /** Centelleo de shiny (cruz de píxeles que nace y se apaga). */
@@ -82,36 +103,46 @@ G.FX = (() => {
     texts.push({ x: x + G.U.rand(-6, 6), y, vy: -46, t: 0, life: big ? 0.95 : 0.62, s: value, color, big });
   }
 
-  /** Anillo de onda (puntos de píxel). */
-  function ring(x, y, r0, r1, color, life = 0.3, width = 3) {
+  /** Anillo de onda (puntos de píxel). plus: paleta de un ataque «+» → un segundo aro claro por dentro. */
+  function ring(x, y, r0, r1, color, life = 0.3, width = 3, plus = null) {
     rings.push({ x, y, r0, r1, color, life, t: 0, width });
+    if (plus && q()) {
+      const P = G.VFX.PAL[plus] || G.VFX.PAL.normal;
+      rings.push({ x, y, r0: r0 * 0.8, r1: r1 * 0.86, color: P[4], life, t: 0, width: 2, ease: true });
+    }
   }
 
-  /** Golpe cuerpo a cuerpo. fx: { pal, melee } (ver G.VFX.forMove). */
+  /** Golpe cuerpo a cuerpo. fx: { pal, melee, plus } (ver G.VFX.forMove). */
   function slash(x, y, angle, radius, arc, color, fx = {}) {
-    const pal = fx.pal || 'normal';
-    slashes.push({ x, y, angle, radius, arc, pal, t: 0, life: 0.22 });
+    const pal = fx.pal || 'normal', plus = !!fx.plus;
+    slashes.push({ x, y, angle, radius, arc, pal, t: 0, life: 0.22, plus });
     const mx = x + Math.cos(angle) * radius * 0.7, my = y + Math.sin(angle) * radius * 0.7;
     switch (fx.melee) {
-      case 'impact': sp('impact', pal, mx, my, { life: 0.2, scale: 1.5, frameRate: 12, fade: false }); break;
-      case 'jaws':   sp('jaws', pal, mx, my, { life: 0.24, scale: 1.5, frameRate: 9, fade: false }); break;
-      case 'claw':   sp('claw', pal, mx, my, { life: 0.2, scale: 1.5, angle: angle - Math.PI / 4 }); break;
+      case 'impact': sp('impact', pal, mx, my, { life: 0.2, scale: 1.5, frameRate: 12, fade: false, plus }); break;
+      case 'jaws':   sp('jaws', pal, mx, my, { life: 0.24, scale: 1.5, frameRate: 9, fade: false, plus }); break;
+      case 'claw':   sp('claw', pal, mx, my, { life: 0.2, scale: 1.5, angle: angle - Math.PI / 4, plus }); break;
       case 'vine':
       case 'feather':
         for (let i = 0; i < 4; i++) {
           const a = angle + G.U.rand(-arc / 2, arc / 2), r = radius * G.U.rand(0.5, 1);
           sp('leaf', fx.melee === 'feather' ? 'flying' : pal, x + Math.cos(a) * r, y + Math.sin(a) * r,
-             { vx: Math.cos(a) * 40, vy: Math.sin(a) * 40 + 20, life: 0.45, spin: G.U.rand(-8, 8), grav: 60 });
+             { vx: Math.cos(a) * 40, vy: Math.sin(a) * 40 + 20, life: 0.45, spin: G.U.rand(-8, 8), grav: 60, plus });
         }
         break;
     }
+    // «+»: unas chispas en el filo del golpe.
+    if (plus) for (let i = 0; i < 3; i++) {
+      const a = angle + G.U.rand(-0.5, 0.5) * Math.min(arc, 6.2832), r = radius * G.U.rand(0.85, 1.05);
+      glint(pal, x + Math.cos(a) * r, y + Math.sin(a) * r);
+    }
   }
 
-  /** Rayo recto. fx: { pal, beam } — beam = forma que viaja por él o 'lightning'. */
+  /** Rayo recto. fx: { pal, beam, plus } — beam = forma que viaja por él o 'lightning'. */
   function beam(x, y, angle, len, width, color, fx = {}) {
-    beams.push({ x, y, angle, len, width, pal: fx.pal || 'normal', shape: fx.beam || null, t: 0, life: 0.2, seed: Math.random() * 100 });
-    sp('impact', fx.pal || 'normal', x + Math.cos(angle) * 10, y + Math.sin(angle) * 10, { life: 0.12, scale: 1 });
-    sp('impact', fx.pal || 'normal', x + Math.cos(angle) * len, y + Math.sin(angle) * len, { life: 0.18, scale: 1.5 });
+    const plus = !!fx.plus;
+    beams.push({ x, y, angle, len, width, pal: fx.pal || 'normal', shape: fx.beam || null, t: 0, life: 0.2, seed: Math.random() * 100, plus });
+    sp('impact', fx.pal || 'normal', x + Math.cos(angle) * 10, y + Math.sin(angle) * 10, { life: 0.12, scale: 1, plus });
+    sp('impact', fx.pal || 'normal', x + Math.cos(angle) * len, y + Math.sin(angle) * len, { life: 0.18, scale: 1.5, plus });
   }
 
   // ---------------- actualización ----------------
@@ -169,6 +200,7 @@ G.FX = (() => {
       for (let d = 0; d < b.len; d += seg) {
         const ny = d + seg >= b.len ? 0 : snap((G.U.hash(d | 0, (now * 30) | 0, b.seed | 0) - 0.5) * b.width);
         const lo = Math.min(py, ny), hi = Math.max(py, ny);
+        if (b.plus) { ctx.fillStyle = P[2]; ctx.fillRect(d - PX * 2, lo - PX * 3, seg + PX * 4, hi - lo + PX * 6); }
         ctx.fillStyle = P[3]; ctx.fillRect(d - PX, lo - PX * 2, seg + PX * 2, hi - lo + PX * 4);
         ctx.fillStyle = P[4]; ctx.fillRect(d, lo - PX, seg, hi - lo + PX * 2);
         py = ny;
@@ -182,13 +214,18 @@ G.FX = (() => {
         ctx.fillStyle = P[2]; ctx.fillRect(d, -hw, seg, hw * 2);
         ctx.fillStyle = P[3]; ctx.fillRect(d, -snap(hw * 0.55), seg, snap(hw * 0.55) * 2);
         ctx.fillStyle = P[4]; ctx.fillRect(d, -PX, seg, PX * 2);
+        // «+»: filo de luz por fuera del contorno, a trazos que corren hacia delante.
+        if (b.plus && ((d / seg + ((now * 24) | 0)) & 3) !== 0) {
+          ctx.fillStyle = P[4];
+          ctx.fillRect(d, -hw - PX * 2, seg, PX); ctx.fillRect(d, hw + PX, seg, PX);
+        }
       }
       // Sprites que viajan por el rayo (llamas, gotas, cristales, ondas).
       if (b.shape) {
         const gap = 26, off = (now * 420) % gap;
         for (let d = off; d < b.len - 6; d += gap) {
           const yo = Math.sin(d * 0.3 + b.seed) * b.width * 0.18;
-          G.VFX.draw(ctx, b.shape, b.pal, d, yo, { angle: 0.0001, scale: 1.5, frame: (d / gap + now * 12) | 0 });
+          G.VFX.draw(ctx, b.shape, b.pal, d, yo, { angle: 0.0001, scale: 1.5, frame: (d / gap + now * 12) | 0, plus: b.plus });
         }
       }
     }
@@ -210,14 +247,27 @@ G.FX = (() => {
         ctx.fillStyle = j < 0 ? P[1] : j === thick ? P[4] : j > thick / 2 ? P[3] : P[2];
         ctx.fillRect(snap(s.x + Math.cos(a) * rr), snap(s.y + Math.sin(a) * rr), PX, PX);
       }
+      // «+»: filo de luz por fuera del contorno y un eco del tajo por dentro (con
+      // cualquier paleta se nota, también en los blancos de tipo Normal).
+      if (s.plus && thick > 0) {
+        const rr = r + PX * 2, re = r * 0.78 - PX * 2;
+        ctx.fillStyle = P[4];
+        ctx.fillRect(snap(s.x + Math.cos(a) * rr), snap(s.y + Math.sin(a) * rr), PX, PX);
+        ctx.fillStyle = P[1];
+        ctx.fillRect(snap(s.x + Math.cos(a) * (re + PX)), snap(s.y + Math.sin(a) * (re + PX)), PX, PX);
+        ctx.fillStyle = P[3];
+        ctx.fillRect(snap(s.x + Math.cos(a) * re), snap(s.y + Math.sin(a) * re), PX, PX);
+      }
     }
     ctx.globalAlpha = 1;
   }
 
   function drawRing(ctx, r) {
     const k = r.t / r.life;
+    // (ease: sale rápido y frena al final, como los aros de los ataques «+».)
+    const e = r.ease ? 1 - (1 - k) * (1 - k) * (1 - k) : k;
     // Con tope: un radio enorme (o que no es número) colgaba la pestaña dibujando millones de puntos.
-    const rad = Math.min(4000, G.U.lerp(r.r0, r.r1, k)) || 0;
+    const rad = Math.min(4000, G.U.lerp(r.r0, r.r1, e)) || 0;
     const n = Math.max(10, Math.ceil(rad * 6.2832 / (PX * 2)));
     const size = r.width >= 4 ? PX * 2 : PX;
     ctx.globalAlpha = step(1 - k);
@@ -246,7 +296,7 @@ G.FX = (() => {
       if (s.twinkle) { G.Icons.twinkle(ctx, s.x, s.y, s.t / s.life, PX); continue; }
       G.VFX.draw(ctx, s.shape, s.pal, s.x, s.y, {
         angle: s.angle, scale: s.scale, alpha: s.fade ? step(k) : 1,
-        frame: Math.floor(s.t * s.fr)
+        frame: Math.floor(s.t * s.fr), plus: s.plus
       });
     }
 
@@ -266,6 +316,6 @@ G.FX = (() => {
     }
   }
 
-  return { clear, px, burst, spark, sp, twinkle, trail, dmgText, ring, slash, beam, update, draw,
+  return { clear, px, burst, spark, sp, twinkle, trail, glint, plusFlash, dmgText, ring, slash, beam, update, draw,
            get count() { return parts.length + sprites.length + texts.length; } };
 })();
