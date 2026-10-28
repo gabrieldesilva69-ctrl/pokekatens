@@ -603,15 +603,15 @@ G.Aura = (() => {
   // orbit: lo que gira alrededor (drawOrbit) · day: el aura también de día (si no, sólo de noche) ·
   // trail: el rastro que va dejando en el suelo al moverse ({ s: su estilo en TRAILS, c: colores }).
   const SPECIAL = {
-    150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', parts: { c: ['#e08aff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.4, rate: 2, glow: true, star: true }, pulse: 7.5 }, // Mewtwo: aura psíquica
-    151: { parts: { c: ['#ffc4ee', '#ffffff'], up: 10, spread: 14, r: 2.2, life: 1.4, rate: 2, ring: true } },   // Mew: burbujas
+    150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', parts: { c: ['#e08aff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.4, rate: 2, glow: true, star: true }, pulse: 7.5, trail: { s: 'psy', c: ['#e08aff', '#ffffff'] } }, // Mewtwo: aura psíquica
+    151: { parts: { c: ['#ffc4ee', '#ffffff'], up: 10, spread: 14, r: 2.2, life: 1.4, rate: 2, ring: true }, trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },   // Mew: burbujas
     249: { back: 'ripple', c: '#b8d8ff', parts: { c: ['#ffffff', '#d6e8ff'], up: 4, spread: 26, r: 1.4, life: 1, rate: 4, soft: true }, trail: { s: 'feather', c: ['#ffffff', '#d6e8ff', '#8f9fb7'] } }, // Lugia: viento
     250: { aura: '#ffb347', parts: { hue: true, up: 14, spread: 16, r: 1.3, life: 1.3, rate: 6, glow: true, star: true }, rays: '#ffb347', trail: { s: 'rainbow', c: ['#ffffff'] } }, // Ho-Oh: arcoíris
     382: { back: 'ripple', c: '#5fb8ff', trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                                                     // Kyogre: ondas
     383: { parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 18, r: 1.4, life: 0.8, rate: 5, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }, // Groudon: ascuas
-    384: { parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 40, r: 1.2, life: 0.5, rate: 8, glow: true } },  // Rayquaza: estelas
-    483: { back: 'clock', c: '#9fe8ff' },                                                                      // Dialga: el reloj del tiempo
-    484: { aura: '#ff8ad8', back: 'ripple', c: '#ff9ff0', pulse: 9 },                                                    // Palkia: el espacio que se ondula
+    384: { parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 40, r: 1.2, life: 0.5, rate: 8, glow: true }, trail: { s: 'wind', c: ['#ffffff', '#a5f07a'] } },  // Rayquaza: estelas
+    483: { back: 'clock', c: '#9fe8ff', trail: { s: 'star', c: ['#9fe8ff', '#ffffff'] } },                                                                      // Dialga: el reloj del tiempo
+    484: { aura: '#ff8ad8', back: 'ripple', c: '#ff9ff0', pulse: 9, trail: { s: 'gem', c: ['#ff9ff0', '#ffffff'] } },                                                    // Palkia: el espacio que se ondula
     487: { parts: { c: ['#2a1830', '#5a1a2a'], up: 8, spread: 18, r: 3, life: 1.6, rate: 4, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1020', '#ff4a4a'] } }, // Giratina: sombras
     491: { parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 20, r: 3.2, life: 1.8, rate: 5, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#b58aff'] } }, // Darkrai: humo oscuro
     493: { day: true, aura: '#ffd23f', parts: { c: ['#ffe680', '#ffffff'], up: 10, spread: 22, r: 1.4, life: 1.4, rate: 3, glow: true, star: true }, rays: '#ffd23f', pulse: 10.5, trail: { s: 'gold', c: ['#ffd23f', '#ffffff'] } }, // Arceus: luz dorada
@@ -629,76 +629,76 @@ G.Aura = (() => {
     245: { back: 'ripple', c: '#9fe8ff', parts: { c: ['#d6f0ff', '#b8a8ff', '#ffffff'], up: 6, spread: 24, r: 1.2, life: 1.4, rate: 5, glow: true, star: true }, trail: { s: 'aurora', c: ['#6affd0', '#5fd0ff', '#7f9fff', '#c07aff'] } }, // Suicune: rastro de aurora
     251: { parts: { c: ['#5fe08a', '#a5f07a'], up: -8, spread: 20, r: 1.6, life: 1.6, rate: 4, leaf: true }, trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },  // Celebi: hojas
     385: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 22, r: 1.6, life: 1.1, rate: 4, glow: true, star: true }, trail: { s: 'star', c: ['#ffe680', '#fff7c0'] } }, // Jirachi: estrellas
-    386: { day: true, aura: '#ff6a4a', parts: { c: ['#7fd0ff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.2, rate: 2, glow: true }, pulse: 6 }, // Deoxys: aura
-    480: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffe680', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Uxie
-    481: { parts: { c: ['#ffb3e6', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffb3e6', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Mesprit
-    482: { parts: { c: ['#9fd8ff', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#9fd8ff', '#ff6a6a'], s: 'gem', sp: 0.35 } },     // Azelf
+    386: { day: true, aura: '#ff6a4a', parts: { c: ['#7fd0ff', '#ffffff'], up: 6, spread: 16, r: 1.2, life: 1.2, rate: 2, glow: true }, pulse: 6, trail: { s: 'psy', c: ['#ff9a5a', '#7fd0ff'] } }, // Deoxys: aura
+    480: { parts: { c: ['#ffe680', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffe680', '#ff6a6a'], s: 'gem', sp: 0.35 }, trail: { s: 'psy', c: ['#ffe680', '#ffffff'] } },     // Uxie
+    481: { parts: { c: ['#ffb3e6', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffb3e6', '#ff6a6a'], s: 'gem', sp: 0.35 }, trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },     // Mesprit
+    482: { parts: { c: ['#9fd8ff', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#9fd8ff', '#ff6a6a'], s: 'gem', sp: 0.35 }, trail: { s: 'psy', c: ['#9fd8ff', '#ffffff'] } },     // Azelf
     485: { parts: { c: ['#ff7a3d', '#ffb347'], up: 24, spread: 20, r: 1.6, life: 0.9, rate: 6, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } },  // Heatran: ascuas
-    488: { aura: '#ffb3e6', parts: { c: ['#ffe680', '#ffb3e6'], up: 6, spread: 18, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, pulse: 9 }, // Cresselia: luz de luna
+    488: { aura: '#ffb3e6', parts: { c: ['#ffe680', '#ffb3e6'], up: 6, spread: 18, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, pulse: 9, trail: { s: 'star', c: ['#ffb3e6', '#ffe680'] } }, // Cresselia: luz de luna
     490: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 18, spread: 12, r: 1.8, life: 1.3, rate: 3, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Manaphy: burbujas
     494: { parts: { c: ['#ff7a3d', '#ffe14d'], up: 22, spread: 14, r: 1.3, life: 0.8, rate: 5, glow: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff5a2a'] } },  // Victini: llamitas
     648: { parts: { c: ['#7fffa0', '#ffffff', '#ffe680'], up: 16, spread: 20, r: 1, life: 1.4, rate: 2, note: true }, trail: { s: 'note', c: ['#7fffa0', '#ffffff', '#ffe680'] } }, // Meloetta: notas
     718: { parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 5, glow: true }, orbit: { n: 5, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, trail: { s: 'cell', c: ['#7fff6a', '#ff5a5a'] } },  // Zygarde: células
-    719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 18, r: 1.6, life: 1, rate: 4, glow: true, star: true } }, // Diancie: destellos
-    720: { day: true, aura: '#ffd23f', parts: { c: ['#ffd23f', '#ffe680'], up: 8, spread: 20, r: 2.4, life: 1.6, rate: 1.5, ring: true, glow: true }, pulse: 9, orbit: { n: 3, c: ['#ffd23f', '#ffe680'], s: 'ring', sp: 0.3 } }, // Hoopa: aros dorados
+    719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 18, r: 1.6, life: 1, rate: 4, glow: true, star: true }, trail: { s: 'gem', c: ['#ffb5de', '#ffffff'] } }, // Diancie: destellos
+    720: { day: true, aura: '#ffd23f', parts: { c: ['#ffd23f', '#ffe680'], up: 8, spread: 20, r: 2.4, life: 1.6, rate: 1.5, ring: true, glow: true }, pulse: 9, orbit: { n: 3, c: ['#ffd23f', '#ffe680'], s: 'ring', sp: 0.3 }, trail: { s: 'psy', c: ['#ffd23f', '#ff9fd8'] } }, // Hoopa: aros dorados
     721: { parts: { c: ['#ffffff', '#e6eef5'], up: 30, spread: 12, r: 2.6, life: 1.2, rate: 4, soft: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },  // Volcanion: vapor
-    791: { aura: '#ffab28', parts: { c: ['#ffd27f', '#ffffff'], up: 14, spread: 20, r: 1.3, life: 1, rate: 4, glow: true }, rays: '#ffab28', pulse: 9 }, // Solgaleo: sol
-    792: { aura: '#8f6bff', parts: { c: ['#c9b5ff', '#ffffff', '#7cd8ed'], up: 4, spread: 26, r: 1.4, life: 1.4, rate: 5, glow: true, star: true }, pulse: 9 }, // Lunala: estrellas
+    791: { aura: '#ffab28', parts: { c: ['#ffd27f', '#ffffff'], up: 14, spread: 20, r: 1.3, life: 1, rate: 4, glow: true }, rays: '#ffab28', pulse: 9, trail: { s: 'flame', c: ['#ffffff', '#ffe14d', '#ff9a3d'] } }, // Solgaleo: sol
+    792: { aura: '#8f6bff', parts: { c: ['#c9b5ff', '#ffffff', '#7cd8ed'], up: 4, spread: 26, r: 1.4, life: 1.4, rate: 5, glow: true, star: true }, pulse: 9, trail: { s: 'star', c: ['#c9b5ff', '#7cd8ed'] } }, // Lunala: estrellas
     800: { parts: { hue: true, up: 10, spread: 22, r: 1.4, life: 1, rate: 6, glow: true, star: true }, rays: 'hue', trail: { s: 'rainbow', c: ['#ffffff'] } },        // Necrozma: luz del prisma
     802: { parts: { c: ['#1a1428', '#2f3a2f'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 4, soft: true, low: true }, trail: { s: 'shadow', c: ['#14201a', '#7fff9f'] } }, // Marshadow: sombra
     807: { parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 7, glow: true, bolt: true }, trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } }, // Zeraora: rayos
     890: { back: 'ripple', c: '#ff5a6a', parts: { c: ['#ff5a6a', '#b04aff'], up: 20, spread: 18, r: 2, life: 1.1, rate: 5, glow: true }, trail: { s: 'miasma', c: ['#ff3a5a', '#b04aff', '#ff8a9a'] } }, // Eternatus: energía
     // Tercera tanda.
-    641: { parts: { c: ['#ffffff', '#c9f0d6'], up: 2, spread: 40, r: 2.2, life: 1, rate: 4, soft: true } },    // Tornadus: viento
+    641: { parts: { c: ['#ffffff', '#c9f0d6'], up: 2, spread: 40, r: 2.2, life: 1, rate: 4, soft: true }, trail: { s: 'wind', c: ['#ffffff', '#a5f07a'] } },    // Tornadus: viento
     642: { parts: { c: ['#fffbe0', '#c9b5ff'], up: 0, spread: 36, r: 1, life: 0.2, rate: 6, glow: true, bolt: true }, trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#c9b5ff'] } }, // Thundurus: rayos
-    645: { parts: { c: ['#d8b878', '#b89458'], up: 6, spread: 26, r: 2, life: 1, rate: 5, soft: true, low: true } }, // Landorus: arena
-    786: { aura: '#ff8ad8', parts: { c: ['#ffb3e6', '#ffffff'], up: 6, spread: 20, r: 1.3, life: 1.3, rate: 3, glow: true, star: true } }, // Tapu Lele: escamas
+    645: { parts: { c: ['#d8b878', '#b89458'], up: 6, spread: 26, r: 2, life: 1, rate: 5, soft: true, low: true }, trail: { s: 'rock', c: ['#d8b878', '#b89458', '#8a6a48'] } }, // Landorus: arena
+    786: { aura: '#ff8ad8', parts: { c: ['#ffb3e6', '#ffffff'], up: 6, spread: 20, r: 1.3, life: 1.3, rate: 3, glow: true, star: true }, trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } }, // Tapu Lele: escamas
     787: { parts: { c: ['#5fe08a', '#ffe14d'], up: -6, spread: 20, r: 1.6, life: 1.6, rate: 3, leaf: true }, trail: { s: 'flower', c: ['#ffe14d', '#ffffff', '#ff9a3d'] } }, // Tapu Bulu: hojas
     788: { aura: '#9fd8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 4, spread: 26, r: 2.6, life: 1.6, rate: 3, soft: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Tapu Fini: niebla
     789: { parts: { c: ['#ffe680', '#9fe8ff', '#ffffff'], up: 6, spread: 18, r: 1.2, life: 1.3, rate: 3, glow: true, star: true }, orbit: { n: 3, c: ['#ffe680', '#9fe8ff'], s: 'star', sp: 0.3 }, trail: { s: 'star', c: ['#9fe8ff', '#ffe680'] } }, // Cosmog: estrellitas
     790: { aura: '#ffe680', parts: { c: ['#ffe680', '#ffffff'], up: 4, spread: 16, r: 1.2, life: 1.3, rate: 2, glow: true, star: true }, pulse: 7.5, trail: { s: 'star', c: ['#ffe680', '#ffffff'] } }, // Cosmoem
     793: { aura: '#6abde0' },                                                                                   // Nihilego
-    801: { day: true, aura: '#ff9fb0', parts: { c: ['#ffd5d6', '#ffffff'], up: 8, spread: 14, r: 1.2, life: 1.2, rate: 2, glow: true, star: true }, pulse: 3.9 }, // Magearna
-    888: { aura: '#5fb8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5 }, // Zacian: espada de luz
-    889: { aura: '#ff6a5a', parts: { c: ['#ffd0c0', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5 }, // Zamazenta: escudo de luz
+    801: { day: true, aura: '#ff9fb0', parts: { c: ['#ffd5d6', '#ffffff'], up: 8, spread: 14, r: 1.2, life: 1.2, rate: 2, glow: true, star: true }, pulse: 3.9, trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } }, // Magearna
+    888: { aura: '#5fb8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5, trail: { s: 'metal', c: ['#ffffff', '#7fb8ff'] } }, // Zacian: espada de luz
+    889: { aura: '#ff6a5a', parts: { c: ['#ffd0c0', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5, trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } }, // Zamazenta: escudo de luz
     894: { parts: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 44, r: 1, life: 0.2, rate: 8, glow: true, bolt: true }, trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } }, // Regieleki: rayos
     896: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 20, r: 1.4, life: 1.6, rate: 4 }, trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },            // Glastrier: nieve
     897: { aura: '#8f6bff', parts: { c: ['#1a1428', '#3a2c50'], up: 6, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#b58aff'] } }, // Spectrier: sombra
     898: { aura: '#7fe8a0', parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 20, r: 1.5, life: 1.6, rate: 3, leaf: true }, pulse: 7.5, trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } }, // Calyrex: hojas
     // Cuarta tanda: auras de los que en el anime y los juegos la tienen.
     447: { day: true, aura: '#3f8fff' },                                                                                   // Riolu: aura
-    448: { day: true, aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 3, glow: true } }, // Lucario: aura
-    282: { aura: '#ff8ad8', parts: { c: ['#ff8ad8', '#ffc4ee'], up: 6, spread: 12, r: 2, life: 1.3, rate: 1.5, ring: true } }, // Gardevoir
-    100448: { day: true, aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 4, glow: true } }, // Mega Lucario
-    100282: { aura: '#ff8ad8' },                                                                                // Mega Gardevoir
-    100006: { parts: { c: ['#a4ddf9', '#5fc8ff'], up: 30, spread: 16, r: 1.5, life: 0.8, rate: 6, glow: true } }, // Mega Charizard X: llamas azules
-    100150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', pulse: 7.5 },                                                  // Mega Mewtwo Y
-    100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true }, pulse: 9 }, // Mega Rayquaza
-    100719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 22, r: 1.8, life: 1.1, rate: 6, glow: true, star: true } }, // Mega Diancie
+    448: { day: true, aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 3, glow: true }, trail: { s: 'flame', c: ['#ffffff', '#7fb8ff', '#3f6aff'] } }, // Lucario: aura
+    282: { aura: '#ff8ad8', parts: { c: ['#ff8ad8', '#ffc4ee'], up: 6, spread: 12, r: 2, life: 1.3, rate: 1.5, ring: true }, trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } }, // Gardevoir
+    100448: { day: true, aura: '#3f8fff', parts: { c: ['#7fb8ff', '#ffffff'], up: 14, spread: 14, r: 1.4, life: 1.1, rate: 4, glow: true }, trail: { s: 'flame', c: ['#ffffff', '#7fb8ff', '#3f6aff'] } }, // Mega Lucario
+    100282: { aura: '#ff8ad8', trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } },                                                                                // Mega Gardevoir
+    100006: { parts: { c: ['#a4ddf9', '#5fc8ff'], up: 30, spread: 16, r: 1.5, life: 0.8, rate: 6, glow: true }, trail: { s: 'flame', c: ['#ffffff', '#a4ddf9', '#5fc8ff'] } }, // Mega Charizard X: llamas azules
+    100150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', pulse: 7.5, trail: { s: 'psy', c: ['#e08aff', '#ffffff'] } },                                                  // Mega Mewtwo Y
+    100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true }, pulse: 9, trail: { s: 'wind', c: ['#ffffff', '#a5f07a'] } }, // Mega Rayquaza
+    100719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 22, r: 1.8, life: 1.1, rate: 6, glow: true, star: true }, trail: { s: 'gem', c: ['#ffb5de', '#ffffff'] } }, // Mega Diancie
     100382: { aura: '#3fa8ff', back: 'ripple', c: '#7fe8ff', parts: { c: ['#9fd8ff', '#d6f0ff'], up: 26, spread: 16, r: 1.8, life: 1.2, rate: 5, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Kyogre primigenio
     100383: { aura: '#ff6a1a', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 34, spread: 20, r: 1.6, life: 0.9, rate: 8, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }, // Groudon primigenio
     // Quinta tanda (28-10-2026): los legendarios que faltaban (y megas de legendarios).
     378: { parts: { c: ['#d8f1ff', '#ffffff'], up: -8, spread: 20, r: 1.3, life: 1.6, rate: 4, glow: true, star: true }, trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } }, // Regice: frío
-    486: { aura: '#fff2b0', pulse: 12, parts: { c: ['#ffffff', '#fff2b0'], up: 6, spread: 24, r: 1.4, life: 1.4, rate: 2, glow: true, star: true } }, // Regigigas
-    895: { aura: '#ff4a7a', pulse: 7.5, parts: { c: ['#ff5d83', '#ffffff'], up: 10, spread: 18, r: 1.3, life: 1.2, rate: 3, glow: true, star: true } }, // Regidrago
-    380: { aura: '#ff6a8a', pulse: 7.5, parts: { c: ['#ffb3c8', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true } }, // Latias: Bola Neblina
-    381: { aura: '#4a8aff', pulse: 7.5, parts: { c: ['#9fd0ff', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true } }, // Latios: Resplandor
-    100380: { aura: '#c08aff', pulse: 7.5, parts: { c: ['#e0c0ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Mega Latias
-    100381: { aura: '#8a8aff', pulse: 7.5, parts: { c: ['#c0c8ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true } }, // Mega Latios
+    486: { aura: '#fff2b0', pulse: 12, parts: { c: ['#ffffff', '#fff2b0'], up: 6, spread: 24, r: 1.4, life: 1.4, rate: 2, glow: true, star: true }, trail: { s: 'rock', c: ['#e6e6e6', '#b0b8c8', '#8f939c'] } }, // Regigigas
+    895: { aura: '#ff4a7a', pulse: 7.5, parts: { c: ['#ff5d83', '#ffffff'], up: 10, spread: 18, r: 1.3, life: 1.2, rate: 3, glow: true, star: true }, trail: { s: 'star', c: ['#ff5d83', '#ffffff'] } }, // Regidrago
+    380: { aura: '#ff6a8a', pulse: 7.5, parts: { c: ['#ffb3c8', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, trail: { s: 'wind', c: ['#ffffff', '#ffc4d8'] } }, // Latias: Bola Neblina
+    381: { aura: '#4a8aff', pulse: 7.5, parts: { c: ['#9fd0ff', '#ffffff'], up: 4, spread: 24, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, trail: { s: 'wind', c: ['#ffffff', '#c4d8ff'] } }, // Latios: Resplandor
+    100380: { aura: '#c08aff', pulse: 7.5, parts: { c: ['#e0c0ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true }, trail: { s: 'wind', c: ['#ffffff', '#e0c0ff'] } }, // Mega Latias
+    100381: { aura: '#8a8aff', pulse: 7.5, parts: { c: ['#c0c8ff', '#ffffff'], up: 4, spread: 26, r: 1.3, life: 1.2, rate: 4, glow: true, star: true }, trail: { s: 'wind', c: ['#ffffff', '#c0c8ff'] } }, // Mega Latios
     489: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Phione: burbujas
-    638: { parts: { c: ['#e6eef5', '#9fe8ff'], up: 4, spread: 24, r: 1.2, life: 0.9, rate: 3, glow: true, star: true } }, // Cobalion: brillos de acero
-    639: { parts: { c: ['#c8a875', '#8f939c'], up: 4, spread: 26, r: 1.8, life: 1, rate: 4, soft: true, low: true } }, // Terrakion: polvo de roca
+    638: { parts: { c: ['#e6eef5', '#9fe8ff'], up: 4, spread: 24, r: 1.2, life: 0.9, rate: 3, glow: true, star: true }, trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] } }, // Cobalion: brillos de acero
+    639: { parts: { c: ['#c8a875', '#8f939c'], up: 4, spread: 26, r: 1.8, life: 1, rate: 4, soft: true, low: true }, trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } }, // Terrakion: polvo de roca
     640: { parts: { c: ['#8bd72f', '#c9f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true }, trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffe14d'] } }, // Virizion: hojas
     647: { aura: '#5fb8ff', pulse: 9, parts: { c: ['#9fd8ff', '#d6f0ff'], up: 16, spread: 12, r: 1.6, life: 1.3, rate: 3, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Keldeo: agua
-    772: { parts: { c: ['#3a3f4a', '#2c7d5f'], up: 4, spread: 18, r: 2.6, life: 1.4, rate: 3, soft: true, low: true } }, // Código Cero: humo del casco
-    773: { parts: { hue: true, up: 8, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true } }, // Silvally: el Sistema Alfa (todos los tipos)
-    808: { parts: { c: ['#ffd23f', '#d0d8e0'], up: 8, spread: 14, r: 1.2, life: 1.1, rate: 2, glow: true, star: true } }, // Meltan: metal
-    891: { parts: { c: ['#ffffff', '#d0dfe3'], up: 2, spread: 30, r: 2, life: 0.8, rate: 3, soft: true } }, // Kubfu: viento de sus golpes
-    892: { aura: '#4a4a8a', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true } }, // Urshifu
-    905: { aura: '#ff6aa8', pulse: 9, parts: { c: ['#ff6aa8', '#ff9fc8'], up: 12, spread: 16, r: 2.6, life: 1.6, rate: 2.5, heart: true } }, // Enamorus: corazones
+    772: { parts: { c: ['#3a3f4a', '#2c7d5f'], up: 4, spread: 18, r: 2.6, life: 1.4, rate: 3, soft: true, low: true }, trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] } }, // Código Cero: humo del casco
+    773: { parts: { hue: true, up: 8, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, trail: { s: 'metal', c: ['#ffffff', '#7fd8ff'] } }, // Silvally: el Sistema Alfa (todos los tipos)
+    808: { parts: { c: ['#ffd23f', '#d0d8e0'], up: 8, spread: 14, r: 1.2, life: 1.1, rate: 2, glow: true, star: true }, trail: { s: 'metal', c: ['#ffffff', '#ffe680'] } }, // Meltan: metal
+    891: { parts: { c: ['#ffffff', '#d0dfe3'], up: 2, spread: 30, r: 2, life: 0.8, rate: 3, soft: true }, trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } }, // Kubfu: viento de sus golpes
+    892: { aura: '#4a4a8a', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: 4, spread: 18, r: 2.8, life: 1.4, rate: 3, soft: true, low: true }, trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } }, // Urshifu
+    905: { aura: '#ff6aa8', pulse: 9, parts: { c: ['#ff6aa8', '#ff9fc8'], up: 12, spread: 16, r: 2.6, life: 1.6, rate: 2.5, heart: true }, trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } }, // Enamorus: corazones
     1007: { aura: '#ff7a3d', pulse: 9, rays: '#ff9a3d', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 24, spread: 16, r: 1.3, life: 0.9, rate: 4, glow: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } }, // Koraidon: el sol
-    1015: { parts: { c: ['#f711e4', '#97007b'], up: 6, spread: 20, r: 3, life: 1.6, rate: 2.5, soft: true } }, // Munkidori: gas tóxico
-    1016: { parts: { c: ['#ff9fcf', '#ffd23f', '#ffffff'], up: -6, spread: 24, r: 2, life: 2, rate: 3, leaf: true, petal: true } }, // Fezandipiti: pétalos
+    1015: { parts: { c: ['#f711e4', '#97007b'], up: 6, spread: 20, r: 3, life: 1.6, rate: 2.5, soft: true }, trail: { s: 'shadow', c: ['#3a0a40', '#f711e4'] } }, // Munkidori: gas tóxico
+    1016: { parts: { c: ['#ff9fcf', '#ffd23f', '#ffffff'], up: -6, spread: 24, r: 2, life: 2, rate: 3, leaf: true, petal: true }, trail: { s: 'flower', c: ['#ff9fcf', '#ffd23f', '#ffffff'] } }, // Fezandipiti: pétalos
     1017: { parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true }, trail: { s: 'flower', c: ['#ffffff', '#9fe8ff', '#ffe14d'] } }, // Ogerpon: hojas
     1024: { aura: '#9fe8ff', pulse: 7.5, rays: 'hue', parts: { hue: true, up: 8, spread: 20, r: 1.3, life: 1.2, rate: 4, glow: true, star: true }, trail: { s: 'tera', c: ['#ffffff'] } }, // Terapagos: Teracristal
     100491: { aura: '#6a3aa8', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 22, r: 3.2, life: 1.8, rate: 5, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#b58aff'] } }, // Mega Darkrai
@@ -708,7 +708,97 @@ G.Aura = (() => {
     1004: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                    // Chi-Yu
     785: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffb347'] } },                                     // Tapu Koko
     492: { trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffc4e2', '#ffe14d'] } },                         // Shaymin
-    100485: { trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }                                   // Mega Heatran
+    100485: { trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } },                                  // Mega Heatran
+    // Más rastros (28-10-2026): los legendarios que no tenían entrada y Pokémon conocidos (pseudolegendarios,
+    // iniciales, los más usados y sus megas).
+    377: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                    // Regirock
+    379: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] } },                                              // Registeel
+    649: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } },                                              // Genesect
+    809: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] } },                                              // Melmetal
+    149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                               // Dragonite
+    248: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                    // Tyranitar
+    373: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Salamence
+    376: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] } },                                              // Metagross
+    445: { trail: { s: 'rock', c: ['#d8b878', '#b89458', '#8a6a48'] } },                                    // Garchomp
+    635: { trail: { s: 'shadow', c: ['#1a1030', '#b06aff'] } },                                             // Hydreigon
+    706: { trail: { s: 'puddle', c: ['#c9a0ff', '#ffffff'] } },                                             // Goodra
+    784: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] } },                                              // Kommo-o
+    887: { trail: { s: 'shadow', c: ['#1a2030', '#7fd8ff'] } },                                             // Dragapult
+    998: { trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },                                              // Baxcalibur
+    3: { trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffe14d'] } },                                    // Venusaur
+    6: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                     // Charizard
+    9: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                               // Blastoise
+    154: { trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffe14d'] } },                                  // Meganium
+    157: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Typhlosion
+    160: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Feraligatr
+    254: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                                  // Sceptile
+    257: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Blaziken
+    260: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Swampert
+    389: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                                  // Torterra
+    392: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Infernape
+    395: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Empoleon
+    497: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                                  // Serperior
+    500: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Emboar
+    503: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Samurott
+    652: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                    // Chesnaught
+    655: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Delphox
+    658: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Greninja
+    724: { trail: { s: 'feather', c: ['#7fb86a', '#3a5a30', '#c8e0b0'] } },                                 // Decidueye
+    727: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Incineroar
+    730: { trail: { s: 'note', c: ['#9fd8ff', '#ffffff', '#ffb3e6'] } },                                    // Primarina
+    812: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                                  // Rillaboom
+    815: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Cinderace
+    818: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Inteleon
+    908: { trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffe14d'] } },                                  // Meowscarada
+    911: { trail: { s: 'note', c: ['#ffb347', '#ffe14d', '#ff6a4a'] } },                                    // Skeledirge
+    914: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Quaquaval
+    25: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                                    // Pikachu
+    26: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                                    // Raichu
+    38: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                    // Ninetales
+    59: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                    // Arcanine
+    65: { trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },                                                 // Alakazam
+    94: { trail: { s: 'shadow', c: ['#1a1030', '#c070ff'] } },                                              // Gengar
+    130: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Gyarados
+    131: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Lapras
+    134: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Vaporeon
+    135: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                                   // Jolteon
+    136: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Flareon
+    196: { trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },                                                // Espeon
+    197: { trail: { s: 'star', c: ['#ffe14d', '#ffffff'] } },                                               // Umbreon
+    470: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                                  // Leafeon
+    471: { trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },                                              // Glaceon
+    700: { trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } },                                   // Sylveon
+    359: { trail: { s: 'shadow', c: ['#1a1030', '#d6e8ff'] } },                                             // Absol
+    609: { trail: { s: 'flame', c: ['#ffffff', '#c9b5ff', '#8f6bff'] } },                                   // Chandelure
+    637: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Volcarona
+    468: { trail: { s: 'star', c: ['#ffe680', '#ffb3e6', '#ffffff'] } },                                    // Togekiss
+    350: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Milotic
+    212: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } },                                              // Scizor
+    681: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] } },                                              // Aegislash
+    778: { trail: { s: 'shadow', c: ['#1a1408', '#ffe14d'] } },                                             // Mimikyu
+    479: { trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } },                                   // Rotom
+    571: { trail: { s: 'shadow', c: ['#1a1030', '#ff4a6a'] } },                                             // Zoroark
+    873: { trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },                                              // Frosmoth
+    936: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Armarouge
+    937: { trail: { s: 'flame', c: ['#ffffff', '#c9b5ff', '#8f6bff'] } },                                   // Ceruledge
+    230: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Kingdra
+    100009: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                          // Mega Blastoise
+    100003: { trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffe14d'] } },                               // Mega Venusaur
+    100094: { trail: { s: 'shadow', c: ['#1a1030', '#c070ff'] } },                                          // Mega Gengar
+    100130: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                          // Mega Gyarados
+    100248: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                 // Mega Tyranitar
+    100376: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] } },                                           // Mega Metagross
+    100445: { trail: { s: 'rock', c: ['#d8b878', '#b89458', '#8a6a48'] } },                                 // Mega Garchomp
+    100373: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                // Mega Salamence
+    100257: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                // Mega Blaziken
+    100260: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                          // Mega Swampert
+    100359: { trail: { s: 'shadow', c: ['#1a1030', '#d6e8ff'] } },                                          // Mega Absol
+    100212: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } },                                           // Mega Scizor
+    100181: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                                // Mega Ampharos
+    100310: { trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } },                                // Mega Manectric
+    100229: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                // Mega Houndoom
+    100254: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                               // Mega Sceptile
+    100149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } }                                             // Mega Dragonite
   };
 
   // Efectos con firma (24-10-2026): partículas según lo que es cada Pokémon conocido (los
@@ -1144,6 +1234,48 @@ G.Aura = (() => {
         ctx.fillStyle = rgba(cs[j % cs.length], 0.6 * f * (0.7 + 0.3 * Math.sin(t * 3 + j + p.i)));
         dot(ctx, p.x + (hash(p.i * 3 + j) - 0.5) * 12, p.y - p.age * 5 - j * 3, hash(p.i + j * 7) > 0.6 ? 2 : 1);
       }
+    } },
+    // Aros psíquicos pequeños que se abren en el suelo (Mewtwo, Mew, Espeon...).
+    psy: { life: 1.4, gap: 9, draw(ctx, p, f, t, cs) {
+      const rx = 2 + 6 * p.age / 1.4;
+      ctx.fillStyle = rgba(cs[0], 0.9 * f); pixEllipse(ctx, p.x, p.y, rx, rx * 0.45);
+      ctx.fillStyle = rgba(cs[1], f * (0.6 + 0.4 * Math.sin(t * 6 + p.i))); dot(ctx, p.x, p.y - 2 - p.age * 4);
+    } },
+    // Piedrecitas que saltan al pisar y se quedan quietas (Regirock, Tyranitar, Garchomp...).
+    rock: { life: 2, gap: 6, solid: true, draw(ctx, p, f, t, cs) {
+      const k = Math.min(1, p.age / 0.35), up = Math.sin(k * Math.PI) * 5;
+      ctx.globalAlpha = Math.min(1, f * 1.5);
+      for (let j = 0; j < 2; j++) {
+        ctx.fillStyle = cs[(p.i + j) % cs.length];
+        dot(ctx, p.x + (hash(p.i * 2 + j) - 0.5) * 10 * (0.5 + 0.5 * k), p.y - up * (j ? 0.6 : 1), hash(p.i + j * 5) > 0.4 ? 2 : 1);
+      }
+      ctx.globalAlpha = 1;
+    } },
+    // Destello de metal: un brillo en cruz que se enciende y se apaga una vez (Registeel, Metagross...).
+    metal: { life: 1.2, gap: 8, draw(ctx, p, f, t, cs) {
+      const k = p.age / 1.2, big = k > 0.15 && k < 0.5, x = snap(p.x + (hash(p.i) - 0.5) * 10), y = snap(p.y - 2);
+      ctx.fillStyle = rgba(cs[1], 0.5 * f); pixLine(ctx, x - 6, y + 2, x + 6, y + 2);
+      ctx.fillStyle = rgba(cs[0], f);
+      glyph(ctx, big ? ['..x..', '..x..', 'xxoxx', '..x..', '..x..'] : ['.x.', 'xox', '.x.'], x, y, G.Sprites.PX, rgba('#ffffff', f));
+    } },
+    // Ráfagas de viento que se quedan detrás y se abren hacia los lados (Rayquaza, Tornadus, Dragonite...).
+    wind: { life: 1.1, gap: 6, draw(ctx, p, f, t, cs) {
+      const mx = p.ny, my = -p.nx, side = (hash(p.i) - 0.5) * 16 + (hash(p.i) < 0.5 ? -1 : 1) * p.age * 10, len = 6 + 6 * hash(p.i + 2);
+      const x = p.x + p.nx * side, y = p.y - 6 + p.ny * side * 0.5;
+      ctx.fillStyle = rgba(cs[p.i % cs.length], 0.8 * f); pixLine(ctx, x - mx * len, y - my * len * 0.5, x + mx * len, y + my * len * 0.5);
+    } },
+    // Corazones de píxeles que suben un poco y se apagan (Sylveon, Gardevoir, Magearna...).
+    heart: { life: 1.8, gap: 10, solid: true, draw(ctx, p, f, t, cs) {
+      ctx.globalAlpha = Math.min(1, f * 1.4);
+      ctx.fillStyle = cs[p.i % (cs.length - 1)];
+      glyph(ctx, ['.x.x.', 'xxoxx', '.xxx.', '..x..'], snap(p.x + (hash(p.i) - 0.5) * 12), snap(p.y - 4 - p.age * 6), G.Sprites.PX, cs[cs.length - 1]);
+      ctx.globalAlpha = 1;
+    } },
+    // Gemas rosas que relucen en el suelo (Diancie, las perlas de Palkia).
+    gem: { life: 2.2, gap: 7, draw(ctx, p, f, t, cs) {
+      const tw = Math.sin(t * 5 + p.i) > 0.6;
+      ctx.fillStyle = rgba(cs[0], f);
+      glyph(ctx, ['.x.', 'xxx', 'xox', '.x.'], snap(p.x + (hash(p.i) - 0.5) * 12), snap(p.y - 3), G.Sprites.PX, rgba(tw ? '#ffffff' : cs[1], f));
     } }
   };
   const TRAIL_MAX = 90;
