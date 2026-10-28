@@ -346,6 +346,8 @@ G.MenuUI = (() => {
 
     // Sus efectos visuales (entities/aura.js): se le pueden quitar a uno solo.
     const fxOn = !(G.Settings.get('fxOff') || []).includes(dex);
+    // Y su rastro en el suelo, aparte (sólo los que tienen).
+    const trOn = !(G.Settings.get('trailOff') || []).includes(dex);
     const box = $('dex-detail');
     box.innerHTML = `
       <canvas id="dex-big" class="stage" width="220" height="190"></canvas>
@@ -357,6 +359,7 @@ G.MenuUI = (() => {
         <h3>${own ? p.name : '???'}</h3>
         ${own ? `<button id="dex-fav" class="chip${G.DB.isFav(dex) ? ' on' : ''}" type="button">${G.Icons.html(G.DB.isFav(dex) ? 'star' : 'starDim', 12)} ${G.DB.isFav(dex) ? 'Favorito' : 'Marcar como favorito'}</button>` : ''}
         ${own ? `<button id="dex-fx" class="chip${fxOn ? ' on' : ''}" type="button" title="${G.T('Brillos, partículas y auras de este Pokémon')}">${G.Icons.html('shiny', 12)} ${fxOn ? 'Efectos visuales: sí' : 'Efectos visuales: no'}</button>` : ''}
+        ${own && G.Aura.hasTrail(dex) ? `<button id="dex-trail" class="chip${trOn ? ' on' : ''}" type="button" title="${G.T('El rastro que deja este Pokémon al moverse')}">${G.Icons.html('shiny', 12)} ${trOn ? 'Rastro: sí' : 'Rastro: no'}</button>` : ''}
         <div style="color:${G.Gacha.RARITY_COLOR[p.rarity]}">${G.UI.stars(p.rarity, 24)} ${G.Gacha.RARITY_NAME[p.rarity]}</div>
         <div style="margin:6px 0">${own ? G.UI.typeChips(p.types) : ''}</div>
       </div>
@@ -399,6 +402,8 @@ G.MenuUI = (() => {
     if (fav) fav.onclick = () => { G.DB.setFav(dex, !G.DB.isFav(dex)); renderGrid(true); showDetail(dex); };
     const fxb = $('dex-fx');
     if (fxb) fxb.onclick = () => { G.Aura.setEnabled(dex, !fxOn); showDetail(dex); };
+    const trb = $('dex-trail');
+    if (trb) trb.onclick = () => { G.Aura.setTrailEnabled(dex, !trOn); showDetail(dex); };
     const pick = $('dex-pick');
     if (pick) pick.onclick = () => {
       s.partner = dex;

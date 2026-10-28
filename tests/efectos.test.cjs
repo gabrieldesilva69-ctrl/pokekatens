@@ -131,10 +131,29 @@ test('Suicune leaves an aurora trail on the ground while it moves, now and then 
   const ctx = new Proxy({}, { get: (o, k) => (k in o ? o[k] : () => ({ addColorStop() {} })), set: (o, k, v) => { o[k] = v; return true; } });
   const S = { x: 0, bodyH: 40, r: 14, _fxSeed: 0 };
   // Quieto no deja nada; andando, sí (mientras dura la ola), y cada punto se apaga solo.
-  for (let i = 0; i < 20; i++) A.special(ctx, S, 245, 100, 1 + i * 0.05, 0.05);
+  for (let i = 0; i < 20; i++) A.trail(ctx, S, 245, 100, 1 + i * 0.05, 0.05, true);
   assert.ok((S._trail || []).length <= 1, 'quieto, nada');
-  for (let i = 0; i < 40; i++) { S.x += 4; A.special(ctx, S, 245, 100, 2 + i * 0.05, 0.05); }
+  for (let i = 0; i < 40; i++) { S.x += 4; A.trail(ctx, S, 245, 100, 2 + i * 0.05, 0.05, true); }
   assert.ok(S._trail.length > 20, 'andando, el rastro');
-  for (let i = 0; i < 80; i++) A.special(ctx, S, 245, 100, 4 + i * 0.05, 0.05);
+  for (let i = 0; i < 80; i++) A.trail(ctx, S, 245, 100, 4 + i * 0.05, 0.05, true);
   assert.equal(S._trail.length, 0, 'y se apaga solo');
+});
+
+test('trails have their own setting, apart from effects: all, only your partner or none, and off for one Pokémon (28-10-2026)', () => {
+  const { A, store } = load();
+  assert.equal(A.trailEnabled(245, false), true, 'de fábrica, todos');
+  store.trails = 'partner';
+  assert.equal(A.trailEnabled(245, true), true);
+  assert.equal(A.trailEnabled(245, false), false, 'los de los demás, no');
+  store.trails = 'all'; store.fx = 'off';
+  assert.equal(A.trailEnabled(245, false), true, 'sin efectos, el rastro sigue');
+  A.setTrailEnabled(245, false);
+  assert.deepEqual([...store.trailOff], [245]);
+  assert.equal(A.trailEnabled(245, true), false, 'quitado en su ficha');
+  assert.equal(A.enabled(245, true), false, 'y los efectos van por su lado');
+  A.setTrailEnabled(245, true);
+  assert.deepEqual([...store.trailOff], []);
+  assert.equal(A.hasTrail(245), true);
+  assert.equal(A.hasTrail(10), false, 'Caterpie no tiene');
+  assert.equal(A.hasTrail(380), true);
 });

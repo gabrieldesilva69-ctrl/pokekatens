@@ -781,12 +781,14 @@
       const lift = (this.flying && !this.boss ? 1 + Math.sin(this.bob) * 1.5 : 0) + (this.jumpLift || 0);
       // Jefes, legendarios y shiny: sus efectos (entities/aura.js). Los demás enemigos, nada (rendimiento).
       const t = performance.now() / 1000, fx = G.Aura.forEnemy(this, t);
+      const fdt = Math.min(0.05, t - (this._auraT || t));
+      // Su rastro (los mismos de siempre: jefes, legendarios y shiny), aparte de los efectos.
+      if (G.Aura.fancy(this)) G.Aura.trail(ctx, this, this.anim.dex, this.y - lift, t, fdt, false);
       if (fx) {
-        const fdt = Math.min(0.05, t - (this._auraT || t));
         G.Aura.emit(this, this.types, fdt);
         G.Aura.special(ctx, this, this.anim.dex, this.y - lift, t, fdt);
-        this._auraT = t;
       }
+      this._auraT = t;
       this.anim.draw(ctx, this.x, this.y - lift, Object.assign(fx || {}, { flash: this.flash > 0, alpha }));
       if (fx) G.Aura.front(ctx, this, this.anim, this.anim.dex, this.y - lift, t);
       if (fx && fx.emit) { G.Aura.spotEmit(this, this.anim, this.anim.dex, Math.min(0.05, t - (this._spotT || t))); this._spotT = t; }

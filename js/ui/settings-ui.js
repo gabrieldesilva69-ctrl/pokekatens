@@ -102,6 +102,8 @@ G.SettingsUI = (() => {
         + choice('quality', [['auto', 'Auto'], ['high', 'Alta'], ['mid', 'Media'], ['low', 'Baja']])
         + section('Efectos de los Pokémon', 'Brillos, partículas y auras de tu compañero, los jefes, los legendarios y los shiny. En la ficha de cada Pokémon de la Colección puedes quitárselos a uno solo.')
         + choice('fx', [['all', 'Todos'], ['partner', 'Sólo mi compañero'], ['off', 'Ninguno']])
+        + section('Rastros en el suelo', 'Lo que dejan algunos Pokémon al moverse: llamas, flores, escarcha, la aurora de Suicune... Va aparte de los efectos. En la ficha de cada Pokémon de la Colección puedes quitárselo a uno solo.')
+        + choice('trails', [['all', 'Todos'], ['partner', 'Sólo mi compañero'], ['off', 'Ninguno']])
         + section('Pantalla')
         + toggle('dmgNumbers', 'Números de daño', 'Los números que salen al golpear y al recibir daño.')
         + toggle('calm', 'Menos sacudidas y destellos', 'La cámara tiembla menos y los fogonazos son suaves.')

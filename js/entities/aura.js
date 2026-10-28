@@ -521,11 +521,9 @@ G.Aura = (() => {
         ctx.globalCompositeOperation = 'lighter';
         ctx.fillStyle = p.c; zig(0);
       } else if (p.P.star) {
-        // Destello de cuatro puntas, en píxeles, que titila.
-        const s = Math.max(1, Math.round(p.r * (0.8 + 0.6 * Math.abs(Math.sin(p.t * 5)))));
-        ctx.fillRect(x - s, y, s * 2 + 1, 1);
-        ctx.fillRect(x, y - s, 1, s * 2 + 1);
-        ctx.fillRect(x - 1, y - 1, 2, 2);
+        // Destello de cuatro puntas en píxeles del arte, que titila (grande y pequeño por turnos).
+        glyph(ctx, p.r * Math.abs(Math.sin(p.t * 5)) > 2 ? ['..x..', '..x..', 'xxoxx', '..x..', '..x..'] : ['.x.', 'xox', '.x.'],
+          snap(x), snap(y), G.Sprites.PX, '#ffffff');
       } else if (p.P.heart) {
         // Corazón de píxeles.
         const u = Math.max(1, Math.round(p.r / 2.5));
@@ -548,9 +546,9 @@ G.Aura = (() => {
         // Burbuja de píxeles.
         glyph(ctx, ['.xx.', 'x..x', 'x..x', '.xx.'], x, y, Math.max(1, Math.round(p.r / 2.5)));
       } else {
-        // Lo normal: un cuadradito, como un píxel del sprite (deja un rastro pixelado al moverse).
-        const s = Math.max(1, Math.round(p.r));
-        ctx.fillRect(x - (s >> 1), y - (s >> 1), s, s);
+        // Lo normal: un cuadradito de píxeles del arte, en su rejilla (deja un rastro pixelado al moverse).
+        const u = G.Sprites.PX, s = Math.max(u, Math.round(p.r / u) * u);
+        ctx.fillRect(snap(x) - (s >> 1), snap(y) - (s >> 1), s, s);
       }
     }
     ctx.restore();
@@ -922,7 +920,6 @@ G.Aura = (() => {
     if (!S || ent.dead) return;
     const h = ent.bodyH || 24, r = ent.r || 12, x = ent.x, seed = seedOf(ent);
     if (S.rays) drawRays(ctx, S.rays, x, y - h * 0.55, Math.max(h * 1.25, r * 2.6), t, seed);
-    if (S.trail) drawTrail(ctx, ent, S.trail, y, t, dt);
     if (S.aurora) drawAurora(ctx, S.aurora, x, y - h * 1.05, Math.max(r * 2.4, h * 0.9), t, seed);
     // (28-10-2026) El aura de su color, sólo de noche (de día no quedaba bien), salvo los que la
     // llevan siempre (day: los singulares, Arceus y la línea de Lucario).
@@ -1115,7 +1112,7 @@ G.Aura = (() => {
       for (let j = -1; j <= 1; j++) {
         const x = Math.round(p.x + j * px), hh = Math.round(14 + 9 * Math.sin(p.i * 0.7 + j + t * 1.5));
         const a = 0.9 * fade * (0.55 + 0.45 * Math.sin(p.i * 0.9 + j * 1.3 + t * 3));
-        ctx.fillStyle = rgba('#ffffff', a * 0.5); ctx.fillRect(x, y0, px, 1);
+        ctx.fillStyle = rgba('#ffffff', a * 0.5); ctx.fillRect(x, y0, px, px);
         ctx.fillStyle = rgba(c, a); ctx.fillRect(x, y0 - px, px, px);
         ctx.fillStyle = rgba(c, a * 0.5); ctx.fillRect(x, y0 - px - Math.round(hh * 0.4), px, Math.round(hh * 0.4));
         ctx.fillStyle = rgba(c, a * 0.2); ctx.fillRect(x, y0 - hh - px, px, Math.round(hh * 0.6));
@@ -1410,6 +1407,19 @@ G.Aura = (() => {
     ctx.restore();
   }
 
+  /** El rastro en el suelo de su sprite. Va aparte de los demás efectos, con su propio ajuste
+   *  (trailEnabled): lo llaman player.js y enemy.js ANTES de special y del sprite. dex: el del
+   *  sprite (megas y primigenios llevan otro) · mine: es tu compañero. */
+  function trail(ctx, ent, dex, y, t, dt, mine) {
+    const S = SPECIAL[dex];
+    if (!S || !S.trail || ent.dead) return;
+    // Quitado: fuera también lo que ya había en el suelo (si no, saldría de golpe al volver a ponerlo).
+    if (!trailEnabled(ent.dex || dex, mine)) { ent._trail = null; ent._trailAt = null; return; }
+    drawTrail(ctx, ent, S.trail, y, t, dt);
+  }
+  /** ¿Lleva rastro? (el suyo o el de su mega: la ficha sólo enseña el botón a los que lo tienen) */
+  const hasTrail = dex => !!((SPECIAL[dex] && SPECIAL[dex].trail) || (SPECIAL[100000 + dex] && SPECIAL[100000 + dex].trail));
+
   // ---------------- quitar efectos (Ajustes y la ficha de cada Pokémon) ----------------
   /** ¿Se dibujan los efectos de este Pokémon? dex: el normal (no el de su mega) · mine: es tu
    *  compañero. Ajustes → "Efectos de los Pokémon" (fx: todos, sólo el tuyo o ninguno) y, en la
@@ -1424,6 +1434,19 @@ G.Aura = (() => {
     const off = (G.Settings.get('fxOff') || []).filter(d => d !== dex);
     if (!v) off.push(dex);
     G.Settings.set('fxOff', off);
+  }
+  /** Lo mismo para los rastros, aparte (28-10-2026): Ajustes → "Rastros en el suelo" (trails:
+   *  todos, sólo el tuyo o ninguno) y, en la ficha, quitárselo a uno solo (trailOff). */
+  function trailEnabled(dex, mine) {
+    const m = G.Settings.get('trails') || 'all';
+    if (m === 'off' || (m === 'partner' && !mine)) return false;
+    const off = G.Settings.get('trailOff');
+    return !(Array.isArray(off) && off.includes(dex));
+  }
+  function setTrailEnabled(dex, v) {
+    const off = (G.Settings.get('trailOff') || []).filter(d => d !== dex);
+    if (!v) off.push(dex);
+    G.Settings.set('trailOff', off);
   }
 
   // ---------------- para quién ----------------
@@ -1455,5 +1478,5 @@ G.Aura = (() => {
   /** ¿Lleva partículas? (los mismos que forEnemy, más los jugadores) */
   const fancy = e => !!(e.boss || e.shiny || e.legend);
 
-  return { SPOTS, PARTS, SPECIAL, emissive, emitLevel, spotColor, emit, spotEmit, special, front, TRAILS, enabled, setEnabled, update, draw, clear, sweep, drawSweep, forPlayer, forEnemy, fancy };
+  return { SPOTS, PARTS, SPECIAL, emissive, emitLevel, spotColor, emit, spotEmit, special, front, trail, hasTrail, trailEnabled, setTrailEnabled, TRAILS, enabled, setEnabled, update, draw, clear, sweep, drawSweep, forPlayer, forEnemy, fancy };
 })();
