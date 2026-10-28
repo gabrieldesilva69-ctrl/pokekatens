@@ -309,6 +309,7 @@ G.UI = (() => {
         ctx.save();
         ctx.translate(fx, fy); ctx.scale(1, 1 + 0.018 * Math.sin(now * 2.4)); ctx.translate(-fx, -fy);
         s.a.draw(ctx, fx, fy, fxo);
+        if (fxOn) G.Aura.front(ctx, fe, s.a, s.dex, fy, now);
         ctx.restore();
       } else if (s.opts.silhouette) {
         ctx.save();

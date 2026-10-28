@@ -6,6 +6,17 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-28', title: ["PokeKatens: legendarios con más efectos", "PokeKatens: legendaries with more effects"], new: [
+    ["Los 21 legendarios y singulares que aún no tenían efecto ya lo tienen (Regice, Latias, Latios, Regigigas, Keldeo, Koraidon, Terapagos...), y también las megas de Darkrai, Zygarde y Zeraora.",
+     "The 21 legendaries and mythicals that still had no effect now have one (Regice, Latias, Latios, Regigigas, Keldeo, Koraidon, Terapagos...), and so do the Megas of Darkrai, Zygarde and Zeraora."],
+    ["Efectos nuevos, como en el anime: los puntos de Regirock, Regice, Registeel y Regigigas se encienden uno a uno; Arceus, Solgaleo, Ho-Oh, Necrozma, Koraidon y Terapagos tienen rayos de luz detrás; Suicune y Articuno, una aurora encima; y a Hoopa, al trío del lago, a Zygarde y a Cosmog les giran alrededor sus aros, gemas, células o estrellas.",
+     "New effects, like in the anime: the dots of Regirock, Regice, Registeel and Regigigas light up one by one; Arceus, Solgaleo, Ho-Oh, Necrozma, Koraidon and Terapagos have rays of light behind them; Suicune and Articuno, an aurora above; and Hoopa, the lake trio, Zygarde and Cosmog have their rings, gems, cells or stars circling around them."]
+  ], chg: [
+    ["Muchos brillos ahora se apagan y se vuelven a encender despacio en lugar de parpadear: el núcleo de Eternatus, el corazón de Magearna, el cristal de Deoxys, las líneas de Kyogre, el diamante de Dialga, las perlas de Palkia... Y brillan más legendarios: la crin de Suicune, las flores de Shaymin, los caparazones de los Tapu y muchos más.",
+     "Many glows now fade out and slowly light up again instead of flickering: Eternatus's core, Magearna's heart, Deoxys's crystal, Kyogre's lines, Dialga's diamond, Palkia's pearls... And more legendaries glow: Suicune's mane, Shaymin's flowers, the Tapus' shells and many more."],
+    ["Más megas con partículas propias (burbujas, ascuas, pétalos, nieve, arena, destellos de dragón...): las de Venusaur, Blastoise, Gyarados, Gengar, Tyranitar, Garchomp, Salamence y muchas más.",
+     "More Megas with their own particles (bubbles, embers, petals, snow, sand, dragon sparkles...): those of Venusaur, Blastoise, Gyarados, Gengar, Tyranitar, Garchomp, Salamence and many more."]
+  ] },
   { d: '2026-10-25', title: ["PokeKatens: Megapiedras sin aro blanco", "PokeKatens: Mega Stones without the white ring"], fix: [
     ["Los iconos de las Megapiedras ya no llevan el aro blanco (y el trozo de fondo) que sobresalía por fuera de su borde negro. Por dentro siguen igual.",
      "Mega Stone icons no longer have the white ring (and bit of background) sticking out past their black outline. Inside they're the same."]

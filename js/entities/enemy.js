@@ -788,6 +788,7 @@
         this._auraT = t;
       }
       this.anim.draw(ctx, this.x, this.y - lift, Object.assign(fx || {}, { flash: this.flash > 0, alpha }));
+      if (fx) G.Aura.front(ctx, this, this.anim, this.anim.dex, this.y - lift, t);
       if (fx && fx.emit) { G.Aura.spotEmit(this, this.anim, this.anim.dex, Math.min(0.05, t - (this._spotT || t))); this._spotT = t; }
       ctx.restore();
 

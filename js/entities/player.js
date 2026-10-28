@@ -654,6 +654,7 @@ G.Player = class Player {
     if (fx) G.Aura.special(ctx, this, this.anim.dex, this.y, t, fdt);
     this._auraT = t;
     this.anim.draw(ctx, this.x, this.y, Object.assign(fx || {}, { flash: this.flash > 0, softFlash: true, alpha, color: '#ffcb3d' }));
+    if (fx) G.Aura.front(ctx, this, this.anim, this.anim.dex, this.y, t);
     if (fx && fx.emit) G.Aura.spotEmit(this, this.anim, this.anim.dex, Math.min(0.05, t - (this._spotT || t)));
     this._spotT = t;
 
