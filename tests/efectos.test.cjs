@@ -161,6 +161,6 @@ test('trails have their own setting, apart from effects: all, only your partner 
 
 test('a few normal Pokémon that gleam get the shiny light sweep in their own colour (28-10-2026)', () => {
   const { A } = load();
-  for (const d of [483, 719, 208, 379, 681]) assert.match(A.glint(d) || '', /^#[0-9a-f]{6}$/, 'franja de ' + d);
+  for (const d of [483, 719, 208, 379, 681, 212, 376, 1000, 703, 471, 801]) assert.match(A.glint(d) || '', /^#[0-9a-f]{6}$/, 'franja de ' + d);
   assert.equal(A.glint(25), null, 'los demás, no');
 });

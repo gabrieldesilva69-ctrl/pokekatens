@@ -7,6 +7,8 @@
  */
 G.CHANGELOG = [
   { d: '2026-10-28', title: ["PokeKatens: legendarios con más efectos", "PokeKatens: legendaries with more effects"], new: [
+    ["También relucen con su franja de color Scizor (roja), Metagross (azul plateada), Gholdengo (dorada), Carbink (rosa), Glaceon (azul hielo) y Magearna (rosa dorada), y las megas de Scizor y Metagross.",
+     "Scizor (red), Metagross (silver blue), Gholdengo (gold), Carbink (pink), Glaceon (ice blue) and Magearna (rose gold) also gleam with their coloured band, as do the Megas of Scizor and Metagross."],
     ["Dialga, Diancie, Steelix, Registeel y Aegislash relucen sin ser shiny: de vez en cuando les cruza una franja de luz de su color (azul, rosa, plateada, azul acero y dorada), como la blanca de los shiny.",
      "Dialga, Diancie, Steelix, Registeel and Aegislash gleam without being shiny: every now and then a band of light in their own colour (blue, pink, silver, steel blue and gold) crosses them, like the white one on shiny Pokémon."],
     ["Botón «Al azar» en la Colección, con un dado: si no sabes con quién jugar, elige tu compañero al azar entre los Pokémon que tienes, con los filtros que hayas puesto (generación, tipo, rareza, favoritos...; con Shiny, su shiny).",

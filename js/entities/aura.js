@@ -659,7 +659,7 @@ G.Aura = (() => {
     789: { parts: { c: ['#ffe680', '#9fe8ff', '#ffffff'], up: 6, spread: 18, r: 1.2, life: 1.3, rate: 3, glow: true, star: true }, orbit: { n: 3, c: ['#ffe680', '#9fe8ff'], s: 'star', sp: 0.3 }, trail: { s: 'star', c: ['#9fe8ff', '#ffe680'] } }, // Cosmog: estrellitas
     790: { aura: '#ffe680', parts: { c: ['#ffe680', '#ffffff'], up: 4, spread: 16, r: 1.2, life: 1.3, rate: 2, glow: true, star: true }, pulse: 7.5, trail: { s: 'star', c: ['#ffe680', '#ffffff'] } }, // Cosmoem
     793: { aura: '#6abde0' },                                                                                   // Nihilego
-    801: { day: true, aura: '#ff9fb0', parts: { c: ['#ffd5d6', '#ffffff'], up: 8, spread: 14, r: 1.2, life: 1.2, rate: 2, glow: true, star: true }, pulse: 3.9, trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } }, // Magearna
+    801: { day: true, aura: '#ff9fb0', parts: { c: ['#ffd5d6', '#ffffff'], up: 8, spread: 14, r: 1.2, life: 1.2, rate: 2, glow: true, star: true }, pulse: 3.9, trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] }, glint: '#ffd5c0' }, // Magearna
     888: { aura: '#5fb8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5, trail: { s: 'metal', c: ['#ffffff', '#7fb8ff'] } }, // Zacian: espada de luz
     889: { aura: '#ff6a5a', parts: { c: ['#ffd0c0', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5, trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } }, // Zamazenta: escudo de luz
     894: { parts: { c: ['#fffbe0', '#ffe14d'], up: 0, spread: 44, r: 1, life: 0.2, rate: 8, glow: true, bolt: true }, trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } }, // Regieleki: rayos
@@ -719,7 +719,7 @@ G.Aura = (() => {
     149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                               // Dragonite
     248: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                    // Tyranitar
     373: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Salamence
-    376: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] } },                                              // Metagross
+    376: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] }, glint: '#9fd8ff' },                                              // Metagross
     445: { trail: { s: 'rock', c: ['#d8b878', '#b89458', '#8a6a48'] } },                                    // Garchomp
     635: { trail: { s: 'shadow', c: ['#1a1030', '#b06aff'] } },                                             // Hydreigon
     706: { trail: { s: 'puddle', c: ['#c9a0ff', '#ffffff'] } },                                             // Goodra
@@ -767,14 +767,14 @@ G.Aura = (() => {
     196: { trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },                                                // Espeon
     197: { trail: { s: 'star', c: ['#ffe14d', '#ffffff'] } },                                               // Umbreon
     470: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                                  // Leafeon
-    471: { trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },                                              // Glaceon
+    471: { trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] }, glint: '#c8f4ff' },                                              // Glaceon
     700: { trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } },                                   // Sylveon
     359: { trail: { s: 'shadow', c: ['#1a1030', '#d6e8ff'] } },                                             // Absol
     609: { trail: { s: 'flame', c: ['#ffffff', '#c9b5ff', '#8f6bff'] } },                                   // Chandelure
     637: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Volcarona
     468: { trail: { s: 'star', c: ['#ffe680', '#ffb3e6', '#ffffff'] } },                                    // Togekiss
     350: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Milotic
-    212: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } },                                              // Scizor
+    212: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] }, glint: '#ff8a7a' },                                              // Scizor
     681: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] }, glint: '#ffe680' },                                              // Aegislash
     778: { trail: { s: 'shadow', c: ['#1a1408', '#ffe14d'] } },                                             // Mimikyu
     479: { trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } },                                   // Rotom
@@ -788,13 +788,13 @@ G.Aura = (() => {
     100094: { trail: { s: 'shadow', c: ['#1a1030', '#c070ff'] } },                                          // Mega Gengar
     100130: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                          // Mega Gyarados
     100248: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                 // Mega Tyranitar
-    100376: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] } },                                           // Mega Metagross
+    100376: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] }, glint: '#9fd8ff' },                                           // Mega Metagross
     100445: { trail: { s: 'rock', c: ['#d8b878', '#b89458', '#8a6a48'] } },                                 // Mega Garchomp
     100373: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                // Mega Salamence
     100257: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                // Mega Blaziken
     100260: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                          // Mega Swampert
     100359: { trail: { s: 'shadow', c: ['#1a1030', '#d6e8ff'] } },                                          // Mega Absol
-    100212: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } },                                           // Mega Scizor
+    100212: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] }, glint: '#ff8a7a' },                                           // Mega Scizor
     100181: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                                // Mega Ampharos
     100310: { trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } },                                // Mega Manectric
     100229: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                // Mega Houndoom
@@ -802,7 +802,9 @@ G.Aura = (() => {
     100149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                             // Mega Dragonite
     // La franja de luz de los shiny, de su color, en algunos normales que relucen (28-10-2026).
     208: { glint: '#e6eef5' },                                                                               // Steelix
-    100208: { glint: '#e6eef5' }                                                                             // Mega Steelix
+    100208: { glint: '#e6eef5' },                                                                            // Mega Steelix
+    703: { glint: '#ffb5de' },                                                                               // Carbink
+    1000: { glint: '#ffd23f' }                                                                               // Gholdengo
   };
 
   // Efectos con firma (24-10-2026): partículas según lo que es cada Pokémon conocido (los
