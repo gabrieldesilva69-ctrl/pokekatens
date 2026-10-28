@@ -217,6 +217,10 @@ G.Icons = (() => {
     throatspray: { pal: { b: '#4fb4ff', d: '#2a6fb0', w: '#cfe8ff', s: '#b0b8c8' }, rows: [
       '....kkk.....', '...ksssk.ww.', '...kkskk.w..', '....kssk....', '...kkkkkk...', '..kbbbbbbk..',
       '..kbwbbbbk..', '..kbwbbbdk..', '..kbbbbbdk..', '..kbbbbbdk..', '..kddddddk..', '...kkkkkk...'] },
+    // Dado (botón «Al azar» de la Colección): el cinco.
+    dice: { pal: { w: '#f4f8ff', s: '#b0b8c8' }, rows: [
+      '............', '.kkkkkkkkkk.', '.kwwwwwwwwk.', '.kwkkwwkkwk.', '.kwkkwwkkwk.', '.kwwwkkwwsk.',
+      '.kwwwkkwwsk.', '.kwkkwwkksk.', '.kwkkwwkksk.', '.kwsssssssk.', '.kkkkkkkkkk.', '............'] },
     loadeddice: { pal: { w: '#f4f8ff', s: '#b0b8c8', r: '#ff3048' }, rows: [
       '............', '...kkkkkkk..', '..kwwwwwwsk.', '.kwwwwwwssk.', '.kkkkkkkssk.', '.kwrwwrwksk.',
       '.kwwwwwwksk.', '.kwwrrwwksk.', '.kwwwwwwkk..', '.kwrwwrwk...', '.kkkkkkkk...', '............'] },

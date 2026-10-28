@@ -216,6 +216,9 @@ G.MenuUI = (() => {
     };
     q.onkeydown = e => { if (e.key === 'Escape') { e.stopPropagation(); q.blur(); } };
     $('dex-clear').onclick = () => { dexF = DEX0(); openDex(); };
+    const rb = $('dex-rand');
+    rb.innerHTML = G.Icons.html('dice', 14) + ' ' + G.T('Al azar');
+    rb.onclick = randomPartner;
     renderGrid();
     showDetail(dexSel);
   }
@@ -316,6 +319,42 @@ G.MenuUI = (() => {
       showDetail(p.dex);
     };
     return cell;
+  }
+
+  /*
+   * «Al azar» (28-10-2026): para cuando no sabes con quién jugar. Elige tu compañero entre los
+   * que tienes de la lista de ahora (con sus filtros: generación, tipo, rareza, favoritos...).
+   * Con el filtro Shiny, su shiny. Una tirada corta enseñando unos cuantos antes de decidirse.
+   */
+  let rolling = false;
+  function randomPartner() {
+    if (rolling) return;
+    const s = G.DB.save, pool = dexList().filter(p => s.owned[p.dex]);
+    if (!pool.length) { G.UI.toast(G.T('No tienes ninguno con estos filtros')); return; }
+    // Si hay más de uno, que no salga el que ya llevas.
+    const pick = () => { const l = pool.length > 1 ? pool.filter(p => p.dex !== s.partner) : pool; return l[Math.floor(Math.random() * l.length)]; };
+    const p = pick();
+    rolling = true;
+    let n = 0;
+    const roll = () => {
+      if (n++ < 7) { showDetail(pick().dex); G.Audio.sfx('select'); setTimeout(roll, 70 + n * 12); return; }
+      rolling = false;
+      s.partner = p.dex;
+      s.partnerShiny = !!dexF.shiny && G.DB.ownsShiny(p.dex);
+      viewShiny = s.partnerShiny;
+      dexSel = p.dex;
+      G.DB.commit();
+      G.Audio.cry(p.dex, { shiny: s.partnerShiny });
+      G.UI.toast(G.I18n.f('¡Al azar! {x} es ahora tu compañero', p.name + (s.partnerShiny ? ' shiny' : '')));
+      // Que se vea en la rejilla (pinta las tandas que hagan falta hasta llegar a él).
+      renderGrid(true);
+      const i = gridList.indexOf(p);
+      if (i >= gridShown) moreCells(i - gridShown + 1);
+      const cell = $('dex-grid').children[i];
+      if (cell && cell.scrollIntoView) cell.scrollIntoView({ block: 'nearest' });
+      showDetail(p.dex);
+    };
+    roll();
   }
 
   // Variante que se está viendo en la ficha (normal o shiny).
