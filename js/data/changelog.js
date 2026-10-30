@@ -6,6 +6,30 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-29', title: ["PokeKatens: lo nuevo de PokéSurvivor", "PokeKatens: what's new from PokéSurvivor"], new: [
+    ["Móvil y tableta: nuevo joystick «Anclado» (Ajustes → Controles → Colocar los botones). Aparece donde pones el dedo y se queda en ese sitio mientras lo mantienes, aunque alejes el dedo; al levantarlo y tocar en otro sitio, aparece allí. El «Flotante» de siempre sigue al dedo y sigue siendo el que viene puesto.",
+     "Mobile and tablet: new \"Anchored\" joystick (Settings → Controls → Place the buttons). It appears where you put your finger and stays in that spot while you hold it, even if you move your finger away; lift it and touch somewhere else, and it appears there. The usual \"Floating\" one follows your finger and is still the default."]
+  ], chg: [
+    ["El evento de Halloween dura un día más: del 30 de octubre al 2 de noviembre (hora de España).",
+     "The Halloween event lasts one more day: from October 30 to November 2 (Spain time)."]
+  ], fix: [
+    ["Durante Halloween, unos segundos después de abrir el juego (y al empezar o acabar el evento), la tienda, el gacha u otra pantalla del menú se cerraban solos y te devolvían al menú. Ya no.",
+     "During Halloween, a few seconds after opening the game (and when the event starts or ends), the shop, the gacha or another menu screen closed by itself and sent you back to the menu. Not anymore."],
+    ["Armadura Frágil, Impasible y Cobardía ya no te quitan las cargas de Agilidad (u otra subida de velocidad mejor) al recibir un golpe: antes las dejaban en una.",
+     "Weak Armor, Steadfast and Rattled no longer remove your Agility charges (or any better speed boost) when you get hit: they used to drop them to one."],
+    ["El Chaleco Asalto ya no cuenta para el tope del 70 % de las cartas Coraza: con las cartas al máximo, el chaleco suma encima. Y si te lo quitas, no pierdes lo de las cartas.",
+     "The Assault Vest no longer counts toward the 70% cap of the Armor cards: with the cards maxed, the vest adds on top. And if you take it off, you keep what the cards gave you."],
+    ["En ventanas muy alargadas (muy anchas y bajas), los enemigos ya no se quedan dando vueltas fuera de la pantalla sin acercarse: parecía que no salía ninguno.",
+     "In very elongated windows (very wide and short), enemies no longer keep looping off screen without coming closer: it looked as if none were spawning."],
+    ["Test inicial: los rasgos de tu personalidad («Paciente», «Tenaz»…) salían en español en todos los idiomas. Ya salen traducidos.",
+     "Starting quiz: your personality traits (\"Patient\", \"Tenacious\"…) were shown in Spanish in every language. They are translated now."],
+    ["Móvil: al tocar «Cambiar opciones» en las cartas de nivel, a veces se elegía sola una de las cartas nuevas; y en el vínculo, tras elegir el primer movimiento, se unía solo el que quedara debajo del dedo en vez del que tocabas. Ahora sólo se elige la carta que tocas.",
+     "Mobile: tapping \"Change options\" on the level-up cards sometimes picked one of the new cards by itself; and in a bond, after choosing the first move, whichever move ended up under your finger was joined instead of the one you tapped. Now only the card you tap is chosen."],
+    ["Cooperativo: con una conexión lenta, un jugador podía ver la partida minutos tarde (hasta más de 4 minutos por detrás de los demás), y en la Sentencia de Arceus era un caos. Ahora, si la conexión no da para más, el juego espera a que se ponga al día en vez de amontonar lo que falta por llegar: como mucho, la partida se para un momento («esperando al anfitrión»), pero va siempre al día.",
+     "Co-op: with a slow connection, a player could see the run minutes late (more than 4 minutes behind the others), and Arceus's Judgment turned into chaos. Now, if the connection cannot keep up, the game waits for it to catch up instead of piling up what has yet to arrive: at worst the run pauses for a moment (\"waiting for the host\"), but it is always up to date."],
+    ["Ranking de daño a Arceus: «Sólo amigos» enseña también a los amigos que no están en el top 50 (en Histórico), y en el Histórico se guarda tu mejor daño aunque esa partida no mejore tu tiempo.",
+     "Arceus damage leaderboard: \"Friends only\" also shows friends outside the top 50 (in All-time), and All-time keeps your best damage even if that run does not beat your time."]
+  ] },
   { d: '2026-10-28', title: ["PokeKatens: legendarios con más efectos", "PokeKatens: legendaries with more effects"], new: [
     ["Los ataques evolucionados («… +») ya se ven distintos de los normales: llevan un borde de luz de su color, un destello en cruz al lanzarlos, chispas que se quedan atrás, un aro doble en las ondas y un eco en los golpes. Sólo cambia cómo se ven, y en grupo tus amigos también lo ven. Con la calidad en «Baja», sólo el borde.",
      "Evolved moves («… +») now look different from normal ones: they have a border of light in their colour, a cross-shaped flash when cast, sparkles that trail behind, a double ring on shockwaves and an echo on strikes. Only the look changes, and in a group your friends see it too. With quality set to “Low”, just the border."],

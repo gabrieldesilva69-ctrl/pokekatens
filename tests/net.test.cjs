@@ -131,7 +131,7 @@ test('representative busy host payload saves at least 30%; all savings are lossl
 test('real Coop.tick frames pass through the codec without changing gameplay fields', () => {
   for (const host of [true, false]) {
     const sent = [], G = {};
-    G.Net = { uid: host ? 'host' : 'guest', on() {}, onPeer() {}, slow: () => false,
+    G.Net = { uid: host ? 'host' : 'guest', on() {}, onPeer() {}, slow: () => false, busy: () => false,
       send: (uid, f) => sent.push(f), toHost: f => sent.push(f) };
     G.Player = class { constructor() { this.maxHp = 300; } };
     G.DEX_BY = { 25: { dex: 25 } }; G.baseStartOf = () => 'thundershock';
@@ -241,7 +241,7 @@ function coopWithCuts(host) {
   const timers = new Map(), lost = [], said = [], dropped = [];
   let mode = 'direct', nextT = 0;
   const G = {};
-  G.Net = { uid: host ? 'host' : 'guest', on(fn) { msgFn = fn; }, onPeer(fn) { peerFn = fn; }, slow: () => false,
+  G.Net = { uid: host ? 'host' : 'guest', on(fn) { msgFn = fn; }, onPeer(fn) { peerFn = fn; }, slow: () => false, busy: () => false,
     send() {}, toHost() {}, mode: () => mode };
   G.Player = class { constructor() { this.maxHp = 300; } };
   G.DEX_BY = { 25: { dex: 25 } }; G.baseStartOf = () => 'thundershock';
@@ -299,7 +299,7 @@ test('co-op cut mid-run: the host keeps the guest while it reconnects and remove
 test('co-op orbs: the host applies a guest orb only if the guest really has it, and buffs reach those nearby', () => {
   let msgFn = null;
   const G = {}, slept = [], slowed = [];
-  G.Net = { uid: 'host', on(fn) { msgFn = fn; }, onPeer() {}, slow: () => false, send() {}, toHost() {}, mode: () => 'direct' };
+  G.Net = { uid: 'host', on(fn) { msgFn = fn; }, onPeer() {}, slow: () => false, busy: () => false, send() {}, toHost() {}, mode: () => 'direct' };
   G.Player = class { constructor() { this.maxHp = 300; } };
   G.DEX_BY = { 25: { dex: 25 } }; G.baseStartOf = () => 'thundershock';
   G.Sprites = { preload() {} };
@@ -378,7 +378,7 @@ test('without a direct connection the game goes through the database relay, unti
 function coopSums(host, mySum) {
   let msgFn = null; const got = {};
   const G = {};
-  G.Net = { uid: host ? 'host' : 'guest', on(fn) { msgFn = fn; }, onPeer() {}, slow: () => false, send() {}, toHost() {}, mode: () => 'direct' };
+  G.Net = { uid: host ? 'host' : 'guest', on(fn) { msgFn = fn; }, onPeer() {}, slow: () => false, busy: () => false, send() {}, toHost() {}, mode: () => 'direct' };
   G.Player = class { constructor() { this.maxHp = 300; } };
   G.DEX_BY = { 25: { dex: 25 }, 7: { dex: 7 } }; G.baseStartOf = () => 'thundershock';
   G.Moves = { BY_ID: { thundershock: {}, tackle: {} } }; G.Items = { BY: { leftovers: {} } };
@@ -465,4 +465,62 @@ test('connection candidates travel together in one database message, and both fo
   deliver({ c: { candidate: 'h3' } });                          // de las de antes
   await settle(); await settle();
   assert.deepEqual(pc.added.map(c => c.candidate).sort(), ['h1', 'h2', 'h3']);
+});
+
+// ---- Conexión atascada (de PokéSurvivor, 27-10-2026; traído el 29-10 sin su TURN) ----
+function coopJam(host) {
+  const sent = [], G = {};
+  let jam = false;
+  G.Net = { uid: host ? 'host' : 'guest', on() {}, onPeer() {}, slow: () => false, busy: () => jam,
+    send: (uid, f) => sent.push(f), toHost: f => sent.push(f) };
+  G.Player = class { constructor() { this.maxHp = 300; } };
+  G.DEX_BY = { 25: { dex: 25 } }; G.baseStartOf = () => 'thundershock';
+  G.Sprites = { preload() {} }; G.U = { dist2: () => 0 };
+  G.EnemyMgr = { all: () => [] }; G.Judgment = { netState: () => null };
+  G.Social = { me: { name: 'yo' } };
+  new Function('G', 'document', source('js/net/coop.js'))(G, { addEventListener() {} });
+  const local = { x: 0, y: 0, moveAngle: 0, walking: false, hp: 300, maxHp: 300, magnet: 78, aim: 0, xpMul: 1, activeGroup: () => [] };
+  G.Coop.begin({ host: 'host', members: [{ uid: 'host', name: 'Ana', dex: 25 }, { uid: 'guest', name: 'Bea', dex: 25 }] }, local,
+    { team: () => ({ time: 0, level: 1, xp: 0, xpNext: 10, kills: 0, bosses: 0, coins: 0, t1: 0, t10: 0 }), choosing: () => false, levelStart() {}, waiting() {} });
+  return { G, sent, jam: v => { jam = v; } };
+}
+
+test('co-op jammed connection: nothing piles up behind (the 4-minute delay); events wait and none are lost', () => {
+  const h = coopJam(true);
+  h.G.Coop.tick(1); h.sent.length = 0;
+  h.jam(true);
+  for (let i = 0; i < 700; i++) h.G.Coop.say('e' + i, 1);
+  for (let i = 0; i < 30; i++) h.G.Coop.tick(1 / 15);
+  h.G.Coop.levelStart(2);                                   // también lo que se manda al momento
+  assert.equal(h.sent.length, 0, 'nothing is added while the channel still has a backlog');
+  h.jam(false);
+  h.G.Coop.tick(1 / 15); h.G.Coop.tick(1 / 15);
+  const evs = h.sent.flatMap(f => f.ev).filter(e => e[0] === 'say').map(e => e[1]);
+  assert.equal(h.sent[0].ev.length, 500, 'a huge backlog goes in several messages');
+  assert.deepEqual(evs, Array.from({ length: 700 }, (_, i) => 'e' + i), 'all of them, in order');
+
+  const g = coopJam(false);
+  g.G.Coop.tick(1); g.sent.length = 0;
+  g.jam(true);
+  g.G.Coop.status({ id: 7 }, 'b', 3);
+  g.G.Coop.localPicked();
+  g.G.Coop.tick(1);
+  assert.equal(g.sent.length, 0);
+  g.jam(false); g.G.Coop.tick(1);
+  assert.deepEqual(g.sent[0].ev.map(e => e[0]), ['s', 'lp']);
+  g.jam(true); g.G.Coop.leave();
+  assert.deepEqual(g.sent.at(-1).ev.at(-1), ['bye'], 'leaving is always said');
+});
+
+
+test('net busy: only an open channel with a big backlog counts as busy', async () => {
+  const h = signalNetwork('host', true);
+  h.N.syncMembers(['host', 'a']); await settle();
+  const dc = h.pcs[0].dc;
+  assert.equal(h.N.busy('a'), false);
+  dc.readyState = 'open'; dc.bufferedAmount = 64 * 1024;
+  assert.equal(h.N.busy('a'), false);
+  dc.bufferedAmount = 64 * 1024 + 1;
+  assert.equal(h.N.busy('a'), true);
+  assert.equal(h.N.busy('nadie'), false);
 });

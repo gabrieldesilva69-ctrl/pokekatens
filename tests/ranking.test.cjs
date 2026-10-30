@@ -73,3 +73,16 @@ test('el histórico enseña lo que ya se sabe del semanal (leído después): ya 
   // Al revés no: lo del histórico no sale en el semanal.
   assert.deepEqual((await R.top('s', 'w', null, false)).map(r => r.id), ['M']);
 });
+
+// #356 de PokéSurvivor (traído el 29-10-2026, sin su sello): fuera de los dos top 50 del histórico,
+// un daño a Arceus mejor se guarda aunque el tiempo no mejore.
+test('#356: fuera de los dos top 50 del histórico, un daño a Arceus mejor se guarda aunque no mejore el tiempo', async () => {
+  const { R, docs, store } = env();
+  const b = R.board('s', 'a');
+  store.set('ps.rk.thr', JSON.stringify({ [b]: 5000, [b + '#d']: 9e9 }));
+  docs.set('lb/' + b + '/e/U1', { t: 2400, lv: 300, kills: 5000, dmg: 1000, uids: ['U1'], names: ['Ash'], dex: [25], shiny: [false] });
+  await R.submitSolo({ t: 1900, lv: 200, kills: 3000, dex: 25, shiny: false, dmg: 200000 });
+  const e = docs.get('lb/' + b + '/e/U1');
+  assert.equal(e.dmg, 200000, 'se guarda el daño nuevo');
+  assert.deepEqual([e.t, e.lv, e.kills], [2400, 300, 5000], 'con el tiempo, nivel y derrotados de la marca de antes (lo que piden las reglas)');
+});

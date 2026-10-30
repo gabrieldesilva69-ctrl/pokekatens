@@ -37,6 +37,11 @@ G.Net = (() => {
   // manda ni un byte más por la red. Se lee como mucho cada PING_MS y sólo si alguien
   // lo pide (el HUD, con "Mostrar ping" activado).
   const PING_MS = 2000;
+  // Lo que puede quedar por salir en el canal. El canal no pierde nada y va en orden:
+  // si la conexión da menos de lo que se manda, lo de más se queda en cola y el otro lo
+  // ve cada vez más tarde (de PokéSurvivor, 27-10-2026: una invitada iba 4 min y 40 s
+  // por detrás). Con más que esto en cola, coop.js espera en vez de mandar (ver busy).
+  const BUSY_BYTES = 64 * 1024;
 
 
   // Diagnóstico de la red (para la sala): con una conexión de prueba contra varios STUN
@@ -450,6 +455,8 @@ G.Net = (() => {
     probeNat, natKind, onNat(fn) { natHandlers.add(fn); },
     nat(u) { return u === uid ? natMine : natOf.get(u) || null; },
     mode(u) { const p = peers.get(u); return p ? p.mode : 'closed'; },
+    /** ¿Le queda mucho por salir? Entonces mejor esperar que mandar más (ver BUSY_BYTES). */
+    busy(u) { const p = peers.get(u); return !!(p && p.dc && p.dc.readyState === 'open' && p.dc.bufferedAmount > BUSY_BYTES); },
     /** ¿Va por el relé (o no hay conexión)? Entonces se manda menos a menudo. */
     slow(u) { const p = peers.get(u); return !p || p.mode !== 'direct'; },
     peers() { return [...peers.keys()]; },
