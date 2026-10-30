@@ -12,7 +12,8 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **PC:** WASD o flechas, 1-4, Q / E / Tab y P / Esc de fábrica. Las teclas se cambian en Ajustes →
   Controles (dos por acción; Esc siempre pausa y las de las cartas, 1-3 y R, son fijas). Se guardan en
   este navegador, no en la cuenta (`js/core/input.js`).
-- **Ajustes:** sonido, calidad gráfica (con modo automático), números de daño, menos sacudidas, FPS,
+- **Ajustes:** sonido, calidad gráfica (con modo automático), números de daño, menos sacudidas, FPS (y su límite: sin límite, 144, 120, 60 o 30; 30-10-2026), píxeles exactos
+  (cada píxel del arte ocupa un número entero de píxeles de pantalla si la vista cambia un 8 % o menos; `camera.js`),
   ping (sólo en grupo: verde < 100 ms, amarillo hasta 200, rojo más) y la cuenta.
 - **Música:** suena tras el primer clic (los navegadores no dejan sonar antes). Volumen y silencio con el
   botón del altavoz arriba a la derecha, o en la pausa.

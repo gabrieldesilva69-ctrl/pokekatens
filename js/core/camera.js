@@ -25,8 +25,22 @@ G.Camera = {
     this.fit();
   },
 
+  // Píxeles exactos (Ajustes → Gráficos, 30-10-2026): cada píxel del arte (PX
+  // unidades) ocupa un número entero de píxeles de pantalla, así todos los
+  // cuadrados salen iguales. La vista sólo cambia si es poco (SNAP_MAX): en un
+  // móvil, redondear 2,7 a 3 recortaba un 11 % y se deja como estaba.
+  SNAP_MAX: 0.08,
+
+  /** La escala base (sin zoom), ajustada a píxeles exactos si toca. */
+  baseScale() {
+    const s = Math.min(this._cw / this.VIEW_W, this._ch / this.MIN_VIEW_H);
+    if (!(G.Settings && G.Settings.get('pixelPerfect')) || !G.Sprites) return s;
+    const k = s * this.dpr * G.Sprites.PX, n = Math.round(k);
+    return n >= 2 && Math.abs(n - k) / k <= this.SNAP_MAX ? s * n / k : s;
+  },
+
   fit() {
-    this.scale = Math.min(this._cw / this.VIEW_W, this._ch / this.MIN_VIEW_H) / this.zoom;
+    this.scale = this.baseScale() / this.zoom;
     this.w = this._cw / this.scale;
     this.h = this._ch / this.scale;
   },

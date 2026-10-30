@@ -6,6 +6,10 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-30', title: ["PokeKatens: límite de FPS y píxeles exactos", "PokeKatens: FPS limit and pixel-perfect"], new: [
+    ["Ajustes → Gráficos: «Límite de FPS» (sin límite, 144, 120, 60 o 30) para que el juego no dibuje más fotogramas de los que necesitas (con una pantalla rápida gastaba la gráfica sin parar), y «Píxeles exactos», encendido de fábrica: cada cuadrado del dibujo ocupa los mismos píxeles de tu pantalla y todo se ve más nítido, sobre todo en pantallas grandes. La vista casi no cambia.",
+     "Settings → Graphics: “FPS limit” (no limit, 144, 120, 60 or 30) so the game doesn't draw more frames than you need (with a fast screen it kept the graphics card busy nonstop), and “Pixel-perfect”, on by default: every square of the art takes the same number of pixels on your screen and everything looks sharper, especially on big screens. The view barely changes."]
+  ] },
   { d: '2026-10-29', title: ["PokeKatens: lo nuevo de PokéSurvivor", "PokeKatens: what's new from PokéSurvivor"], new: [
     ["Móvil y tableta: nuevo joystick «Anclado» (Ajustes → Controles → Colocar los botones). Aparece donde pones el dedo y se queda en ese sitio mientras lo mantienes, aunque alejes el dedo; al levantarlo y tocar en otro sitio, aparece allí. El «Flotante» de siempre sigue al dedo y sigue siendo el que viene puesto.",
      "Mobile and tablet: new \"Anchored\" joystick (Settings → Controls → Place the buttons). It appears where you put your finger and stays in that spot while you hold it, even if you move your finger away; lift it and touch somewhere else, and it appears there. The usual \"Floating\" one follows your finger and is still the default."]

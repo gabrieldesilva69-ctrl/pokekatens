@@ -58,6 +58,8 @@ G.Game = (() => {
       // se rehace al volver a él)
       if (G.UI.isOpen('scr-menu') && !BACK_SCREENS.some(shown)) G.MenuUI.open();
     });
+    // Píxeles exactos: al cambiarlo se recoloca la vista al momento.
+    G.Settings.on(k => { if (k === 'pixelPerfect') G.Camera.fit(); });
     last = performance.now();
     requestAnimationFrame(loop);
   }
@@ -755,8 +757,23 @@ G.Game = (() => {
   // partida se da por terminada a los ~3 s y se guarda: tiempo, derrotados,
   // récords y ranking. Mejor eso que una pantalla negra y perderlo todo.
   let loopErrs = 0, errRun = 0;
+  // Límite de FPS (Ajustes → Gráficos, 30-10-2026): con una pantalla de 144 o 240 Hz
+  // el juego dibujaba todos los que podía y gastaba la gráfica sin necesidad. Se
+  // salta el fotograma si aún no toca; el tiempo de juego (dt) sale del real, así
+  // que todo va igual de rápido con 30 que con 240.
+  let nextT = 0;
+  function due(ts) {
+    const cap = G.Settings.get('fpsCap');
+    if (!(cap > 0)) return true;
+    const step = 1000 / cap;
+    if (ts < nextT - 0.5) return false;
+    nextT = nextT + step > ts ? nextT + step : ts + step;     // tras un tirón no se recupera de golpe
+    return true;
+  }
+
   function loop(ts) {
     requestAnimationFrame(loop);
+    if (!due(ts)) return;
     try { frame(ts); errRun = 0; }
     catch (e) {
       if (loopErrs++ < 5) console.error('[Game] fallo en un fotograma:', e);

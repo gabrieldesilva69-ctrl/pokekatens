@@ -7,6 +7,8 @@
  *   calm        true/false                        menos sacudidas y destellos
  *   darkNight   true/false                        la noche oscurece la pantalla (systems/night.js)
  *   fps         true/false                        contador de FPS
+ *   fpsCap      0 | 144 | 120 | 60 | 30           FPS como mucho (0 = los que dé la pantalla; game.js)
+ *   pixelPerfect true/false                       cada píxel del arte, un número entero de píxeles (camera.js)
  *   ping        true/false                        ping en ms en las partidas en grupo
  *   stick       0.8 | 1 | 1.25                    tamaño del joystick táctil
  *   stickMode   'float' | 'anchor' | 'fixed'      joystick donde pones el dedo (que le sigue o se queda ahí), o siempre en su sitio
@@ -30,7 +32,7 @@
  */
 G.Settings = (() => {
   const KEY = 'ps.settings';
-  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, ping: true, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false, cries: true, darkNight: true, fx: 'all', fxOff: [], trails: 'all', trailOff: [], keys: null };
+  const DEF = { quality: 'auto', dmgNumbers: true, calm: false, fps: false, fpsCap: 0, pixelPerfect: true, ping: true, stick: 1, stickMode: 'float', pad: null, gamepad: true, padRumble: true, aimManual: false, cries: true, darkNight: true, fx: 'all', fxOff: [], trails: 'all', trailOff: [], keys: null };
   let s = Object.assign({}, DEF);
   try { Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* nada */ }
   const fns = new Set();
@@ -52,7 +54,9 @@ G.Settings = (() => {
     const fps = frames / acc;
     acc = 0; frames = 0;
     // 3 s seguidos por debajo de 45 FPS: baja un nivel; 8 s por encima de 57: sube.
-    if (fps < 45) { slowT++; fastT = 0; } else if (fps > 57) { fastT++; slowT = 0; } else { slowT = fastT = 0; }
+    // (Con el límite de FPS, en proporción a él: a 30 FPS no va a tirones.)
+    const cap = s.fpsCap > 0 ? s.fpsCap : 60, slow = Math.min(45, cap * 0.75), fast = Math.min(57, cap * 0.95);
+    if (fps < slow) { slowT++; fastT = 0; } else if (fps > fast) { fastT++; slowT = 0; } else { slowT = fastT = 0; }
     if (slowT >= 3 && autoLevel > 0) { autoLevel--; slowT = 0; }
     if (fastT >= 8 && autoLevel < (touchy ? 1 : 2)) { autoLevel++; fastT = 0; }
   }

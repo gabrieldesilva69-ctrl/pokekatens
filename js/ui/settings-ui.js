@@ -107,6 +107,9 @@ G.SettingsUI = (() => {
         + toggle('calm', 'Menos sacudidas y destellos', 'La cámara tiembla menos y los fogonazos son suaves.')
         + toggle('darkNight', 'Noches oscuras', 'De noche la pantalla se oscurece alrededor de tu Pokémon. Sin esto, sólo cambia un poco el color.')
         + toggle('fps', 'Mostrar FPS', 'Fotogramas por segundo, en la esquina de abajo.')
+        + toggle('pixelPerfect', 'Píxeles exactos', 'Todos los cuadrados del dibujo del mismo tamaño y nítidos. La vista casi no cambia.')
+        + section('Límite de FPS', 'Cuántos fotogramas por segundo dibuja como mucho. Con una pantalla rápida, bajarlo gasta menos batería y calienta menos; el juego va igual de rápido.')
+        + choice('fpsCap', [[0, 'Sin límite'], [144, '144'], [120, '120'], [60, '60'], [30, '30']])
         + toggle('ping', 'Mostrar ping', 'En las partidas en grupo, en la esquina de abajo: verde por debajo de 100 ms, amarillo hasta 200 ms y rojo por encima.')
         + (canFull() ? `<div class="set-row"><div class="grow"><b>Pantalla completa</b><small>Sin barras del navegador.</small></div>
              <button class="btn small" id="set-full">${isFull() ? 'Salir' : 'Activar'}</button></div>`
