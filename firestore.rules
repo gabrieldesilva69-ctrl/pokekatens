@@ -78,9 +78,11 @@ service cloud.firestore {
         && s.get('name', '') is string && s.get('name', '').size() <= 24
         && s.get('owned', {}) is map && s.get('owned', {}).size() <= 2000
         && s.get('shiny', {}) is map && s.get('shiny', {}).size() <= 2000
-        && s.get('coins', 0) is number && s.get('coins', 0) >= 0
-        && tk(s, 't1') is number && tk(s, 't1') >= 0
-        && tk(s, 't10') is number && tk(s, 't10') >= 0
+        // Topes de sobra (31-10-2026, A1 de la revisión): no impiden poner trampas en tu
+        // propia partida (eso no se cierra sin servidor), pero sí las cifras absurdas.
+        && s.get('coins', 0) is number && s.get('coins', 0) >= 0 && s.get('coins', 0) <= 1000000000
+        && tk(s, 't1') is number && tk(s, 't1') >= 0 && tk(s, 't1') <= 1000000
+        && tk(s, 't10') is number && tk(s, 't10') >= 0 && tk(s, 't10') <= 100000
         // Pokédex de vistos y derrotados (systems/seen.js): un texto corto cada uno.
         && s.get('seen', '') is string && s.get('seen', '').size() <= 260
         && s.get('beat', '') is string && s.get('beat', '').size() <= 260;
@@ -93,17 +95,20 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(['uid'])
         && request.resource.data.uid == me()
-        && lower.size() >= 3 && lower.size() <= 16
-        && lower == lower.lower();
+        // Como VALID en js/net/social.js (31-10-2026, R9: antes cabían espacios y comillas).
+        && lower.matches('^[a-z0-9_ñáéíóú]{3,16}$');
       allow delete: if signedIn() && resource.data.uid == me();
     }
 
     // Perfil público: apodo, 3 favoritos, título, mejores marcas y medallas.
-    // Récords del perfil: sólo números (lo que pinta el perfil; nada de texto).
+    // Récords del perfil: sólo números (lo que pinta el perfil; nada de texto), dentro
+    // de lo posible (31-10-2026, R6: antes se veían perfiles con 999.999.999 derrotados en 3 h).
+    function intIn(b, k, max) { return b.get(k, 0) is int && b.get(k, 0) >= 0 && b.get(k, 0) <= max; }
     function validBest(b) {
       return b is map && b.keys().hasOnly(['solo', 'group', 'level', 'bosses', 'legends', 'kills', 'medals'])
-        && b.get('solo', 0) is int && b.get('group', 0) is int && b.get('level', 0) is int && b.get('bosses', 0) is int
-        && b.get('legends', 0) is int && b.get('kills', 0) is int && b.get('medals', 0) is int;
+        && intIn(b, 'solo', 86400) && intIn(b, 'group', 86400) && intIn(b, 'level', 21610)
+        && intIn(b, 'bosses', 10000000) && intIn(b, 'legends', 2000) && intIn(b, 'kills', 1000000000)
+        && intIn(b, 'medals', 1000);
     }
 
     // Textos de una lista corta (hasta 8): cada uno, texto de `max` letras como mucho.

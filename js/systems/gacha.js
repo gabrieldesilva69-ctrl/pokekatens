@@ -167,10 +167,13 @@ G.Gacha = (() => {
     }
     save.stats.pulls = (save.stats.pulls || 0) + n;
     // GS Ball: una cada GS_EVERY tiradas (de cualquier banner), a la Mochila (data/shop.js).
+    // (gsPulls cuenta todas y gsGot las dadas, y sólo suben: así al juntar dos aparatos
+    // no sale una de más; G.DB.merge, 31-10-2026.)
     save.gsPulls = (save.gsPulls || 0) + n;
+    save.gsGot = save.gsGot || 0;
     out.gs = 0;
-    while (save.gsPulls >= GS_EVERY) {
-      save.gsPulls -= GS_EVERY;
+    while (save.gsGot < Math.floor(save.gsPulls / GS_EVERY)) {
+      save.gsGot++;
       save.bag = save.bag || {};
       save.bag[G.Shop.GS] = Math.min(999, (save.bag[G.Shop.GS] || 0) + 1);
       out.gs++;

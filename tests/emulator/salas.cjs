@@ -23,6 +23,8 @@ const member = n => ({ name: n, dex: 25, shiny: false, at: TS });
   await req(null, 'DELETE', '');
   // ---- lo que hace el juego ----
   await ok(A, 'PUT', 'rooms/' + A, { host: A, open: true, at: TS, m: { [A]: member('Ash') } }, 'crear su sala');
+  await ok(A, 'PUT', `rooms/${A}/ok/${B}`, true, 'anfitrión: invitar a B (social.js invite)');
+  await ok(A, 'PUT', `rooms/${A}/ok/${C}`, true, 'anfitrión: invitar a C');
   await ok(B, 'PUT', `rin/${A}/${B}`, true, 'invitado: marca rin');
   await ok(B, 'PUT', `rooms/${A}/m/${B}`, member('Misty'), 'invitado: entrar en una sala abierta');
   await ok(C, 'PUT', `rin/${A}/${C}`, true, 'otro invitado: rin');
@@ -42,7 +44,7 @@ const member = n => ({ name: n, dex: 25, shiny: false, at: TS });
   await ok(A, 'PUT', `rooms/${A}/m/${B}`, { name: 'Misty', dex: 7, shiny: true, at: 1 }, 'anfitrión: devolver la plaza');
   // corte del anfitrión: el servidor borra la sala y él la vuelve a escribir con los que había (rejoin)
   await ok(A, 'DELETE', 'rooms/' + A, undefined, 'onDisconnect del anfitrión');
-  await ok(A, 'PUT', 'rooms/' + A, { host: A, open: false, at: TS, m: { [A]: member('Ash'), [B]: member('Misty'), [C]: member('Brock') } }, 'rehacer la sala');
+  await ok(A, 'PUT', 'rooms/' + A, { host: A, open: false, at: TS, m: { [A]: member('Ash'), [B]: member('Misty'), [C]: member('Brock') }, ok: { [B]: true, [C]: true } }, 'rehacer la sala');
   await ok(B, 'PUT', `rooms/${A}/m/${B}`, member('Misty'), 'invitado: volver a poner su plaza (ya existe)');
   // salir
   await ok(C, 'DELETE', `rooms/${A}/m/${C}`, undefined, 'invitado: salir');
@@ -51,7 +53,11 @@ const member = n => ({ name: n, dex: 25, shiny: false, at: TS });
   await ok(A, 'DELETE', 'rooms/' + A, undefined, 'anfitrión: cerrar su sala');
 
   // ---- el ataque ----
-  await ok(A, 'PUT', 'rooms/' + A, { host: A, open: true, at: TS, m: { [A]: member('Ash') } }, '(sala para probar)');
+  await ok(A, 'PUT', 'rooms/' + A, { host: A, open: true, at: TS, m: { [A]: member('Ash') }, ok: { [B]: true, [C]: true } }, '(sala para probar)');
+  // M2 de la revisión (31-10-2026): sólo entran los invitados del anfitrión.
+  await no(X, 'PUT', `rooms/${A}/m/${X}`, member('x'), 'entrar sin invitación en una sala abierta');
+  await no(X, 'PUT', `rooms/${A}/ok/${X}`, true, 'invitarse a sí mismo');
+  await no(A, 'PUT', `rooms/${A}/ok/${X}`, 'sí', 'una invitación que no es sí/no');
   await no(X, 'PUT', 'rooms/nuke_' + X + '_1', { host: X, open: true, at: TS, m: { [X]: member('x') } }, 'sala con otro nombre');
   await no(X, 'PUT', 'rooms/' + A, { host: X, open: true, at: TS, m: { [X]: member('x') } }, 'pisar la sala de otro');
   await no(X, 'PUT', 'rooms/' + X, { host: X, open: true, at: TS, m: { [X]: member('x'), FAKE1: member('f') } }, 'sala con plazas falsas');
@@ -72,8 +78,15 @@ const member = n => ({ name: n, dex: 25, shiny: false, at: TS });
   await ok(B, 'PUT', `rin/${A}/${B}`, true, '(B en la sala)'); await ok(B, 'PUT', `rooms/${A}/m/${B}`, member('Misty'), '(B en la sala)');
   await ok(C, 'PUT', `rin/${A}/${C}`, true, '(C en la sala)'); await ok(C, 'PUT', `rooms/${A}/m/${C}`, member('Brock'), '(C en la sala)');
   await no(B, 'PUT', `rooms/${A}/q/${C}/${B}_00`, 'x', 'invitado → otro invitado');
+  // R7: lo que un invitado manda al anfitrión no lo lee ni lo borra otro invitado.
+  await ok(C, 'PUT', `rooms/${A}/q/${A}/${C}_00`, JSON.stringify({ f: C, sig: { c: 'mi-ip' } }), '(C → anfitrión)');
+  await no(B, 'GET', `rooms/${A}/q/${A}`, undefined, 'leer lo que otro manda al anfitrión');
+  await no(B, 'GET', 'rooms/' + A, undefined, 'leer la sala entera (con la señalización)');
+  await no(B, 'DELETE', `rooms/${A}/q/${A}/${C}_00`, undefined, 'borrar el mensaje de otro');
+  await ok(C, 'DELETE', `rooms/${A}/q/${A}/${C}_00`, undefined, 'borrar el suyo');
+  await ok(B, 'GET', `rooms/${A}/open`, undefined, 'leer si está abierta');
   await ok(A, 'PUT', `rooms/${A}/open`, false, '(empieza la partida)');
-  await ok(X, 'PUT', `rin/${A}/${X}`, true, '(X pone su rin)');
+  await no(X, 'PUT', `rin/${A}/${X}`, true, 'rin en una sala cerrada (R10)');
   await no(X, 'PUT', `rooms/${A}/m/${X}`, member('x'), 'entrar en una sala cerrada');
   // ---- el contador del relé (relay/<AAAA-MM> = { t, u: { uid: { mb, at } } }, en MB; net.js) ----
   // (28-10-2026: antes era un número que cualquiera subía de 20 en 20 hasta el tope.)

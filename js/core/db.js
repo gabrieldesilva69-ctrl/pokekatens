@@ -108,7 +108,8 @@ G.DB = (() => {
       eggs: [],               // [{ id, dex, shiny, need, done, from }]
       eggsHatched: {},        // id -> fecha: los ya abiertos (que no vuelvan al juntar aparatos)
       eggGacha: {},           // generación del banner -> tiradas ×10 hacia el próximo huevo
-      gsPulls: 0,             // tiradas hacia la próxima GS Ball (25-10-2026, systems/gacha.js)
+      gsPulls: 0,             // tiradas desde que hay GS Ball (25-10-2026, systems/gacha.js; antes, hacia la próxima)
+      gsGot: 0,               // GS Ball ya dadas (31-10-2026): sale una cada 500 tiradas, floor(gsPulls / 500)
       // Pokédex (24-10-2026, systems/seen.js): mapas de bits en hexadecimal.
       seen: '',               // especies vistas en la partida
       beat: '',               // especies derrotadas
@@ -146,10 +147,13 @@ G.DB = (() => {
    * servidor (firestore.rules, saves).
    */
   function sanitize(s) {
-    s.coins = num(s.coins);
-    s.tickets.t1 = num(s.tickets.t1);
-    s.tickets.t10 = num(s.tickets.t10);
-    s.gsPulls = Math.min(499, num(s.gsPulls));
+    // Los mismos topes que firestore.rules (saneSave, 31-10-2026): con más, la nube no la guardaría.
+    s.coins = Math.min(1e9, num(s.coins));
+    s.tickets.t1 = Math.min(1e6, num(s.tickets.t1));
+    s.tickets.t10 = Math.min(1e5, num(s.tickets.t10));
+    // GS Ball (systems/gacha.js): tiradas desde que existe y las que ya se dieron, las dos sólo suben.
+    s.gsPulls = Math.min(1e7, num(s.gsPulls));
+    s.gsGot = Math.min(Math.floor(s.gsPulls / 500), num(s.gsGot));
     // Avatar de entrenador (data/avatars.js): un número de 1 a G.AVATARS, o 0.
     if (isObj(s.profile)) { const a = num(s.profile.avatar); s.profile.avatar = a <= (G.AVATARS || 60) ? a : 0; }
     if (isObj(s.led)) {
@@ -460,14 +464,24 @@ G.DB = (() => {
     }
     r.eggs = [...eggs.values()];
     r.eggsHatched = hatched;
+    // Como mucho los que caben (B2 de la revisión): los de más, las monedas de siempre (systems/eggs.js).
+    const cap = G.Eggs ? G.Eggs.SLOTS + G.Eggs.WAIT : 6;
+    if (r.eggs.length > cap) { r.coins = num(r.coins) + (r.eggs.length - cap) * (G.Eggs ? G.Eggs.OVERFLOW : 200); r.eggs.length = cap; }
     // Desafío semanal: la semana más reciente en que se cogió el premio (no se cobra dos veces).
     const wch = [a.wch, b.wch].filter(w => typeof w === 'string').sort().pop();
     if (wch) r.wch = wch;
     // Pokédex: lo visto y lo derrotado en cualquiera de los dos.
     if (G.Seen) for (const k of ['seen', 'beat']) r[k] = G.Seen.union(a[k], b[k]);
+    // GS Ball y huevos del gacha (M5 de la revisión, 31-10-2026): se cuentan las tiradas y lo
+    // que ya se dio, y las dos cosas sólo suben. Antes el contador volvía a 0 al dar el premio
+    // y, al juntar con un aparato que se quedó en 495, salía otra GS Ball con 5 tiradas.
     r.gsPulls = Math.max(num(r.gsPulls), num(older.gsPulls));
-    r.eggGacha = r.eggGacha || {};
-    for (const g in older.eggGacha || {}) r.eggGacha[g] = Math.max(num(r.eggGacha[g]), num(older.eggGacha[g]));
+    r.gsGot = Math.max(num(r.gsGot), num(older.gsGot));
+    for (const k of ['eggGacha', 'eggGachaGot']) {
+      if (!isObj(r[k]) && !isObj(older[k])) continue;      // (si no lo tiene ninguno, no se crea: la copia cambiaría)
+      r[k] = isObj(r[k]) ? r[k] : {};
+      for (const g in older[k] || {}) r[k][g] = Math.max(num(r[k][g]), num(older[k][g]));
+    }
     if (r.starter == null) r.starter = older.starter;
     if (r.personality == null) r.personality = older.personality;
     if (r.partner == null || !r.owned[r.partner]) { r.partner = older.partner; r.partnerShiny = older.partnerShiny; }
@@ -732,8 +746,12 @@ G.DB = (() => {
     // se daba por guardado; Guardar decía "Ya está todo guardado" y no lo subía.
     const same = remote && !opts.legacy && !gift && canon(save) === canon(fold(migrate(plain(remote))));
     if (!online) { pending = true; setSync('offline'); readTries = 0; readLater(); }
-    else if (same) { sentCanon = sameKey(plain(save)); setSync('ok'); }
-    else { pending = true; setSync('pending'); }
+    else if (same) { sentCanon = sameKey(plain(save)); setSync('ok'); remove(K_UP + uid); }
+    else {
+      pending = true; setSync('pending');
+      // Una subida que se cortó (ver pushNow): ahora sí se sube sola, una vez.
+      if (read(K_UP + uid)) setTimeout(() => { if (uid && pending) pushNow(0); }, 0);
+    }
   }
 
   /*
@@ -799,7 +817,7 @@ G.DB = (() => {
    * 65, el segundo Guardar de seguida quedaba "para dentro de un rato" y, si
    * salías del juego antes, no se subía nunca: en el otro aparato faltaban los tickets.
    */
-  const K_OK = 'ps.cloudok.', MIN_GAP = 25000, RULE_GAP = 21000;
+  const K_OK = 'ps.cloudok.', K_UP = 'ps.cloudup.', MIN_GAP = 25000, RULE_GAP = 21000;
   const sinceOk = () => Date.now() - (+read(K_OK + uid) || 0);
 
   /**
@@ -826,6 +844,9 @@ G.DB = (() => {
     }
     pending = false;
     setSync('syncing');
+    // Marca mientras sube (M6 de la revisión): si se corta (una actualización que recarga a los
+    // 6 s, cerrar la pestaña), al volver a entrar se sube sola una vez (ver openCloud).
+    write(K_UP + uid, Date.now());
     // Si la red se cae a medias, Firestore puede quedarse esperando: tope de 12 s.
     let tried = '';
     const u = uid, send = r => {
@@ -854,6 +875,7 @@ G.DB = (() => {
       clearTimeout(readT);           // (si estaba sin leer la nube: ya va a la par)
       if (uid === u) { setRev(r); sentCanon = tried; }
       write(K_OK + uid, Date.now());
+      remove(K_UP + u);
       // (Lo cambiado mientras se subía queda pendiente para el próximo Guardar.)
       setSync(pending ? 'pending' : 'ok');
       if (G.UI && G.UI.refreshCoins) G.UI.refreshCoins();

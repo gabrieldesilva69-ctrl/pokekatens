@@ -135,6 +135,7 @@
     /** @param eff  'super' | 'weak' | null (tabla de tipos, sólo para enseñarlo) */
     hurt(amount, color = '#fff', dirX = 0, dirY = 0, knock = 0, eff = null) {
       if (this.dead) return;
+      if (!Number.isFinite(amount)) return;          // (B3 de la revisión: con NaN no caía nunca)
       const d = Math.max(1, Math.round(amount));
       // Arceus en la Sentencia: no cae nunca; el golpe suma a su cuenta de daño
       // (la lleva quien manda: el invitado se lo manda al anfitrión).

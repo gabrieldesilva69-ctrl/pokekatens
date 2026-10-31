@@ -7,6 +7,8 @@
  *                     primero: borrar la marca, banear (no puede volver a
  *                     subir marcas, y se borra su marca de todas las tablas de
  *                     ahora) o descartar el reporte.
+ *   Muy largas        las marcas de ahora de más de 33 min (casi imposibles con la Sentencia):
+ *                     borrar o banear sin esperar a que alguien las reporte (31-10-2026).
  *   Baneados          las cuentas baneadas del ranking; se pueden desbanear.
  *   Regalos           dar monedas o tickets a un jugador por su apodo (sólo
  *                     sumar). Le llegan al buzón y los recibe al entrar.
@@ -47,6 +49,7 @@ G.ModUI = (() => {
     list.innerHTML = '<p class="sub">Cargando…</p>';
     try {
       if (tab === 'rep') await renderReports(list);
+      else if (tab === 'long') await renderLong(list);
       else if (tab === 'gift') renderGift(list);
       else await renderMarked(list);
     } catch (e) {
@@ -112,6 +115,42 @@ G.ModUI = (() => {
         }),
         btn('Descartar', 'ghost', () => busy(() => G.Ranking.dismiss(g.ids), 'Reporte descartado'))
       ].filter(Boolean));
+      row.appendChild(acts);
+      list.appendChild(row);
+    }
+  }
+
+  async function renderLong(list) {
+    const rows = await G.Ranking.suspects(SUSPECT_T);
+    list.innerHTML = rows.length ? '' : '<p class="sub">No hay marcas de más de 33 min en las tablas de ahora.</p>';
+    for (const r of rows) {
+      const mode = r.board.startsWith('g_') ? 'g' : 's';
+      const row = document.createElement('div');
+      row.className = 'rk-row mod-row rep';
+      const mons = document.createElement('span');
+      mons.className = 'mons';
+      r.dex.forEach((d, i) => { if (G.DEX_BY[d]) mons.appendChild(G.UI.spriteCanvas(d, 44, 40, { scale: 1, shiny: !!(r.shiny || [])[i] })); });
+      row.innerHTML = '<span class="pos"></span>';
+      row.appendChild(mons);
+      row.insertAdjacentHTML('beforeend', `<span class="who"><b translate="no">${r.names.map(esc).join(' · ')}</b>
+          <small>${esc(boardName(r.board))} · Nv. ${r.lv || 1} · ${(r.kills || 0).toLocaleString(G.I18n.locale)} derrotados</small></span>
+        <span class="time mod-warn">${fmt(r.t)}</span>`);
+      const acts = document.createElement('span');
+      acts.className = 'mod-acts';
+      const busy = async (fn, msg) => {
+        acts.querySelectorAll('button').forEach(b => { b.disabled = true; });
+        try { await fn(); G.UI.toast(msg); row.remove(); }
+        catch (e) { G.UI.toast('No se pudo: ' + (e.code || e.message)); acts.querySelectorAll('button').forEach(b => { b.disabled = false; }); }
+      };
+      acts.append(
+        btn('Borrar marca', 'ghost', () => busy(() => G.Ranking.removeEverywhere(r.id, mode, [], r.board), 'Marca borrada')),
+        btn('Banear', 'danger', () => {
+          if (!confirm('¿Banear a ' + r.names.join(', ') + '? No podrán volver a salir en el ranking y se borra su marca.')) return;
+          busy(async () => {
+            for (let i = 0; i < r.uids.length; i++) await G.Ranking.setMarked(r.uids[i], true, r.names[i]);
+            await G.Ranking.removeEverywhere(r.id, mode, [], r.board);
+          }, 'Baneado');
+        }));
       row.appendChild(acts);
       list.appendChild(row);
     }

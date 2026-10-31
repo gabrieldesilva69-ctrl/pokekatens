@@ -9,6 +9,13 @@ G.CHANGELOG = [
   { d: '2026-10-31', title: ["PokeKatens: la Pokédex completa", "PokeKatens: the complete Pokédex"], new: [
     ["La Pokédex, completa: llegan los 59 Pokémon que faltaban, hasta los 1025. Entre ellos Simisear, Zebstrika, Jellicent, Pyroar, Toucannon, Coalossal, Sirfetch'd, Mr. Rime, Copperajah, Mabosstiff, Espathra y los legendarios Zarude, Wo-Chien, Chien-Pao, Ting-Lu, Miraidon, Okidogi y Pecharunt, que salen en las grietas. Todos con su shiny, su grito y sus MT, en el gacha de su región, como enemigos y en los huevos.",
      "The Pokédex is complete: the 59 missing Pokémon arrive, all the way to 1025. Among them Simisear, Zebstrika, Jellicent, Pyroar, Toucannon, Coalossal, Sirfetch'd, Mr. Rime, Copperajah, Mabosstiff, Espathra and the legendaries Zarude, Wo-Chien, Chien-Pao, Ting-Lu, Miraidon, Okidogi and Pecharunt, who show up in the rifts. All with their shiny, their cry and their TMs, in their region's gacha, as enemies and in eggs."]
+  ], fix: [
+    ["Al jugar en dos aparatos con la misma cuenta, juntar las partidas ya no regala una GS Ball ni un huevo del gacha de más, ni deja más de 6 huevos (los que sobran se cambian por 200 monedas cada uno, como siempre).",
+     "When you play on two devices with the same account, merging the saves no longer gives an extra GS Ball or gacha egg, nor leaves more than 6 eggs (any extra ones turn into 200 coins each, as usual)."],
+    ["Móvil: los botones ya no se quedan iluminados después de tocarlos, los menús no se meten debajo de la muesca y la ayuda del principio de la partida queda encima de la barra de inicio del iPhone.",
+     "Mobile: buttons no longer stay lit after you tap them, menus no longer go under the notch, and the help line at the start of a run sits above the iPhone home bar."],
+    ["En grupo, sólo pueden entrar en tu sala los amigos a los que invitas (antes, quien supiera el código de tu cuenta podía colarse en una sala abierta).",
+     "In a group, only the friends you invite can join your room (before, anyone who knew your account code could sneak into an open room)."]
   ] },
   { d: '2026-10-30', title: ["PokeKatens: límite de FPS y píxeles exactos", "PokeKatens: FPS limit and pixel-perfect"], new: [
     ["Ajustes → Gráficos: «Límite de FPS» (sin límite, 144, 120, 60 o 30) para que el juego no dibuje más fotogramas de los que necesitas (con una pantalla rápida gastaba la gráfica sin parar), y «Píxeles exactos», encendido de fábrica: cada cuadrado del dibujo ocupa los mismos píxeles de tu pantalla y todo se ve más nítido, sobre todo en pantallas grandes. La vista casi no cambia.",

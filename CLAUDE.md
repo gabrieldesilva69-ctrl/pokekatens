@@ -14,7 +14,7 @@ la web en GitHub Pages y un programa para Windows (`.exe`) que abre esa web. Nor
 | Comprobar los datos del juego | `node tools/export_data.js` |
 | Construir (publicar) | `node tools/build.js --sin-seo` → `index.html`, `js/app.min.js`, `version.json`, `js/lang/*.js` |
 | Jugar en local | `node tools/serve.cjs` → http://127.0.0.1:8123/dev.html (código suelto) o /index.html (construido) |
-| Prueba de datos (Firebase local) | `node tools/emu.cjs "node tests/emulator/smoke.cjs && node tests/emulator/ranking.cjs"` |
+| Prueba de datos (Firebase local) | `node tools/emu.cjs "node tests/emulator/smoke.cjs && node tests/emulator/ranking.cjs && node tests/emulator/salas.cjs && node tests/emulator/perfil.cjs && node tests/emulator/abusos.cjs"` |
 | ¿Hay Java 21? | `node tools/emu.cjs --check-java` |
 | Escritorio: instalar | `npm ci --prefix desktop` (o `npm install --prefix desktop` si cambias `desktop/package.json`) |
 | Escritorio: abrir | `npm --prefix desktop start` |

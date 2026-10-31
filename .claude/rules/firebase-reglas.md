@@ -20,7 +20,7 @@ paths:
   (auth 9099, firestore 8080, database 9000, como en `firebase.json`).
 - Las reglas son la seguridad real. Si cambias qué se guarda o quién lo lee, cambia `firestore.rules`
   y añade un caso a `tests/emulator/` (mismo estilo: códigos de respuesta, nunca tokens en la salida).
-- Prueba: `node tools/emu.cjs "node tests/emulator/smoke.cjs && node tests/emulator/ranking.cjs"`
+- Prueba: `node tools/emu.cjs "node tests/emulator/smoke.cjs && node tests/emulator/ranking.cjs && node tests/emulator/salas.cjs && node tests/emulator/perfil.cjs && node tests/emulator/abusos.cjs"`
   (necesita Java 21; `node tools/emu.cjs --check-java` lo comprueba).
 - Mantén los topes de escritura de las reglas (las llamadas a `every()`) y las cachés del juego: el plan gratuito tiene
   límites diarios de lecturas y escrituras.

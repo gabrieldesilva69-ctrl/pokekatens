@@ -86,8 +86,8 @@ G.GachaUI = (() => {
     $('cost-100').innerHTML = `${G.Icons.html('ticket', 18)} 100`;
     $('cost-100b').innerHTML = `${G.Icons.html('ticket10', 18)} 10`;
     $('gacha-tickets').innerHTML = `Tienes ${G.Icons.html('ticket', 18)} <b>${t.t1}</b> tickets y ${G.Icons.html('ticket10', 18)} <b>${t.t10}</b> tickets ×10`
-      + `<br><small>${G.Icons.html('egg', 14)} ${G.I18n.f('Huevo de esta región: {x} de 10 tiradas ×10', (s.eggGacha && s.eggGacha[gen]) || 0)}`
-      + ` · ${G.Icons.html('gsball', 14)} ${G.I18n.f('GS Ball: {x} de {x} tiradas', s.gsPulls || 0, G.Gacha.GS_EVERY)}</small>`;
+      + `<br><small>${G.Icons.html('egg', 14)} ${G.I18n.f('Huevo de esta región: {x} de 10 tiradas ×10', ((s.eggGacha && s.eggGacha[gen]) || 0) % G.Eggs.GACHA_EVERY)}`
+      + ` · ${G.Icons.html('gsball', 14)} ${G.I18n.f('GS Ball: {x} de {x} tiradas', (s.gsPulls || 0) % G.Gacha.GS_EVERY, G.Gacha.GS_EVERY)}</small>`;
     $('pull-10').disabled = !G.Gacha.costOf(s, 10, 't1');
     $('pull-10b').disabled = !G.Gacha.costOf(s, 10, 't10');
     $('pull-100').disabled = !G.Gacha.costOf(s, 100, 't1');

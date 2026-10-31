@@ -188,6 +188,7 @@ test('una partida con lo de PokeKatens (huevos, GS Ball, avatar) se abre en otro
   assert.equal(B.DB.syncState !== 'error', true);
   const s = B.DB.save;
   assert.deepEqual(s.eggs.map(e => [e.id, e.need, e.done]), [['e1', 500, 120], ['e2', 1, 0]]);
-  assert.equal(s.gsPulls, 499);
+  assert.equal(s.gsPulls, 1234);          // (31-10-2026: cuenta todas las tiradas; las dadas, en gsGot)
+  assert.equal(s.gsGot, 0);
   assert.equal(s.profile.avatar, 7);
 });

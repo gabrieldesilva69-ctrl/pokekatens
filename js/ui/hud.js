@@ -530,7 +530,8 @@ G.HUD = (() => {
       ctx.fillStyle = 'rgba(180,200,230,.55)';
       ctx.fillText(touch ? 'Arrastra el dedo para moverte  ·  toca un ataque para cambiarlo'
                          : G.Input.defaultKeys ? 'WASD moverse  ·  1-4 / Q / E o clic en un ataque para cambiarlo  ·  Esc pausa'
-                         : 'Teclas personalizadas (Ajustes > Controles)  ·  Esc pausa', w / 2, h - 4);
+                         : 'Teclas personalizadas (Ajustes > Controles)  ·  Esc pausa', w / 2,
+                   h - 4 - (touch ? Math.min(28, G.Touch.safeArea().bottom) : 0));   // (encima de la barra de inicio del iPhone)
     }
 
     ctx.restore();

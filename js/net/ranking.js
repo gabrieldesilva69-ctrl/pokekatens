@@ -699,6 +699,23 @@ G.Ranking = (() => {
    * filas de cada top 50 y las marcas sueltas del histórico). Con la Sentencia
    * de Arceus nadie legal pasa de ~32 min. → { rows, boards }
    */
+  /**
+   * Admin (A2 de la revisión, 31-10-2026): las marcas de las tablas de ahora (solo y grupo, cada
+   * periodo) que pasan de minT segundos, para revisarlas una a una. Las reglas no pueden saber si
+   * una marca es de verdad: sólo comprueban que los números cuadren con el tiempo, que pone el
+   * jugador. Lee los resúmenes de siempre (los que ya lee el ranking, con su caché).
+   * → [{ board, ...fila }], las más largas primero
+   */
+  async function suspects(minT) {
+    const out = [];
+    for (const mode of ['s', 'g']) for (const [p] of PERIODS) {
+      const b = board(mode, p);
+      const sum = await sumOf(b).catch(() => ({ top: {}, dtop: {} }));
+      for (const [id, v] of Object.entries(sum.top)) if ((v.t || 0) > minT) out.push(Object.assign({ board: b }, rowOf(id, v)));
+    }
+    return out.sort((a, c) => c.t - a.t);
+  }
+
   async function purgeAbove(maxT, onProgress) {
     const fs = fbx().fs;
     const all = await fs.collection('lbs').get();
@@ -775,5 +792,5 @@ G.Ranking = (() => {
   }
 
   return { PERIODS, periodIds, board, runStarted, submitSolo, submitGroup, submitChallenge, top, topDmg, myRank, removeMine,
-           report, reported, isAdmin, reports, entryInfo, removeEntry, purgeAbove, removeEverywhere, setMarked, dismiss, markedAccounts, sendGift };
+           report, reported, isAdmin, reports, suspects, entryInfo, removeEntry, purgeAbove, removeEverywhere, setMarked, dismiss, markedAccounts, sendGift };
 })();

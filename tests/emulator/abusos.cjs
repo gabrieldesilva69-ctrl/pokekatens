@@ -1,5 +1,5 @@
 // Reglas de Firestore (firestore.rules) contra el emulador: lo de la revisión del 28-10-2026
-// (docs/REVISION-2026-10-28.md, R1, R2, R4 y R5).
+// (docs/REVISION-2026-10-28.md, R1, R2, R4, R5 y, desde el 31-10-2026, A1, R6 y R9).
 //   node tools/emu.cjs "node tests/emulator/smoke.cjs && node tests/emulator/ranking.cjs && node tests/emulator/salas.cjs && node tests/emulator/perfil.cjs && node tests/emulator/abusos.cjs"
 // Lo que hace el juego tiene que pasar; llenar la base de datos (tablas inventadas, textos
 // enormes), reportar marcas que no existen o librarse del baneo sin partida en la nube, no.
@@ -67,6 +67,18 @@ const prof = (uid, nm, extra) => doc(`profiles/${uid}`, Object.assign({ name: st
   const many = {}; for (let i = 0; i < 101; i++) many['k' + i] = int(1);
   await no(X, [save(X, many)], 'partida con 101 claves');
   await no(X, [save(X, { name: str('x'.repeat(25)) })], 'partida con un nombre enorme');
+
+  // ---- A1, R6 y R9 (31-10-2026): topes de sobra en la partida, el perfil y los apodos ----
+  await ok(B, [save(B, { coins: int(999999999), tickets: map({ t1: int(5000), t10: int(800) }) })], 'muchas monedas y tickets (de verdad)');
+  await no(X, [save(X, { coins: int(2000000000) })], 'dos mil millones de monedas');
+  await no(X, [save(X, { tickets: map({ t1: int(1000001) }) })], 'más de un millón de tickets ×1');
+  await no(X, [save(X, { tickets: map({ t10: int(100001) }) })], 'más de cien mil tickets ×10');
+  await ok(B, [doc('names/ñandú_9', { uid: str(B) }, [])], 'apodo con ñ y tilde (como VALID en social.js)');
+  await ok(B, [prof(B, 'ñandú_9', { best: map({ solo: int(10800), kills: int(250000), level: int(400), medals: int(90) }) })], 'perfil con buenas marcas');
+  await no(X, [prof(X, 'xx_x', { best: map({ kills: int(1000000001) }) })], 'perfil con mil millones de derrotados');
+  await no(X, [prof(X, 'xx_x', { best: map({ solo: int(-5) }) })], 'perfil con un tiempo negativo');
+  await no(X, [doc('names/a b"x', { uid: str(X) }, [])], 'apodo con espacios y comillas');
+  await no(X, [doc('names/ab', { uid: str(X) }, [])], 'apodo de 2 letras');
 
   // ---- R4 y R5: reportes sólo de marcas que existen, en tablas del juego ----
   await ok(X, [report('s_d20261028a', A, X)], 'reportar una marca que existe');

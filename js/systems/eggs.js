@@ -17,7 +17,7 @@
 G.Eggs = (() => {
   const NEED = { 1: 500, 2: 1000, 3: 2000, 4: 4000, 5: 8000 };
   const SHINY = 1 / 32;
-  const SLOTS = 3, WAIT = 3, OVERFLOW = 200, KEEP_HATCHED = 40;
+  const SLOTS = 3, WAIT = 3, OVERFLOW = 200, KEEP_HATCHED = 300;   // (300: B1 de la revisión; con 40, un aparato viejo resucitaba huevos)
   const GACHA_EVERY = 10;           // tiradas ×10 en un banner por huevo
   const LEGEND_CHANCE = 0.05;
 
@@ -114,10 +114,12 @@ G.Eggs = (() => {
   function onGacha10(gen) {
     const s = save();
     if (!s) return null;
+    // Tiradas de ese banner y huevos ya dados, que sólo suben (como la GS Ball: G.DB.merge).
     s.eggGacha = s.eggGacha || {};
+    s.eggGachaGot = s.eggGachaGot || {};
     s.eggGacha[gen] = (s.eggGacha[gen] || 0) + 1;
-    if (s.eggGacha[gen] < GACHA_EVERY) return null;
-    s.eggGacha[gen] = 0;
+    if ((s.eggGachaGot[gen] || 0) >= Math.floor(s.eggGacha[gen] / GACHA_EVERY)) return null;
+    s.eggGachaGot[gen] = (s.eggGachaGot[gen] || 0) + 1;
     return give(gen, 'gacha');
   }
 

@@ -68,6 +68,19 @@ test('cada mega de la partida dura 3 s más, de 45 a 90 s', () => {
 
 test('el gacha cuenta las tiradas hacia la GS Ball y se guarda en la partida', () => {
   const g = source('js/systems/gacha.js'), db = source('js/core/db.js');
-  assert.ok(/const GS_EVERY = 500;/.test(g) && /save\.gsPulls -= GS_EVERY/.test(g));
-  assert.ok(/gsPulls: 0,/.test(db) && /r\.gsPulls = Math\.max/.test(db) && /s\.gsPulls = Math\.min\(499/.test(db));
+  assert.ok(/const GS_EVERY = 500;/.test(g) && /save\.gsGot < Math\.floor\(save\.gsPulls \/ GS_EVERY\)/.test(g));
+  assert.ok(/gsPulls: 0,/.test(db) && /gsGot: 0,/.test(db) && /r\.gsPulls = Math\.max/.test(db) && /r\.gsGot = Math\.max/.test(db));
+});
+
+test('juntar dos aparatos no da una GS Ball de más (M5 de la revisión, 31-10-2026)', () => {
+  // Uno llegó a 500 (le dio la GS Ball); el otro, sin conexión, se quedó en 495.
+  const g = source('js/systems/gacha.js');
+  const give = new Function('save', 'n', 'const GS_EVERY = 500; let out = { gs: 0 };'
+    + g.slice(g.indexOf('    save.gsPulls = (save.gsPulls || 0) + n;'), g.indexOf('    out.iris', g.indexOf('    save.gsPulls = (save.gsPulls || 0) + n;'))).replace(/G\.Shop\.GS/g, "'gsball'") + 'return out.gs;');
+  const pc = { gsPulls: 495 }, mob = { gsPulls: 495 };
+  assert.equal(give(pc, 5), 1, 'a las 500, una');
+  // Lo que hace G.DB.merge: el mayor de cada contador.
+  const merged = { gsPulls: Math.max(pc.gsPulls, mob.gsPulls), gsGot: Math.max(pc.gsGot || 0, mob.gsGot || 0) };
+  assert.equal(give(merged, 5), 0, 'con 5 tiradas más no sale otra');
+  assert.equal(give(merged, 495), 1, 'a las 1000, la segunda');
 });

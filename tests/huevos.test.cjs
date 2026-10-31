@@ -72,7 +72,10 @@ test('every 10 ×10 pulls on the same banner give an egg of that region', () => 
   for (let i = 0; i < 9; i++) assert.equal(E.onGacha10(4), null);
   assert.equal(E.onGacha10(5), null, 'otro banner cuenta aparte');
   const e = E.onGacha10(4);
-  assert.ok(e && e.id && save.eggGacha[4] === 0 && save.eggGacha[5] === 1);
+  // (31-10-2026: cuenta las tiradas de cada banner y los huevos dados, y las dos cosas sólo suben.)
+  assert.ok(e && e.id && save.eggGacha[4] === 10 && save.eggGachaGot[4] === 1 && save.eggGacha[5] === 1);
+  for (let i = 0; i < 9; i++) assert.equal(E.onGacha10(4), null);
+  assert.ok(E.onGacha10(4), 'a las 20, el segundo');
 });
 
 test('merging two devices: eggs of both, the most progress of each, and none that was already hatched', () => {
@@ -89,4 +92,16 @@ test('merging two devices: eggs of both, the most progress of each, and none tha
   assert.equal(r.eggGacha[3], 7);
   // Y al revés, lo mismo (sin duplicar).
   assert.equal(D.merge(b, a).eggs.map(e => e.id).sort().join(), 'aa,bb,dd');
+});
+
+test('al juntar dos aparatos con muchos huevos, como mucho 6 y los de más en monedas (B2 de la revisión, 31-10-2026)', () => {
+  const D = db();
+  const base = { coins: 0, tickets: { t1: 0, t10: 0 }, owned: {}, shiny: {}, upgrades: {}, stats: {}, missions: {}, eggsHatched: {} };
+  const egg = id => ({ id, dex: 1, need: 500, done: 0 });
+  const a = Object.assign(JSON.parse(JSON.stringify(base)), { updated: 2, eggs: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'].map(egg) });
+  const b = Object.assign(JSON.parse(JSON.stringify(base)), { updated: 1, eggs: ['b1', 'b2', 'b3'].map(egg) });
+  const r = D.merge(a, b);
+  assert.equal(r.eggs.length, 6);
+  assert.equal(r.eggs.map(e => e.id).join(), 'a1,a2,a3,a4,a5,a6', 'se quedan los de la copia que queda');
+  assert.equal(r.coins, 3 * 200, 'los 3 de más, 200 monedas cada uno');
 });

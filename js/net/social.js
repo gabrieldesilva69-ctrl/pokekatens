@@ -517,7 +517,7 @@ G.Social = (() => {
           const m = {};
           for (const x of room.members) m[x.uid] = { name: x.name, dex: x.dex, shiny: !!x.shiny, avatar: x.avatar | 0, at: x.at || 0 };
           m[uid] = Object.assign(memberInfo(), m[uid] ? { at: m[uid].at } : {});
-          await within(base.set({ host: uid, open: playing ? false : room.open, at: ts(), m }), 5000);
+          await within(base.set({ host: uid, open: playing ? false : room.open, at: ts(), m, ok: room.ok || {} }), 5000);
         }
       } else {
         if (!host) throw Error('sin anfitrión');
@@ -609,6 +609,11 @@ G.Social = (() => {
     // Acabas de invitarle a esta sala: ya la tiene (pulsar otra vez no escribe nada; 25-10-2026).
     const s = sentInv.get(other);
     if (s && s.room === room.id && now() - s.at < REINVITE_MS) return { ok: true, msg: 'Invitación enviada a ' + f.name };
+    // Sólo entran los invitados (31-10-2026, M2 de la revisión: antes cualquiera con el uid del
+    // anfitrión, que sale en el ranking, entraba en una sala abierta). database.rules.json → ok.
+    try { await fb.rtdb.ref('rooms/' + room.id + '/ok/' + other).set(true); }
+    catch (e) { return { ok: false, error: 'No se pudo invitar (' + (e.code || 'error') + ').' }; }
+    (room.ok = room.ok || {})[other] = true;
     try {
       await fb.fs.collection('inv').doc(other + '_' + uid).set({ to: other, from: uid, room: room.id, name: me.name, at: fts() });
     } catch (e) { return { ok: false, error: 'No se pudo invitar (' + (e.code || 'error') + ').' }; }
