@@ -591,7 +591,29 @@ G.VFX = (() => {
     'doom-desire':   { proj: 'star', trail: 'spark' },
     'drain-punch':   { proj: 'fist' },
     'secret-sword':  { proj: 'crescent' },
-    'extreme-speed':  { proj: 'streak' }
+    'extreme-speed':  { proj: 'streak' },
+    // exclusivos de la segunda tanda (31-10-2026)
+    'relic-song':     { proj: 'note' },
+    'blue-flare':     { beam: 'fire', pal: 'aura' },
+    'pyro-ball':      { proj: 'ball', trail: 'ember' },
+    'snipe-shot':     { proj: 'drop', trail: 'drip' },
+    'plasma-fists':   { proj: 'fist', trail: 'spark' },
+    'flower-trick':   { proj: 'star', trail: 'spark' },
+    'glacial-lance':  { proj: 'shard' },
+    'meteor-assault': { proj: 'comet', pal: 'fighting' },
+    'malignant-chain': { beam: 'needle' },
+    'thousand-arrows': { proj: 'needle', trail: 'dirt' },
+    'aeroblast':      { beam: 'feather' },
+    'photon-geyser':  { beam: 'star', proj: 'star', pal: 'electric' },
+    'stone-axe':      { melee: 'impact' },
+    'moongeist-beam': { beam: 'shadow', pal: 'mind' },
+    'spirit-shackle': { proj: 'needle', trail: 'wisp' },
+    'dynamax-cannon': { beam: 'fire', pal: 'fighting' },
+    'clanging-scales': { proj: 'note' },
+    'darkest-lariat': { melee: 'impact' },
+    'sunsteel-strike': { proj: 'comet', pal: 'fire' },
+    'behemoth-blade': { melee: 'claw' },
+    'sparkling-aria': { proj: 'bubble' }
   };
 
   const TYPE_SHAPE = {

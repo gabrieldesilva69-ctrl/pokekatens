@@ -876,7 +876,75 @@
       cd: 1.0, dmg: 14, count: 4, radius: 72, poison: 1.5 },
     { id: 'attack-order', name: 'Al Ataque', type: 'bug', kind: 'homing', only: [416],
       desc: 'Un enjambre de bichos persigue a los enemigos.',
-      cd: 0.75, dmg: 12, count: 4, spread: 0.6, speed: 300, life: 2.0, size: 7, homing: 6 }
+      cd: 0.75, dmg: 12, count: 4, spread: 0.6, speed: 300, life: 2.0, size: 7, homing: 6 },
+
+    // ---- segunda tanda (31-10-2026): los de los iniciales de Alola, Galar y Paldea y de más
+    // legendarios (nombres oficiales y quién los aprende, de PokeAPI). Lariat Oscuro hoy lo
+    // aprenden muchos por MT: aquí es la firma de Incineroar. Tajo Supremo, de Zacian (en los
+    // juegos, con su forma Espada Suprema).
+    { id: 'relic-song', name: 'Canto Arcaico', type: 'normal', kind: 'shove', only: [648],
+      desc: 'Un canto antiguo que daña y aparta con fuerza a todos los que tienes cerca.',
+      cd: 1.1, dmg: 24, radius: 110, knock: 360 },
+    { id: 'blue-flare', name: 'Llama Azul', type: 'fire', kind: 'beam', only: [643],
+      desc: 'Una llamarada azul en línea recta que quema todo lo que atraviesa.',
+      cd: 1.6, dmg: 44, radius: 300, width: 40, burn: 1.5 },
+    { id: 'pyro-ball', name: 'Balón Ígneo', type: 'fire', kind: 'projectile', only: [815],
+      desc: 'Un balón de fuego que atraviesa a varios enemigos y los quema.',
+      cd: 0.7, dmg: 28, speed: 320, count: 1, spread: 0.1, pierce: 3, life: 1.5, size: 11, burn: 1 },
+    { id: 'snipe-shot', name: 'Disparo Certero', type: 'water', kind: 'projectile', only: [818],
+      desc: 'Un disparo de agua rapidísimo que atraviesa a todos y hace más golpes críticos.',
+      cd: 0.6, dmg: 26, speed: 520, count: 1, spread: 0.05, pierce: 99, life: 1.2, size: 7, critUp: 0.3 },
+    { id: 'plasma-fists', name: 'Puños Plasma', type: 'electric', kind: 'punch', only: [807],
+      desc: 'Tres puñetazos de plasma; el último electrocuta a los enemigos cercanos.',
+      cd: 0.8, dmg: 18, count: 3, radius: 64, arc: 1.1, zap: 3 },
+    { id: 'flower-trick', name: 'Truco Floral', type: 'grass', kind: 'homing', only: [908],
+      desc: 'Flores que persiguen a los enemigos y hacen muchos más golpes críticos.',
+      cd: 0.8, dmg: 16, count: 4, spread: 0.6, speed: 300, life: 2.0, size: 8, homing: 5, critUp: 0.5 },
+    { id: 'glacial-lance', name: 'Lanza Glacial', type: 'ice', kind: 'meteor', only: [898],
+      desc: 'Lanzas de hielo caen sobre los enemigos cercanos y los frenan.',
+      cd: 1.4, dmg: 36, count: 4, radius: 60, slow: 0.5 },
+    { id: 'meteor-assault', name: 'Asalto Estelar', type: 'fighting', kind: 'dash', only: [865],
+      desc: 'Cargas con el puerro por delante y arrollas todo lo que hay en tu camino.',
+      cd: 1.1, dmg: 44, radius: 180, width: 50, knock: 140 },
+    { id: 'malignant-chain', name: 'Cadena Virulenta', type: 'poison', kind: 'chain', only: [1025],
+      desc: 'Una cadena tóxica salta de un enemigo a otro y los envenena.',
+      cd: 1.0, dmg: 22, count: 6, radius: 150, poison: 2 },
+    { id: 'thousand-arrows', name: 'Mil Flechas', type: 'ground', kind: 'meteor', only: [718],
+      desc: 'Una lluvia de flechas de tierra cae sobre muchos enemigos.',
+      cd: 1.3, dmg: 26, count: 7, radius: 44 },
+    { id: 'aeroblast', name: 'Aerochorro', type: 'flying', kind: 'beam', only: [249],
+      desc: 'Un chorro de aire cortante en línea recta que atraviesa todo lo que pilla.',
+      cd: 1.3, dmg: 40, radius: 320, width: 36 },
+    { id: 'photon-geyser', name: 'Géiser Fotónico', type: 'psychic', kind: 'charge', only: [800],
+      desc: 'Reúnes luz un momento y sale un géiser de fotones enorme hacia delante.',
+      cd: 2.3, charge: 0.7, dmg: 78, radius: 320, width: 60 },
+    { id: 'stone-axe', name: 'Hachazo Pétreo', type: 'rock', kind: 'scissor', only: [900],
+      desc: 'Dos hachazos de piedra cruzados: lo que pilles en el centro recibe los dos.',
+      cd: 0.8, dmg: 22, radius: 78, arc: 1.3 },
+    { id: 'moongeist-beam', name: 'Rayo Umbrío', type: 'ghost', kind: 'beam', only: [792],
+      desc: 'Un rayo de luz de luna que atraviesa todo lo que pilla.',
+      cd: 1.5, dmg: 42, radius: 300, width: 44 },
+    { id: 'spirit-shackle', name: 'Puntada Sombría', type: 'ghost', kind: 'projectile', only: [724],
+      desc: 'Una flecha sombría que atraviesa a varios enemigos y los deja frenados.',
+      cd: 0.75, dmg: 24, speed: 400, count: 1, spread: 0.08, pierce: 3, life: 1.4, size: 8, slow: 0.5 },
+    { id: 'dynamax-cannon', name: 'Cañón Dinamax', type: 'dragon', kind: 'charge', only: [890],
+      desc: 'Cargas energía un momento y disparas un cañonazo rojo enorme.',
+      cd: 2.4, charge: 0.8, dmg: 84, radius: 340, width: 62 },
+    { id: 'clanging-scales', name: 'Fragor Escamas', type: 'dragon', kind: 'shove', only: [784],
+      desc: 'El estruendo de tus escamas daña y aparta a todos los que tienes cerca.',
+      cd: 1.1, dmg: 26, radius: 100, knock: 300 },
+    { id: 'darkest-lariat', name: 'Lariat Oscuro', type: 'dark', kind: 'spin', only: [727],
+      desc: 'Giras con los brazos abiertos golpeando todo lo que tienes alrededor.',
+      cd: 1.0, dmg: 18, count: 4, radius: 78, knock: 60 },
+    { id: 'sunsteel-strike', name: 'Meteoimpacto', type: 'steel', kind: 'dash', only: [791],
+      desc: 'Te lanzas envuelto en el poder del sol y arrollas todo a tu paso.',
+      cd: 1.0, dmg: 42, radius: 170, width: 52, knock: 120 },
+    { id: 'behemoth-blade', name: 'Tajo Supremo', type: 'steel', kind: 'melee', only: [888],
+      desc: 'Un tajo enorme con la espada que golpea en un arco amplio.',
+      cd: 0.9, dmg: 40, radius: 70, arc: 2.6, knock: 120 },
+    { id: 'sparkling-aria', name: 'Aria Burbuja', type: 'water', kind: 'nova', only: [730],
+      desc: 'Burbujas cantarinas salen en todas direcciones y atraviesan a varios enemigos.',
+      cd: 1.2, dmg: 18, speed: 280, count: 14, pierce: 2, life: 1.4, size: 9 }
   ];
 
   // Cuerpo a cuerpo (12-10-2026): +20 % de daño y +25 % de alcance y de arco
@@ -923,7 +991,10 @@
     'explosion',
     // ataques exclusivos (24-10-2026)
     'dragon-ascent', 'sacred-fire', 'precipice-blades', 'shadow-force', 'volt-tackle', 'diamond-storm',
-    'mortal-spin', 'attack-order']);
+    'mortal-spin', 'attack-order',
+    // segunda tanda (31-10-2026)
+    'pyro-ball', 'plasma-fists', 'flower-trick', 'glacial-lance', 'meteor-assault', 'thousand-arrows', 'stone-axe',
+    'spirit-shackle', 'darkest-lariat', 'sunsteel-strike', 'behemoth-blade']);
 
   // Los que disparan bolas necesitan count y spread de base: las mejoras los
   // multiplican y, sin ellos, "+1 proyectil" no sumaba ninguno y el abanico se
