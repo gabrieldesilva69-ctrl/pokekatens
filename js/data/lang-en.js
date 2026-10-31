@@ -1075,6 +1075,7 @@ G.I18n.add({
   '¡SE HA ABIERTO UNA GRIETA!': 'A RIFT HAS OPENED!', 'Sigue la flecha morada: dentro te espera un legendario': 'Follow the purple arrow: a legendary awaits inside',
   'GRIETA · {x} m · {x} s': 'RIFT · {x} m · {x} s', 'GRIETA · {x} s': 'RIFT · {x} s',
   '¡{x} se ha enfurecido!': '{x} is enraged!',
+  "¡{x} saca todo su poder!": "{x} unleashes its full power!",
   'Pulsa para empezar': 'Press to start',
   'Sobrevive a las hordas con tu compañero Pokémon': 'Survive the hordes with your Pokémon partner',
   'Huesomerang': 'Bonemerang', 'Psicocorte': 'Psycho Cut', 'Púas': 'Spikes', 'Púas Tóxicas': 'Toxic Spikes', 'Granizo': 'Hail',

@@ -164,6 +164,11 @@ G.HUD = (() => {
     if (boss) {
       const bw = Math.min(420, w - 80);
       bar(ctx, (w - bw) / 2, 70, bw, 12, boss.hp / boss.maxHp, '#ffcb3d');
+      // El legendario de la grieta va por fases (entities/enemy.js, phaseUp): dónde cambia.
+      if (G.Rift.inArena) {
+        ctx.fillStyle = 'rgba(32,22,10,.85)';
+        for (const f of [1 / 3, 2 / 3]) ctx.fillRect(Math.round((w - bw) / 2 + bw * f) - 1, 70, 2, 12);
+      }
       ctx.font = F(800, 10);
       ctx.fillStyle = '#20160a';
       ctx.fillText(boss.name.toUpperCase(), w / 2, 80);

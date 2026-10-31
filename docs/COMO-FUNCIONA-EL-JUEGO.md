@@ -41,7 +41,7 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
   60 % y duermes 2 s sin moverte ni atacar), Reflejo / Pantalla Luz (`screen`: −35 % de daño físico / especial 8 s),
   Doble Equipo (`decoy`: una copia que atrae a los enemigos a 260 px, menos a los jefes; la mueve el anfitrión) y
   Explosión (`boom`: te cuesta un 25 % de la vida que te queda, nunca KO).
-- **Ataques exclusivos** (24-10-2026): 18, uno por tipo, con `only: [dex…]` en `js/data/moves.js` (Ascenso Draco de
+- **Ataques exclusivos** (24-10-2026; 39 desde el 31-10-2026, con la segunda tanda de iniciales y legendarios): 18 primeros, uno por tipo, con `only: [dex…]` en `js/data/moves.js` (Ascenso Draco de
   Rayquaza, Onda Mental de Mewtwo, Placaje Eléctrico de Pichu/Pikachu/Raichu…; nombres y quién los aprende, de
   PokeAPI). No van en el pool de su tipo, no hay MT y no evolucionan. Salen como carta especial al subir de nivel desde
   el nivel 10 (`G.Moves.ONLY_LVL`, `systems/levelup.js`) y la ficha de la colección dice cuál es.
@@ -132,6 +132,8 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Altares de poder**, **manantiales** que curan, **cofres con candado** (quedarse a su lado unos segundos)
   y **trampas** que también dañan a los enemigos.
 - **Grietas:** a veces se abre una; al entrar luchas contra un **legendario** en una arena aparte.
+  Desde el 31-10-2026 pelea **por fases** (`js/entities/enemy.js`, `phaseUp`): a 2/3 de vida saca su ataque de fase según
+  su tipo (cruz de rayos, espiral o tormenta) y a 1/3 se enfurece y lanza una vez su ataque final; la barra marca los cambios.
 
 ## Progresión fuera de la run
 

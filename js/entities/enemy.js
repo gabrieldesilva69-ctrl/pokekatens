@@ -485,6 +485,11 @@
     // dispara también se te echa encima y el de cuerpo a cuerpo también
     // dispara. Todo avisa en el suelo. Por debajo de la mitad de vida se
     // enfurece: más rápido, menos espera y a veces encadena dos ataques.
+    //
+    // Los legendarios de las grietas van por FASES (31-10-2026) en vez de eso:
+    //   fase 2 (2/3 de vida)  aprende su ataque de fase según su tipo (PHASE_SIG) y lo lanza ya
+    //   fase 3 (1/3 de vida)  se enfurece y suelta una vez su ataque final (rayos en estrella, en dos tandas)
+    // Todo con aviso en el suelo (G.Hazards, que también llega a los demás en grupo).
 
     bossInit() {
       const T = this.types, has = (...xs) => xs.some(x => T.includes(x));
@@ -496,13 +501,39 @@
       const ranged = [pref, others[Math.floor(G.U.hash(this.dex, 5, 9) * 3) % 3]];
       const far = this.behavior === 'ranged';
       this.ai = { melee, ranged, farLike: far ? 0.65 : 0.35, mode: far ? 'far' : 'close', modeT: G.U.rand(6, 8),
-                  cd: 1.6, cast: null, fury: false, side: Math.random() < 0.5 ? -1 : 1 };
+                  cd: 1.6, cast: null, fury: false, side: Math.random() < 0.5 ? -1 : 1, phase: 1,
+                  sig: has('psychic', 'ghost', 'dark', 'fairy', 'poison') ? 'spiral'
+                     : has('electric', 'water', 'ice', 'flying', 'grass', 'bug') ? 'storm' : 'cross' };
+    }
+
+    /** ¿Va por fases? Sólo el legendario de la grieta (los de la Sentencia de Arceus, no). */
+    phased() { return !!this.legend && !this.judge; }
+
+    /** Pasa a la fase n (2 o 3) y lanza ya su ataque de esa fase. */
+    phaseUp(n, pl) {
+      const ai = this.ai;
+      ai.phase = n;
+      ai.cast = null;
+      if (n === 2) {
+        ai.ranged.push(ai.sig);
+        G.Spawner.say('¡' + this.name + ' saca todo su poder!', 2.4);
+        G.FX.ring(this.x, this.y, this.r, this.r * 5, G.U.TYPE_COLOR[this.atkType] || '#ffd23f', 0.6, 5);
+        G.Camera.kick(0.5);
+        G.Audio.sfx('boss');
+        this.bossStart(ai.sig, pl);
+      } else {
+        this.enrage();
+        this.bossStart('ultimate', pl);
+      }
     }
 
     bossMove(dt, pl, dist, dx, dy, spd) {
       if (!this.ai) this.bossInit();
       const ai = this.ai;
-      if (!ai.fury && this.hp < this.maxHp * 0.5) this.enrage();
+      if (this.phased()) {
+        if (ai.phase < 2 && this.hp < this.maxHp * 2 / 3) this.phaseUp(2, pl);
+        else if (ai.phase < 3 && this.hp < this.maxHp / 3) this.phaseUp(3, pl);
+      } else if (!ai.fury && this.hp < this.maxHp * 0.5) this.enrage();
       const k = ai.fury ? 1.25 : 1;
       if (ai.cast) return this.bossCast(dt, pl);
       ai.modeT -= dt; ai.cd -= dt * k;
@@ -581,6 +612,43 @@
                             delay: 1.0, dmg: this.shotDmg() * 1.2, type, color: col });
           }
           c.wind = 1.0; c.after = 0.25; this.anim.play('Charge', { speed: 1.1 });
+          break;
+        }
+        // ---- ataques de fase de los legendarios de las grietas (31-10-2026) ----
+        case 'cross': {    // cruz de rayos (+) y, al poco, en aspa (×)
+          for (let k = 0; k < 8; k++) {
+            this.hazard({ kind: 'beam', x: this.x, y: this.y, angle: ang + k * Math.PI / 4, len: 380, w: 30,
+                            delay: k % 2 ? 1.55 : 1.0, dmg: this.shotDmg() * 1.25, type, color: col });
+          }
+          c.wind = 1.0; c.after = 0.7; this.anim.play('Charge', { speed: 1.1 });
+          break;
+        }
+        case 'spiral': {   // rayos que van saliendo uno tras otro, girando a su alrededor
+          const n = ai.fury ? 10 : 8, dir = ai.side;
+          for (let k = 0; k < n; k++) {
+            this.hazard({ kind: 'beam', x: this.x, y: this.y, angle: ang + dir * k * (6.2832 / n), len: 360, w: 24,
+                            delay: 0.9 + k * 0.14, dmg: this.shotDmg() * 1.15, type, color: col });
+          }
+          c.wind = 0.9; c.after = n * 0.14; this.anim.play('Charge', { speed: 1.2 });
+          break;
+        }
+        case 'storm': {    // tormenta: zonas que caen por toda la zona, en oleadas, y una sobre ti
+          const n = ai.fury ? 12 : 9;
+          for (let k = 0; k < n; k++) {
+            const a = Math.random() * 6.2832, d = k ? G.U.rand(30, 190) : 0;
+            this.hazard({ kind: 'zone', x: pl.x + Math.cos(a) * d, y: pl.y + Math.sin(a) * d * 0.8, r: 46,
+                            delay: 1.0 + (k % 3) * 0.35, dmg: this.shotDmg() * 1.1, type, color: col });
+          }
+          c.wind = 0.6; this.anim.play('Shoot');
+          break;
+        }
+        case 'ultimate': { // ataque final (fase 3, una vez): 12 rayos en estrella, en dos tandas que no coinciden
+          for (let k = 0; k < 12; k++) {
+            this.hazard({ kind: 'beam', x: this.x, y: this.y, angle: ang + k * Math.PI / 6 + (k % 2 ? 0 : Math.PI / 12), len: 440, w: 30,
+                            delay: k % 2 ? 2.0 : 1.3, dmg: this.shotDmg() * 1.4, type, color: col });
+          }
+          G.FX.ring(this.x, this.y, this.r, this.r * 7, col, 1.3, 6);
+          c.wind = 1.3; c.after = 0.9; this.anim.play('Charge', { speed: 0.9 });
           break;
         }
         case 'volley':     // abanico de disparos
