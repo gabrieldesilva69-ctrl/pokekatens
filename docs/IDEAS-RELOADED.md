@@ -288,7 +288,14 @@ pueden enseñar y se ven y se sienten distintos entre sí en partida.
 
 ---
 
-## Aplazado: completar la Pokédex (los 59 que faltan)
+## Hecho (31-10-2026): completar la Pokédex (los 59 que faltaban)
+
+Ya están los 1025. Cómo se hizo: `tools/import_reloaded.py --faltan` (sprites de mapa normal **y shiny**: Reloaded sí
+trae el shiny de mapa, no hizo falta sacarlo por paleta), `tools/add_pokedex.py` (sus filas en `pokedex.js`, habilidades
+y nombres en francés y chino, sin rehacer a los 966 de antes), `tools/fetch_tms.py --pokemon …`, `tools/fetch_evolutions.py`,
+`tools/import_cries.py …` y `tools/import_eggs.py`. Los legendarios nuevos tienen su efecto en `js/entities/aura.js`.
+Lo de abajo son las notas de cuando estaba aplazado.
+
 
 Los dueños lo dejan para más adelante. Notas para cuando se haga:
 

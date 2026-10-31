@@ -8,6 +8,8 @@ en la Tienda Kecleon.
     python tools/fetch_tms.py                       # los que ya hay en tms.js
     python tools/fetch_tms.py earthquake surf ...   # y además estos (ataques nuevos)
     python tools/fetch_tms.py --comprobar           # sólo compara con lo que hay
+    python tools/fetch_tms.py --pokemon 1025,893    # añade esos Pokémon (nuevos en pokedex.js) a
+                                                    # las MT que ya hay, sin tocar a los demás
 
 El id del movimiento es el de PokeAPI (el mismo que en js/data/moves.js). Sólo
 entran los Pokémon que hay en js/data/pokedex.js. Precio: 300 + 6 × potencia,
@@ -62,7 +64,14 @@ def current():
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    argv = sys.argv[1:]
+    # --pokemon N,N: Pokémon recién añadidos a la Pokédex (tools/add_pokedex.py, 30-10-2026).
+    added = set()
+    if '--pokemon' in argv:
+        i = argv.index('--pokemon')
+        added = {int(x) for x in argv[i + 1].split(',') if x}
+        del argv[i:i + 2]
+    args = [a for a in argv if not a.startswith('--')]
     check = '--comprobar' in sys.argv
     game_moves = set(re.findall(r"\{ id: '([a-z-]+)'", io.open(MOVES, encoding='utf-8').read()))
     dex = {int(d) for d in re.findall(r'"dex":(\d+)', io.open(POKEDEX, encoding='utf-8').read())}
@@ -82,7 +91,9 @@ def main():
     if check:
         return
     # Las que ya había se quedan como estaban (son las del PR #236); sólo se añaden las nuevas.
-    final = {k: (tm[k] if k in tm else out[k]) for k in keys}
+    final = {k: (sorted(set(tm[k]) | {d for d in out[k] if d in added}) if k in tm else out[k]) for k in keys}
+    if added:
+        print(f'  nuevos: {len({d for k in keys for d in final[k] if d in added})} de {len(added)} aprenden alguna MT')
     prices = dict(pr)
     prices.update(new_price)
     text = io.open(OUT, encoding='utf-8').read()

@@ -702,6 +702,14 @@ G.Aura = (() => {
     1016: { parts: { c: ['#ff9fcf', '#ffd23f', '#ffffff'], up: -6, spread: 24, r: 2, life: 2, rate: 3, leaf: true, petal: true }, trail: { s: 'flower', c: ['#ff9fcf', '#ffd23f', '#ffffff'] } }, // Fezandipiti: pétalos
     1017: { parts: { c: ['#5fe08a', '#a5f07a'], up: -6, spread: 22, r: 2, life: 1.8, rate: 3, leaf: true, petal: true }, trail: { s: 'flower', c: ['#ffffff', '#9fe8ff', '#ffe14d'] } }, // Ogerpon: hojas
     1024: { aura: '#9fe8ff', pulse: 7.5, rays: 'hue', parts: { hue: true, up: 8, spread: 20, r: 1.3, life: 1.2, rate: 4, glow: true, star: true }, trail: { s: 'tera', c: ['#ffffff'] } }, // Terapagos: Teracristal
+    // Los que llegaron al completar la Pokédex (30-10-2026, sprites de Reloaded).
+    893: { aura: '#3f8f3f', pulse: 9, parts: { c: ['#5fe08a', '#2c7d3f'], up: -6, spread: 24, r: 2, life: 1.8, rate: 3, leaf: true }, trail: { s: 'flower', c: ['#5fe08a', '#a5f07a', '#ffffff'] } }, // Zarude: hojas de la selva
+    1001: { parts: { c: ['#6a5a48', '#8bd72f'], up: -4, spread: 24, r: 2.4, life: 1.8, rate: 3, soft: true, low: true }, trail: { s: 'miasma', c: ['#3a2c20', '#8bd72f'] } }, // Wo-Chien: la debacle
+    1002: { parts: { c: ['#d8f1ff', '#ffffff'], up: -10, spread: 18, r: 1.4, life: 1.6, rate: 4 }, trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },          // Chien-Pao: nieve
+    1003: { parts: { c: ['#c8a875', '#8f939c'], up: 4, spread: 26, r: 1.8, life: 1, rate: 4, soft: true, low: true }, trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } }, // Ting-Lu: polvo
+    1008: { aura: '#7f6aff', pulse: 9, rays: '#9fd8ff', parts: { c: ['#9fd8ff', '#7f6aff', '#ffffff'], up: 0, spread: 34, r: 1, life: 0.2, rate: 6, glow: true, bolt: true }, trail: { s: 'spark', c: ['#d6f0ff', '#9fd8ff', '#7f6aff'] } }, // Miraidon: electricidad
+    1014: { parts: { c: ['#f711e4', '#5fe08a'], up: 6, spread: 20, r: 3, life: 1.6, rate: 2.5, soft: true }, trail: { s: 'shadow', c: ['#1a3a1a', '#f711e4'] } }, // Okidogi: cadena tóxica
+    1025: { aura: '#b04aff', pulse: 9, parts: { c: ['#f711e4', '#b04aff'], up: 8, spread: 18, r: 2.6, life: 1.6, rate: 3, soft: true }, trail: { s: 'miasma', c: ['#3a0a40', '#f711e4'] } }, // Pecharunt: mochi tóxico
     100491: { aura: '#6a3aa8', pulse: 7.5, parts: { c: ['#1a1428', '#3a2c50'], up: -4, spread: 22, r: 3.2, life: 1.8, rate: 5, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#b58aff'] } }, // Mega Darkrai
     100718: { aura: '#5fe08a', pulse: 7.5, orbit: { n: 6, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 4, glow: true }, trail: { s: 'cell', c: ['#7fff6a', '#ff5a5a'] } }, // Mega Zygarde
     100807: { aura: '#7fd8ff', pulse: 6, parts: { c: ['#d6f0ff', '#7fd8ff'], up: 0, spread: 40, r: 1, life: 0.2, rate: 8, glow: true, bolt: true }, trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } }, // Mega Zeraora

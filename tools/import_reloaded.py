@@ -8,7 +8,7 @@ marcada con "rl":1 (para los créditos y para que fetch_sprites.py la respete).
 
     python tools/import_reloaded.py --mega 6          # una mega (normal y shiny) -> 100006
     python tools/import_reloaded.py --megas           # todas las megas oficiales que tenga Reloaded
-    python tools/import_reloaded.py --dex 25          # un Pokémon (sólo normal; su shiny de mapa, file_id(N, True), aún no se convierte)
+    python tools/import_reloaded.py --dex 25          # un Pokémon (normal y, si lo trae, su shiny de mapa)
     python tools/import_reloaded.py --faltan          # los de 1-1025 que aún no tenemos
 
     --out DIR   carpeta de prueba: escribe DIR/<id>/ y DIR/sprites-meta-prueba.js
@@ -327,8 +327,16 @@ def job_dex(dex, gid, out, metas, k):
         print(f'  {dex} (Reloaded {rid}): no tiene sus sprites de mapa completos')
         return None
     anims, shadow = res
-    print(f'  {dex} (Reloaded {rid}) -> {gid} (escala {k})')
-    return {'s': shadow, 'a': anims, 'rl': 1}
+    meta = {'s': shadow, 'a': anims, 'rl': 1}
+    # Su shiny de mapa (file_id con shiny), como en las megas (30-10-2026, para completar la Pokédex).
+    sres = convert(file_id(rid, True), os.path.join(out, str(gid), 's'), k)
+    if sres:
+        meta['sh'] = 1
+        diff = {a: g for a, g in sres[0].items() if anims.get(a) != g}
+        if diff:
+            meta['sa'] = diff
+    print(f'  {dex} (Reloaded {rid}) -> {gid} (escala {k}{", con shiny" if sres else ", sin shiny"})')
+    return meta
 
 
 def mega_rid(dex, have):

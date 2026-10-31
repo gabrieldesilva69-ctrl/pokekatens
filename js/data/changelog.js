@@ -6,6 +6,10 @@
  * Cada línea en español y en inglés.
  */
 G.CHANGELOG = [
+  { d: '2026-10-31', title: ["PokeKatens: la Pokédex completa", "PokeKatens: the complete Pokédex"], new: [
+    ["La Pokédex, completa: llegan los 59 Pokémon que faltaban, hasta los 1025. Entre ellos Simisear, Zebstrika, Jellicent, Pyroar, Toucannon, Coalossal, Sirfetch'd, Mr. Rime, Copperajah, Mabosstiff, Espathra y los legendarios Zarude, Wo-Chien, Chien-Pao, Ting-Lu, Miraidon, Okidogi y Pecharunt, que salen en las grietas. Todos con su shiny, su grito y sus MT, en el gacha de su región, como enemigos y en los huevos.",
+     "The Pokédex is complete: the 59 missing Pokémon arrive, all the way to 1025. Among them Simisear, Zebstrika, Jellicent, Pyroar, Toucannon, Coalossal, Sirfetch'd, Mr. Rime, Copperajah, Mabosstiff, Espathra and the legendaries Zarude, Wo-Chien, Chien-Pao, Ting-Lu, Miraidon, Okidogi and Pecharunt, who show up in the rifts. All with their shiny, their cry and their TMs, in their region's gacha, as enemies and in eggs."]
+  ] },
   { d: '2026-10-30', title: ["PokeKatens: límite de FPS y píxeles exactos", "PokeKatens: FPS limit and pixel-perfect"], new: [
     ["Ajustes → Gráficos: «Límite de FPS» (sin límite, 144, 120, 60 o 30) para que el juego no dibuje más fotogramas de los que necesitas (con una pantalla rápida gastaba la gráfica sin parar), y «Píxeles exactos», encendido de fábrica: cada cuadrado del dibujo ocupa los mismos píxeles de tu pantalla y todo se ve más nítido, sobre todo en pantallas grandes. La vista casi no cambia.",
      "Settings → Graphics: “FPS limit” (no limit, 144, 120, 60 or 30) so the game doesn't draw more frames than you need (with a fast screen it kept the graphics card busy nonstop), and “Pixel-perfect”, on by default: every square of the art takes the same number of pixels on your screen and everything looks sharper, especially on big screens. The view barely changes."]

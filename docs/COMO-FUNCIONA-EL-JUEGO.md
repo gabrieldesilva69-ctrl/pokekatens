@@ -233,6 +233,7 @@ de Ko-fi no sale nunca). PokeKatens no acepta dinero.
 
 ## Ideas de los dueños (aún no están en el juego)
 
-Todas detalladas en `docs/IDEAS-RELOADED.md` (con material de Pokémon Reloaded): completar la Pokédex,
+Todas detalladas en `docs/IDEAS-RELOADED.md` (con material de Pokémon Reloaded; la Pokédex ya está completa
+desde el 31-10-2026: 1025, los 59 últimos con sprites de Reloaded y datos de PokeAPI, `tools/add_pokedex.py`),
 gritos en momentos especiales, megaevolución en partida (sólo megas oficiales), objetos nuevos, huevos
 (con más shiny que el gacha), más MT y mejoras visuales.

@@ -139,6 +139,10 @@ no se sube).
   Edición Reloaded (`tools/shiny_from_reloaded.py`).
 - **Gritos de los Pokémon** (`assets/cries/`): los de Pokémon Edición Reloaded,
   pasados a MP3 ligero con `tools/import_cries.py`.
+- **Los 59 Pokémon que faltaban en la Pokédex** (514 Simisear, 893 Zarude, 1001-1003, 1008 Miraidon, 1025
+  Pecharunt...): sus sprites de mapa (normal y shiny), convertidos con `tools/import_reloaded.py --faltan`, sus
+  gritos y los huevos de sus familias. Sus datos (tipos, estadísticas, habilidades, MT) son de PokeAPI
+  (`tools/add_pokedex.py`).
 - **Megaevoluciones** (`assets/pokemon/1000xx/`): los sprites de mapa de 81 megas
   oficiales (normal y shiny), convertidos con `tools/import_reloaded.py --mega N`, y sus
   gritos. Sus datos (tipos, estadísticas, habilidad) son de PokeAPI (`tools/fetch_megas.py`).
