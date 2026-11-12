@@ -35,7 +35,15 @@ function familias() {
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', 'data', 'moves.js'), 'utf8'), vm.createContext({ G, Math }));
   const n = {};
   for (const id of Object.keys(G.Moves.EVO)) { const d = G.Moves.BY_ID[id]; if (d) n[d.kind] = (n[d.kind] || 0) + 1; }
+  familias.cuantos = n;
   return Object.keys(n).sort((a, b) => n[b] - n[a]);
+}
+
+/** Tamaño de la imagen de una familia si Edge no deja leerlo de la página (misma cuenta que demo/banco.js: 2 columnas, zoom 2). */
+function tamano(f) {
+  if (f === 'pokemon') return [1224, 828];
+  const k = f === 'pulidos' ? 4 : familias.cuantos[f], filas = Math.ceil(k / 2);
+  return [1668, filas * 280 + (filas - 1) * 28 + 24 + 70];
 }
 
 const espera = ms => new Promise(r => setTimeout(r, ms));
@@ -69,13 +77,18 @@ async function arriba() {
                    '--force-device-scale-factor=1', '--virtual-time-budget=4000', '--user-data-dir=' + perfil];
     for (const f of lista) {
       const url = `http://127.0.0.1:${PORT}/demo/ataques-plus.html?captura=1&cols=2&familia=${f}&fase=${fase}`;
-      // Primero, el tamaño que tiene la página; luego, la foto con esa ventana.
-      const dom = spawnSync(exe, [...comun, '--dump-dom', url], { encoding: 'utf8', timeout: 60000 });
-      const m = /data-w="(\d+)" data-h="(\d+)"/.exec(dom.stdout || '');
-      if (!m) { console.error('✗ ' + f + ': la página no ha pintado'); mal++; continue; }
+      // El tamaño de la ventana sale de la cuenta de tamano() (la de la propia página).
+      const m = ['', ...tamano(f)];
       const png = path.join(OUT, f + '.png');
       fs.rmSync(png, { force: true });
       spawnSync(exe, [...comun, `--window-size=${m[1]},${m[2]}`, '--screenshot=' + png, url], { encoding: 'utf8', timeout: 60000 });
+      // (Edge de ahora vuelve enseguida y guarda la imagen unos segundos después: se espera a que esté y deje de crecer.)
+      for (let i = 0, ult = -1; i < 120; i++) {
+        const tam = fs.existsSync(png) ? fs.statSync(png).size : 0;
+        if (tam > 0 && tam === ult) break;
+        ult = tam;
+        await espera(500);
+      }
       if (fs.existsSync(png)) console.log('✓ demo/capturas/' + f + '.png  ' + m[1] + '×' + m[2]);
       else { console.error('✗ ' + f + ': no se ha guardado la imagen'); mal++; }
     }

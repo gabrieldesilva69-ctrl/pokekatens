@@ -343,7 +343,7 @@ G.VFXPlus = (() => {
   S.eye2 = grow('eye', P => { for (const x of [4, 8, 12]) { P.set(x, 0, 'l'); P.set(x, 10, 'l'); } P.set(8, 5, 'w'); });
   S.mud2 = grow('blob', (P, f) => { dots(P, 'd', [5, 8], [8, 5]); P.set(9, 9, 'w'); P.set(f, 6, 'm'); P.set(13 - f, 4, 'm'); });
   S.fstar2 = grow('star', P => { for (const i of [2, 3]) for (const [a, b] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) P.set(6 + a * i, 6 + b * i, i === 3 ? 'w' : 'l'); }, { ol: false });
-  S.dring2 = grow('ring', P => { disc(P, 7, 7, [[1, 'w'], [2.1, 'd']]); dots(P, 'l', [2, 2], [12, 2], [2, 12], [12, 12]); }, { ol: false });
+  S.dring2 = grow('ring', P => { disc(P, 7, 7, [[1, 'w'], [2.1, 'd']]); dots(P, 'l', [7, 0], [7, 14], [0, 7], [14, 7]); dots(P, 'm', [7, 1], [7, 13], [1, 7], [13, 7]); }, { ol: false });
   S.lava2 = grow('blob', (P, f) => { dots(P, 'd', [5, 3], [6, 3], [8, 4]); dots(P, 'w', [6, 6], [7, 7], [5, 8]); P.set(7, f, 'l'); });
 
   // ---- teledirigidos (homing) ----
