@@ -56,6 +56,13 @@ G.FX = (() => {
   // un destello en cruz al lanzar, chispas claras que se quedan atrás y un
   // anillo doble. En calidad baja sólo queda el borde (lo demás no sale).
 
+  /** ¿Queda sitio para los adornos de un «+»? Nunca en calidad baja, y sin quitarle sitio a lo demás:
+   *  con la pantalla cargada (70 % del tope de partículas, 55 % del de sprites) dejan de salir. */
+  function spare(sprite) {
+    const l = q();
+    return !!l && (sprite ? sprites.length < CAP_SPRITES[l] * 0.55 : parts.length < CAP_PARTS[l] * 0.7);
+  }
+
   /** Chispa clara de su paleta que se queda atrás y se apaga (estela de los «+»). */
   function glint(pal, x, y) {
     if (!q() || parts.length >= CAP_PARTS[q()] * 0.85) return;      // no le quita sitio a lo demás
@@ -135,6 +142,8 @@ G.FX = (() => {
       const a = angle + G.U.rand(-0.5, 0.5) * Math.min(arc, 6.2832), r = radius * G.U.rand(0.85, 1.05);
       glint(pal, x + Math.cos(a) * r, y + Math.sin(a) * r);
     }
+    // Y lo propio de ese golpe (vfx-plus.js): su fotograma, lo que salta del filo...
+    if (fx.evo) G.VFXPlus.cut(fx.evo, pal, x, y, angle, radius, arc);
   }
 
   /** Rayo recto. fx: { pal, beam, plus } — beam = forma que viaja por él o 'lightning'. */
@@ -143,6 +152,7 @@ G.FX = (() => {
     beams.push({ x, y, angle, len, width, pal: fx.pal || 'normal', shape: fx.beam || null, t: 0, life: 0.2, seed: Math.random() * 100, plus });
     sp('impact', fx.pal || 'normal', x + Math.cos(angle) * 10, y + Math.sin(angle) * 10, { life: 0.12, scale: 1, plus });
     sp('impact', fx.pal || 'normal', x + Math.cos(angle) * len, y + Math.sin(angle) * len, { life: 0.18, scale: 1.5, plus });
+    if (fx.evo) G.VFXPlus.ray(fx.evo, fx.pal || 'normal', x, y, angle, len);      // lo propio de ese rayo (vfx-plus.js)
   }
 
   // ---------------- actualización ----------------
@@ -316,6 +326,6 @@ G.FX = (() => {
     }
   }
 
-  return { clear, px, burst, spark, sp, twinkle, trail, glint, plusFlash, dmgText, ring, slash, beam, update, draw,
+  return { clear, px, burst, spark, sp, twinkle, trail, glint, spare, plusFlash, dmgText, ring, slash, beam, update, draw,
            get count() { return parts.length + sprites.length + texts.length; } };
 })();

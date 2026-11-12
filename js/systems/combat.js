@@ -93,6 +93,17 @@ G.Combat = (() => {
 
   /** Paleta para el aro doble de G.FX.ring si el ataque es «+» (si no, null). */
   const plusPal = vis => (vis && vis.plus ? vis.pal : null);
+  /** Lo propio de un «+» de zona (vfx-plus.js) al lanzarse o estallar ahí. Sólo se ve. */
+  function plusArea(vis, x, y, r) {
+    if (vis && vis.evo && vis.evo.area && G.Camera.sees(x, y, r)) G.VFXPlus.area(vis.evo, vis.pal, x, y, r);
+  }
+  /** El aro de un ataque (doble si es «+») y, si es «+», lo suyo. */
+  function plusRing(x, y, r0, r1, col, life, width, vis) {
+    G.FX.ring(x, y, r0, r1, col, life, width, plusPal(vis));
+    plusArea(vis, x, y, Math.max(r0, r1));
+  }
+  /** La forma con la que se pinta lo que deja un ataque en el mapa (mina, meteoro, torreta). */
+  const fieldShape = vis => (vis.evo && (vis.evo.body || vis.evo.shape)) || vis.proj;
 
   const TARGETED = ['melee', 'beam', 'projectile', 'boomerang', 'chain', 'meteor', 'dash', 'cone',
                     'homing', 'bounce', 'charge', 'spin', 'quake', 'vortex', 'shove', 'stun',
@@ -179,7 +190,7 @@ G.Combat = (() => {
       const a = (i / n) * 6.2832 + G.U.rand(-0.06, 0.06);
       shot(pl, m, a, col, vis);
     }
-    G.FX.ring(pl.x, pl.y, pl.r, pl.r * 4, col, 0.3, 3, plusPal(vis));
+    plusRing(pl.x, pl.y, pl.r, pl.r * 4, col, 0.3, 3, vis);
   }
 
   function inArc(px, py, x, y, aim, half) {
@@ -234,7 +245,7 @@ G.Combat = (() => {
   function aura(pl, m) {
     const col = G.U.TYPE_COLOR[m.type];
     const vis = G.VFX.forMove(m);
-    G.FX.ring(pl.x, pl.y, m.radius * 0.5, m.radius, col, 0.28, 2, plusPal(vis));
+    plusRing(pl.x, pl.y, m.radius * 0.5, m.radius, col, 0.28, 2, vis);
     if (vis.aura) {
       for (let i = 0; i < 5; i++) {
         const a = Math.random() * 6.2832, r = m.radius * G.U.rand(0.45, 1);
@@ -352,7 +363,7 @@ G.Combat = (() => {
                   t: 0, life: m.dur || 6, shotT: 0.3, dmg: m.dmg * pl.atkFor(m) });
     const mine = fields.filter(f => f.kind === 'turret' && f.owner === pl && !f.gone);
     for (const f of mine.slice(0, Math.max(0, mine.length - Math.max(1, m.count | 0)))) f.gone = true;
-    G.FX.ring(pl.x, pl.y, 4, 30, col, 0.3, 2, plusPal(vis));
+    plusRing(pl.x, pl.y, 4, 30, col, 0.3, 2, vis);
   }
 
   /** Embestida: cruzas como un rayo hacia el enemigo y golpeas a todo lo del camino. */
@@ -368,6 +379,7 @@ G.Combat = (() => {
     // Estela: varias copias del golpe a lo largo del recorrido.
     for (let d = 0; d <= len; d += 22) G.FX.sp(vis.proj || 'streak', vis.pal, sx + ca * d, sy + sa * d - G.LIFT * 0.6, { life: 0.22, angle: pl.aim, plus: vis.plus });
     G.FX.slash(sx + ca * len, sy + sa * len - G.LIFT * 0.5, pl.aim, 34, 2.2, col, vis);
+    if (vis.evo) G.VFXPlus.path(vis.evo, vis.pal, sx, sy - G.LIFT * 0.6, sx + ca * len, sy + sa * len - G.LIFT * 0.6);
     if (ghost) return;
     pl.x = sx + ca * len; pl.y = sy + sa * len;
     G.World.collide(pl);
@@ -428,7 +440,7 @@ G.Combat = (() => {
   function chargeUp(pl, m) {
     const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m), at = m.charge || 0.75;
     fields.push({ kind: 'charge', owner: pl, ghost, m, col, vis, x: pl.x, y: pl.y, t: 0, at });
-    G.FX.ring(pl.x, pl.y - G.LIFT * 0.5, pl.r * 3.2, pl.r * 0.8, col, at, 2, plusPal(vis));
+    plusRing(pl.x, pl.y - G.LIFT * 0.5, pl.r * 3.2, pl.r * 0.8, col, at, 2, vis);
   }
 
   /** Giro: golpea todo alrededor `count` veces seguidas (lo hace updateFields). */
@@ -451,7 +463,7 @@ G.Combat = (() => {
     const x = tg ? tg.x : pl.x + Math.cos(pl.aim) * 120, y = tg ? tg.y : pl.y + Math.sin(pl.aim) * 100;
     fields.push({ kind: 'vortex', owner: pl, ghost, m, col, vis, x, y, t: 0, life: m.dur || 2.6, r: m.radius,
                   tick: 0.15, dmg: m.dmg * pl.atkFor(m), pull: m.pull || 140 });
-    G.FX.ring(x, y, m.radius, 6, col, 0.4, 3, plusPal(vis));
+    plusRing(x, y, m.radius, 6, col, 0.4, 3, vis);
     // Como mucho dos a la vez por jugador.
     const mine = fields.filter(f => f.kind === 'vortex' && f.owner === pl && !f.gone);
     for (const f of mine.slice(0, Math.max(0, mine.length - 2))) f.gone = true;
@@ -460,7 +472,7 @@ G.Combat = (() => {
   /** Empujón: onda alrededor que daña y aparta a los enemigos (no a los jefes). */
   function shove(pl, m) {
     const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m);
-    G.FX.ring(pl.x, pl.y, pl.r, m.radius, col, 0.35, 4, plusPal(vis));
+    plusRing(pl.x, pl.y, pl.r, m.radius, col, 0.35, 4, vis);
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * 6.2832;
       G.FX.sp(vis.proj, vis.pal, pl.x + Math.cos(a) * pl.r, pl.y + Math.sin(a) * pl.r * 0.8 - G.LIFT * 0.5,
@@ -486,6 +498,7 @@ G.Combat = (() => {
     const col = G.U.TYPE_COLOR[m.type], vis = G.VFX.forMove(m);
     fields.push({ kind: 'tremor', owner: pl, ghost, m, col, vis, x: pl.x, y: pl.y, t: 0, life: 0.55, r: m.radius,
                   dmg: m.dmg * pl.atkFor(m), hits: new Set() });
+    plusArea(vis, pl.x, pl.y, m.radius * 0.5);
     if (!ghost) G.Camera.kick(0.4);
   }
 
@@ -627,6 +640,7 @@ G.Combat = (() => {
     G.FX.ring(pl.x, pl.y, 8, m.radius, '#ffffff', 0.35, 6);
     G.FX.ring(pl.x, pl.y, 8, m.radius * 0.8, col, 0.45, 5, m.evolved ? 'fire' : null);
     G.FX.burst(pl.x, pl.y - 10, col, 30, 260);
+    if (m.evolved) plusArea(G.VFX.forMove(m), pl.x, pl.y, m.radius * 0.6);
     G.Audio.sfx('boss');
     if (ghost) return;
     G.Camera.kick(1);
@@ -691,7 +705,7 @@ G.Combat = (() => {
         const x = f.x + f.ca * f.i * QSTEP, y = f.y + f.sa * f.i * QSTEP, r = m.radius;
         if (G.World.isWall(x, y)) { f.i = f.n; break; }
         if (G.Camera.sees(x, y, 40)) {
-          G.FX.ring(x, y, 4, r, f.col, 0.3, 3, plusPal(f.vis));
+          plusRing(x, y, 4, r, f.col, 0.3, 3, f.vis);
           G.FX.burst(x, y - 4, f.col, 6, 120);
           for (let k = 0; k < 2; k++) G.FX.sp(f.vis.proj, f.vis.pal, x + G.U.rand(-r, r) * 0.5, y - 4, { vy: -G.U.rand(50, 90), vx: G.U.rand(-30, 30), life: 0.35, plus: f.vis.plus });
         }
@@ -711,7 +725,7 @@ G.Combat = (() => {
         e.x += dx / d * k; e.y += dy / d * k;
       }
       f.tick -= dt;
-      if (f.tick <= 0) { f.tick = 0.4; blast(f, f.r); }
+      if (f.tick <= 0) { f.tick = 0.4; blast(f, f.r); plusArea(f.vis, f.x, f.y, f.r); }
       if (Math.random() < dt * 16 && G.Camera.sees(f.x, f.y, 40)) {
         const a = Math.random() * 6.2832, rr = f.r * G.U.rand(0.5, 1);
         G.FX.sp(f.vis.proj, f.vis.pal, f.x + Math.cos(a) * rr, f.y + Math.sin(a) * rr * 0.6 - 4,
@@ -756,6 +770,7 @@ G.Combat = (() => {
       const tx = e.x - Math.cos(ang) * (e.r + pl.r), ty = e.y - Math.sin(ang) * (e.r + pl.r);
       if (G.World.isFree(tx, ty, pl.r * 0.8, true)) { pl.x = tx; pl.y = ty; G.World.collide(pl); }
       for (let d = 0; d <= 1; d += 0.2) G.FX.sp(f.vis.proj || 'streak', f.vis.pal, sx + (pl.x - sx) * d, sy + (pl.y - sy) * d - G.LIFT * 0.6, { life: 0.2, angle: ang, plus: f.vis.plus });
+      if (f.vis.evo) G.VFXPlus.path(f.vis.evo, f.vis.pal, sx, sy - G.LIFT * 0.6, pl.x, pl.y - G.LIFT * 0.6);
       pl.invuln = Math.max(pl.invuln || 0, 0.25);
       hit(pl, e, m.dmg * pl.atkFor(m), f.col, Math.cos(ang), Math.sin(ang), 50, m);
       G.FX.slash(e.x, e.y - G.LIFT * 0.5, ang, 30, 2, f.col, f.vis);
@@ -765,7 +780,7 @@ G.Combat = (() => {
       if (f.t < f.fly) return false;
       if (!f.ghost && !pl.dead && G.World.isFree(f.x, f.y, pl.r * 0.8, true)) { pl.x = f.x; pl.y = f.y; G.World.collide(pl); }
       if (G.Camera.sees(f.x, f.y, f.r)) {
-        G.FX.ring(f.x, f.y, 4, f.r, f.col, 0.3, 4, plusPal(f.vis));
+        plusRing(f.x, f.y, 4, f.r, f.col, 0.3, 4, f.vis);
         G.FX.burst(f.x, f.y - 6, f.col, 10, 160);
         if (!f.ghost) G.Camera.kick(0.25);
       }
@@ -794,6 +809,7 @@ G.Combat = (() => {
       if (Math.random() < dt * 30 && G.Camera.sees(cx, cy, f.w)) {
         const o = G.U.rand(-f.w / 2, f.w / 2);
         G.FX.px(cx - f.sa * o, cy + f.ca * o - 6, '#e8fbff', { vx: f.ca * 80, vy: -40 + f.sa * 80, life: 0.4 });
+        if (Math.random() < 0.2) plusArea(f.vis, cx + f.ca * 10, cy + f.sa * 10, f.w * 0.4);
       }
       if (!f.ghost && !pl.dead) {
         for (const e of G.EnemyMgr.queryCircle(cx, cy, f.w / 2 + 30)) {
@@ -813,7 +829,7 @@ G.Combat = (() => {
     if (f.kind === 'cross') {
       if (f.t < f.delay) return false;
       if (G.Camera.sees(f.x, f.y, f.r)) {
-        G.FX.ring(f.x, f.y, 4, f.w * 1.4, f.col, 0.3, 4, plusPal(f.vis));
+        plusRing(f.x, f.y, 4, f.w * 1.4, f.col, 0.3, 4, f.vis);
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
           for (let k = 1; k <= 4; k++) G.FX.burst(f.x + dx * f.r * k / 4, f.y + dy * f.r * 0.6 * k / 4 - 4, f.col, 4, 110);
         }
@@ -835,7 +851,7 @@ G.Combat = (() => {
       if (!f.struck) {
         f.struck = true;
         if (G.Camera.sees(f.x, f.y, 60)) {
-          G.FX.ring(f.x, f.y, 3, f.r, '#fff7b0', 0.25, 3, plusPal(f.vis));
+          plusRing(f.x, f.y, 3, f.r, '#fff7b0', 0.25, 3, f.vis);
           G.FX.burst(f.x, f.y - 6, f.col, 8, 140);
           G.Audio.sfx('shot', { kind: 'beam', type: 'electric' });
         }
@@ -845,7 +861,7 @@ G.Combat = (() => {
     }
     if (f.kind === 'stunzone') {
       if (f.t < f.delay) return false;
-      G.FX.ring(f.x, f.y, 4, f.r, f.col, 0.35, 4, plusPal(f.vis));
+      plusRing(f.x, f.y, 4, f.r, f.col, 0.35, 4, f.vis);
       G.FX.burst(f.x, f.y - 6, f.col, 12, 160);
       if (G.Camera.sees(f.x, f.y, 40)) G.Audio.sfx('break');
       if (!f.ghost) {
@@ -880,7 +896,7 @@ G.Combat = (() => {
         const armed = f.t >= f.arm;
         const trig = armed && G.EnemyMgr.queryCircle(f.x, f.y, 14).length > 0;
         if (trig || f.t >= f.life) {
-          G.FX.ring(f.x, f.y, 4, f.r, f.col, 0.3, 4, plusPal(f.vis));
+          plusRing(f.x, f.y, 4, f.r, f.col, 0.3, 4, f.vis);
           G.FX.burst(f.x, f.y - 6, f.col, 10, 150);
           if (G.Camera.sees(f.x, f.y, 40)) G.Audio.sfx('break');
           blast(f, f.r, trig ? 1 : 0.5);
@@ -888,7 +904,7 @@ G.Combat = (() => {
         }
       } else if (f.kind === 'meteor') {
         if (f.t >= f.fall) {
-          G.FX.ring(f.x, f.y, 4, f.r, f.col, 0.35, 4, plusPal(f.vis));
+          plusRing(f.x, f.y, 4, f.r, f.col, 0.35, 4, f.vis);
           G.FX.burst(f.x, f.y - 6, f.col, 12, 170);
           if (G.Camera.sees(f.x, f.y, 40)) { G.Audio.sfx('break'); G.Camera.kick(0.12); }
           blast(f, f.r);
@@ -913,7 +929,7 @@ G.Combat = (() => {
         if (f.kick > 0) f.kick -= dt;
       } else if (f.kind === 'patch') {
         f.tick -= dt;
-        if (f.tick <= 0) { f.tick = 0.5; blast(f, f.r); }
+        if (f.tick <= 0) { f.tick = 0.5; blast(f, f.r); plusArea(f.vis, f.x, f.y, f.r); }
         if (f.vis.aura && Math.random() < dt * 3 && G.Camera.sees(f.x, f.y, 20)) {
           G.FX.sp(f.vis.aura, f.vis.pal, f.x + G.U.rand(-f.r, f.r) * 0.6, f.y - 4, { vy: -40, life: 0.4, plus: f.vis.plus });
         }
@@ -941,6 +957,7 @@ G.Combat = (() => {
   /** Lo de los campos que va en el suelo (debajo de los Pokémon). */
   function drawGroundFields(ctx) {
     const now = performance.now() / 1000;
+    const PXW = G.Sprites.PX;          // un píxel de arte, en unidades de juego
     for (const f of fields) {
       // (La ola de Surf se mueve lejos de donde salió: se mira dónde está ahora.)
       if (f.kind === 'wave' ? !G.Camera.sees(f.x + f.ca * f.d, f.y + f.sa * f.d, f.w) : !G.Camera.sees(f.x, f.y, 60)) continue;
@@ -950,11 +967,17 @@ G.Combat = (() => {
         ctx.globalAlpha = 0.22 * a;
         ctx.fillStyle = f.col;
         ctx.beginPath(); ctx.ellipse(f.x, f.y, f.r, f.r * 0.6, 0, 0, 6.2832); ctx.fill();
-        ctx.globalAlpha = 0.6 * a;
-        ctx.strokeStyle = f.col; ctx.lineWidth = 2;
+        // (Pulido el 12-11-2026: los brazos eran trazos suaves de canvas; ahora, bloques de píxel
+        // que se afinan hacia la cola, como el resto de efectos.)
+        ctx.globalAlpha = 0.75 * a;
+        ctx.fillStyle = f.col;
         for (let k = 0; k < 3; k++) {
           const rr = f.r * (0.35 + k * 0.28), a0 = now * (3 - k * 0.6) + k * 2;
-          ctx.beginPath(); ctx.ellipse(f.x, f.y, rr, rr * 0.6, 0, a0, a0 + 3.4); ctx.stroke();
+          const n = Math.max(6, Math.ceil(rr * 3.4 / (PXW * 2)));
+          for (let i = 0; i <= n; i++) {
+            const an = a0 + (i / n) * 3.4, s = i > n * 0.35 ? PXW * 2 : PXW;
+            ctx.fillRect(Math.round((f.x + Math.cos(an) * rr) / PXW) * PXW, Math.round((f.y + Math.sin(an) * rr * 0.6) / PXW) * PXW, s, s);
+          }
         }
         if (f.vis.plus) plusRim(ctx, f.x, f.y, f.r, f.vis.pal, now, 0.8 * a);
       } else if (f.kind === 'tremor') {
@@ -968,12 +991,24 @@ G.Combat = (() => {
         if (f.vis.plus) plusRim(ctx, f.x, f.y, rr + 4, f.vis.pal, now, 0.9 * (1 - k * 0.6));
       } else if (f.kind === 'wave') {
         ctx.translate(f.x + f.ca * f.d, f.y + f.sa * f.d); ctx.rotate(f.a);
-        ctx.globalAlpha = 0.5;
-        ctx.fillStyle = f.col;
-        ctx.fillRect(-36, -f.w / 2, 36, f.w);
-        ctx.globalAlpha = 0.85;
-        ctx.fillStyle = '#e8fbff';
-        for (let o = -f.w / 2; o < f.w / 2; o += 12) ctx.fillRect(Math.sin(now * 10 + o) * 3 - 4, o, 6, 9);
+        // (Pulido el 12-11-2026: era un rectángulo liso con rayas; ahora el cuerpo va a tiras con
+        // el lomo ondulado y la cresta lleva dos filas de espuma a bloques.)
+        const WP = G.VFX.PAL.water;
+        for (let o = -f.w / 2; o < f.w / 2; o += 6) {
+          const wob = Math.round(Math.sin(now * 10 + o * 0.12) * 2) * PXW;
+          ctx.globalAlpha = 0.5;
+          ctx.fillStyle = f.col;
+          ctx.fillRect(-36 - wob, o, 36 + wob, 6);
+          ctx.globalAlpha = 0.55;
+          ctx.fillStyle = WP[1];
+          ctx.fillRect(-36 - wob, o, PXW * 2, 6);                     // el lomo, más oscuro
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = WP[3];
+          ctx.fillRect(-10 + wob, o, PXW * 2, 6);                     // la panza, más clara
+          ctx.fillStyle = '#e8fbff';
+          ctx.fillRect(-6 + wob, o, 6, 4);                            // espuma de la cresta
+          if (((o / 6) & 1) === (Math.floor(now * 8) & 1)) ctx.fillRect(2 + wob, o + 2, PXW * 2, PXW);
+        }
         if (f.vis.plus) {                                  // «+»: filo de luz delante de la ola
           ctx.fillStyle = (G.VFX.PAL[f.vis.pal] || G.VFX.PAL.normal)[4];
           for (let o = -f.w / 2; o < f.w / 2; o += 6) ctx.fillRect(4 + Math.sin(now * 10 + o) * 3, o, 3, 4);
@@ -1036,7 +1071,7 @@ G.Combat = (() => {
         ctx.fillStyle = f.col;
         ctx.beginPath(); ctx.ellipse(f.x, f.y, f.r * 0.45, f.r * 0.28, 0, 0, 6.2832); ctx.fill();
         ctx.globalAlpha = 1;
-        G.VFX.draw(ctx, f.vis.proj, f.vis.pal, f.x, f.y - 4, { scale: 1, alpha: blink ? 1 : 0.75, frame: 0, plus: f.vis.plus });
+        G.VFX.draw(ctx, fieldShape(f.vis), f.vis.pal, f.x, f.y - 4, { scale: 1, alpha: blink ? 1 : 0.75, frame: 0, plus: f.vis.plus });
       } else if (f.kind === 'meteor') {
         const k = G.U.clamp(f.t / f.fall, 0, 1);
         ctx.globalAlpha = 0.2 + k * 0.3;
@@ -1058,31 +1093,35 @@ G.Combat = (() => {
   /** Lo de los campos que va por encima (meteoros cayendo, torretas). */
   function drawAirFields(ctx) {
     const now = performance.now() / 1000;
+    const PXW = G.Sprites.PX;          // un píxel de arte, en unidades de juego
     for (const f of fields) {
       if (!G.Camera.sees(f.x, f.y, 200)) continue;
       if (f.kind === 'bolt' && f.struck) {
         // Trueno: el rayo baja del cielo en zigzag.
+        // (Pulido el 12-11-2026: era una línea suave de canvas; ahora, bloques de píxel en zigzag,
+        // como los rayos de G.FX, y se apaga a escalones.)
         ctx.save();
-        ctx.globalAlpha = 1 - (f.t - f.delay) / 0.16;
-        ctx.strokeStyle = '#fff7b0'; ctx.lineWidth = 4; ctx.lineJoin = 'round';
-        ctx.beginPath(); ctx.moveTo(f.x + 10, f.y - 280);
-        for (let k = 1; k <= 6; k++) ctx.lineTo(f.x + (k % 2 ? -12 : 12) * (1 - k / 7), f.y - 280 + k * 280 / 6);
-        if (f.vis.plus) {                                  // «+»: el rayo, más grueso por fuera y con su color claro
-          const a0 = ctx.globalAlpha;
-          ctx.globalAlpha = a0 * 0.45; ctx.strokeStyle = (G.VFX.PAL[f.vis.pal] || G.VFX.PAL.normal)[3]; ctx.lineWidth = 9; ctx.stroke();
-          ctx.globalAlpha = a0; ctx.strokeStyle = '#fff7b0'; ctx.lineWidth = 4;
+        const left = 1 - (f.t - f.delay) / 0.16;
+        ctx.globalAlpha = left > 0.66 ? 1 : left > 0.33 ? 0.66 : 0.33;
+        const EP = G.VFX.PAL[f.vis.pal] || G.VFX.PAL.electric, H0 = 280, seg = PXW * 3;
+        for (let d = 0; d < H0; d += seg) {
+          // El mismo zigzag de antes (seis tramos que se cierran al caer), a escalones.
+          const u = d / H0 * 6, k = Math.floor(u), t0 = u - k;
+          const xa = k === 0 ? 10 : (k % 2 ? -12 : 12) * (1 - k / 7), xb = ((k + 1) % 2 ? -12 : 12) * (1 - (k + 1) / 7);
+          const x = Math.round((f.x + xa + (xb - xa) * t0) / PXW) * PXW, y = Math.round((f.y - H0 + d) / PXW) * PXW;
+          if (f.vis.plus) { ctx.fillStyle = EP[2]; ctx.fillRect(x - PXW * 3, y, PXW * 6, seg); }   // «+»: más grueso por fuera
+          ctx.fillStyle = '#fff7b0'; ctx.fillRect(x - PXW * 2, y, PXW * 4, seg);
+          ctx.fillStyle = f.col; ctx.fillRect(x - PXW, y, PXW * 2, seg);
         }
-        ctx.stroke();
-        ctx.strokeStyle = f.col; ctx.lineWidth = 2; ctx.stroke();
         ctx.restore();
       } else if (f.kind === 'meteor' && f.t > 0) {
         const k = G.U.clamp(f.t / f.fall, 0, 1);
-        G.VFX.draw(ctx, f.vis.proj, f.vis.pal, f.x + (1 - k) * 40, f.y - (1 - k) * 170 - 6,
+        G.VFX.draw(ctx, fieldShape(f.vis), f.vis.pal, f.x + (1 - k) * 40, f.y - (1 - k) * 170 - 6,
                    { scale: 1.5, angle: Math.atan2(170, -40), frame: Math.floor(now * 12), plus: f.vis.plus });
       } else if (f.kind === 'turret') {
         const fade = Math.min(1, (f.life - f.t) * 2, f.t * 5);
         const bob = Math.sin(now * 4 + f.x) * 2 - (f.kick > 0 ? 2 : 0);
-        G.VFX.draw(ctx, f.vis.proj, f.vis.pal, f.x, f.y - 16 + bob, { scale: 1.5, alpha: fade, frame: Math.floor(now * 8), plus: f.vis.plus });
+        G.VFX.draw(ctx, fieldShape(f.vis), f.vis.pal, f.x, f.y - 16 + bob, { scale: 1.5, alpha: fade, frame: Math.floor(now * 8), plus: f.vis.plus });
       }
     }
   }
@@ -1189,6 +1228,17 @@ G.Combat = (() => {
       const mine = fields.filter(o => o.kind === 'patch' && o.owner === pl && o.m === m && !o.gone);
       for (const o of mine.slice(0, Math.max(0, mine.length - 12))) o.gone = true;
     }
+  }
+
+  /** Ataques «+»: el impacto propio de ese ataque (vfx-plus.js). Sólo se ve, y como
+   *  mucho uno cada 90 ms por proyectil (los que atraviesan a muchos no lo repiten). */
+  function plusHit(p, e) {
+    const E = p.vis && p.vis.evo;
+    if (!E || !G.Settings.fx) return;
+    const t = performance.now();
+    if (t - (p.hitFxAt || 0) < 90 || !G.Camera.sees(e.x, e.y, 30)) return;
+    p.hitFxAt = t;
+    G.VFXPlus.hit(E, p.vis.pal, e.x, e.y - e.bodyH * 0.5, p.vx || 0, p.vy || 0);
   }
 
   /** Arceus (Sentencia) sólo recibe una parte (ver Judgment.dmgK). */
@@ -1301,6 +1351,7 @@ G.Combat = (() => {
         // Disparo fantasma de un compañero: choca y se ve, pero no daña.
         if (p.ghost) {
           G.FX.sp('impact', p.vis ? p.vis.pal : 'normal', e.x, e.y - e.bodyH * 0.5, { life: 0.12, scale: 1 });
+          plusHit(p, e);
           if (rebound(p, e)) break;
           if (p.pierce > 0) { p.pierce--; continue; }
           G.FX.burst(p.x, p.y - G.LIFT, p.color, 5, 80);
@@ -1313,6 +1364,7 @@ G.Combat = (() => {
         e.hurt(p.dmg * k, p.color, p.vx || (e.x - pl.x), p.vy || (e.y - pl.y), sk ? p.knock : 0,
                crit ? 'crit' : p.mtype ? G.Types.label(G.Types.mult(p.mtype, e.types)) : null);
         if (Math.random() < 0.5) G.FX.sp('impact', p.vis ? p.vis.pal : 'normal', e.x, e.y - e.bodyH * 0.5, { life: 0.12, scale: 1 });
+        plusHit(p, e);
         pl.dmgDealt += p.dmg * k;
         if (p.src) p.src.dealt = (p.src.dealt || 0) + p.dmg * k;
         pl.onDealt(p.dmg * k);

@@ -87,6 +87,17 @@ El diseño detallado heredado de JPTER78 está en `GDD.md` (puede estar desfasad
 - **Aspecto de los ataques** (`js/entities/vfx.js`, `MOVE`): cada ataque tiene su forma y su paleta; desde el
   25-10-2026 casi ninguno repite la de otro de su tipo (formas nuevas: `spiral`, `eye`, `prism`, `mist`, `psiwave`,
   `comet`, `snowflake`, `fist`, `seed`, `feather`, `boulder`; paletas `psyviolet`, `mist`, `mind`).
+- **Ataques evolucionados («… +»)** (12-11-2026, `js/entities/vfx-plus.js`): encima del envoltorio común de los «+»
+  (borde de luz, destello, chispas, aro doble), cada uno de los 123 de `EVO` tiene lo suyo, sin dos iguales: los que lanzan
+  algo, su silueta (`shape`), un rastro de dos siluetas planas, su estela y su impacto; los golpes, su fotograma y lo que
+  salta del filo; los rayos, sus partículas y su final; las zonas, lo que sale por el borde. Sólo se ve (sale de `m.evolved`
+  por `G.VFX.forMove`, campo `evo`; en grupo lo ven los compañeros sin cambiar la red). Con presupuesto: los adornos dejan
+  de salir con la pantalla cargada (`G.FX.spare`) y en calidad «Baja» queda la silueta con su borde. Inventario y reglas de
+  estilo en `docs/ATAQUES-PLUS.md`; demo en `demo/ataques-plus.html` (no es parte del juego) y capturas con
+  `node tools/capturas-demo.cjs`. Un «+» con silueta propia conserva el tamaño de píxel de su ataque normal.
+- **Detalles en píxeles** (12-11-2026): la sombra de los Pokémon (`G.Sprites.drawShadow`) es una elipse a escalones cacheada;
+  los enemigos aparecen con un destello blanco y al caer se apagan en tres escalones; Trueno, Surf y los remolinos van a
+  bloques de píxel y la onda de sonido (`note`) lleva contorno.
 - **Estado de los amigos** (25-10-2026, `js/net/social.js`): `presence/<uid>` en la Realtime Database, `{ s: on|play|group|off, at }`.
   Se escribe sólo al cambiar (entrar, empezar o acabar una partida) y Firebase pone `off` solo al cerrar o perder la
   conexión (`onDisconnect`; la hora la pone siempre el servidor); cada uno escucha sólo a sus amigos confirmados.

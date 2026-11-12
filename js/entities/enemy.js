@@ -83,7 +83,7 @@
       // Rowlet camina aunque sea Volador). Los jefes, por su tamaño, también.
       this.flying = boss || G.Sprites.hovers(def.dex);
 
-      this.flash = 0;
+      this.flash = 0.1;          // aparece con un destello blanco (sólo se ve)
       this.slow = 0; this.slowT = 0;
       this.burn = 0; this.burnT = 0; this.burnTick = 0;
       this.poison = 0; this.poisonT = 0; this.poisonTick = 0;
@@ -835,7 +835,9 @@
     }
 
     draw(ctx) {
-      const alpha = this.dead ? G.U.clamp(this.fade / 0.5, 0, 1) : 1;
+      // Al caer se apaga a escalones (1 · ,66 · ,33), como los efectos: sin fundido suave.
+      const k0 = this.dead ? G.U.clamp(this.fade / 0.5, 0, 1) : 1;
+      const alpha = k0 > 0.66 ? 1 : k0 > 0.33 ? 0.66 : k0 > 0 ? 0.33 : 0;
       if (alpha <= 0) return;
 
       const gold = this.golden || this.behavior === 'thief' || (this.remote && !this.boss && G.Events.golden);

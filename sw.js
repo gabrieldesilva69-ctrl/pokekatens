@@ -24,6 +24,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
+  if (/\/demo\//.test(url.pathname)) return;      // la demo de ataques no es del juego: ni se guarda ni se sirve sin red
   const art = /\/assets\/(pokemon|icons|fonts|cries|eggs|ui|arenas|trainers)\//.test(url.pathname) && !/\/k-[a-z0-9-]+\//.test(url.pathname);
   if (art) {
     e.respondWith(caches.open(ART).then(async c => {

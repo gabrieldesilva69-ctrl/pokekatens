@@ -4,7 +4,7 @@
  * Así una misma burbuja sale azul de agua o morada de veneno, y todo comparte
  * píxel y contorno oscuro con los sprites de Mundo Misterioso.
  *
- *   G.VFX.draw(ctx, shape, pal, x, y, { angle, scale, frame, alpha, plus })
+ *   G.VFX.draw(ctx, shape, pal, x, y, { angle, scale, frame, alpha, plus, echo })
  *   G.VFX.forMove(m)  -> cómo se ve ese movimiento (proyectil, rayo, golpe...)
  *   G.VFX.forType(t)  -> forma por defecto de un tipo (disparos enemigos)
  */
@@ -204,10 +204,13 @@ G.VFX = (() => {
       });
       P.outline();
     } },
-    note: { w: 11, h: 11, dir: true, gen(P) {
-      P.arc(1, 5, 2.2, -0.7, 0.7, 'w');
-      P.arc(1, 5, 4.6, -0.6, 0.6, 'l');
-      P.arc(1, 5, 7.2, -0.5, 0.5, 'm');
+    // (Pulido el 12-11-2026: con contorno, como las demás; sin él, las tres rayas finas se
+    // perdían sobre los suelos claros.)
+    note: { w: 13, h: 13, dir: true, gen(P) {
+      P.arc(2, 6, 2.2, -0.7, 0.7, 'w');
+      P.arc(2, 6, 4.6, -0.6, 0.6, 'l');
+      P.arc(2, 6, 7.2, -0.5, 0.5, 'm');
+      P.outline();
     } },
     impact: { w: 15, h: 15, frames: 2, gen(P, f) {
       for (let k = 0; k < 8; k++) {
@@ -367,67 +370,61 @@ G.VFX = (() => {
     return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
   }
 
-  function sprite(shape, pal, frame = 0) {
+  // Cada forma se pinta una vez por paleta, fotograma y modo:
+  //   0 normal
+  //   1 «+»: con su borde de luz de 2 píxeles de arte ya puesto (el de dentro del tono
+  //     más claro de la paleta, el de fuera más tenue): un solo drawImage, como el normal
+  //   2 y 3 eco: la silueta en un color plano (claro; medio y tramado), para el rastro
+  //     de fotogramas de los «+» (projectile.js). Sin transparencias: pixel art.
+  const HALO = 2;
+  function sprite(shape, pal, frame = 0, mode = 0) {
     const S = SHAPES[shape] || SHAPES.ball;
-    const f = (frame | 0) % (S.frames || 1);
-    const k = shape + '|' + pal + '|' + f;
+    const f = (((frame | 0) % (S.frames || 1)) + (S.frames || 1)) % (S.frames || 1);
+    const k = shape + '|' + pal + '|' + f + '|' + mode;
     let cv = cache.get(k);
     if (cv) return cv;
     const P = grid(S.w, S.h);
     S.gen(P, f);
+    const pad = mode === 1 ? HALO : 0, W = S.w + pad * 2, Hh = S.h + pad * 2;
     cv = document.createElement('canvas');
-    cv.width = S.w; cv.height = S.h;
+    cv.width = W; cv.height = Hh;
     const c = cv.getContext('2d');
     const colors = PAL[pal] || PAL.normal;
+    if (mode === 1) {
+      const solid = (x, y) => !!P.get(x - HALO, y - HALO);
+      for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
+        if (solid(x, y)) continue;
+        let d = 9;
+        for (let b = -HALO; b <= HALO; b++) for (let a = -HALO; a <= HALO; a++) {
+          if (solid(x + a, y + b)) d = Math.min(d, Math.max(Math.abs(a), Math.abs(b)));
+        }
+        if (d === 1) c.fillStyle = rgba(colors[4], 0.85);
+        else if (d === 2) c.fillStyle = rgba(colors[3], 0.35);
+        else continue;
+        c.fillRect(x, y, 1, 1);
+      }
+    }
     for (let y = 0; y < S.h; y++) for (let x = 0; x < S.w; x++) {
       const ch = P.g[y][x];
       if (!ch) continue;
-      c.fillStyle = ch === 'L' ? rgba(colors[3], 0.5) : colors[IDX[ch]];
-      c.fillRect(x, y, 1, 1);
+      if (mode >= 2) {
+        if (ch === 'o' || (mode === 3 && (x + y) & 1)) continue;
+        c.fillStyle = colors[mode === 2 ? 3 : 2];
+      } else c.fillStyle = ch === 'L' ? rgba(colors[3], 0.5) : colors[IDX[ch]];
+      c.fillRect(x + pad, y + pad, 1, 1);
     }
     cache.set(k, cv);
     return cv;
   }
 
-  // Ataques «+» (evolucionados): borde de luz de 2 píxeles de arte alrededor de la
-  // forma, el de dentro del tono más claro de su paleta y el de fuera más tenue.
-  // Se hace una vez por forma, paleta y fotograma (un drawImage más al dibujar).
-  const HALO = 2;
-  const halos = new Map();
-  function halo(shape, pal, frame = 0) {
-    const S = SHAPES[shape] || SHAPES.ball;
-    const f = (frame | 0) % (S.frames || 1);
-    const k = shape + '|' + pal + '|' + f;
-    let cv = halos.get(k);
-    if (cv) return cv;
-    const P = grid(S.w, S.h);
-    S.gen(P, f);
-    const W = S.w + HALO * 2, Hh = S.h + HALO * 2;
-    cv = document.createElement('canvas');
-    cv.width = W; cv.height = Hh;
-    const c = cv.getContext('2d');
-    const colors = PAL[pal] || PAL.normal;
-    const solid = (x, y) => !!P.get(x - HALO, y - HALO);
-    for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
-      if (solid(x, y)) continue;
-      let d = 9;
-      for (let b = -HALO; b <= HALO; b++) for (let a = -HALO; a <= HALO; a++) {
-        if (solid(x + a, y + b)) d = Math.min(d, Math.max(Math.abs(a), Math.abs(b)));
-      }
-      if (d === 1) c.fillStyle = rgba(colors[4], 0.85);
-      else if (d === 2) c.fillStyle = rgba(colors[3], 0.35);
-      else continue;
-      c.fillRect(x, y, 1, 1);
-    }
-    halos.set(k, cv);
-    return cv;
-  }
-
-  /** Dibuja centrado en (x, y). opts: angle, scale (1 = píxel de juego), frame, alpha, plus (borde de luz). */
+  /** Dibuja centrado en (x, y). opts: angle, scale (1 = píxel de juego), frame, alpha,
+   *  plus (con borde de luz), echo (1 o 2: silueta plana del rastro de los «+»). */
   function draw(ctx, shape, pal, x, y, o = {}) {
     const S = SHAPES[shape] || SHAPES.ball;
-    const cv = sprite(shape, pal, o.frame || 0);
-    const k = PX * (o.scale || 1);
+    const mode = o.echo ? (o.echo > 1 ? 3 : 2) : o.plus ? 1 : 0;
+    const cv = sprite(shape, pal, o.frame || 0, mode);
+    const k = PX * (o.scale || 1), pad = mode === 1 ? HALO : 0;
+    const W = (S.w + pad * 2) * k, Hh = (S.h + pad * 2) * k;
     ctx.save();
     if (o.alpha != null && o.alpha < 1) ctx.globalAlpha *= o.alpha;
     ctx.imageSmoothingEnabled = false;
@@ -437,11 +434,7 @@ G.VFX = (() => {
       a = Math.round(a / (Math.PI / 8)) * (Math.PI / 8);          // 16 direcciones: menos parpadeo
       ctx.rotate(a);
     }
-    if (o.plus) {
-      const W = S.w + HALO * 2, Hh = S.h + HALO * 2;
-      ctx.drawImage(halo(shape, pal, o.frame || 0), -W * k / 2, -Hh * k / 2, W * k, Hh * k);
-    }
-    ctx.drawImage(cv, -S.w * k / 2, -S.h * k / 2, S.w * k, S.h * k);
+    ctx.drawImage(cv, -W / 2, -Hh / 2, W, Hh);
     ctx.restore();
   }
 
@@ -624,11 +617,18 @@ G.VFX = (() => {
 
   // plus: el ataque ha evolucionado («… +»). Lo pintan projectile.js, fx.js y combat.js
   // con el mismo lenguaje: borde de luz, destello al lanzar, chispas y anillo doble.
+  // evo: encima de eso, el rediseño propio de ese ataque (vfx-plus.js): su silueta,
+  // su estela y su impacto. Sólo se ve; los números del ataque no pasan por aquí.
+  // fine: su proyectil normal se pinta a píxel de juego (los de radio 8 o más van a
+  // 1,5). El «+» crece de radio, pero con su silueta propia no infla los píxeles: se
+  // queda con el píxel de su ataque normal (projectile.js).
   function forMove(m) {
     const v = MOVE[m.id] || {};
-    return Object.assign({ pal: m.type, proj: TYPE_SHAPE[m.type] || 'ball' }, v, { pal: v.pal || m.type, plus: !!m.evolved });
+    const evo = m.evolved && G.VFXPlus ? G.VFXPlus.of(m.id) : null;
+    return Object.assign({ pal: m.type, proj: TYPE_SHAPE[m.type] || 'ball' }, v,
+      { pal: v.pal || m.type, plus: !!m.evolved, evo, fine: !!(evo && m.def && !(m.def.size >= 8)) });
   }
   function forType(type) { return { proj: TYPE_SHAPE[type] || 'ball', pal: PAL[type] ? type : 'normal' }; }
 
-  return { PAL, SHAPES, draw, sprite, forMove, forType, isDir, spins, frames };
+  return { PAL, SHAPES, MOVE, draw, sprite, forMove, forType, isDir, spins, frames };
 })();

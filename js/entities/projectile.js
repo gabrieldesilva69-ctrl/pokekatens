@@ -99,7 +99,11 @@ G.Projectiles = (() => {
     p.glintT = (p.glintT == null ? Math.random() * every : p.glintT) - dt;
     if (p.glintT > 0) return;
     p.glintT = every;
-    if (G.Camera.sees(p.x, p.y, 20)) G.FX.glint(p.vis.pal, p.x, p.y - G.LIFT);
+    if (!G.Camera.sees(p.x, p.y, 20)) return;
+    // Una vez la chispa común y otra la estela propia de ese ataque (brasas, gotas, humo...:
+    // vfx-plus.js): se turnan, así un «+» no suelta más partículas que antes.
+    if (p.vis.evo && p.vis.evo.trail && (p.turn = !p.turn)) G.VFXPlus.trail(p.vis.evo, p.vis.pal, p.x, p.y - G.LIFT, p.vx || 0, p.vy || 0);
+    else G.FX.glint(p.vis.pal, p.x, p.y - G.LIFT);
   }
 
   function nearest(enemies, x, y, maxDist) {
@@ -131,17 +135,36 @@ G.Projectiles = (() => {
       if (p.friendly) continue;
       ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r * 1.5, p.r * 0.6, 0, 0, 6.2832); ctx.fill();
     }
-    for (const p of list) {
+    const q = G.Settings.fx;
+    // Cómo se pinta cada uno. «+»: su silueta propia (vfx-plus.js) en vez de la normal.
+    const look = p => {
       const v = p.vis || G.VFX.forType('normal');
-      const shape = v.proj;
-      const a = p.orb ? 1 : Math.min(1, (p.life - p.t) * 4);
+      const E = v.evo, shape = E && E.shape || v.proj;
       let angle = 0;
       if (G.VFX.isDir(shape)) angle = p.orb ? p.oa + Math.PI / 2 : Math.atan2(p.vy, p.vx);
       else if (G.VFX.spins(shape)) angle = p.t * 9;
-      G.VFX.draw(ctx, shape, v.pal, p.x, p.y - L, {
-        angle, alpha: a, scale: p.r >= 8 ? 1.5 : 1,
-        frame: Math.floor(p.t * 12), plus: v.plus
-      });
+      return { v, E, shape, angle, alpha: p.orb ? 1 : Math.min(1, (p.life - p.t) * 4),
+               scale: p.r >= 8 && !v.fine ? 1.5 : 1, frame: Math.floor(p.t * 12) };
+    };
+    // Rastro de fotogramas de los «+»: la silueta en plano donde estaba hace un momento
+    // (dos ecos; uno en calidad media, ninguno en baja). Todos antes que los proyectiles,
+    // para que el eco de uno no tape al de al lado.
+    if (q) for (const p of list) {
+      if (!p.vis || !p.vis.evo) continue;
+      const k = look(p);
+      for (let i = q; i >= 1; i--) {
+        let ex, ey;
+        if (p.orb) {
+          const o = p.owner, oa = p.oa - p.ospeed * 0.05 * i;
+          if (!o) break;
+          ex = o.x + Math.cos(oa) * p.orad; ey = o.y + Math.sin(oa) * p.orad * 0.7;
+        } else { ex = p.x - p.vx * 0.035 * i; ey = p.y - p.vy * 0.035 * i; }
+        G.VFX.draw(ctx, k.shape, k.v.pal, ex, ey - L, { angle: k.angle, alpha: k.alpha, scale: k.scale, frame: k.frame - i, echo: i });
+      }
+    }
+    for (const p of list) {
+      const k = look(p);
+      G.VFX.draw(ctx, k.shape, k.v.pal, p.x, p.y - L, { angle: k.angle, alpha: k.alpha, scale: k.scale, frame: k.frame, plus: k.v.plus });
     }
   }
 

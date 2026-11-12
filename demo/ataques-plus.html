@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<!-- Todo se resuelve como en la raíz: las rutas de los scripts son las mismas que en dev.html. -->
+<base href="../">
+<title>Ataques «+» · demo</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #14161d; color: #e8e6df; font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 2; background: #1b1e28; border-bottom: 2px solid #2b3040; padding: 10px 16px; }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  h1 small { font-weight: 400; color: #9aa3b5; margin-left: 8px; }
+  .fila { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+  .fila > span { color: #9aa3b5; min-width: 58px; }
+  button { font: inherit; color: #e8e6df; background: #262b3a; border: 2px solid #363d52; padding: 3px 9px; cursor: pointer; }
+  button:hover { border-color: #6d7aa5; }
+  button.on { background: #ffd84a; border-color: #ffd84a; color: #1a1420; font-weight: 700; }
+  button.hecho::after { content: " ✓"; color: #7be08a; }
+  button.on.hecho::after { color: #1a1420; }
+  main { padding: 14px 16px 60px; }
+  h2 { font-size: 15px; margin: 4px 0 2px; }
+  p.nota { color: #9aa3b5; margin: 0 0 12px; max-width: 900px; }
+  canvas { display: block; image-rendering: pixelated; max-width: 100%; height: auto; }
+  section + section { margin-top: 34px; border-top: 2px solid #2b3040; padding-top: 18px; }
+  body.captura header, body.captura .nocap { display: none; }
+  body.captura main { padding: 12px; }
+  body.captura.solo-pk #ataques, body.captura:not(.solo-pk) #pokemon { display: none; }
+  h3 { font-size: 13px; margin: 14px 0 4px; color: #9aa3b5; }
+  img { display: block; max-width: 100%; height: auto; image-rendering: pixelated; }
+  ul.nota { padding-left: 18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Ataques evolucionados («… +») <small>normal a la izquierda · «+» a la derecha · con el código real del juego</small></h1>
+  <div class="fila" id="familias"><span>Familia</span></div>
+  <div class="fila" id="tipos"><span>Tipo</span></div>
+  <div class="fila" id="calidades"><span>Calidad</span></div>
+</header>
+<main>
+  <section id="ataques">
+    <h2 id="titulo"></h2>
+    <p class="nota" id="nota"></p>
+    <canvas id="lienzo"></canvas>
+  </section>
+  <section class="nocap" id="normales">
+    <h2>Ataques normales pulidos (antes y después)</h2>
+    <p class="nota">Sólo los cuatro que se veían peor que el resto. <button id="ver-pulidos">Verlos en movimiento arriba</button></p>
+    <ul class="nota">
+      <li><b>Trueno</b>: el rayo era una línea suave de canvas (la única cosa no pixelada de la pantalla); ahora va a bloques en zigzag.</li>
+      <li><b>Surf</b>: la ola era un rectángulo liso con rayas; ahora va a tiras con el lomo ondulado y dos filas de espuma.</li>
+      <li><b>Torbellino</b> (y los demás remolinos): los brazos eran trazos suaves; ahora son bloques de píxel que se afinan hacia la cola.</li>
+      <li><b>Vozarrón</b> (y los que usan la onda de sonido): tres rayas finas sin contorno que se perdían sobre los suelos claros; ahora llevan contorno, como las demás formas.</li>
+    </ul>
+    <h3>Antes</h3>
+    <img src="demo/capturas/pulidos-antes.png" alt="Los cuatro ataques antes de pulirlos" loading="lazy">
+    <h3>Después</h3>
+    <img src="demo/capturas/pulidos.png" alt="Los cuatro ataques después de pulirlos" loading="lazy">
+  </section>
+  <section id="pokemon">
+    <h2>Detalles de los Pokémon</h2>
+    <p class="nota">Antes a la izquierda, ahora a la derecha, con los sprites y el animador del juego. El destello al recibir un golpe, el contorno del shiny y el compañero frente a los enemigos se quedan como estaban: ya iban en píxeles.</p>
+    <canvas id="lienzo-pk"></canvas>
+  </section>
+</main>
+
+<!-- Scripts REALES del juego, con las mismas rutas que en dev.html (tests/ataques-plus.test.cjs lo comprueba). -->
+<script src="js/core/util.js"></script>
+<script src="js/core/settings.js"></script>
+<script src="js/data/sprites-meta.js"></script>
+<script src="js/core/sprites.js"></script>
+<script src="js/core/camera.js"></script>
+<script src="js/data/moves.js"></script>
+<script src="js/entities/vfx.js"></script>
+<script src="js/entities/fx.js"></script>
+<script src="js/entities/vfx-plus.js"></script>
+<script src="js/entities/projectile.js"></script>
+<script src="js/systems/combat.js"></script>
+<!-- Sólo de la demo -->
+<script src="demo/banco.js"></script>
+<script src="demo/pokemon.js"></script>
+<script src="demo/pagina.js"></script>
+</body>
+</html>

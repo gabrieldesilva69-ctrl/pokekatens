@@ -185,14 +185,31 @@ G.Sprites = (() => {
   }
 
   /** Sombra elíptica bajo los pies, tamaño según el ShadowSize de PMD. */
+  // (12-11-2026: en píxeles. Antes era una elipse suave de canvas; ahora, una elipse a
+  // escalones del tamaño de píxel del arte, pintada una vez por tamaño y reutilizada.)
+  const shadows = new Map();
+  function shadowImg(rpx) {
+    let c = shadows.get(rpx);
+    if (c) return c;
+    const ry = Math.max(1, Math.round(rpx * 0.42));
+    c = document.createElement('canvas');
+    c.width = rpx * 2 + 1; c.height = ry * 2 + 1;
+    const g = c.getContext('2d');
+    g.fillStyle = 'rgba(0,0,0,.34)';
+    for (let j = -ry; j <= ry; j++) {
+      const w = Math.round(rpx * Math.sqrt(1 - (j / (ry + 0.5)) ** 2));
+      g.fillRect(rpx - w, j + ry, w * 2 + 1, 1);
+    }
+    shadows.set(rpx, c);
+    return c;
+  }
   function drawShadow(ctx, dex, x, y, scale = 1) {
     const m = meta(dex);
     const s = m ? m.s : 1;
-    const rx = [5, 8, 12][G.U.clamp(s, 0, 2)] * PX * scale;
-    ctx.fillStyle = 'rgba(0,0,0,.34)';
-    ctx.beginPath();
-    ctx.ellipse(x, y, rx, rx * 0.42, 0, 0, 6.2832);
-    ctx.fill();
+    const rpx = Math.max(2, Math.round([5, 8, 12][G.U.clamp(s, 0, 2)] * scale));
+    const c = shadowImg(rpx);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(c, Math.round(x - c.width * PX / 2), Math.round(y - c.height * PX / 2), c.width * PX, c.height * PX);
   }
 
   /** Geometría de una hoja con disfraz: la misma, con el margen del sombrero. */
