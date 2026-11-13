@@ -252,6 +252,9 @@ G.Tiles = (() => {
     for (const k of ['speck', 'light', 'wallLight', 'wallEdge', 'wallFaceDark', 'liq', 'liqDeep', 'foam', 'shore'])
       C[k] = pack(B[k]);
     C.liqLight = mixPack(B.liq, B.foam, 0.28);
+    // Adornos del agua (12-11-2026): nenúfares sólo en el agua de verdad; rocas, con los colores de las paredes del bioma.
+    C.deco = B.liquid === 'water';
+    C.lily = [pack('#2f7a40'), pack('#4fa85a'), pack('#8fd48a'), pack('#ffb3e6')];
 
     const tx0 = cx * n, ty0 = cy * n;
     const dirtAt = dirtMask(tx0 * T, ty0 * T, n * T, dirtField, seed);
@@ -371,6 +374,12 @@ G.Tiles = (() => {
 
         // Distancia a la orilla dentro del tile (incluye esquinas interiores).
         let d = Math.min(n ? BIG : y, s ? BIG : T - 1 - y, w ? BIG : x, e ? BIG : T - 1 - x);
+        // (12-11-2026) En las esquinas redondeadas la orilla sigue el corte en diagonal: antes el
+        // labio de tierra y la espuma se cortaban ahí y el agua tocaba la hierba.
+        if (!n && !w) d = Math.min(d, x + y - 3);
+        if (!n && !e) d = Math.min(d, (T - 1 - x) + y - 3);
+        if (!s && !w) d = Math.min(d, x + (T - 1 - y) - 3);
+        if (!s && !e) d = Math.min(d, (T - 1 - x) + (T - 1 - y) - 3);
         if (n && w && !nw) d = Math.min(d, Math.hypot(x, y) - 0.5);
         if (n && e && !ne) d = Math.min(d, Math.hypot(T - 1 - x, y) - 0.5);
         if (s && w && !sw) d = Math.min(d, Math.hypot(x, T - 1 - y) - 0.5);
@@ -381,6 +390,7 @@ G.Tiles = (() => {
         let col;
         if (d < 1) col = C.shore;                       // labio de tierra
         else if (d < 2) col = C.foam;                   // espuma
+        else if (d < 3) col = H(gx >> 1, gy >> 1, 36) < 0.4 ? C.foam : C.liqLight;   // espuma a trozos de 2 px
         else if (d < 4) col = C.liqLight;               // agua somera
         else if (d < 6) col = r < 0.5 ? C.liq : C.liqLight;
         else col = d < 8 && r < 0.5 ? C.liq : C.liqDeep;
@@ -392,6 +402,21 @@ G.Tiles = (() => {
         P.set(ox + x, oy + y, col);
       }
     }
+
+    // Adornos, sólo en tiles con agua por los ocho lados (nunca tocan la orilla): un nenúfar
+    // (a veces con flor) o una roca que asoma. Sólo dibujo: no cambian por dónde se pasa.
+    if (!(n && s && w && e && nw && ne && sw && se)) return;
+    const hv = H(tx, ty, 35);
+    if (hv >= 0.1 || (hv < 0.065 && !C.deco)) return;
+    const px = ox + 3 + Math.floor(H(tx, ty, 37) * 5), py = oy + 3 + Math.floor(H(tx, ty, 38) * 6);
+    const rows = hv < 0.065
+      ? ['.dggd.', 'dgGggd', 'dgg..d', 'dgggGd', '.dddd.', '.ssss.']
+      : ['.lll.', 'lmmmd', 'mmmdd', 'fsssf'];
+    const pal = hv < 0.065
+      ? { d: C.lily[0], g: C.lily[1], G: C.lily[2], s: C.liqDeep }
+      : { l: C.wallLight, m: C.wallTop[0], d: C.wallFaceDark, s: C.liqDeep, f: C.foam };
+    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) if (row[i] !== '.') P.set(px + i, py + j, pal[row[i]]); });
+    if (hv < 0.02) P.set(px + 1, py + 3, C.lily[3]);            // la flor
   }
 
   // ---------------- sprites de objetos del escenario ----------------

@@ -490,6 +490,7 @@ G.Aura = (() => {
       const p = parts[i];
       p.t += dt;
       if (p.t >= p.life) { parts[i] = parts[parts.length - 1]; parts.pop(); continue; }
+      if (p.P.rain && p.t > p.life * 0.75) continue;                    // ya cayó: se queda la salpicadura
       p.x += p.vx * dt + (p.P.leaf ? Math.sin(p.t * 3) * 10 * dt : 0);
       p.y += p.vy * dt;
     }
@@ -520,6 +521,13 @@ G.Aura = (() => {
         ctx.fillStyle = 'rgba(60,40,0,.5)'; zig(G.Sprites.PX);
         ctx.globalCompositeOperation = 'lighter';
         ctx.fillStyle = p.c; zig(0);
+      } else if (p.P.rain) {
+        // Gota: una raya inclinada de tres píxeles del arte; al llegar al suelo, salpicadura de dos fotogramas.
+        const u = G.Sprites.PX, gx = snap(x), gy = snap(y);
+        ctx.globalAlpha = 0.8;
+        if (k < 0.75) { ctx.fillRect(gx, gy, u, u); ctx.fillRect(gx, gy - u, u, u); ctx.fillRect(gx + u, gy - 2 * u, u, u); }
+        else if (k < 0.88) { ctx.fillRect(gx - u, gy - u, u, u); ctx.fillRect(gx + u, gy - u, u, u); }
+        else { ctx.fillRect(gx - 2 * u, gy, u, u); ctx.fillRect(gx + 2 * u, gy, u, u); }
       } else if (p.P.star) {
         // Destello de cuatro puntas en píxeles del arte, que titila (grande y pequeño por turnos).
         glyph(ctx, p.r * Math.abs(Math.sin(p.t * 5)) > 2 ? ['..x..', '..x..', 'xxoxx', '..x..', '..x..'] : ['.x.', 'xox', '.x.'],
@@ -597,7 +605,8 @@ G.Aura = (() => {
   // back: lo que va en el suelo, a ratos ('ripple' ondas, 'clock' el reloj de Dialga) con su color c ·
   // parts: partículas propias, que salen de su cuerpo a ratos (hue: cada una de un color del
   // arcoíris · low: sólo de la parte de abajo · star / note / heart / zzz / petal: destellos de
-  // cuatro puntas, notas, corazones, Zzz u hojas que giran).
+  // cuatro puntas, notas, corazones, Zzz u hojas que giran · rain: gotas que caen desde encima de
+  // su cabeza hasta sus pies y salpican, tanda del 12-11-2026).
   // (28-10-2026) pulse: el aura se apaga y se enciende despacio en esos segundos · rays: rayos de
   // luz que giran detrás (un color o 'hue') · aurora: cintas de luz por encima (un color por cinta) ·
   // orbit: lo que gira alrededor (drawOrbit) · day: el aura también de día (si no, sólo de noche) ·
@@ -608,9 +617,9 @@ G.Aura = (() => {
     151: { parts: { c: ['#ffc4ee', '#ffffff'], up: 10, spread: 14, r: 2.2, life: 1.4, rate: 2, ring: true }, trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },   // Mew: burbujas
     249: { back: 'ripple', c: '#b8d8ff', parts: { c: ['#ffffff', '#d6e8ff'], up: 4, spread: 26, r: 1.4, life: 1, rate: 4, soft: true }, trail: { s: 'feather', c: ['#ffffff', '#d6e8ff', '#8f9fb7'] } }, // Lugia: viento
     250: { aura: '#ffb347', parts: { hue: true, up: 14, spread: 16, r: 1.3, life: 1.3, rate: 6, glow: true, star: true }, rays: '#ffb347', trail: { s: 'rainbow', c: ['#ffffff'] } }, // Ho-Oh: arcoíris
-    382: { back: 'ripple', c: '#5fb8ff', trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                                                     // Kyogre: ondas
+    382: { back: 'ripple', c: '#5fb8ff', parts: { c: ['#9fd8ff', '#d6f0ff'], up: 0, spread: 0, r: 1, life: 0.6, rate: 7, rain: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Kyogre: ondas y su lluvia (Llovizna)
     383: { parts: { c: ['#ff7a3d', '#ffb347'], up: 26, spread: 18, r: 1.4, life: 0.8, rate: 5, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }, // Groudon: ascuas
-    384: { parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 40, r: 1.2, life: 0.5, rate: 8, glow: true }, trail: { s: 'wind', c: ['#ffffff', '#a5f07a'] } },  // Rayquaza: estelas
+    384: { parts: { c: ['#5fe08a', '#a5f07a', '#ffe14d'], up: 0, spread: 40, r: 1.2, life: 0.5, rate: 8, glow: true }, trail: { s: 'wind', c: ['#5fe08a', '#c9f07a'] } },  // Rayquaza: estelas verdes
     483: { back: 'clock', c: '#9fe8ff', trail: { s: 'star', c: ['#9fe8ff', '#ffffff'] }, glint: '#9fe8ff' },                                                                      // Dialga: el reloj del tiempo
     484: { aura: '#ff8ad8', back: 'ripple', c: '#ff9ff0', pulse: 9, trail: { s: 'gem', c: ['#ff9ff0', '#ffffff'] } },                                                    // Palkia: el espacio que se ondula
     487: { parts: { c: ['#2a1830', '#5a1a2a'], up: 8, spread: 18, r: 3, life: 1.6, rate: 4, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1020', '#ff4a4a'] } }, // Giratina: sombras
@@ -726,7 +735,7 @@ G.Aura = (() => {
     809: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] } },                                              // Melmetal
     149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                               // Dragonite
     248: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                    // Tyranitar
-    373: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Salamence
+    373: { trail: { s: 'wind', c: ['#ffffff', '#c4d8ff'] } },                                               // Salamence: vuela, no arde
     376: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] }, glint: '#9fd8ff' },                                              // Metagross
     445: { trail: { s: 'rock', c: ['#d8b878', '#b89458', '#8a6a48'] } },                                    // Garchomp
     635: { trail: { s: 'shadow', c: ['#1a1030', '#b06aff'] } },                                             // Hydreigon
@@ -766,14 +775,14 @@ G.Aura = (() => {
     38: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                    // Ninetales
     59: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                    // Arcanine
     65: { trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },                                                 // Alakazam
-    94: { trail: { s: 'shadow', c: ['#1a1030', '#c070ff'] } },                                              // Gengar
+    94: { aura: '#7a3ad0', parts: { c: ['#5a2a8a', '#9b6bff'], up: 10, spread: 14, r: 2.6, life: 1.5, rate: 3, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#c070ff'] } }, // Gengar: sombra morada
     130: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Gyarados
     131: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Lapras
     134: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Vaporeon
     135: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                                   // Jolteon
     136: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                   // Flareon
     196: { trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },                                                // Espeon
-    197: { trail: { s: 'star', c: ['#ffe14d', '#ffffff'] } },                                               // Umbreon
+    197: { trail: { s: 'shadow', c: ['#14141e', '#ffe14d'] } },                                             // Umbreon: sombra con la luz de sus anillos
     470: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                                  // Leafeon
     471: { trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] }, glint: '#c8f4ff' },                                              // Glaceon
     700: { trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } },                                   // Sylveon
@@ -809,7 +818,7 @@ G.Aura = (() => {
     100254: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                               // Mega Sceptile
     100149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                             // Mega Dragonite
     // La franja de luz de los shiny, de su color, en algunos normales que relucen (28-10-2026).
-    208: { glint: '#e6eef5' },                                                                               // Steelix
+    208: { glint: '#e6eef5', trail: { s: 'rock', c: ['#b0b8c8', '#8f939c', '#6a6f7a'] } },                   // Steelix
     100208: { glint: '#e6eef5' },                                                                            // Mega Steelix
     703: { glint: '#ffb5de' },                                                                               // Carbink
     1000: { glint: '#ffd23f' }                                                                               // Gholdengo
@@ -996,6 +1005,12 @@ G.Aura = (() => {
       while (ent._specAcc >= 1 && parts.length < MAX) {
         ent._specAcc -= 1;
         const c = P.hue ? 'hsl(' + Math.floor(Math.random() * 360) + ',100%,72%)' : G.U.pick(P.c);
+        if (P.rain) {
+          // Cae desde encima de la cabeza hasta el suelo, a su lado, en el 75 % de su vida.
+          const life = P.life * G.U.rand(0.85, 1.15), y0 = y - h * G.U.rand(1, 1.3), fall = (y + G.U.rand(-3, 5) - y0) / (life * 0.75);
+          parts.push({ x: x + G.U.rand(-r, r) * 1.8, y: y0, vx: -fall * 0.25, vy: fall, t: 0, life, c, r: G.Sprites.PX, P });
+          continue;
+        }
         parts.push({ x: x + G.U.rand(-r, r) * 1.3, y: y - G.U.rand(0.05, P.low ? 0.3 : 0.95) * h, vx: G.U.rand(-1, 1) * P.spread * 0.4,
           vy: -P.up * 0.75 * G.U.rand(0.6, 1.2), t: 0, life: P.life * 1.2 * G.U.rand(0.7, 1.2), c, r: P.r * G.U.rand(0.8, 1.3) * G.Sprites.PX, P });
       }
@@ -1181,9 +1196,10 @@ G.Aura = (() => {
         ctx.globalCompositeOperation = 'source-over';
       }
     } },
-    // Ondas de agua que se abren en el suelo (Kyogre, Manaphy...).
-    puddle: { life: 1.8, gap: 10, draw(ctx, p, f, t, cs) {
-      const k = p.age / 1.8, rx = 4 + 16 * k;
+    // Ondas de agua que se abren en el suelo (Kyogre, Manaphy...). (12-11-2026) Más separadas: tan
+    // juntas se montaban unas en otras y parecían una cadena.
+    puddle: { life: 1.8, gap: 22, draw(ctx, p, f, t, cs) {
+      const k = p.age / 1.8, rx = 3 + 9 * k;
       ctx.fillStyle = rgba(cs[0], 0.9 * f); pixEllipse(ctx, p.x, p.y, rx, rx * 0.38);
       if (k > 0.25) { ctx.fillStyle = rgba(cs[1], 0.55 * f); pixEllipse(ctx, p.x, p.y, rx * 0.5, rx * 0.19); }
     } },
@@ -1195,12 +1211,18 @@ G.Aura = (() => {
       ctx.fillStyle = rgba(c, f);
       glyph(ctx, Math.sin(t * 6 + p.i) > 0 ? ['..x..', '..x..', 'xxoxx', '..x..', '..x..'] : ['.x.', 'xox', '.x.'], x, y, u, rgba('#ffffff', f));
     } },
-    // Grietas de magma que brillan y se enfrían (Groudon, Heatran): de amarillo a rojo oscuro.
-    magma: { life: 2.2, gap: 6, draw(ctx, p, f, t, cs) {
-      const k = p.age / 2.2, x = p.x, y = p.y, s = hash(p.i) < 0.5 ? -1 : 1, a = (hash(p.i + 1) - 0.5) * 4;
-      ctx.fillStyle = rgba(k < 0.3 ? cs[0] : k < 0.6 ? cs[1] : cs[2], f * (0.75 + 0.25 * Math.sin(t * 5 + p.i)));
-      pixLine(ctx, x - 7 * s, y + a, x - 2 * s, y - 1); pixLine(ctx, x - 2 * s, y - 1, x + 2 * s, y + 2); pixLine(ctx, x + 2 * s, y + 2, x + 7 * s, y - a);
-      if (hash(p.i + 5) > 0.6) pixLine(ctx, x - 2 * s, y - 1, x - 3 * s, y - 5);
+    // Tierra agrietada con magma dentro (Groudon, Heatran): la grieta se queda oscura en el suelo y
+    // el magma de dentro pasa de amarillo a rojo y se apaga antes; al principio salta algún ascua.
+    magma: { life: 2.6, gap: 6, solid: true, draw(ctx, p, f, t, cs) {
+      const k = p.age / 2.6, x = p.x, y = p.y, s = hash(p.i) < 0.5 ? -1 : 1, a = (hash(p.i + 1) - 0.5) * 4, u = G.Sprites.PX;
+      const crack = d => {
+        pixLine(ctx, x - 7 * s, y + a + d, x - 2 * s, y - 1 + d); pixLine(ctx, x - 2 * s, y - 1 + d, x + 2 * s, y + 2 + d); pixLine(ctx, x + 2 * s, y + 2 + d, x + 7 * s, y - a + d);
+        if (hash(p.i + 5) > 0.6) pixLine(ctx, x - 2 * s, y - 1 + d, x - 3 * s, y - 5 + d);
+      };
+      ctx.fillStyle = rgba('#2a1610', 0.85 * f); crack(u);                 // el labio oscuro de la grieta
+      if (k < 0.7) ctx.fillStyle = rgba(k < 0.2 ? cs[0] : k < 0.45 ? cs[1] : cs[2], Math.min(1, f * 1.3) * (0.8 + 0.2 * Math.sin(t * 5 + p.i)));
+      crack(0);                                                            // el magma (o la grieta ya fría)
+      if (k < 0.4 && hash(p.i * 3 + Math.floor(t * 4)) > 0.7) { ctx.fillStyle = cs[0]; dot(ctx, x + (hash(p.i + 7) - 0.5) * 10, y - 3 - p.age * 12); }
     } },
     // Plumas que caen de su cuerpo meciéndose, se posan y se apagan (Lugia plateadas, Yveltal rojas).
     feather: { life: 3, gap: 9, solid: true, draw(ctx, p, f, t, cs) {

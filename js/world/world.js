@@ -531,25 +531,89 @@ G.World = (() => {
     }
   }
 
-  /** Brillos animados sobre el agua / burbujas de la lava (y del veneno y la electricidad). */
+  /** Qué lados de cada tile de líquido del chunk dan a la orilla (1 norte, 2 sur, 4 oeste, 8 este). */
+  function liquidEdges(c) {
+    const out = new Uint8Array(c.liquids.length >> 1);
+    for (let i = 0; i < c.liquids.length; i += 2) {
+      const tx = c.liquids[i], ty = c.liquids[i + 1];
+      out[i >> 1] = (terrainAt(tx, ty - 1) !== LIQUID ? 1 : 0) | (terrainAt(tx, ty + 1) !== LIQUID ? 2 : 0) |
+                    (terrainAt(tx - 1, ty) !== LIQUID ? 4 : 0) | (terrainAt(tx + 1, ty) !== LIQUID ? 8 : 0);
+    }
+    return out;
+  }
+
+  /** Brillos animados sobre el agua / burbujas de la lava (y del veneno y la electricidad).
+   *  (12-11-2026) En el agua y el pantano, además y todo a fotogramas y en píxeles del arte: una
+   *  onda que baja, la espuma de la orilla que va y viene y lo que trae el clima (aros de lluvia;
+   *  con la nieve, la orilla blanca). En calidad baja, sólo el brillo de siempre. */
   function drawLiquid(ctx, cam, t) {
     const B = G.Tiles.BIOMES[biome];
     const lava = B.liquid === 'lava' || B.liquid === 'poison' || B.liquid === 'spark';
+    const full = (B.liquid === 'water' || B.liquid === 'swamp') && G.Settings.get('quality') !== 'low';
+    const wl = full && G.Weather ? G.Weather.level : 0, wk = wl > 0 ? G.Weather.kind : null;
+    const rain = wk === 'rain' ? wl : 0, snow = wk === 'snow' ? wl : 0;
     ctx.fillStyle = B.foam;
     const P = G.Sprites.PX;
+    const f2 = Math.floor(t * 2), f3 = Math.floor(t * 3);
     for (const [cx, cy] of visibleChunks(cam)) {
       const c = chunkData(cx, cy);
+      if (full && !c.liqEdge) c.liqEdge = liquidEdges(c);
       for (let i = 0; i < c.liquids.length; i += 2) {
         const tx = c.liquids[i], ty = c.liquids[i + 1];
         const x = tx * TS, y = ty * TS;
         if (!cam.sees(x + TS / 2, y + TS / 2, TS)) continue;
         const ph = H(tx, ty, 77) * 6.28;
         const k = (Math.sin(t * (lava ? 2.2 : 1.6) + ph) + 1) / 2;
-        ctx.globalAlpha = lava ? 0.35 + k * 0.5 : k * 0.7;
         const sx = x + Math.floor(H(tx, ty, 78) * 12 + 2) * P;
         const sy = y + Math.floor(H(tx, ty, 79) * 12 + 2) * P;
-        ctx.fillRect(sx + Math.round(k * 2) * P, sy, P * (lava ? 2 : 3), P);
-        if (lava && k > 0.8) ctx.fillRect(sx, sy - P * 2, P, P);
+        if (!full) {
+          ctx.globalAlpha = lava ? 0.35 + k * 0.5 : k * 0.7;
+          ctx.fillRect(sx + Math.round(k * 2) * P, sy, P * (lava ? 2 : 3), P);
+          if (lava && k > 0.8) ctx.fillRect(sx, sy - P * 2, P, P);
+          continue;
+        }
+        const e = c.liqEdge[i >> 1], hn = Math.floor(ph * 100);
+        // Brillo: una rayita con su punto, sólo lejos de la orilla, que se enciende a tres niveles.
+        if (!e && k > 0.3) {
+          ctx.globalAlpha = k > 0.75 ? 0.8 : 0.45;
+          ctx.fillRect(sx + Math.round(k * 2) * P, sy, P * 3, P);
+          if (k > 0.75) ctx.fillRect(sx + (Math.round(k * 2) + 3) * P, sy - P, P, P);
+        }
+        // Onda: una raya corta que baja un píxel por fotograma y vuelve a empezar (uno de cada dos tiles).
+        if (hn & 1) {
+          const row = 3 + (hn + f2) % 10, wx = 3 + (hn >> 1) % 7;
+          ctx.globalAlpha = row < 5 || row > 10 ? 0.18 : 0.32;
+          ctx.fillRect(x + wx * P, y + row * P, 4 * P, P);
+          ctx.fillRect(x + (wx + 4) * P, y + (row + 1) * P, 2 * P, P);
+        }
+        // Orilla: la espuma avanza un píxel y se retira (cada tile a su paso); con nieve, borde blanco fijo.
+        if (e) {
+          const lap = (f2 + hn) % 4 === 0, x0 = e & 4 ? 3 : 0, x1 = e & 8 ? 13 : 16, y0 = e & 1 ? 3 : 0, y1 = e & 2 ? 13 : 16;
+          for (let pass = snow > 0 ? 0 : 1; pass < 2; pass++) {
+            if (pass === 0) { ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.85 * snow; }
+            else { if (!lap) break; ctx.fillStyle = B.foam; ctx.globalAlpha = 0.6; }
+            const d = pass === 0 ? 1 : 3, th = pass === 0 ? 2 : 1;
+            if (e & 1) ctx.fillRect(x + x0 * P, y + d * P, (x1 - x0) * P, th * P);
+            if (e & 2) ctx.fillRect(x + x0 * P, y + (16 - d - th) * P, (x1 - x0) * P, th * P);
+            if (e & 4) ctx.fillRect(x + d * P, y + y0 * P, th * P, (y1 - y0) * P);
+            if (e & 8) ctx.fillRect(x + (16 - d - th) * P, y + y0 * P, th * P, (y1 - y0) * P);
+          }
+          ctx.fillStyle = B.foam;
+        }
+        // Lluvia: aros que se abren donde cae una gota (punto, aro pequeño, aro grande).
+        if (rain > 0) {
+          const n = Math.floor(t * 1.4 + ph), fr = Math.floor(((t * 1.4 + ph) % 1) * 4);
+          if (fr < 3 && H(tx + n * 7, ty - n * 3, 81) < 0.45 * rain) {
+            const rx = x + (4 + Math.floor(H(tx, ty + n, 82) * 8)) * P, ry = y + (4 + Math.floor(H(tx + n, ty, 83) * 8)) * P;
+            ctx.globalAlpha = fr === 2 ? 0.4 : 0.75;
+            if (fr === 0) ctx.fillRect(rx, ry, P, P);
+            else {
+              const a = fr === 1 ? 1 : 2;
+              ctx.fillRect(rx - a * P, ry, P, P); ctx.fillRect(rx + a * P, ry, P, P);
+              ctx.fillRect(rx - (a - 1) * P, ry - P, (2 * a - 1) * P, P); ctx.fillRect(rx - (a - 1) * P, ry + P, (2 * a - 1) * P, P);
+            }
+          }
+        }
       }
     }
     ctx.globalAlpha = 1;
