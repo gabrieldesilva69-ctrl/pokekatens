@@ -651,7 +651,7 @@ G.Aura = (() => {
     718: { parts: { c: ['#7fff6a', '#3fbf3f'], up: 10, spread: 22, r: 1.6, life: 1.2, rate: 5, glow: true }, orbit: { n: 5, c: ['#7fff6a', '#3fbf3f'], s: 'cell', sp: 0.25 }, trail: { s: 'cell', c: ['#7fff6a', '#ff5a5a'] } },  // Zygarde: células
     719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 18, r: 1.6, life: 1, rate: 4, glow: true, star: true }, trail: { s: 'gem', c: ['#ffb5de', '#ffffff'] }, glint: '#ffb5de' }, // Diancie: destellos
     720: { day: true, aura: '#ffd23f', parts: { c: ['#ffd23f', '#ffe680'], up: 8, spread: 20, r: 2.4, life: 1.6, rate: 1.5, ring: true, glow: true }, pulse: 9, orbit: { n: 3, c: ['#ffd23f', '#ffe680'], s: 'ring', sp: 0.3 }, trail: { s: 'psy', c: ['#ffd23f', '#ff9fd8'] } }, // Hoopa: aros dorados
-    721: { parts: { c: ['#ffffff', '#e6eef5'], up: 30, spread: 12, r: 2.6, life: 1.2, rate: 4, soft: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },  // Volcanion: vapor
+    721: { parts: { c: ['#ffffff', '#e6eef5'], up: 30, spread: 12, r: 2.6, life: 1.2, rate: 4, soft: true }, trail: { s: 'miasma', c: ['#ffffff', '#d6e8f0', '#ffb38a'] } },  // Volcanion: vapor (también en el rastro)
     791: { aura: '#ffab28', parts: { c: ['#ffd27f', '#ffffff'], up: 14, spread: 20, r: 1.3, life: 1, rate: 4, glow: true }, rays: '#ffab28', pulse: 9, trail: { s: 'flame', c: ['#ffffff', '#ffe14d', '#ff9a3d'] } }, // Solgaleo: sol
     792: { aura: '#8f6bff', parts: { c: ['#c9b5ff', '#ffffff', '#7cd8ed'], up: 4, spread: 26, r: 1.4, life: 1.4, rate: 5, glow: true, star: true }, pulse: 9, trail: { s: 'star', c: ['#c9b5ff', '#7cd8ed'] } }, // Lunala: estrellas
     800: { parts: { hue: true, up: 10, spread: 22, r: 1.4, life: 1, rate: 6, glow: true, star: true }, rays: 'hue', trail: { s: 'rainbow', c: ['#ffffff'] } },        // Necrozma: luz del prisma
@@ -667,7 +667,7 @@ G.Aura = (() => {
     788: { aura: '#9fd8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 4, spread: 26, r: 2.6, life: 1.6, rate: 3, soft: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Tapu Fini: niebla
     789: { parts: { c: ['#ffe680', '#9fe8ff', '#ffffff'], up: 6, spread: 18, r: 1.2, life: 1.3, rate: 3, glow: true, star: true }, orbit: { n: 3, c: ['#ffe680', '#9fe8ff'], s: 'star', sp: 0.3 }, trail: { s: 'star', c: ['#9fe8ff', '#ffe680'] } }, // Cosmog: estrellitas
     790: { aura: '#ffe680', parts: { c: ['#ffe680', '#ffffff'], up: 4, spread: 16, r: 1.2, life: 1.3, rate: 2, glow: true, star: true }, pulse: 7.5, trail: { s: 'star', c: ['#ffe680', '#ffffff'] } }, // Cosmoem
-    793: { aura: '#6abde0' },                                                                                   // Nihilego
+    793: { aura: '#6abde0', parts: { c: ['#9fe8ff', '#ffffff'], up: 6, spread: 18, r: 1.2, life: 1.3, rate: 2, glow: true, star: true }, trail: { s: 'gem', c: ['#9fe8ff', '#ffffff'] } }, // Nihilego: destellos de cristal
     801: { day: true, aura: '#ff9fb0', parts: { c: ['#ffd5d6', '#ffffff'], up: 8, spread: 14, r: 1.2, life: 1.2, rate: 2, glow: true, star: true }, pulse: 3.9, trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] }, glint: '#ffd5c0' }, // Magearna
     888: { aura: '#5fb8ff', parts: { c: ['#d6f0ff', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5, trail: { s: 'metal', c: ['#ffffff', '#7fb8ff'] } }, // Zacian: espada de luz
     889: { aura: '#ff6a5a', parts: { c: ['#ffd0c0', '#ffffff'], up: 10, spread: 18, r: 1.2, life: 1.1, rate: 3, glow: true, star: true }, pulse: 7.5, trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } }, // Zamazenta: escudo de luz
@@ -829,11 +829,23 @@ G.Aura = (() => {
     478: { trail: { s: 'frost', c: ['#e8f8ff', '#c9b5ff'] } },                                          // Froslass
     555: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                               // Darmanitan
     100475: { trail: { s: 'psy', c: ['#7fffb0', '#ffffff'] } },                                         // Mega Gallade
+    // Tanda 3 (12-11-2026): rastro para conocidos del 650 al 1025 que no lo tenían.
+    663: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                               // Talonflame
+    699: { trail: { s: 'aurora', c: ['#6affd0', '#5fd0ff', '#c07aff'] } },                              // Aurorus
+    715: { trail: { s: 'wind', c: ['#ffffff', '#c9b5ff'] } },                                           // Noivern
+    738: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                               // Vikavolt
+    745: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                // Lycanroc
+    823: { trail: { s: 'metal', c: ['#ffffff', '#9fb0d0'] } },                                          // Corviknight
+    849: { trail: { s: 'spark', c: ['#f0d6ff', '#d793ff', '#ffffff'] } },                               // Toxtricity
+    858: { trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },                                            // Hatterene
+    861: { trail: { s: 'shadow', c: ['#1a1030', '#ff8ad8'] } },                                         // Grimmsnarl
+    959: { trail: { s: 'metal', c: ['#ffffff', '#ffb3e6'] } },                                          // Tinkaton
+    983: { trail: { s: 'metal', c: ['#ffffff', '#ffd23f'] } },                                          // Kingambit
     // La franja de luz de los shiny, de su color, en algunos normales que relucen (28-10-2026).
     208: { glint: '#e6eef5', trail: { s: 'rock', c: ['#b0b8c8', '#8f939c', '#6a6f7a'] } },                   // Steelix
     100208: { glint: '#e6eef5' },                                                                            // Mega Steelix
     703: { glint: '#ffb5de' },                                                                               // Carbink
-    1000: { glint: '#ffd23f' }                                                                               // Gholdengo
+    1000: { glint: '#ffd23f', trail: { s: 'gem', c: ['#ffd23f', '#fff2b0'] } }                                                                               // Gholdengo
   };
 
   // Efectos con firma (24-10-2026): partículas según lo que es cada Pokémon conocido (los
