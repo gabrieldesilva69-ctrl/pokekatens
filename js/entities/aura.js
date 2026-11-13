@@ -644,7 +644,7 @@ G.Aura = (() => {
     481: { parts: { c: ['#ffb3e6', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#ffb3e6', '#ff6a6a'], s: 'gem', sp: 0.35 }, trail: { s: 'psy', c: ['#ff9fd8', '#ffffff'] } },     // Mesprit
     482: { parts: { c: ['#9fd8ff', '#ffffff'], up: 8, spread: 12, r: 1.4, life: 1, rate: 2, ring: true }, orbit: { n: 2, c: ['#9fd8ff', '#ff6a6a'], s: 'gem', sp: 0.35 }, trail: { s: 'psy', c: ['#9fd8ff', '#ffffff'] } },     // Azelf
     485: { parts: { c: ['#ff7a3d', '#ffb347'], up: 24, spread: 20, r: 1.6, life: 0.9, rate: 6, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } },  // Heatran: ascuas
-    488: { aura: '#ffb3e6', parts: { c: ['#ffe680', '#ffb3e6'], up: 6, spread: 18, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, pulse: 9, trail: { s: 'star', c: ['#ffb3e6', '#ffe680'] } }, // Cresselia: luz de luna
+    488: { aura: '#ffb3e6', parts: { c: ['#ffe680', '#ffb3e6'], up: 6, spread: 18, r: 1.2, life: 1.2, rate: 3, glow: true, star: true }, pulse: 9, trail: { s: 'aurora', c: ['#ff8ad8', '#ffd23f', '#b06aff'] } }, // Cresselia: luz de luna y su velo de aurora
     490: { parts: { c: ['#9fd8ff', '#d6f0ff'], up: 18, spread: 12, r: 1.8, life: 1.3, rate: 3, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Manaphy: burbujas
     494: { parts: { c: ['#ff7a3d', '#ffe14d'], up: 22, spread: 14, r: 1.3, life: 0.8, rate: 5, glow: true }, trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff5a2a'] } },  // Victini: llamitas
     648: { parts: { c: ['#7fffa0', '#ffffff', '#ffe680'], up: 16, spread: 20, r: 1, life: 1.4, rate: 2, note: true }, trail: { s: 'note', c: ['#7fffa0', '#ffffff', '#ffe680'] } }, // Meloetta: notas
@@ -683,9 +683,9 @@ G.Aura = (() => {
     100282: { aura: '#ff8ad8', trail: { s: 'heart', c: ['#ff6aa8', '#ff9fc8', '#ffffff'] } },                                                                                // Mega Gardevoir
     100006: { parts: { c: ['#a4ddf9', '#5fc8ff'], up: 30, spread: 16, r: 1.5, life: 0.8, rate: 6, glow: true }, trail: { s: 'flame', c: ['#ffffff', '#a4ddf9', '#5fc8ff'] } }, // Mega Charizard X: llamas azules
     100150: { aura: '#b060ff', back: 'ripple', c: '#e08aff', pulse: 7.5, trail: { s: 'psy', c: ['#e08aff', '#ffffff'] } },                                                  // Mega Mewtwo Y
-    100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true }, pulse: 9, trail: { s: 'wind', c: ['#ffffff', '#a5f07a'] } }, // Mega Rayquaza
+    100384: { aura: '#5fe08a', parts: { c: ['#5fe08a', '#ffe14d'], up: 0, spread: 50, r: 1.3, life: 0.5, rate: 10, glow: true }, pulse: 9, trail: { s: 'wind', c: ['#5fe08a', '#ffe14d'] } }, // Mega Rayquaza: estelas verdes y doradas
     100719: { parts: { c: ['#ffb5de', '#ffffff'], up: 8, spread: 22, r: 1.8, life: 1.1, rate: 6, glow: true, star: true }, trail: { s: 'gem', c: ['#ffb5de', '#ffffff'] }, glint: '#ffb5de' }, // Mega Diancie
-    100382: { aura: '#3fa8ff', back: 'ripple', c: '#7fe8ff', parts: { c: ['#9fd8ff', '#d6f0ff'], up: 26, spread: 16, r: 1.8, life: 1.2, rate: 5, ring: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Kyogre primigenio
+    100382: { aura: '#3fa8ff', back: 'ripple', c: '#7fe8ff', parts: { c: ['#7fe8ff', '#d6f0ff'], up: 0, spread: 0, r: 1, life: 0.6, rate: 10, rain: true }, trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } }, // Kyogre primigenio: el Mar del Albor
     100383: { aura: '#ff6a1a', parts: { c: ['#ff7a3d', '#ffb347', '#ffe14d'], up: 34, spread: 20, r: 1.6, life: 0.9, rate: 8, glow: true }, trail: { s: 'magma', c: ['#ffe14d', '#ff7a1a', '#c8281a'] } }, // Groudon primigenio
     // Quinta tanda (28-10-2026): los legendarios que faltaban (y megas de legendarios).
     378: { parts: { c: ['#d8f1ff', '#ffffff'], up: -8, spread: 20, r: 1.3, life: 1.6, rate: 4, glow: true, star: true }, trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } }, // Regice: frío
@@ -731,7 +731,7 @@ G.Aura = (() => {
     // iniciales, los más usados y sus megas).
     377: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                    // Regirock
     379: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] }, glint: '#bfe8ff' },                                              // Registeel
-    649: { trail: { s: 'metal', c: ['#ffffff', '#ffb0a0'] } },                                              // Genesect
+    649: { parts: { c: ['#c08aff', '#ffffff'], up: 6, spread: 20, r: 1.2, life: 1, rate: 3, glow: true, star: true }, trail: { s: 'metal', c: ['#ffffff', '#c08aff'] }, glint: '#c08aff' }, // Genesect: armadura morada
     809: { trail: { s: 'metal', c: ['#ffffff', '#ffe680'] } },                                              // Melmetal
     149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                               // Dragonite
     248: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                    // Tyranitar
@@ -802,7 +802,7 @@ G.Aura = (() => {
     230: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                             // Kingdra
     100009: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                          // Mega Blastoise
     100003: { trail: { s: 'flower', c: ['#ff9fcf', '#ffffff', '#ffe14d'] } },                               // Mega Venusaur
-    100094: { trail: { s: 'shadow', c: ['#1a1030', '#c070ff'] } },                                          // Mega Gengar
+    100094: { aura: '#7a3ad0', parts: { c: ['#5a2a8a', '#9b6bff'], up: 10, spread: 14, r: 2.6, life: 1.5, rate: 3, soft: true, low: true }, trail: { s: 'shadow', c: ['#1a1030', '#c070ff'] } }, // Mega Gengar: sombra morada
     100130: { trail: { s: 'puddle', c: ['#d6f0ff', '#ffffff'] } },                                          // Mega Gyarados
     100248: { trail: { s: 'rock', c: ['#c8a875', '#8f939c', '#6a5a48'] } },                                 // Mega Tyranitar
     100376: { trail: { s: 'metal', c: ['#ffffff', '#bfe8ff'] }, glint: '#9fd8ff' },                                           // Mega Metagross
@@ -817,6 +817,18 @@ G.Aura = (() => {
     100229: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                                // Mega Houndoom
     100254: { trail: { s: 'flower', c: ['#ffffff', '#c9f07a', '#ffe14d'] } },                               // Mega Sceptile
     100149: { trail: { s: 'wind', c: ['#ffffff', '#d6f0ff'] } },                                             // Mega Dragonite
+    // Tanda 2 (12-11-2026): rastro para conocidos del 387 al 649 que no lo tenían.
+    405: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                               // Luxray
+    429: { trail: { s: 'shadow', c: ['#1a1030', '#ff5a8a'] } },                                         // Mismagius
+    442: { trail: { s: 'shadow', c: ['#1a1030', '#7fff7f'] } },                                         // Spiritomb
+    461: { trail: { s: 'frost', c: ['#e8f8ff', '#9fd8ff'] } },                                          // Weavile
+    462: { trail: { s: 'spark', c: ['#d6f0ff', '#7fd8ff', '#ffffff'] } },                               // Magnezone
+    466: { trail: { s: 'spark', c: ['#fffbe0', '#ffe14d', '#ffffff'] } },                               // Electivire
+    475: { trail: { s: 'psy', c: ['#7fffb0', '#ffffff'] } },                                            // Gallade
+    477: { trail: { s: 'shadow', c: ['#1a1408', '#ffd23f'] } },                                         // Dusknoir
+    478: { trail: { s: 'frost', c: ['#e8f8ff', '#c9b5ff'] } },                                          // Froslass
+    555: { trail: { s: 'flame', c: ['#ffe14d', '#ff9a3d', '#ff4a1a'] } },                               // Darmanitan
+    100475: { trail: { s: 'psy', c: ['#7fffb0', '#ffffff'] } },                                         // Mega Gallade
     // La franja de luz de los shiny, de su color, en algunos normales que relucen (28-10-2026).
     208: { glint: '#e6eef5', trail: { s: 'rock', c: ['#b0b8c8', '#8f939c', '#6a6f7a'] } },                   // Steelix
     100208: { glint: '#e6eef5' },                                                                            // Mega Steelix
